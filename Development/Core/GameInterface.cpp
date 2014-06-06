@@ -500,7 +500,9 @@ namespace FlamingTorch
 			};
 		};
 
+#if USE_GRAPHICS
 		RendererManager::Instance.Input.ClearContexts();
+#endif
 
 		Instance.Dispose();
 

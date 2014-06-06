@@ -1,3 +1,4 @@
+#include "FlamingCore.hpp"
 #include "DefaultProject.hpp"
 
 using namespace FlamingTorch;

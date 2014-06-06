@@ -1,4 +1,5 @@
 #include "FlamingCore.hpp"
+#if USE_GRAPHICS
 namespace FlamingTorch
 {
 	TextureCollision TextureCollision::FromTexture(Texture *TheTexture, uint8 MinTransparency)
@@ -68,3 +69,4 @@ namespace FlamingTorch
 		return Out;
 	};
 };
+#endif

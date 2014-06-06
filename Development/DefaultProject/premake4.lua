@@ -24,8 +24,12 @@ solution "DefaultProject"
 			"../../Dependencies/Source/webp/",
 			"../Core/"
 		}
+		
+		pchheader "FlamingCore.hpp"
+		pchsource "../Core/FlamingCore.cpp"
 
 		if os.get() == "windows" then
+			buildoptions { "/Zm139", "/bigobj" }
 			postbuildcommands {
 				"finishbuild.bat \"$(TargetPath)\" \"$(SolutionDir)..\\..\\Content\\$(TargetName)\\$(TargetFileName)\" \"$(SolutionDir)..\\..\\Binaries\\$(ProjectName)\\$(ConfigurationName)\\$(TargetName).pdb\""
 			}

@@ -25,6 +25,9 @@ solution "Tools"
 			"../../Dependencies/Source/webp/",
 			"../Core/"
 		}
+		
+		pchheader "FlamingCore.hpp"
+		pchsource "../Core/FlamingCore.cpp"
 
 		excludes {
 			"../../Dependencies/Source/lua/luac.c", 
@@ -39,6 +42,10 @@ solution "Tools"
 			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
 		})
+		
+		if os.get() == "windows" then
+			buildoptions { "/Zm139", "/bigobj" }
+		end
  
 		configuration "Debug"
 			libdirs {
@@ -115,10 +122,17 @@ solution "Tools"
 			"../../Dependencies/Libs/"
 		}
 		
+		pchheader "FlamingCore.hpp"
+		pchsource "../Core/FlamingCore.cpp"
+		
 		defines({
 			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
 		})
+		
+		if os.get() == "windows" then
+			buildoptions { "/Zm139", "/bigobj" }
+		end
  
 		configuration "Debug"
 			libdirs {

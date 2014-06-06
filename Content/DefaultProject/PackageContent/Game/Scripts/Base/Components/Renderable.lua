@@ -8,6 +8,6 @@ Renderable = {
 			Self.Properties["Sprite"].Options:Position(Owner:GetComponent("Transform").Properties["Position"])
 		end
 		
-		Self.Properties["Sprite"]:Draw(RendererManager.Instance.ActiveRenderer)
+		Self.Properties["Sprite"]:Draw(g_RendererManager.ActiveRenderer)
 	end
 }

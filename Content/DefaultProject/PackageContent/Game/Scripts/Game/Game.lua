@@ -4,30 +4,31 @@ Entity = nil
 GamePreInitialize = function()
 	g_Log:Register()
 	g_Clock:Register()
-	g_FPSCounter.Instance:Register()
-	g_ResourceManager.Instance:Register()
-	g_RendererManager.Instance:Register()
+	g_FPSCounter:Register()
+	g_ResourceManager:Register()
+	g_RendererManager:Register()
+	g_Console:Register()
 	
-	g_Game.DevelopmentBuild = true
+	Game.DevelopmentBuild = true
 
 	return true
 end
 
 GameInitialize = function()
 	local Options = RenderCreateOptions()
-	Options.Title = g_Game.GameName
+	Options.Title = Game.GameName
 	Options.Width = 960
 	Options.Height = 600
 	
-	local Renderer = g_Game:CreateRenderer(Options)
+	local Renderer = Game:CreateRenderer(Options)
 	
-	LogoTexture = g_ResourceManager.Instance:GetTextureFromPackage("/", "torch_small.png")
+	LogoTexture = g_ResourceManager:GetTextureFromPackage("/", "torch_small.png")
 	
 	if LogoTexture == nil then
 		return false
 	end
 
-	g_RendererManager.Instance.ActiveRenderer.Camera:SetOrtho(Rect(0, 960, 600, 0), -1, 1)
+	g_RendererManager.ActiveRenderer.Camera:SetOrtho(Rect(0, 960, 600, 0), -1, 1)
 	
 	g_World:LoadComponent("/Scripts/Base/Components/Transform.lua")
 	g_World:LoadComponent("/Scripts/Base/Components/Renderable.lua")
@@ -68,8 +69,8 @@ GameFrameUpdate = function()
 	if g_Input:GetKey(InputCenter.Key_Right).Pressed then
 		Position.x = Position.x + g_Clock:Delta() * 500
 		
-		if Position.x > g_RendererManager.Instance.ActiveRenderer.Size.x - LogoTexture.Size.x then
-			Position.x = g_RendererManager.Instance.ActiveRenderer.Size.x - LogoTexture.Size.x
+		if Position.x > g_RendererManager.ActiveRenderer.Size.x - LogoTexture.Size.x then
+			Position.x = g_RendererManager.ActiveRenderer.Size.x - LogoTexture.Size.x
 		end
 	end
 	
@@ -84,8 +85,8 @@ GameFrameUpdate = function()
 	if g_Input:GetKey(InputCenter.Key_Down).Pressed then
 		Position.y = Position.y + g_Clock:Delta() * 500
 		
-		if Position.y > g_RendererManager.Instance.ActiveRenderer.Size.y - LogoTexture.Size.y then
-			Position.y = g_RendererManager.Instance.ActiveRenderer.Size.y - LogoTexture.Size.y
+		if Position.y > g_RendererManager.ActiveRenderer.Size.y - LogoTexture.Size.y then
+			Position.y = g_RendererManager.ActiveRenderer.Size.y - LogoTexture.Size.y
 		end
 	end
 	
@@ -97,5 +98,5 @@ GameDeInitialize = function()
 end
 
 GameShouldQuit = function()
-	return not g_RendererManager.Instance:RequestFrame()
+	return not g_RendererManager:RequestFrame()
 end

@@ -1,18 +1,6 @@
-#include "FlamingConfig.hpp"
-#include "CoreVersion.hpp"
+#include "FlamingCore.hpp"
 #include <vector>
 #include <map>
-#include <SFML/System.hpp>
-
-namespace FlamingTorch
-{
-#	include "SubSystem.hpp"
-#	include "Log.hpp"
-#	include "GameClock.hpp"
-#	include "StringID.hpp"
-#	include "SuperSmartPointer.hpp"
-#	include "FileSystem.hpp"
-};
 
 using namespace FlamingTorch;
 #include <stdio.h>
