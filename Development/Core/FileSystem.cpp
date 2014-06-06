@@ -1,0 +1,1303 @@
+#include "FlamingCore.hpp"
+
+#ifdef FLPLATFORM_WINDOWS
+#	define WIN32_LEAN_AND_MEAN
+#	define VC_LEAN_AND_MEAN
+#	include <windows.h>
+#	include <direct.h>
+#	include <ShlObj.h>
+#	undef CreateDirectory
+#	define GetCWD _getcwd
+#else
+#	include <sys/stat.h>
+#	include <sys/types.h>
+#	include <dirent.h>
+#	include <unistd.h>
+#	define GetCWD getcwd
+#	define _mkdir(n) mkdir(n, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH)
+#endif
+
+namespace FlamingTorch
+{
+#	define TAG "PackageFileSystemManager"
+
+	bool FileInfo::Remove(const std::string Name)
+	{
+#ifdef FLPLATFORM_WINDOWS
+		return _unlink(Name.c_str()) != -1;
+#else
+		return unlink(Name.c_str()) != -1;
+#endif
+	};
+
+	std::vector<std::string> DirectoryInfo::ScanDirectory(const std::string &Directory,
+		const std::string &Extension, bool Recursive)
+	{
+		std::vector<std::string> Files;
+		{
+#ifdef FLPLATFORM_WINDOWS
+			std::string Query = Directory + std::string("\\*.") + Extension;
+			WIN32_FIND_DATAA FileData;
+			HANDLE hFindHandle = INVALID_HANDLE_VALUE;
+			hFindHandle = FindFirstFileA(Query.c_str(), &FileData);
+
+			if(hFindHandle == INVALID_HANDLE_VALUE)
+				return Files;
+
+			std::string FileName(FileData.cFileName);
+			
+			if(FileName[0] != '.')
+			{
+				if(FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if(Recursive)
+					{
+						std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
+							std::string(FileData.cFileName), Extension, Recursive));
+
+						Files.insert(Files.end(), t.begin(), t.end());
+					};
+				}
+				else
+				{
+					std::string FileName(FileData.cFileName);
+					Files.push_back(Directory + std::string("/") + FileData.cFileName);
+				};
+			};
+
+			while(FindNextFileA(hFindHandle, &FileData))
+			{
+				FileName = FileData.cFileName;
+
+				if(FileName[0] != '.')
+				{
+					if(FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+					{
+						if(Recursive)
+						{
+							std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
+								std::string(FileData.cFileName), Extension, Recursive));
+
+							Files.insert(Files.end(), t.begin(), t.end());
+						};
+					}
+					else
+					{
+						std::string FileName(FileData.cFileName);
+						Files.push_back(Directory + std::string("/") + FileData.cFileName);
+					};
+				};
+			};
+
+			FindClose(hFindHandle);
+#else
+			DIR *Root = opendir (Directory.c_str());
+
+			if(Root == NULL)
+			{
+				return Files;
+			}
+
+			dirent *Entry = readdir(Root);
+
+			while(Entry != NULL)
+			{
+				std::string FileName(Entry->d_name);
+
+				if(FileName[0] != '.')
+				{
+					if(Entry->d_type == DT_DIR)
+					{
+						if(Recursive)
+						{
+							std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
+								FileName, Extension, Recursive));
+
+							Files.insert(Files.end(), t.begin(), t.end());
+						};
+					}
+					else if(Entry->d_type == DT_REG)
+					{
+						Files.push_back(Directory + std::string("/") + FileName);
+					};
+				};
+
+				Entry = readdir(Root);
+			}
+
+			closedir(Root);
+#endif
+		}
+
+		return Files;
+	};
+
+	bool DirectoryInfo::CreateDirectory(const std::string &Directory)
+	{
+#if FLPLATFORM_WINDOWS
+        bool result = _mkdir(Directory.c_str()) == 0;
+#else
+		bool result = mkdir(Directory.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) == 0;
+#endif
+        
+        if(!result)
+            printf("DirectoryInfo: Failed to create directory '%s': %d\n", Directory.c_str(), errno);
+        
+        return result;
+	};
+
+#if FLPLATFORM_MACOSX
+	const char *OSXResourcesDirectory();
+	const char *OSXPreferredStorageDirectory();
+#endif
+	
+	std::string ActualDirectory, ActualResourcesDirectory, ActualStorageDirectory;
+
+	void GeneralizeSeparators(std::string &Str)
+	{
+		for(uint32 i = 0; i < Str.length(); i++)
+		{
+			if(Str[i] == '\\')
+				Str[i] = '/';
+		};
+	};
+	
+	const std::string &DirectoryInfo::ActiveDirectory()
+	{
+		if(ActualDirectory.length() == 0)
+		{
+			ActualDirectory.resize(1024);
+
+			if(NULL == GetCWD(&ActualDirectory[0], 1024))
+			{
+				ActualDirectory.clear();
+			}
+			else
+			{
+				ActualDirectory.resize(strlen(ActualDirectory.c_str()));
+				ActualDirectory += "/";
+			};
+
+			GeneralizeSeparators(ActualDirectory);
+		};
+		
+		return ActualDirectory;
+	};
+
+	//Platform-specific resources directory (used mainly on OSX)
+	const std::string &DirectoryInfo::ResourcesDirectory()
+	{
+		if(ActualResourcesDirectory.length() == 0)
+#if FLPLATFORM_MACOSX
+		{
+			ActualResourcesDirectory = OSXResourcesDirectory();
+			ActualResourcesDirectory.resize(strlen(ActualResourcesDirectory.c_str()));
+		};
+#endif
+
+		if(ActualResourcesDirectory.length() == 0)
+		{
+			ActualResourcesDirectory.resize(1024);
+
+			if(NULL == GetCWD(&ActualResourcesDirectory[0], 1024))
+			{
+				ActualResourcesDirectory.clear();
+			}
+			else
+			{
+				ActualResourcesDirectory.resize(strlen(ActualResourcesDirectory.c_str()));
+				ActualResourcesDirectory += "/";
+			};
+
+			GeneralizeSeparators(ActualResourcesDirectory);
+		};
+		
+		return ActualResourcesDirectory;
+	};
+
+	const std::string &DirectoryInfo::PreferredStorageDirectory()
+	{
+		if(ActualStorageDirectory.length() == 0)
+		{
+#if SANDBOX_BUILD
+			ActualStorageDirectory = ResourcesDirectory();
+#else
+#	if FLPLATFORM_WINDOWS
+			ActualStorageDirectory.resize(1024);
+
+			if(FAILED(SHGetFolderPathA(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, &ActualStorageDirectory[0])))
+			{
+				ActualStorageDirectory.clear();
+			}
+			else
+			{
+				ActualStorageDirectory.resize(strlen(ActualStorageDirectory.c_str()));
+			};
+            
+			ActualStorageDirectory += std::string("/My Games");
+
+#	elif FLPLATFORM_MACOSX
+			ActualStorageDirectory = OSXPreferredStorageDirectory();
+			
+			ActualStorageDirectory += "/Games";
+#	endif
+			DirectoryInfo::CreateDirectory(ActualStorageDirectory.c_str());
+#endif
+
+			if(GameInterface::Instance != NULL)
+			{
+				ActualStorageDirectory += "/" + GameInterface::Instance->GameName() + "_files";
+				GeneralizeSeparators(ActualDirectory);
+
+				DirectoryInfo::CreateDirectory(ActualStorageDirectory.c_str());
+			};
+		};
+
+		return ActualStorageDirectory;
+	};
+
+	std::string Stream::AsString()
+	{
+		if(Length() == 0)
+			return std::string();
+
+		std::string str;
+		str.resize((uint32)Length());
+
+		AsBuffer(&str[0], (uint32)Length());
+
+		//Remove all extra 0's
+		for(int32 i = str.length() - 1; i >= 0; i--)
+		{
+			if(str[i] != '\0')
+			{
+				str.resize(i + 1);
+
+				break;
+			};
+		};
+
+		return str;
+	};
+
+	MemoryStream::MemoryStream() : _Position(0) {};
+
+	uint64 MemoryStream::Length() const
+	{
+		return Data.size();
+	};
+
+	uint64 MemoryStream::Position() const
+	{
+		return _Position;
+	};
+
+	bool MemoryStream::Seek(uint64 Position)
+	{
+		if(Position >= Data.size())
+			return false;
+
+		_Position = Position;
+
+		return true;
+	};
+
+	bool MemoryStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
+	{
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(ElementSize, "Invalid Element Length!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Data || ElementSize == 0  || Length == 0)
+			return false;
+
+		uint32 ActualLength = ElementSize * Length;
+
+		if(_Position + ActualLength > this->Data.size())
+		{
+			this->Data.resize((uint32)_Position + ActualLength);
+		};
+		
+		memcpy(&this->Data[(uint32)_Position], Data, ActualLength);
+
+		if(Processor)
+			Processor->Encode(&this->Data[(uint32)_Position], ActualLength);
+
+		_Position += ActualLength;
+
+		return true;
+	};
+
+	bool MemoryStream::Read(void *Data, uint32 ElementSize, uint32 Length)
+	{
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(ElementSize, "Invalid Element Length!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Data || ElementSize == 0  || Length == 0)
+			return false;
+
+		uint32 ActualLength = ElementSize * Length;
+
+		if(_Position + ActualLength > this->Data.size())
+			return false;
+
+		memcpy(Data, &this->Data[(uint32)_Position], ActualLength);
+
+		if(Processor)
+			Processor->Decode(Data, ActualLength);
+
+		_Position += ActualLength;
+
+		return true;
+	};
+
+	void MemoryStream::AsBuffer(void *Data, uint32 Length)
+	{
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Data || Length == 0)
+			return;
+
+		uint32 Count = (this->Data.size() - (uint32)_Position < Length ? this->Data.size() - (uint32)_Position : Length);
+
+		memcpy(Data, &this->Data[(uint32)_Position], Count);
+
+		if(Processor)
+			Processor->Decode(Data, Count);
+
+		_Position += Count;
+	};
+
+	const void *MemoryStream::Get() const
+	{
+		FLASSERT(!Processor, "Unable to decode the memory stream when using Get()!");
+
+		return Data.size() ? &Data[0] : NULL;
+	};
+
+	void MemoryStream::Clear()
+	{
+		_Position = 0;
+		Data.clear();
+	};
+
+	ConstantMemoryStream::ConstantMemoryStream(const void *Ptr, uint32 __Length) : Data((uint8 *)Ptr), _Length(__Length), _Position(0) {};
+
+	uint64 ConstantMemoryStream::Length() const
+	{
+		return _Length;
+	};
+
+	uint64 ConstantMemoryStream::Position() const
+	{
+		return _Position;
+	};
+
+	bool ConstantMemoryStream::Seek(uint64 Position)
+	{
+		if(Position > _Length)
+			return false;
+
+		_Position = Position;
+
+		return true;
+	};
+
+	bool ConstantMemoryStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
+	{
+		return false;
+	};
+
+	bool ConstantMemoryStream::Read(void *Data, uint32 ElementSize, uint32 Length)
+	{
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(ElementSize, "Invalid Element Length!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Data || ElementSize == 0  || Length == 0)
+			return false;
+
+		uint32 ActualLength = ElementSize * Length;
+
+		if(_Position + ActualLength > _Length)
+			return false;
+
+		memcpy(Data, this->Data + _Position, ActualLength);
+
+		if(Processor)
+			Processor->Decode(Data, ActualLength);
+
+		_Position += ActualLength;
+
+		return true;
+	};
+
+	void ConstantMemoryStream::AsBuffer(void *Data, uint32 Length)
+	{
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Data || Length == 0)
+			return;
+
+		uint32 Count = (_Length - (uint32)_Position < Length ? _Length - (uint32)_Position : Length);
+
+		memcpy(Data, &this->Data[(uint32)_Position], Count);
+
+		if(Processor)
+			Processor->Decode(Data, Count);
+
+		_Position += Count;
+	};
+
+	const void *ConstantMemoryStream::Get() const
+	{
+		FLASSERT(!Processor, "Unable to decode the constant memory stream when using Get()!");
+
+		return Data;
+	};
+
+	FileStream::FileStream() : Handle(NULL), _Length(0), _Position(0) {};
+
+	FileStream::~FileStream()
+	{
+		Close(); 
+	};
+
+	bool FileStream::Open(const std::string &name, uint8 Flags)
+	{
+		FLASSERT(name.length(), "Invalid Filename!");
+
+		Close();
+
+		char Mode[4] = {
+			'\0', '\0', '\0', '\0'
+		};
+
+		if(Flags & StreamFlags::Read)
+		{
+			Mode[0] = 'r';
+		}
+		else if(Flags & StreamFlags::Write)
+		{
+			Mode[0] = 'w';
+		}
+		else
+		{
+			FLASSERT(0, "Invalid Stream Flags!");
+		};
+
+		if(Flags & StreamFlags::Text)
+		{
+			Mode[1] = 't';
+		}
+		else
+		{
+			Mode[1] = 'b';
+		};
+
+		if(!Handle)
+		{
+#ifdef FLPLATFORM_WINDOWS
+			fopen_s((FILE**) &Handle, name.c_str(), Mode);
+#else
+			Handle = fopen(name.c_str(), Mode);
+#endif
+		};
+
+		if(!Handle)
+			return false;
+
+		_Length = 0;
+		_Position = 0;
+
+		if(Flags & StreamFlags::Read)
+		{
+			fseek((FILE*)Handle, 0, SEEK_END);
+
+#ifdef FLPLATFORM_WINDOWS
+			_Length = _ftelli64((FILE*)Handle);
+#elif FLPLATFORM_MACOSX || ANDROID
+			_Length = ftell((FILE*)Handle);
+#else
+			_Length = ftello64((FILE*)Handle);
+#endif
+			
+			fseek((FILE*)Handle, 0, SEEK_SET);
+		};
+
+		return true;
+	};
+
+	void FileStream::Close()
+	{
+		if(Handle)
+		{
+			fclose((FILE*)Handle);
+			Handle = NULL;
+		};
+
+		_Length = 0;
+		_Position = 0;
+	};
+
+	uint64 FileStream::Length() const
+	{
+		return _Length;
+	};
+
+	uint64 FileStream::Position() const
+	{
+		return _Position;
+	};
+
+	bool FileStream::Seek(uint64 Position)
+	{
+		FLASSERT(Handle, "Invalid File Handle!");
+
+		if(Position == this->_Position)
+			return true;
+
+		if(_Length != 0)
+			FLASSERT(Position <= _Length, "Invalid Position!");
+
+#ifdef FLPLATFORM_WINDOWS
+		int Result = _fseeki64((FILE *)Handle, Position, SEEK_SET);
+#elif FLPLATFORM_MACOSX || ANDROID
+		int Result = fseek((FILE *)Handle, Position, SEEK_SET);
+#else
+		int Result = fseeko64((FILE *)Handle, Position, SEEK_SET);
+#endif
+
+		if(Result == -1)
+			return false;
+
+		this->_Position = Position;
+
+		return true;
+	};
+
+	bool FileStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
+	{
+		FLASSERT(Handle, "Invalid File Handle!");
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(ElementSize, "Invalid Element Length!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Handle || !Data || ElementSize == 0 || Length == 0)
+			return false;
+
+		if(Processor)
+		{
+			static std::vector<uint8> Buffer;
+			uint32 ActualLength = ElementSize * Length;
+			Buffer.resize(ActualLength);
+
+			memcpy(&Buffer[0], Data, ActualLength);
+
+			Processor->Encode(&Buffer[0], ActualLength);
+
+			if(fwrite(&Buffer[0], ElementSize, Length, (FILE*)Handle) != Length)
+				return false;
+		}
+		else
+		{
+			if(fwrite(Data, ElementSize, Length, (FILE*)Handle) != Length)
+				return false;
+		}
+
+		fflush((FILE*)Handle);
+
+		_Position += ElementSize * Length;
+
+		return true;
+	};
+
+	bool FileStream::Read(void *Data, uint32 ElementSize, uint32 Length)
+	{
+		FLASSERT(Handle, "Invalid File Handle!");
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(ElementSize, "Invalid Element Length!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Handle || !Data || ElementSize == 0 || Length == 0)
+			return false;
+
+		if(_Position + ElementSize * Length > this->_Length)
+			return false;
+
+		if(fread(Data, ElementSize, Length, (FILE*)Handle) != Length)
+			return false;
+
+		if(Processor)
+			Processor->Decode(Data, ElementSize * Length);
+
+		_Position += ElementSize * Length;
+
+		return true;
+	};
+
+	void FileStream::AsBuffer(void *Data, uint32 Length)
+	{
+		FLASSERT(Data, "Invalid Data!");
+		FLASSERT(Length, "Invalid Length!");
+
+		if(!Data || Length == 0)
+			return;
+
+		uint32 Count = fread(Data, sizeof(uint8), Length, (FILE *)Handle);
+
+		if(Processor)
+			Processor->Decode(Data, Length);
+
+		_Position += Count;
+	};
+
+	bool Stream::CopyTo(Stream *Out)
+	{
+		FLASSERT(Out, "Invalid Stream!");
+
+		if(!Out)
+			return false;
+
+		std::vector<uint8> Buffer(16384);
+
+		for(uint64 Offset = Position(); Offset < Length();)
+		{
+			if(Length() - Position() < 16384)
+				Buffer.resize((uint32)(Length() - Position()));
+
+			SFLASSERT(Read2<uint8>(&Buffer[0], Buffer.size()));
+
+			if(Processor)
+				Processor->Encode(&Buffer[0], Buffer.size());
+
+			SFLASSERT(Out->Write2<uint8>(&Buffer[0], Buffer.size()));
+
+			Offset += Buffer.size();
+		};
+
+		return true;
+	};
+
+	bool Stream::ReadFromStream(Stream *Target, uint32 Length)
+	{
+		FLASSERT(Target, "Invalid Stream!");
+
+		if(!Target)
+			return false;
+
+		if(Target->Position() + Length > Target->Length())
+			return false;
+
+		std::vector<uint8> Buffer(Length);
+
+		SFLASSERT(Target->Read2<uint8>(&Buffer[0], Length));
+		SFLASSERT(Write2<uint8>(&Buffer[0], Length));
+
+		return true;
+	};
+
+	bool Stream::WriteToStream(Stream *Target, uint32 _Length)
+	{
+		FLASSERT(Target, "Invalid Stream!");
+
+		if(!Target)
+			return false;
+
+		if(Position() + _Length > Length())
+			return false;
+
+		std::vector<uint8> Buffer(_Length);
+
+		SFLASSERT(Read2<uint8>(&Buffer[0], _Length));
+
+		//Don't encode again since the Target might have its own encoder/decoder
+
+		SFLASSERT(Target->Write2<uint8>(&Buffer[0], _Length));
+
+		return true;
+	};
+
+	bool PackageFileSystemManager::Package::Serialize(Stream *Out)
+	{
+		uint64 CurrentOffset = 0;
+		uint64 StartOffset = 0;
+
+#if !ANDROID
+		sf::Lock Lock(FileAccessMutex);
+#endif
+
+		std::vector<FileEntry *> EntryList;
+
+		for(EntryMap::iterator it = Entries.begin(); it != Entries.end(); it++)
+		{
+			for(FileMap::iterator fit = it->second.begin(); fit != it->second.end(); fit++)
+			{
+				if(fit->second.Get() == NULL || fit->second->Input.Get() == NULL)
+					continue;
+
+				EntryList.push_back(fit->second.Get());
+			};
+		};
+
+		StartOffset += sizeof(VersionType) + //Version
+			sizeof(uint32) + //Length
+			sizeof(StringID) + //CRC
+			sizeof(uint32); //Count
+
+		for(uint32 i = 0; i < EntryList.size(); i++)
+		{
+			StartOffset += sizeof(StringID) + //DirectoryID
+				sizeof(uint8) + //NameLength
+				sizeof(uint8) * EntryList[i]->Name.length() + //Entry Name
+				sizeof(uint8) + //DirectoryLength
+				sizeof(uint8) * EntryList[i]->DirectoryName.length() + //Directory Name
+				sizeof(uint64[2]); //Offset + Length
+		};
+
+		MemoryStream HeaderStream;
+
+		uint32 Count = EntryList.size();
+		SFLASSERT(HeaderStream.Write2<uint32>(&Count));
+
+		for(uint32 i = 0; i < EntryList.size(); i++)
+		{
+			EntryList[i]->Offset = StartOffset;
+			EntryList[i]->Length = EntryList[i]->Input->Length();
+			EntryList[i]->Input->Seek(0);
+
+			SFLASSERT(HeaderStream.Write2<StringID>(&EntryList[i]->DirectoryID));
+
+			uint8 DirectoryNameLength = EntryList[i]->DirectoryName.length();
+			SFLASSERT(HeaderStream.Write2<uint8>(&DirectoryNameLength));
+
+			if(DirectoryNameLength)
+				SFLASSERT(HeaderStream.Write2<char>(EntryList[i]->DirectoryName.c_str(), DirectoryNameLength));
+
+			uint8 NameLength = EntryList[i]->Name.length();
+			SFLASSERT(HeaderStream.Write2<uint8>(&NameLength));
+
+			if(NameLength)
+				SFLASSERT(HeaderStream.Write2<char>(EntryList[i]->Name.c_str(), NameLength));
+
+			SFLASSERT(HeaderStream.Write2<uint64>(&EntryList[i]->Offset));
+			SFLASSERT(HeaderStream.Write2<uint64>(&EntryList[i]->Length));
+
+			StartOffset += EntryList[i]->Length;
+		};
+
+		//Start by writing the header
+		VersionType Version = CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR);
+		uint32 Length = (uint32)HeaderStream.Length();
+		StringID CRC = CRC32::Instance.CRC((uint8 *)HeaderStream.Get(), (uint32)HeaderStream.Length());
+
+		SFLASSERT(Out->Write2<VersionType>(&Version));
+		SFLASSERT(Out->Write2<uint32>(&Length));
+		SFLASSERT(Out->Write2<StringID>(&CRC));
+		SFLASSERT(Out->Write2<uint8>((uint8 *)HeaderStream.Get(), (uint32)HeaderStream.Length()));
+
+		if(!EntryList.size())
+		{
+			Log::Instance.LogWarn("Package", "Serializing a package with no Entries!");
+
+			return true;
+		};
+		
+		for(uint32 i = 0; i < EntryList.size(); i++)
+		{
+			if(!EntryList[i]->Input->CopyTo(Out))
+			{
+				Log::Instance.LogErr("PackageFileManager", "While serializing: Unable to serialize Entry '%d/%s'!", EntryList[i]->DirectoryID,
+					EntryList[i]->Name.c_str());
+
+				return false;
+			};
+		};
+
+		return true;
+	};
+
+	bool PackageFileSystemManager::Package::DeSerialize(Stream *In)
+	{
+#if !ANDROID
+		sf::Lock Lock(FileAccessMutex);
+#endif
+
+		OriginalOffset = In->Position();
+
+		Entries.clear();
+		HasBeenTampered = false;
+
+		VersionType Version = 0, TargetVersion = CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR);
+
+		//All packages are now at least encrypted with the default XOR key, so add a processor if missing
+		if(In->GetProcessor().Get() == NULL)
+			In->SetProcessor(SuperSmartPointer<StreamProcessor>(new XORStreamProcessor()));
+
+		SFLASSERT(In->Read2<VersionType>(&Version));
+
+		if(Version != TargetVersion)
+		{
+			Log::Instance.LogErr("PackageFileManager", "While deserializing: Invalid Version ID '%lld' (should be '%lld')",
+				Version, TargetVersion);
+
+			return false;
+		};
+
+		uint32 HeaderLength = 0;
+		StringID CRC = 0;
+		MemoryStream HeaderStream;
+
+		SFLASSERT(In->Read2<uint32>(&HeaderLength));
+		SFLASSERT(In->Read2<StringID>(&CRC));
+		SFLASSERT(In->WriteToStream(&HeaderStream, HeaderLength));
+		HeaderStream.Seek(0);
+
+		StringID ActualCRC = CRC32::Instance.CRC((uint8 *)HeaderStream.Get(), (uint32)HeaderStream.Length());
+
+		if(ActualCRC != CRC)
+		{
+			Log::Instance.LogErr("PackageFileManager", "While deserializing: Invalid CRC '%08x' (should be '%08x')",
+				ActualCRC, CRC);
+
+			return false;
+		};
+
+		uint32 Count = 0;
+
+		SFLASSERT(HeaderStream.Read2<uint32>(&Count));
+
+		StringID DirectoryID, NameID;
+		std::string NameStr, DirectoryNameStr;
+		uint64 Offset, Length;
+
+		for(uint32 i = 0; i < Count; i++)
+		{
+			SFLASSERT(HeaderStream.Read2<StringID>(&DirectoryID));
+
+			uint8 DirectoryNameLength = 0;
+			SFLASSERT(HeaderStream.Read2<uint8>(&DirectoryNameLength));
+
+			DirectoryNameStr.resize(DirectoryNameLength);
+
+			if(DirectoryNameLength)
+				SFLASSERT(HeaderStream.Read2<char>(&DirectoryNameStr[0], DirectoryNameLength));
+
+			uint8 NameLength = 0;
+			SFLASSERT(HeaderStream.Read2<uint8>(&NameLength));
+
+			NameStr.resize(NameLength);
+
+			if(NameLength)
+				SFLASSERT(HeaderStream.Read2<char>(&NameStr[0], NameLength));
+
+			NameID = MakeStringID(NameStr);
+
+			SFLASSERT(HeaderStream.Read2<uint64>(&Offset));
+			SFLASSERT(HeaderStream.Read2<uint64>(&Length));
+
+			SuperSmartPointer<FileEntry> Entry(new FileEntry());
+
+			Entry->DirectoryID = DirectoryID;
+			Entry->Name = NameStr;
+			Entry->DirectoryName = DirectoryNameStr;
+			Entry->Offset = Offset;
+			Entry->Length = Length;
+
+			Entries[DirectoryID][NameID] = Entry;
+		};
+
+		return true;
+	};
+
+	bool PackageFileSystemManager::Package::AddFile(const std::string &Directory, const std::string &Name, SuperSmartPointer<FileStream> In)
+	{
+#if !ANDROID
+		sf::Lock Lock(FileAccessMutex);
+#endif
+
+		StringID DirectoryID = MakeStringID(Directory);
+
+		EntryMap::iterator eit = Entries.find(DirectoryID);
+		StringID NameID = MakeStringID(Name.c_str());
+
+		if(eit == Entries.end() || eit->second.find(NameID) == eit->second.end())
+		{
+			SuperSmartPointer<FileEntry> &Entry = Entries[DirectoryID][NameID];
+
+			Entry.Dispose();
+			Entry.Reset(new FileEntry());
+
+			Entry->DirectoryID = DirectoryID;
+			Entry->DirectoryName = Directory;
+			Entry->Name = Name;
+			Entry->Offset = 0;
+			Entry->Length = In->Length();
+			Entry->Input = In;
+			Entries[DirectoryID][NameID] = Entry;
+
+			HasBeenTampered = true;
+
+			return true;
+		};
+
+		return false;
+	};
+
+	bool PackageFileSystemManager::Package::RemoveFile(const std::string &Directory, const std::string &Name)
+	{
+#if !ANDROID
+		sf::Lock Lock(FileAccessMutex);
+#endif
+
+		StringID DirectoryID = MakeStringID(Directory);
+
+		EntryMap::iterator eit = Entries.find(DirectoryID);
+		StringID NameID = MakeStringID(Name.c_str());
+
+		if(eit == Entries.end())
+			return false;
+
+		HasBeenTampered = true;
+
+		eit->second.erase(NameID);
+
+		return true;
+	};
+
+	PackageFileSystemManager::Package::~Package()
+	{
+		PackageFileSystemManager::Instance.ClearPackageData(this);
+
+		PackageStream.Dispose();
+		Entries.clear();
+	};
+
+	bool PackageFileSystemManager::Package::FromStream(SuperSmartPointer<Stream> Stream)
+	{
+		PackageStream.Dispose();
+		PackageStream = Stream;
+
+		return DeSerialize(Stream.Get());
+	};
+
+	uint64 PackageFileSystemManager::PackageStream::Length() const
+	{
+		return LengthValue;
+	};
+
+	uint64 PackageFileSystemManager::PackageStream::Position() const
+	{
+		return PositionValue;
+	};
+
+	bool PackageFileSystemManager::PackageStream::Seek(uint64 Position)
+	{
+		FLASSERT(Source, "Invalid Source!");
+
+		if(!Source)
+			return false;
+
+		if(Position > LengthValue)
+			return false;
+
+		if(Source->Seek(StartOffset + Position))
+		{
+			PositionValue = Position;
+
+			return true;
+		};
+
+		return false;
+	};
+
+	//Package files can't write to
+	bool PackageFileSystemManager::PackageStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
+	{
+		return false;
+	};
+
+	bool PackageFileSystemManager::PackageStream::Read(void *Data, uint32 ElementSize, uint32 Length)
+	{
+		FLASSERT(Source, "Invalid Source!");
+
+		if(!Source)
+			return false;
+
+		if(ElementSize * Length + PositionValue > LengthValue)
+			return false;
+
+		if(Source->Position() != StartOffset + PositionValue && !Source->Seek(StartOffset + PositionValue))
+			return false;
+
+		if(Source->Read(Data, ElementSize, Length))
+		{
+			PositionValue += ElementSize * Length;
+
+			return true;
+		};
+
+		return false;
+	};
+
+	void PackageFileSystemManager::PackageStream::AsBuffer(void *Data, uint32 Length)
+	{
+		FLASSERT(Source, "Invalid Source!");
+
+		if(!Source)
+			return;
+
+		//We can't do AsBuffer by default, so simply read the data in.
+
+		if(PositionValue + Length > LengthValue)
+			return;
+
+		bool Result = Read(Data, sizeof(uint8), Length);
+
+		if(!Result)
+		{
+			Log::Instance.LogErr(TAG, "Unable to read '%d' bytes!", Length);
+		};
+	};
+
+	PackageFileSystemManager PackageFileSystemManager::Instance;
+
+	void PackageFileSystemManager::StartUp(uint32 Priority)
+	{
+		SUBSYSTEM_STARTUP_CHECK()
+
+		SubSystem::StartUp(Priority);
+
+		SUBSYSTEM_PRIORITY_CHECK();
+
+		Log::Instance.LogInfo(TAG, "Initializing Package Filesystem...");
+	};
+
+	void PackageFileSystemManager::Shutdown(uint32 Priority)
+	{
+		SUBSYSTEM_PRIORITY_CHECK();
+
+		SubSystem::Shutdown(Priority);
+
+		Log::Instance.LogInfo(TAG, "Terminating Package Filesystem...");
+
+		for(PackageMap::iterator it = Packages.begin(); it != Packages.end(); it++)
+		{
+			it->second.Dispose();
+		};
+	};
+
+	void PackageFileSystemManager::Update(uint32 Priority)
+	{
+		PROFILE("PackageFileSystemManager::Update", StatTypes::Game);
+
+		SubSystem::Update(Priority);
+
+		SUBSYSTEM_PRIORITY_CHECK();
+	};
+
+	SuperSmartPointer<PackageFileSystemManager::Package> PackageFileSystemManager::NewPackage()
+	{
+		FLASSERT(WasStarted, "PackageFileSystem Subsystem not started!");
+
+		if(!WasStarted)
+		{
+			Log::Instance.LogErr(TAG, "While calling NewPackage: Subsystem was not inited!");
+
+			return SuperSmartPointer<Package>();
+		};
+
+		return SuperSmartPointer<Package>(new Package());
+	};
+
+	bool PackageFileSystemManager::AddPackage(StringID ID, SuperSmartPointer<Stream> PackageStream)
+	{
+		FLASSERT(WasStarted, "PackageFileSystem Subsystem not started!");
+
+		if(Packages.find(ID) != Packages.end())
+		{
+			Log::Instance.LogWarn(TAG, "Attempted to add a package '%08x' that already exists!", ID);
+
+			return false;
+		};
+
+		SuperSmartPointer<Package> ThePackage(new Package());
+
+		if(!ThePackage->FromStream(PackageStream))
+		{
+			Log::Instance.LogErr(TAG, "Package '%08x' failed to be deserialized!", ID);
+
+			return false;
+		};
+
+		Packages[ID] = ThePackage;
+
+		for(Package::EntryMap::iterator it = ThePackage->Entries.begin(); it != ThePackage->Entries.end(); it++)
+		{
+			for(Package::FileMap::iterator fit = it->second.begin(); fit != it->second.end(); fit++)
+			{
+				StringID NameID = MakeStringID(fit->second->Name);
+
+				EntryMap::iterator mit = Files.find(it->first);
+
+				if(mit != Files.end() && mit->second.find(NameID) != mit->second.end())
+				{
+					Log::Instance.LogWarn(TAG, "While adding Package '%08x': Overriding file %08x/%08x",
+						ID, it->first, NameID);
+				};
+
+				std::pair<Package *, Package::FileEntry *> Pair;
+
+				Pair.first = ThePackage.Get();
+				Pair.second = fit->second;
+
+				Files[it->first][NameID] = Pair;
+			};
+		};
+
+		return true;
+	};
+
+	bool PackageFileSystemManager::RemovePackage(StringID ID)
+	{
+		PackageMap::iterator it = Packages.find(ID);
+
+		if(it == Packages.end())
+			return false;
+
+		it->second.Dispose();
+
+		Packages.erase(it);
+
+		return true;
+	};
+	
+	SuperSmartPointer<PackageFileSystemManager::Package> PackageFileSystemManager::GetPackage(StringID ID)
+	{
+		PackageMap::iterator it = Packages.find(ID);
+
+		if(it == Packages.end() || it->second.Get() == NULL)
+			return SuperSmartPointer<Package>();
+
+		return it->second;
+	};
+
+	void PackageFileSystemManager::ClearPackageData(Package *p)
+	{
+		for(EntryMap::iterator it = Files.begin(); it != Files.end(); it++)
+		{
+			for(FileMap::iterator fit = it->second.begin(); fit != it->second.end(); fit++)
+			{
+				if(fit->second.first == p)
+				{
+					it->second.erase(fit);
+					fit = it->second.begin();
+
+					if(fit == it->second.end())
+						break;
+				};
+			};
+		};
+	};
+
+	SuperSmartPointer<Stream> PackageFileSystemManager::GetFile(StringID Directory, StringID Name)
+	{
+		EntryMap::iterator it = Files.find(Directory);
+
+		if(it == Files.end())
+			return SuperSmartPointer<Stream>();
+
+		FileMap::iterator fit = it->second.find(Name);
+
+		if(fit == it->second.end())
+			return SuperSmartPointer<Stream>();
+
+#if !ANDROID
+		sf::Lock Lock(fit->second.first->FileAccessMutex);
+#endif
+
+		PackageFileSystemManager::PackageStream *PStream = new PackageFileSystemManager::PackageStream();
+
+		PStream->Source = fit->second.first->PackageStream;
+		PStream->StartOffset = fit->second.second->Offset;
+		PStream->LengthValue = fit->second.second->Length;
+		PStream->PositionValue = 0;
+
+		return SuperSmartPointer<Stream>(PStream);
+	};
+
+	std::vector<std::string> PackageFileSystemManager::FindDirectories(const std::string &DirectoryBasePath)
+	{
+		std::vector<std::string> Out;
+
+		for(EntryMap::iterator it = Files.begin(); it != Files.end(); it++)
+		{
+			for(FileMap::iterator fit = it->second.begin(); fit != it->second.end(); fit++)
+			{
+				const std::string &DirectoryName = fit->second.second->DirectoryName;
+
+				if(DirectoryName.find(DirectoryBasePath) == 0)
+				{
+					bool Found = false;
+
+					for(uint32 i = 0; i < Out.size(); i++)
+					{
+						if(Out[i] == DirectoryName)
+						{
+							Found = true;
+
+							break;
+						};
+					};
+
+					if(!Found)
+						Out.push_back(DirectoryName);
+				};
+			};
+		};
+
+		return Out;
+	};
+
+	std::vector<std::pair<std::string, std::string> > PackageFileSystemManager::FindFiles(const std::string &Prefix, const std::string &Suffix,
+		const std::string &Extension, const std::string &StartingDirectory)
+	{
+		std::vector<std::pair<std::string, std::string> > Out;
+		std::string BaseFileName, FileExtension;
+
+		for(EntryMap::iterator it = Files.begin(); it != Files.end(); it++)
+		{
+			for(FileMap::iterator fit = it->second.begin(); fit != it->second.end(); fit++)
+			{
+				const std::string &DirectoryName = fit->second.second->DirectoryName;
+
+				if(DirectoryName.find(StartingDirectory) != 0)
+					continue;
+
+				int32 ExtensionIndex = fit->second.second->Name.rfind('.');
+
+				BaseFileName = ExtensionIndex != std::string::npos ? fit->second.second->Name.substr(0, ExtensionIndex) :
+					fit->second.second->Name;
+
+				if(ExtensionIndex != std::string::npos)
+				{
+					FileExtension = fit->second.second->Name.substr(ExtensionIndex + 1);
+				};
+
+				if(Extension.length() && FileExtension != Extension)
+					continue;
+
+				if((Prefix.length() && BaseFileName.find(Prefix) == std::string::npos) ||
+					(Suffix.length() && BaseFileName.find(Suffix) == std::string::npos))
+					continue;
+
+				Out.push_back(std::pair<std::string, std::string>(fit->second.second->DirectoryName, fit->second.second->Name));
+			};
+		};
+
+		return Out;
+	};
+};
