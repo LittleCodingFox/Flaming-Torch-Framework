@@ -16,9 +16,11 @@ class GameInterface : public LuaLib
 {
 public:
 	bool DevelopmentBuild;
+	bool IsScriptedInterface;
+
 	static SuperSmartPointer<GameInterface> Instance;
 
-	GameInterface() : DevelopmentBuild(false) {};
+	GameInterface() : DevelopmentBuild(false), IsScriptedInterface(false) {};
 	virtual ~GameInterface() {};
 
 	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);
@@ -135,7 +137,11 @@ public:
 		return UpdateRateValue;
 	};
 
-	ScriptedGameInterface() : UpdateRateValue(30), GameNameValue("Game") {};
+	ScriptedGameInterface() : UpdateRateValue(30), GameNameValue("Game")
+	{
+		IsScriptedInterface = true;
+	};
+
 	~ScriptedGameInterface();
 
 #if USE_GRAPHICS

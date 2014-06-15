@@ -71,9 +71,9 @@ namespace FlamingTorch
 #		include "GUI.hpp"
 #		include "GeometryBuffer.hpp"
 #		include "RenderTarget.hpp"
-#		include "TextureCollision.hpp"
 #	endif
 #
+#	include "TextureCollision.hpp"
 #	include "GameInterface.hpp"
 #	include "Console.hpp"
 #

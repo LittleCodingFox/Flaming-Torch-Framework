@@ -1387,22 +1387,7 @@ public:
 	typedef std::map<StringID, SuperSmartPointer<UILayout> > LayoutMap;
 	LayoutMap Layouts;
 
-	UIManager(RendererManager::Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DefaultFontColor(1, 1, 1, 1),
-		DefaultSecondaryFontColor(1, 1, 1, 1), DefaultFontSize(16), MouseOverElement(NULL)
-	{
-		std::vector<LuaLib *> Libs;
-		Libs.push_back(&FrameworkLib::Instance);
-
-		if(GameInterface::Instance != NULL)
-		{
-			Libs.push_back(GameInterface::Instance);
-		};
-
-		ScriptInstance = LuaScriptManager::Instance.CreateScript("", &Libs[0], Libs.size());
-		Tooltip.Reset(new UITooltip(this));
-		RegisterInput();
-	};
-
+	UIManager(RendererManager::Renderer *TheOwner);
 	~UIManager() { UnRegisterInput(); Clear(); ScriptInstance.Dispose(); };
 
 	/*!

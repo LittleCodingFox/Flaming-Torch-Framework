@@ -115,6 +115,27 @@ namespace FlamingTorch
 		void OnLoseFocus() {};
 	};
 
+	UIManager::UIManager(RendererManager::Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DefaultFontColor(1, 1, 1, 1),
+		DefaultSecondaryFontColor(1, 1, 1, 1), DefaultFontSize(16), MouseOverElement(NULL)
+	{
+		std::vector<LuaLib *> Libs;
+		Libs.push_back(&FrameworkLib::Instance);
+
+		if(GameInterface::Instance != NULL)
+		{
+			Libs.push_back(GameInterface::Instance);
+
+			if(GameInterface::Instance->IsScriptedInterface)
+				ScriptInstance = GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance;
+		};
+
+		if(ScriptInstance.Get() == NULL)
+			ScriptInstance = LuaScriptManager::Instance.CreateScript("", &Libs[0], Libs.size());
+
+		Tooltip.Reset(new UITooltip(this));
+		RegisterInput();
+	};
+
 	SuperSmartPointer<UILayout> UIManager::GetLayout(StringID LayoutID)
 	{
 		if(Layouts.find(LayoutID) != Layouts.end())
