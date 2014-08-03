@@ -1,5 +1,7 @@
 Renderable = {
 	OnStart = function(Self, Owner)
+		local Properties = Self.Properties
+		
 		Self.Properties["Sprite"] = Sprite()
 	end,
 	

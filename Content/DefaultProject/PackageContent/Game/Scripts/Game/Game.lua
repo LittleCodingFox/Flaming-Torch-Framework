@@ -8,13 +8,22 @@ GamePreInitialize = function()
 	g_ResourceManager:Register()
 	g_RendererManager:Register()
 	g_Console:Register()
+	g_FileSystemWatcher:Register()
 	
 	Game.DevelopmentBuild = true
 
 	return true
 end
 
-GameInitialize = function()
+GameInitialize = function(Arguments)
+	for i = 1, table.getn(Arguments) do
+		if Arguments[i] == "-guisandbox" then
+			Game.IsGUISandbox = true
+			
+			g_Console:GetVariable("r_drawuirects").UintValue = 1
+		end
+	end
+	
 	local Options = RenderCreateOptions()
 	Options.Title = Game.GameName
 	Options.Width = 960
@@ -38,6 +47,15 @@ GameInitialize = function()
 	Entity:AddComponent("Renderable")
 
 	Entity:GetComponent("Renderable").Properties["Sprite"].Texture = LogoTexture
+	
+	local SkinStream = g_PackageManager:GetFile(MakeStringID("/UIThemes/PolyCode/"), MakeStringID("skin.cfg"))
+	local SkinConfig = GenericConfig()
+
+	if SkinStream == nil or not SkinConfig:DeSerialize(SkinStream) then
+		return false
+	end
+	
+	Renderer.UI.Skin = SkinConfig
 
 	return true
 end
