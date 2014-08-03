@@ -50,7 +50,7 @@ public:
 	bool NinePatchValue;
 	Rect NinePatchRectValue;
 	bool FlipX, FlipY;
-	Vector2 TexCoordBorderMin, TexCoordBorderMax;
+	Vector2 TexCoordBorderMin, TexCoordBorderMax, TexCoordPosition;
 	f32 TexCoordRotation;
 
 	SpriteDrawOptions() : ColorValue(1, 1, 1, 1), ScaleValue(1, 1), RotationValue(0), BlendingModeValue(BlendingMode::Alpha),
@@ -61,7 +61,7 @@ public:
 		PinningModeValue(o.PinningModeValue), CropModeValue(o.CropModeValue), CropRectValue(o.CropRectValue),
 		NinePatchValue(o.NinePatchValue), NinePatchRectValue(o.NinePatchRectValue), FlipX(o.FlipX), FlipY(o.FlipY),
 		TexCoordRotation(o.TexCoordRotation), TexCoordBorderMin(o.TexCoordBorderMin), TexCoordBorderMax(o.TexCoordBorderMax),
-		OffsetValue(o.OffsetValue) {};
+		OffsetValue(o.OffsetValue), TexCoordPosition(o.TexCoordPosition) {};
 
 	SpriteDrawOptions &Position(const Vector2 &Pos) { PositionValue = Pos; return *this; };
 	/*!
@@ -86,12 +86,24 @@ public:
 	*	Set up texture borders
 	*	\param Min the min coordinate
 	*	\param Max the maximum coordinate
-	*	\pnote only works for non-Ninepatch
+	*	\note only works for non-Ninepatch
 	*/
 	SpriteDrawOptions &TextureBorders(const Vector2 &Min, const Vector2 &Max)
 	{
 		TexCoordBorderMin = Min;
 		TexCoordBorderMax = Max;
+
+		return *this;
+	};
+
+	/*!
+	*	Sets the texture's position
+	*	\param Position is the texture's position
+	*	\note only works for non-Ninepatch
+	*/
+	SpriteDrawOptions &TexturePosition(const Vector2 &Position)
+	{
+		TexCoordPosition = Position;
 
 		return *this;
 	};
@@ -176,4 +188,22 @@ public:
 	void StopAnimation();
 
 	void Update();
+};
+
+class SpriteCache
+{
+	friend class Sprite;
+	friend class RendererManager;
+private:
+	std::vector<Vector4> CachedColors;
+	std::vector<Vector2> CachedVertices, CachedTexCoords;
+	SuperSmartPointer<Texture> ActiveTexture;
+	uint32 CurrentBlendingMode;
+public:
+
+	static SpriteCache Instance;
+
+	SpriteCache() : CurrentBlendingMode(BlendingMode::None) {};
+	void Register(Vector2 *Vertices, Vector2 *TexCoords, Vector4 *Color, uint32 VertexCount, SuperSmartPointer<Texture> Texture, uint32 BlendingMode, RendererManager::Renderer *Renderer);
+	void Flush(RendererManager::Renderer *Renderer);
 };

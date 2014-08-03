@@ -55,7 +55,7 @@ namespace FlamingTorch
 		if(o.Name != sf::Mouse::Left)
 			return;
 
-		Vector2 ActualPosition = PositionValue + GetParentPosition();
+		Vector2 ActualPosition = PositionValue + GetParentPosition() + OffsetValue;
 		Vector2 CurrentPosition;
 		AxisAlignedBoundingBox AABB;
 		bool DrewSelector = false;
@@ -98,12 +98,16 @@ namespace FlamingTorch
 
 	void UIMenuBar::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x || ActualPosition.y + SizeValue.y < 0 ||
 			ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
+
+		SpriteCache::Instance.Flush(Renderer);
 
 		Renderer->BindTexture(NULL);
 		Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);

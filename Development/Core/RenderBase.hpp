@@ -207,7 +207,11 @@ private:
 	typedef std::map<uint32, SuperSmartPointer<Renderer> > RendererMap;
 	
 	RendererMap Renderers;
+
+public:
 	bool ShowProfiler, ShowConsole;
+
+private:
 	sf::String ConsoleText;
 	uint32 ConsoleCursorPosition, ConsoleLogOffset;
 

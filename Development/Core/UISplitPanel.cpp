@@ -61,12 +61,12 @@ namespace FlamingTorch
 
 				if(Horizontal)
 				{
-					AABB.min = ParentPosition + PositionValue + Vector2(SizeValue.x * Percentage - SplitSize / 2, 0);
+					AABB.min = ParentPosition + PositionValue + OffsetValue + Vector2(SizeValue.x * Percentage - SplitSize / 2, 0);
 					AABB.max = AABB.min + Vector2((f32)SplitSize, SizeValue.y);
 				}
 				else
 				{
-					AABB.min = ParentPosition + PositionValue + Vector2(0, SizeValue.y * Percentage - SplitSize / 2);
+					AABB.min = ParentPosition + PositionValue + OffsetValue + Vector2(0, SizeValue.y * Percentage - SplitSize / 2);
 					AABB.max = AABB.min + Vector2(SizeValue.x, (f32)SplitSize);
 				};
 
@@ -81,7 +81,7 @@ namespace FlamingTorch
 			}
 			else if(GrabbingSplitter)
 			{
-				Vector2 Difference = RendererManager::Instance.Input.MousePosition - (ParentPosition + PositionValue);
+				Vector2 Difference = RendererManager::Instance.Input.MousePosition - (ParentPosition + PositionValue + OffsetValue);
 
 				Difference.x = MathUtils::Clamp(Difference.x, 0, SizeValue.x);
 				Difference.y = MathUtils::Clamp(Difference.y, 0, SizeValue.y);
@@ -103,23 +103,25 @@ namespace FlamingTorch
 
 		if(Left.Get())
 		{
-			Left->Update(ParentPosition + PositionValue);
+			Left->Update(ParentPosition + PositionValue + OffsetValue);
 		};
 
 		if(Right.Get())
 		{
-			Right->Update(ParentPosition + PositionValue);
+			Right->Update(ParentPosition + PositionValue + OffsetValue);
 		};
 	};
 
 	void UISplitPanel::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		if(Left.Get())
 		{
@@ -142,8 +144,8 @@ namespace FlamingTorch
 
 			Renderer->EnableState(GL_SCISSOR_TEST);
 
-			glScissor((GLsizei)(ActualPosition.x + Right->GetPosition().x),
-				(GLsizei)(Renderer->Size().y - ActualPosition.y - ((!Horizontal && Left.Get()) ? Left->GetSize().y + Right->GetSize().y : Right->GetSize().y)),
+			glScissor((GLsizei)(ActualPosition.x + Right->GetPosition().x + OffsetValue.x),
+				(GLsizei)(Renderer->Size().y - ActualPosition.y - OffsetValue.y - ((!Horizontal && Left.Get()) ? Left->GetSize().y + Right->GetSize().y : Right->GetSize().y)),
 				(GLsizei)Right->GetSize().x, (GLsizei)Right->GetSize().y);
 
 			Right->Draw(ActualPosition, Renderer);

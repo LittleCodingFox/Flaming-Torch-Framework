@@ -33,6 +33,10 @@ public:
 	static ResourceManager Instance;
 
 	static bool IsSameTexture(Texture *Self, Texture *Other);
+	static SuperSmartPointer<Texture> InvalidTexture;
+#if USE_GRAPHICS
+	static SuperSmartPointer<sf::Font> InvalidFont;
+#endif
 
 	SuperSmartPointer<Texture> GetTexture(const std::string &FileName);
 	SuperSmartPointer<Texture> GetTextureFromPackage(const std::string &Directory, const std::string &FileName);

@@ -5,6 +5,12 @@ namespace FlamingTorch
 
 	ResourceManager ResourceManager::Instance;
 
+	SuperSmartPointer<Texture> ResourceManager::InvalidTexture;
+
+#if USE_GRAPHICS
+	SuperSmartPointer<sf::Font> ResourceManager::InvalidFont;
+#endif
+
 	bool ResourceManager::IsSameTexture(Texture *Self, Texture *Other)
 	{
 		return Self == Other;
@@ -19,6 +25,12 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo(TAG, "Starting Resource Manager Subsystem");
+
+#if USE_GRAPHICS
+		InvalidFont.Reset(new sf::Font());
+#endif
+
+		InvalidTexture.Reset(new Texture());
 	};
 
 	void ResourceManager::Shutdown(uint32 Priority)

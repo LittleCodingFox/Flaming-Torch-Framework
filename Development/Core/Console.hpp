@@ -86,6 +86,7 @@ private:
 #if USE_GRAPHICS
 	void BindCommand(const std::vector<std::string> &Parameters);
 	void ValidKeyCommand(const std::vector<std::string> &Parameters);
+	void ScreenshotCommand(const std::vector<std::string> &Parameters);
 #endif
 
 	void StartUp(uint32 Priority);

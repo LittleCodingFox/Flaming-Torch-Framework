@@ -20,7 +20,7 @@ namespace FlamingTorch
 		{
 			//Since we're already pressed, we must be inside it, so we just need to care about the X axis
 
-			Vector2 ActualPosition = PositionValue + Vector2((f32)Padding, 0) + GetParentPosition();
+			Vector2 ActualPosition = PositionValue + OffsetValue + Vector2((f32)Padding, 0) + GetParentPosition();
 
 			std::wstring WideString = Text.toWideString();
 
@@ -192,13 +192,15 @@ namespace FlamingTorch
 	{
 		FLASSERT(Children.size() == 0, "UITextBoxes should not have children!");
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 		Vector2 ActualSize = SizeValue + Vector2(Padding * 2.0f, 0) + Vector2(0, SelectBoxExtraSize.y / 2);
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		Sprite TheSprite;
 		TheSprite.SpriteTexture = BackgroundTexture;
@@ -258,6 +260,8 @@ namespace FlamingTorch
 
 				X = Size.x;
 			};
+
+			SpriteCache::Instance.Flush(Renderer);
 
 			Renderer->BindTexture(NULL);
 			Renderer->EnableState(GL_VERTEX_ARRAY);

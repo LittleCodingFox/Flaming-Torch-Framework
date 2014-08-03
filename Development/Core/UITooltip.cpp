@@ -49,7 +49,9 @@ namespace FlamingTorch
 			(OverrideText.getSize() && Source.Get() == NULL && MouseOverElement.Get()))
 			return;
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		UIPanel::Draw(ParentPosition, Renderer);
+
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		bool UsingFixedPosition = Source.Get() != NULL && Source->GetTooltipElement().Get() != NULL && Source->TooltipsFixed();
 
@@ -78,6 +80,8 @@ namespace FlamingTorch
 		}
 		else
 		{
+			SpriteCache::Instance.Flush(Renderer);
+
 			sf::String Text = (Source ? Source->GetTooltipText() : OverrideText);
 
 			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Text, TextParameters).ToFullSize();

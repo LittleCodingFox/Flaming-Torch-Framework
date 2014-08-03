@@ -380,3 +380,39 @@ public:
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
 };
+
+namespace FileSystemWatcherAction
+{
+	enum
+	{
+		Added, //!<File was added
+		Deleted, //!<File was deleted
+		Modified //!<File was modified
+	};
+};
+
+/*!
+*	FileSystem Watching Class
+*	Provides notifications when files are modified in some way within a directory
+*/
+class FLAMING_API FileSystemWatcher : public SubSystem
+{
+public:
+	static FileSystemWatcher Instance;
+
+	//!<Directory, FileName, Action
+	Signal3<const std::string &, const std::string &, uint32> OnAction;
+
+	FileSystemWatcher() : SubSystem(FILESYSTEM_WATCHER_PRIORITY) {};
+
+	/*!
+	*	Watches a directory for changes
+	*	\param Path the directory to watch
+	*	\return whether it was able to watch that directory
+	*/
+	bool WatchDirectory(const std::string &Path);
+
+	void StartUp(uint32 Priority);
+	void Shutdown(uint32 Priority);
+	void Update(uint32 Priority);
+};

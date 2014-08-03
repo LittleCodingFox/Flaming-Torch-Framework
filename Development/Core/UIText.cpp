@@ -55,12 +55,14 @@ namespace FlamingTorch
 
 	void UIText::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		uint32 YOffset = 0;
 

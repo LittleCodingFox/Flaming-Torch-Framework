@@ -157,6 +157,18 @@ namespace FlamingTorch
 				AnimationQueue.erase(AnimationQueue.begin());
 			};
 		};
+
+		if(OnUpdateFunction)
+		{
+			try
+			{
+				OnUpdateFunction(this, ParentPosition);
+			}
+			catch(std::exception &e)
+			{
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
+			};
+		};
 	};
 
 	void UIPanel::OnMouseJustPressedPriv(const InputCenter::MouseButtonInfo &o)
@@ -266,7 +278,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -284,7 +296,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -302,7 +314,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -320,7 +332,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -338,7 +350,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -356,7 +368,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -374,7 +386,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -392,7 +404,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -410,7 +422,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -428,7 +440,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -446,7 +458,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -464,7 +476,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -482,7 +494,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -500,7 +512,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -518,7 +530,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -536,7 +548,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -554,7 +566,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -572,7 +584,7 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
 			};
 		};
 	};
@@ -607,11 +619,28 @@ namespace FlamingTorch
 		};
 	};
 
+	void UIPanel::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	{
+		if(OnDrawFunction)
+		{
+			try
+			{
+				OnDrawFunction(this, ParentPosition);
+			}
+			catch(std::exception &e)
+			{
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
+			};
+		};
+	};
+
 	void UIPanel::DrawUIRect(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
 		if(GetManager()->DrawUIRects)
 		{
-			Vector2 ActualPosition = ParentPosition + PositionValue;
+			SpriteCache::Instance.Flush(Renderer);
+
+			Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 			Renderer->EnableState(GL_VERTEX_ARRAY);
 			Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);

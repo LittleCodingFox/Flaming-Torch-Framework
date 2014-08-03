@@ -50,11 +50,28 @@ namespace luabind
 namespace FlamingTorch
 {
 	FrameworkLib FrameworkLib::Instance;
-
+	
 	template<class type>
 	bool LuabindSimpleCompare(type &Self, type *Other)
 	{
 		return &Self == Other;
+	};
+
+	luabind::object StringUtilsSplit(const std::string &Self, const std::string &Separator, lua_State *State)
+	{
+		if(Separator.length() == 0)
+			return luabind::object();
+
+		luabind::object Out = luabind::newtable(State);
+
+		std::vector<std::string> Fragments = StringUtils::Split(Self, Separator[0]);
+
+		for(uint32 i = 0; i < Fragments.size(); i++)
+		{
+			Out[i + 1] = Fragments[i];
+		};
+
+		return Out;
 	};
 
 	luabind::object GetComponentProperties(Component &Self)
@@ -530,6 +547,11 @@ namespace FlamingTorch
 		Self.RemoveElement((StringID)ID);
 	};
 
+	bool UIManagerLoadLayouts(UIManager &Self, Stream *In)
+	{
+		return Self.LoadLayouts(In);
+	};
+
 	luabind::object GetUIManagerLayouts(UIManager &Self, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
@@ -540,6 +562,24 @@ namespace FlamingTorch
 		};
 
 		return Out;
+	};
+
+	bool AddUIManagerLayout(UIManager &Self, SuperSmartPointer<UILayout> Layout, StringID LayoutID)
+	{
+		if(Self.Layouts.find(LayoutID) != Self.Layouts.end())
+			return false;
+
+		Self.Layouts[LayoutID] = Layout;
+
+		return true;
+	};
+
+	void RemoveUIManagerLayout(UIManager &Self, StringID LayoutID)
+	{
+		UIManager::LayoutMap::iterator it = Self.Layouts.find(LayoutID);
+
+		if(it != Self.Layouts.end())
+			Self.Layouts.erase(it);
 	};
 
 	luabind::object GetUILayoutElements(UILayout &Self, lua_State *State)
@@ -751,6 +791,16 @@ namespace FlamingTorch
 		Self.Caption = luabind::object_cast<const char *>(arg);
 	};
 
+	std::string UITextGetText(UIText &Self)
+	{
+		return Self.GetText().toAnsiString();
+	};
+
+	void UITextSetText(UIText &Self, std::string &Text)
+	{
+		Self.SetText(Text, false);
+	};
+
 	luabind::object RenderTextFitTextOnRect(const std::string &String, TextParams Params, const Vector2 &Size, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
@@ -763,6 +813,35 @@ namespace FlamingTorch
 		};
 
 		return Out;
+	};
+
+	Rect RenderTextMeasureTextSimple(const std::string &String, TextParams Params)
+	{
+		return RenderTextUtils::MeasureTextSimple(String, Params);
+	};
+
+	int32 RenderTextFitTextAroundLength(const std::string &String, TextParams Params, f32 LengthInPixels, int32 FontSize)
+	{
+		RenderTextUtils::FitTextAroundLength(String, Params, LengthInPixels, &FontSize);
+
+		return FontSize;
+	};
+
+	void RenderTextRenderText(RendererManager::Renderer *Renderer, const std::string &String, TextParams Params)
+	{
+		RenderTextUtils::RenderText(Renderer, String, Params);
+	};
+
+	Rect RenderTextMeasureTextLines(luabind::object Lines, TextParams Params)
+	{
+		std::vector<sf::String> ActualLines;
+
+		for(luabind::iterator it(Lines), end; it != end; it++)
+		{
+			ActualLines.push_back(ProtectedLuaCast<const char *>(*it));
+		};
+
+		return RenderTextUtils::MeasureTextLines(&ActualLines[0], ActualLines.size(), Params);
 	};
 
 	bool ShaderCompileShader(Shader &Self, uint32 Type, const std::string &Data, std::string *Log)
@@ -1130,7 +1209,11 @@ namespace FlamingTorch
 				.def("Save", &TextureBuffer::Save)
 				.def("Width", &TextureBuffer::Width)
 				.def("Height", &TextureBuffer::Height)
-				.def("ColorType", &TextureBuffer::ColorType),
+				.def("ColorType", &TextureBuffer::ColorType)
+				.def("Clone", &TextureBuffer::Clone)
+				.def("Multiply", &TextureBuffer::Multiply)
+				.def("Blend", &TextureBuffer::Blend)
+				.def("Overlay", &TextureBuffer::Overlay),
 
 			//TextureEncoderInfo
 			luabind::class_<TextureEncoderInfo>("TextureEncoderInfo")
@@ -1149,10 +1232,14 @@ namespace FlamingTorch
 			//Texture
 			luabind::class_<Texture, SuperSmartPointer<Texture> >("Texture")
 				.enum_("constants") [
-					luabind::value("Nearest", TextureFiltering::Nearest),
-					luabind::value("Linear", TextureFiltering::Linear),
-					luabind::value("Nearest_Mipmap", TextureFiltering::Nearest_Mipmap),
-					luabind::value("Linear_Mipmap", TextureFiltering::Linear_Mipmap)
+					luabind::value("Filtering_Nearest", TextureFiltering::Nearest),
+					luabind::value("Filtering_Linear", TextureFiltering::Linear),
+					luabind::value("Filtering_Nearest_Mipmap", TextureFiltering::Nearest_Mipmap),
+					luabind::value("Filtering_Linear_Mipmap", TextureFiltering::Linear_Mipmap),
+					luabind::value("Wrap_Clamp", TextureWrapMode::Clamp),
+					luabind::value("Wrap_ClampToBorder", TextureWrapMode::ClampToBorder),
+					luabind::value("Wrap_ClampToEdge", TextureWrapMode::ClampToEdge),
+					luabind::value("Wrap_Repeat", TextureWrapMode::Repeat)
 				]
 				.property("TextureFilter", &Texture::FilterMode, &Texture::SetTextureFiltering)
 				.property("WrapMode", &Texture::WrapMode, &Texture::SetWrapMode)
@@ -1164,6 +1251,7 @@ namespace FlamingTorch
 				.property("Data", &Texture::GetData)
 				.def(luabind::constructor<>())
 				.def("Destroy", &Texture::Destroy)
+				.def("FromBuffer", &Texture::FromBuffer)
 				.def("FromData", &Texture::FromData)
 				.def("FromStream", &Texture::FromStream)
 				.def("FromPackage", &Texture::FromPackage)
@@ -1176,7 +1264,9 @@ namespace FlamingTorch
 				.def("Bind", &Texture::Bind)
 				.def("PushTextureStates", &Texture::PushTextureStates)
 				.def("PopTextureStates", &Texture::PopTextureStates)
-				.def("Blur", &Texture::Blur),
+				.def("Blur", &Texture::Blur)
+				.def("GetPixel", &Texture::GetPixel)
+				.def(luabind::const_self == luabind::other<const Texture &>()),
 
 			//FrustumCuller
 			luabind::class_<FrustumCuller>("FrustumCuller")
@@ -1215,7 +1305,7 @@ namespace FlamingTorch
 				.def("DifferenceNoPause", &GameClockDiffNoPause),
 
 			//GenericConfig
-			luabind::class_<GenericConfig>("GenericConfig")
+			luabind::class_<GenericConfig, SuperSmartPointer<GenericConfig> >("GenericConfig")
 				.def(luabind::constructor<>())
 				.def("Serialize", &GenericConfig::Serialize)
 				.def("DeSerialize", &GenericConfig::DeSerialize)
@@ -1247,6 +1337,7 @@ namespace FlamingTorch
 			luabind::class_<GameInterface>("GameInterface")
 				.property("GameName", &GameInterface::GameName)
 				.def_readwrite("DevelopmentBuild", &GameInterface::DevelopmentBuild)
+				.def_readwrite("IsGUISandbox", &GameInterface::IsGUISandbox)
 #if USE_GRAPHICS
 				.def("CreateRenderer", &GameInterface::CreateRenderer)
 #endif
@@ -1270,7 +1361,7 @@ namespace FlamingTorch
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<const Matrix4x4 &>())
 				.property("m", &GetMatrix4x4M, &SetMatrix4x4M)
-				.def(luabind::self * luabind::other<const Matrix4x4 &>())
+				.def(luabind::const_self * luabind::other<const Matrix4x4 &>())
 				.def("Determinant", &Matrix4x4::Determinant)
 				.def("Identity", &Matrix4x4::Identity)
 				.def("Transpose", &Matrix4x4::Transpose)
@@ -1295,18 +1386,18 @@ namespace FlamingTorch
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<float, float>())
 				.def(luabind::constructor<const Vector2 &>())
-				.def(luabind::self + luabind::other<const Vector2 &>())
-				.def(luabind::self + luabind::other<float>())
-				.def(luabind::self - luabind::other<const Vector2 &>())
-				.def(luabind::self - luabind::other<float>())
-				.def(luabind::self * luabind::other<const Vector2 &>())
-				.def(luabind::self * luabind::other<float>())
-				.def(luabind::self / luabind::other<const Vector2 &>())
-				.def(luabind::self / luabind::other<float>())
-				.def(luabind::self == luabind::other<const Vector2 &>())
-				.def(luabind::self < luabind::other<const Vector2 &>())
-				.def(luabind::self <= luabind::other<const Vector2 &>())
-				.def(-luabind::self)
+				.def(luabind::const_self + luabind::other<const Vector2 &>())
+				.def(luabind::const_self + luabind::other<float>())
+				.def(luabind::const_self - luabind::other<const Vector2 &>())
+				.def(luabind::const_self - luabind::other<float>())
+				.def(luabind::const_self * luabind::other<const Vector2 &>())
+				.def(luabind::const_self * luabind::other<float>())
+				.def(luabind::const_self / luabind::other<const Vector2 &>())
+				.def(luabind::const_self / luabind::other<float>())
+				.def(luabind::const_self == luabind::other<const Vector2 &>())
+				.def(luabind::const_self < luabind::other<const Vector2 &>())
+				.def(luabind::const_self <= luabind::other<const Vector2 &>())
+				.def(-luabind::const_self)
 				.def("Magnitude", &Vector2::Magnitude)
 				.def("MagnitudeSquare", &Vector2::MagnitudeSquare)
 				.def("Normalized", &Vector2::Normalized)
@@ -1335,18 +1426,18 @@ namespace FlamingTorch
 				.def(luabind::constructor<const Vector2 &, float>())
 				.def(luabind::constructor<float, const Vector2 &>())
 				.def(luabind::constructor<const Vector3 &>())
-				.def(luabind::self + luabind::other<const Vector3 &>())
-				.def(luabind::self + luabind::other<float>())
-				.def(luabind::self - luabind::other<const Vector3 &>())
-				.def(luabind::self - luabind::other<float>())
-				.def(luabind::self * luabind::other<const Vector3 &>())
-				.def(luabind::self * luabind::other<float>())
-				.def(luabind::self / luabind::other<const Vector3 &>())
-				.def(luabind::self / luabind::other<float>())
-				.def(luabind::self == luabind::other<const Vector3 &>())
-				.def(luabind::self < luabind::other<const Vector3 &>())
-				.def(luabind::self <= luabind::other<const Vector3 &>())
-				.def(-luabind::self)
+				.def(luabind::const_self + luabind::other<const Vector3 &>())
+				.def(luabind::const_self + luabind::other<float>())
+				.def(luabind::const_self - luabind::other<const Vector3 &>())
+				.def(luabind::const_self - luabind::other<float>())
+				.def(luabind::const_self * luabind::other<const Vector3 &>())
+				.def(luabind::const_self * luabind::other<float>())
+				.def(luabind::const_self / luabind::other<const Vector3 &>())
+				.def(luabind::const_self / luabind::other<float>())
+				.def(luabind::const_self == luabind::other<const Vector3 &>())
+				.def(luabind::const_self < luabind::other<const Vector3 &>())
+				.def(luabind::const_self <= luabind::other<const Vector3 &>())
+				.def(-luabind::const_self)
 				.def("Magnitude", &Vector3::Magnitude)
 				.def("MagnitudeSquare", &Vector3::MagnitudeSquare)
 				.def("Normalized", &Vector3::Normalized)
@@ -1386,18 +1477,18 @@ namespace FlamingTorch
 				.def(luabind::constructor<const Vector3 &, float>())
 				.def(luabind::constructor<float, const Vector3 &>())
 				.def(luabind::constructor<const Vector4 &>())
-				.def(luabind::self + luabind::other<const Vector4 &>())
-				.def(luabind::self + luabind::other<float>())
-				.def(luabind::self - luabind::other<const Vector4 &>())
-				.def(luabind::self - luabind::other<float>())
-				.def(luabind::self * luabind::other<const Vector4 &>())
-				.def(luabind::self * luabind::other<float>())
-				.def(luabind::self / luabind::other<const Vector4 &>())
-				.def(luabind::self / luabind::other<float>())
-				.def(luabind::self == luabind::other<const Vector4 &>())
-				.def(luabind::self < luabind::other<const Vector4 &>())
-				.def(luabind::self <= luabind::other<const Vector4 &>())
-				.def(-luabind::self)
+				.def(luabind::const_self + luabind::other<const Vector4 &>())
+				.def(luabind::const_self + luabind::other<float>())
+				.def(luabind::const_self - luabind::other<const Vector4 &>())
+				.def(luabind::const_self - luabind::other<float>())
+				.def(luabind::const_self * luabind::other<const Vector4 &>())
+				.def(luabind::const_self * luabind::other<float>())
+				.def(luabind::const_self / luabind::other<const Vector4 &>())
+				.def(luabind::const_self / luabind::other<float>())
+				.def(luabind::const_self == luabind::other<const Vector4 &>())
+				.def(luabind::const_self < luabind::other<const Vector4 &>())
+				.def(luabind::const_self <= luabind::other<const Vector4 &>())
+				.def(-luabind::const_self)
 				.def("Magnitude", &Vector4::Magnitude)
 				.def("MagnitudeSquare", &Vector4::MagnitudeSquare)
 				.def("Normalized", &Vector4::Normalized)
@@ -1442,8 +1533,8 @@ namespace FlamingTorch
 				.def(luabind::constructor<const Rect &>())
 				.def(luabind::constructor<float, float>())
 				.def(luabind::constructor<float, float, float, float>())
-				.def(luabind::self + luabind::other<const Rect &>())
-				.def(luabind::self - luabind::other<const Rect &>())
+				.def(luabind::const_self + luabind::other<const Rect &>())
+				.def(luabind::const_self - luabind::other<const Rect &>())
 				.property("Size", &Rect::Size)
 				.property("FullSize", &Rect::ToFullSize)
 				.property("Position", &Rect::Position),
@@ -1490,12 +1581,12 @@ namespace FlamingTorch
 				.def_readwrite("w", &Quaternion::w)
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<float, float, float, float>())
-				.def(-luabind::self)
-				.def(luabind::self * luabind::other<float>())
-				.def(luabind::self * luabind::other<const Quaternion &>())
-				.def(luabind::self + luabind::other<const Quaternion &>())
-				.def(luabind::self - luabind::other<const Quaternion &>())
-				.def(luabind::self == luabind::other<const Quaternion &>())
+				.def(-luabind::const_self)
+				.def(luabind::const_self * luabind::other<float>())
+				.def(luabind::const_self * luabind::other<const Quaternion &>())
+				.def(luabind::const_self + luabind::other<const Quaternion &>())
+				.def(luabind::const_self - luabind::other<const Quaternion &>())
+				.def(luabind::const_self == luabind::other<const Quaternion &>())
 				.def("Normalize", &Quaternion::Normalize)
 				.def("Normalized", &Quaternion::Normalized)
 				.def("IsNormalized", &Quaternion::IsNormalized)
@@ -1555,6 +1646,15 @@ namespace FlamingTorch
 				.def("TranslateMainChunk", &WorldStreamer::TranslateMainChunk)
 				.property("WorldRadius", &WorldStreamer::GetWorldRadius, &WorldStreamer::SetWorldRadius)
 				.property("GlobalCoordinate", &WorldStreamer::GetGlobalCoordinate, &WorldStreamer::SetGlobalCoordinate),
+
+			//FileSystemWatcher
+			luabind::class_<FileSystemWatcher, SubSystem>("FileSystemWatcher")
+				.enum_("constants") [
+					luabind::value("Action_Added", FileSystemWatcherAction::Added),
+					luabind::value("Action_Modified", FileSystemWatcherAction::Modified),
+					luabind::value("Action_Deleted", FileSystemWatcherAction::Deleted)
+				]
+				.def("WatchDirectory", &FileSystemWatcher::WatchDirectory),
 
 #if USE_NETWORK
 			//GameClient
@@ -1706,6 +1806,20 @@ namespace FlamingTorch
 				.def("LogConsole", &ConsoleLogConsole)
 				.def("RunConsoleCommand", &ConsoleRunConsoleCommand),
 
+			//StringUtils
+			luabind::class_<StringUtils>("StringUtils")
+				.scope [
+					luabind::def("DirectoryName", &StringUtils::DirectoryName),
+					luabind::def("FileName", &StringUtils::FileName),
+					luabind::def("HexToFloat", &StringUtils::HexToFloat),
+					luabind::def("HexToInt", &StringUtils::HexToInt),
+					luabind::def("MakeByteString", &StringUtils::MakeByteString),
+					luabind::def("MakeIntString", (std::string (*)(const int32 &, bool)) &StringUtils::MakeIntString),
+					luabind::def("MakeIntString", (std::string (*)(const uint32 &, bool)) &StringUtils::MakeIntString),
+					luabind::def("MakeFloatString", &StringUtils::MakeFloatString),
+					luabind::def("Split", &StringUtilsSplit)
+				],
+
 #if USE_SOUND
 			//SoundManager
 			luabind::class_<SoundManager, SubSystem>("SoundManager")
@@ -1799,6 +1913,7 @@ namespace FlamingTorch
 						.def_readwrite("TexCoordBorderMinValue", &SpriteDrawOptions::TexCoordBorderMin)
 						.def_readwrite("TexCoordBorderMaxValue", &SpriteDrawOptions::TexCoordBorderMax)
 						.def_readwrite("TexCoordRotation", &SpriteDrawOptions::TexCoordRotation)
+						.def_readwrite("TexCoordPosition", &SpriteDrawOptions::TexCoordPosition)
 						.def(luabind::constructor<>())
 						.def(luabind::constructor<const SpriteDrawOptions &>())
 						.def("Position", &SpriteDrawOptions::Position, luabind::return_reference_to(_1))
@@ -1813,6 +1928,7 @@ namespace FlamingTorch
 						.def("Flip", &SpriteDrawOptions::Flip, luabind::return_reference_to(_1))
 						.def("TextureBorders", &SpriteDrawOptions::TextureBorders, luabind::return_reference_to(_1))
 						.def("TextureRotation", &SpriteDrawOptions::TextureRotation, luabind::return_reference_to(_1))
+						.def("TexturePosition", &SpriteDrawOptions::TexturePosition, luabind::return_reference_to(_1))
 				]
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<const Sprite &>())
@@ -1879,6 +1995,7 @@ namespace FlamingTorch
 						.def_readwrite("BorderColorValue", &TextParams::BorderColorValue)
 						.def_readwrite("PositionValue", &TextParams::PositionValue)
 						.def_readwrite("BorderSizeValue", &TextParams::BorderSizeValue)
+						.def_readwrite("FontSizeValue", &TextParams::FontSizeValue)
 						.def_readwrite("FontValue", &TextParams::FontValue)
 						.def_readwrite("StyleValue", &TextParams::StyleValue)
 						.def(luabind::constructor<>())
@@ -1893,11 +2010,11 @@ namespace FlamingTorch
 						.def("Position", &TextParams::Position, luabind::return_reference_to(_1)),
 
 					luabind::def("LoadDefaultFont", &RenderTextUtils::LoadDefaultFont),
-					luabind::def("MeasureTextSimple", &RenderTextUtils::MeasureTextSimple),
-					luabind::def("FitTextAroundLength", &RenderTextUtils::FitTextAroundLength),
-					luabind::def("RenderText", &RenderTextUtils::RenderText),
+					luabind::def("MeasureTextSimple", &RenderTextMeasureTextSimple),
+					luabind::def("FitTextAroundLength", &RenderTextFitTextAroundLength),
+					luabind::def("RenderText", &RenderTextRenderText),
 					luabind::def("FitTextOnRect", &RenderTextFitTextOnRect),
-					luabind::def("MeasureTextLines", &RenderTextUtils::MeasureTextLines)
+					luabind::def("MeasureTextLines", &RenderTextMeasureTextLines)
 				],
 
 			//Shader
@@ -2190,7 +2307,11 @@ namespace FlamingTorch
 			luabind::class_<UIManager>("UIManager")
 				.def("AddElement", &AddUIManagerElement)
 				.def("RemoveElement", &RemoveUIManagerElement)
+				.def("LoadLayouts", &UIManager::LoadLayouts)
+				.def("LoadLayouts", &UIManagerLoadLayouts)
 				.property("Layouts", &GetUIManagerLayouts)
+				.def("AddLayout", &AddUIManagerLayout)
+				.def("RemoveLayout", &RemoveUIManagerLayout)
 				.def("ClearLayouts", &UIManager::ClearLayouts)
 				.def("Clear", &UIManager::Clear)
 				.def("ClearFocus", &UIManager::ClearFocus)
@@ -2201,6 +2322,7 @@ namespace FlamingTorch
 				.property("DefaultFontColor", &GetUIManagerDefaultFontColor)
 				.property("DefaultSecondaryFontColor", &GetUIManagerDefaultSecondaryFontColor)
 				.property("DefaultFontSize", &GetUIManagerDefaultFontSize)
+				.property("Skin", &UIManager::GetSkin, &UIManager::SetSkin)
 				.def("CreateMenu", &UIManager::CreateMenu)
 				.def("GetCurrentMenu", &UIManager::GetCurrentMenu)
 				.def("CreateMenuBar", &UIManager::CreateMenuBar)
@@ -2232,6 +2354,7 @@ namespace FlamingTorch
 				.property("Translation", &UIPanel::GetTranslation)
 				.property("Parent", &UIPanel::GetParent)
 				.property("Position", &UIPanel::GetPosition, &UIPanel::SetPosition)
+				.property("Offset", &UIPanel::GetOffset, &UIPanel::SetOffset)
 				.property("Size", &UIPanel::GetSize, &UIPanel::SetSize)
 				.property("Opacity", &UIPanel::GetAlpha, &UIPanel::SetAlpha)
 				.property("Layout", &UIPanel::GetLayout)
@@ -2239,7 +2362,8 @@ namespace FlamingTorch
 				.def("ClearAnimations", &UIPanel::ClearAnimations)
 				.def("FadeIn", &FadeInUIPanel)
 				.def("FadeOut", &FadeOutUIPanel)
-				.def("Focus", &UIPanel::Focus),
+				.def("Focus", &UIPanel::Focus)
+				.def("Clear", &UIPanel::Clear),
 
 			//UIGroup
 			luabind::class_<UIGroup, UIPanel>("UIGroup")
@@ -2286,7 +2410,10 @@ namespace FlamingTorch
 			luabind::class_<UISprite, UIPanel>("UISprite")
 				.def_readwrite("Sprite", &UISprite::TheSprite),
 			//UIText
-			luabind::class_<UIText, UIPanel>("UIText"),
+			luabind::class_<UIText, UIPanel>("UIText")
+				.property("Text", &UITextGetText, &UITextSetText)
+				.def_readwrite("TextParameters", &UIText::TextParameters),
+
 			//UITextComposer
 			luabind::class_<UITextComposer, UIPanel>("UITextComposer"),
 			//UITooltip
@@ -2299,6 +2426,12 @@ namespace FlamingTorch
 
 		luabind::object Globals = luabind::globals(State);
 
+		Globals["ResourceManager"]["InvalidTexture"] = ResourceManager::InvalidTexture;
+
+#if USE_GRAPHICS
+		Globals["ResourceManager"]["InvalidFont"] = ResourceManager::InvalidFont;
+#endif
+
 		Globals["g_CRC"] = &CRC32::Instance;
 		Globals["g_World"] = &World::Instance;
 		Globals["g_Clock"] = &GameClock::Instance;
@@ -2308,6 +2441,8 @@ namespace FlamingTorch
 		Globals["g_LuaScriptManager"] = &LuaScriptManager::Instance;
 		Globals["g_GameInterface"] = GameInterface::Instance.Get();
 		Globals["Game"] = GameInterface::Instance.Get();
+
+		Globals["g_FileSystemWatcher"] = &FileSystemWatcher::Instance;
 
 		Globals["g_PackageManager"] = &PackageFileSystemManager::Instance;
 

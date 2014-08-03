@@ -446,12 +446,140 @@ namespace FlamingTorch
 		return true;
 	};
 
-	void TextureBuffer::CreateEmpty(uint32 Width, uint32 Height)
+	void TextureBuffer::CreateEmpty(uint32 Width, uint32 Height, const Vector4 &BaseColor)
 	{
 		WidthValue = Width;
 		HeightValue = Height;
 
+		uint8 Components[4] = {
+			(uint8)(BaseColor.x * 255),
+			(uint8)(BaseColor.y * 255),
+			(uint8)(BaseColor.z * 255),
+			(uint8)(BaseColor.w * 255)
+		};
+
 		Data.resize(Width * Height * 4);
+
+		//memset(&Data[0], *(uint32 *)Components, Data.size());
+
+		for(uint32 i = 0; i < Data.size(); i+=4)
+		{
+			Data[i] = Components[0];
+			Data[i + 1] = Components[1];
+			Data[i + 2] = Components[2];
+			Data[i + 3] = Components[3];
+		};
+	};
+
+	SuperSmartPointer<TextureBuffer> TextureBuffer::Clone()
+	{
+		SuperSmartPointer<TextureBuffer> Out(new TextureBuffer());
+
+		Out->ColorTypeValue = ColorTypeValue;
+		Out->WidthValue = WidthValue;
+		Out->HeightValue = HeightValue;
+		Out->Data = Data;
+
+		return Out;
+	};
+
+	inline uint8 SingleOverlay(uint8 Base, uint8 Blend)
+	{
+		//(base < 0.5 ? (2.0 * base * blend) : (1.0 - 2.0 * (1.0 - base) * (1.0 - blend)))
+
+		//return Base < 127 ? (2 * Base * Blend) >> 8 : (255 - 2 * (255 - Base) * (255 - Blend)) >> 8;
+
+		f32 BaseFloat = Base / 255.f, BlendFloat = Blend / 255.f;
+
+		return (uint8)((BaseFloat < 0.5f ? (2.0f * BaseFloat * BlendFloat) : (1.0f - 2.0f * (1.0f - BaseFloat) * (1.0f - BlendFloat))) * 255.f);
+	};
+
+	bool TextureBuffer::Overlay(TextureBuffer *Other)
+	{
+		FLASSERT(Other != NULL, "Invalid Buffer to overlay into");
+
+		if(Other->WidthValue != WidthValue || Other->HeightValue != HeightValue || Other->ColorTypeValue != ColorTypeValue)
+			return false;
+
+		uint32 SkipComponent = ColorTypeValue == ColorType::RGB8 ? 3 : 4;
+		uint32 RowBytes = WidthValue * SkipComponent;
+
+		for(uint32 y = 0, yindex = 0; y < HeightValue; y++, yindex += RowBytes)
+		{
+			for(uint32 x = 0, xindex = 0; x < WidthValue; x++, xindex += SkipComponent)
+			{
+				uint8 *MyPixels = &Data[xindex + yindex], *TheirPixels = &Other->Data[xindex + yindex];
+
+				MyPixels[0] = SingleOverlay(MyPixels[0], TheirPixels[0]);
+				MyPixels[1] = SingleOverlay(MyPixels[1], TheirPixels[1]);
+				MyPixels[2] = SingleOverlay(MyPixels[2], TheirPixels[2]);
+			};
+		};
+
+		return true;
+	};
+
+	bool TextureBuffer::Blend(TextureBuffer *Other)
+	{
+		FLASSERT(Other != NULL, "Invalid Buffer to blend into");
+
+		if(Other->WidthValue != WidthValue || Other->HeightValue != HeightValue || Other->ColorTypeValue != ColorTypeValue)
+			return false;
+
+		uint32 SkipComponent = ColorTypeValue == ColorType::RGB8 ? 3 : 4;
+		uint32 RowBytes = WidthValue * SkipComponent;
+
+		for(uint32 y = 0, yindex = 0; y < HeightValue; y++, yindex += RowBytes)
+		{
+			for(uint32 x = 0, xindex = 0; x < WidthValue; x++, xindex += SkipComponent)
+			{
+				uint8 *MyPixels = &Data[xindex + yindex], *TheirPixels = &Other->Data[xindex + yindex];
+
+				if(SkipComponent == 4)
+				{
+					if(MyPixels[3] == TheirPixels[3] && MyPixels[3] == 0)
+						continue;
+
+					MyPixels[0] = ((MyPixels[0] * TheirPixels[3]) >> 8) + ((TheirPixels[0] * (255 - TheirPixels[3])) >> 8);
+					MyPixels[1] = ((MyPixels[1] * TheirPixels[3]) >> 8) + ((TheirPixels[1] * (255 - TheirPixels[3])) >> 8);
+					MyPixels[2] = ((MyPixels[2] * TheirPixels[3]) >> 8) + ((TheirPixels[2] * (255 - TheirPixels[3])) >> 8);
+					MyPixels[3] = ((MyPixels[3] * TheirPixels[3]) >> 8) + ((TheirPixels[3] * (255 - TheirPixels[3])) >> 8);
+				}
+				else
+				{
+					MyPixels[0] = (MyPixels[0] * TheirPixels[0]) >> 8;
+					MyPixels[1] = (MyPixels[1] * TheirPixels[1]) >> 8;
+					MyPixels[2] = (MyPixels[2] * TheirPixels[2]) >> 8;
+				};
+			};
+		};
+
+		return true;
+	};
+
+	bool TextureBuffer::Multiply(TextureBuffer *Other)
+	{
+		FLASSERT(Other != NULL, "Invalid Buffer to multiply into");
+
+		if(Other->WidthValue != WidthValue || Other->HeightValue != HeightValue || Other->ColorTypeValue != ColorTypeValue)
+			return false;
+
+		uint32 SkipComponent = ColorTypeValue == ColorType::RGB8 ? 3 : 4;
+		uint32 RowBytes = WidthValue * SkipComponent;
+
+		for(uint32 y = 0, yindex = 0; y < HeightValue; y++, yindex += RowBytes)
+		{
+			for(uint32 x = 0, xindex = 0; x < WidthValue; x++, xindex += SkipComponent)
+			{
+				uint8 *MyPixels = &Data[xindex + yindex], *TheirPixels = &Other->Data[xindex + yindex];
+
+				MyPixels[0] = (MyPixels[0] * TheirPixels[0]) >> 8;
+				MyPixels[1] = (MyPixels[1] * TheirPixels[1]) >> 8;
+				MyPixels[2] = (MyPixels[2] * TheirPixels[2]) >> 8;
+			};
+		};
+
+		return true;
 	};
 
 	bool TextureBuffer::FromData(const uint8 *Pixels, uint32 Width, uint32 Height)
@@ -475,17 +603,50 @@ namespace FlamingTorch
 		return true;
 	};
 
-	uint32 TextureBuffer::Width()
+	void TextureBuffer::FlipX()
+	{
+		uint32 RowSize = WidthValue * 4;
+
+		for(uint32 y = 0, StartIndex = 0; y < HeightValue; y++, StartIndex += RowSize)
+		{
+			for(uint32 x = 0, CurrentX = 0, Start = 0, End = 0; x < WidthValue / 2; x++, CurrentX += 4)
+			{
+				Start = StartIndex + CurrentX;
+				End = StartIndex + RowSize - CurrentX;
+
+				std::swap(Data[Start], Data[End - 4]);
+				std::swap(Data[Start + 1], Data[End - 3]);
+				std::swap(Data[Start + 2], Data[End - 2]);
+				std::swap(Data[Start + 3], Data[End - 1]);
+			};
+		};
+	};
+
+	void TextureBuffer::FlipY()
+	{
+		uint32 RowSize = WidthValue * 4;
+		std::vector<uint8> TempRow(RowSize);
+
+		for(uint32 y = 0, StartIndex = 0, EndIndex = (HeightValue - 1) * RowSize; y < HeightValue / 2; y++, StartIndex += RowSize,
+			EndIndex -= RowSize)
+		{
+			memcpy(&TempRow[0], &Data[EndIndex], RowSize);
+			memcpy(&Data[EndIndex], &Data[StartIndex], RowSize);
+			memcpy(&Data[StartIndex], &TempRow[0], RowSize);
+		};
+	};
+
+	uint32 TextureBuffer::Width() const
 	{
 		return WidthValue;
 	};
 
-	uint32 TextureBuffer::Height()
+	uint32 TextureBuffer::Height() const
 	{
 		return HeightValue;
 	};
 
-	uint32 TextureBuffer::ColorType()
+	uint32 TextureBuffer::ColorType() const
 	{
 		return ColorTypeValue;
 	};
@@ -525,18 +686,35 @@ namespace FlamingTorch
 		Buffer.Dispose();
 	};
 
-	SuperSmartPointer<TextureBuffer> Texture::GetData()
+	const TexturePackerIndex &Texture::GetIndex() const
+	{
+		return Index;
+	};
+
+	bool Texture::operator==(const Texture &o) const
+	{
+		return &o == this;
+	};
+
+	SuperSmartPointer<TextureBuffer> Texture::GetData() const
 	{
 		return Buffer;
 	};
 
-	Vector2 Texture::Size()
+	Vector2 Texture::Size() const
 	{
 		return Vector2((f32)Width(), (f32)Height());
 	};
 
+	void Texture::SetIndex(TexturePackerIndex Index)
+	{
+		this->Index = Index;
+	};
+
 	void Texture::Destroy()
 	{
+		Index.Index = -1;
+
 #if USE_GRAPHICS
 		if(GLID)
 		{
@@ -546,8 +724,15 @@ namespace FlamingTorch
 #endif
 	};
 
+	bool Texture::FromBuffer(SuperSmartPointer<TextureBuffer> Buffer)
+	{
+		return FromData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
+	};
+
 	bool Texture::FromStream(Stream *Stream)
 	{
+		Index.Index = -1;
+
 		PROFILE("Texture::FromStream", StatTypes::Rendering);
 
 		Destroy();
@@ -575,6 +760,8 @@ namespace FlamingTorch
 
 	bool Texture::FromFile(const std::string &FileName)
 	{
+		Index.Index = -1;
+
 		PROFILE("Texture::FromFile", StatTypes::Rendering);
 
 		Destroy();
@@ -600,6 +787,8 @@ namespace FlamingTorch
 
 	bool Texture::FromData(const uint8 *Pixels, uint32 Width, uint32 Height)
 	{
+		Index.Index = -1;
+
 		Destroy();
 
 #if USE_GRAPHICS
@@ -631,6 +820,8 @@ namespace FlamingTorch
 
 	bool Texture::CreateEmptyTexture(uint32 Width, uint32 Height, bool RGBA)
 	{
+		Index.Index = -1;
+
 		Destroy();
 		Buffer.Dispose();
 		WidthValue = Width;
@@ -665,6 +856,8 @@ namespace FlamingTorch
 
 	void Texture::UpdateData(const uint8 *Pixels, uint32 Width, uint32 Height)
 	{
+		Index.Index = -1;
+
 		if(!Buffer.Get() || &Buffer->Data[0] != Pixels)
 		{
 			Buffer.Reset(new TextureBuffer());
@@ -709,43 +902,46 @@ namespace FlamingTorch
 #endif
 	};
 
-	int32 Texture::ID()
+	int32 Texture::ID() const
 	{
+		if(Index.Index != -1)
+			return Index.GLID();
+
 		return GLID;
 	};
 
-	uint32 Texture::Width()
+	uint32 Texture::Width() const
 	{
-		return Buffer.Get() ? Buffer->Width() : WidthValue;
+		return Index.Index != -1 ? Index.Width() : (Buffer.Get() ? Buffer->Width() : WidthValue);
 	};
 
-	uint32 Texture::Height()
+	uint32 Texture::Height() const
 	{
-		return Buffer.Get() ? Buffer->Height() : HeightValue;
+		return Index.Index != -1 ? Index.Height() : (Buffer.Get() ? Buffer->Height() : HeightValue);
 	};
 	
-	uint32 Texture::ColorType()
+	uint32 Texture::ColorType() const
 	{
-		return Buffer.Get() ? Buffer->ColorType() : ColorTypeValue;
+		return Index.Index != -1 ? Index.ColorType() : (Buffer.Get() ? Buffer->ColorType() : ColorTypeValue);
 	};
 	
-	uint32 Texture::FilterMode()
+	uint32 Texture::FilterMode() const
 	{
-		return TextureFilter;
+		return Index.Index != -1 ? Index.Filtering : TextureFilter;
 	};
 
-	uint32 Texture::WrapMode()
+	uint32 Texture::WrapMode() const
 	{
-		return TextureWrap;
+		return Index.Index != -1 ? Index.WrapMode : TextureWrap;
 	};
 
 	void Texture::Bind()
 	{
 #if USE_GRAPHICS
-		if(!glIsTexture(GLID))
+		if(!glIsTexture(ID()))
 			return;
 
-		glBindTexture(GL_TEXTURE_2D, GLID);
+		glBindTexture(GL_TEXTURE_2D, ID());
 
 		GLCHECK();
 #endif
@@ -753,6 +949,13 @@ namespace FlamingTorch
 
 	void Texture::SetWrapMode(uint32 WrapMode)
 	{
+		if(Index.Index != -1)
+		{
+			Index.WrapMode = WrapMode;
+
+			return;
+		};
+
 #if USE_GRAPHICS
 		TextureWrap = WrapMode;
 
@@ -816,6 +1019,13 @@ namespace FlamingTorch
 
 	void Texture::SetTextureFiltering(int32 Filter)
 	{
+		if(Index.Index != -1)
+		{
+			Index.Filtering = Filter;
+
+			return;
+		};
+
 #if USE_GRAPHICS
 		TextureFilter = Filter;
 
@@ -874,6 +1084,8 @@ GL_NEAREST : GL_LINEAR);
 
 	bool Texture::FromPackage(const std::string &Directory, const std::string &Name)
 	{
+		Index.Index = -1;
+
 		std::string ActualDirectory = Directory;
 
 		if(ActualDirectory.length() == 0)
@@ -902,6 +1114,8 @@ GL_NEAREST : GL_LINEAR);
 #if USE_GRAPHICS
 	bool Texture::FromScreen()
 	{
+		Index.Index = -1;
+
 		RendererManager::Renderer *Renderer = RendererManager::Instance.ActiveRenderer();
 
 		if(Renderer == NULL)
@@ -917,8 +1131,21 @@ GL_NEAREST : GL_LINEAR);
 	};
 #endif
 
+	Vector4 Texture::GetPixel(uint32 x, uint32 y)
+	{
+		if(Buffer.Get() == NULL || x >= Buffer->Width() || y >= Buffer->Height())
+			return Vector4();
+
+		uint8 *Piece = &Buffer->Data[x * 4 + y * Buffer->Width() * 4];
+
+		return Vector4(Piece[0] / 255.f, Piece[1] / 255.f, Piece[2] / 255.f, Piece[3] / 255.f);
+	};
+
 	void Texture::Blur(uint32 Radius, uint32 Strength)
 	{
+		if(Index.Index != -1)
+			return;
+
 		PROFILE("Texture::Blur", StatTypes::Rendering);
 
 #if USE_GRAPHICS
@@ -1049,5 +1276,180 @@ GL_NEAREST : GL_LINEAR);
 		if(RequiredBufferPlacement)
 			Buffer.Dispose();
 #endif
+	};
+
+	uint32 TexturePackerIndex::Width() const
+	{
+		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Width : 0;
+	};
+
+	uint32 TexturePackerIndex::Height() const
+	{
+		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Height : 0;
+	};
+
+	uint32 TexturePackerIndex::GLID() const
+	{
+		return Owner.Get() ? Owner->MainTexture->ID() : 0;
+	};
+
+	uint32 TexturePackerIndex::ColorType() const
+	{
+		return Owner.Get() ? Owner->MainTexture->ColorType() : 0;
+	};
+
+	bool SortSprites(const TexturePacker::SortedTexture &a, const TexturePacker::SortedTexture &b)
+	{
+		int32 aSize = a.Height * 1024 + a.Width;
+		int32 bSize = b.Height * 1024 + b.Width;
+ 
+		return bSize > aSize;
+	};
+
+	bool SortSpriteIndices(const TexturePacker::SortedTexture &a, const TexturePacker::SortedTexture &b)
+	{
+		return a.Index < b.Index;
+	};
+
+	int32 GuessSpriteWidth(const std::vector<TexturePacker::SortedTexture> &Sprites)
+	{
+		std::vector<int32> Widths;
+
+		for(uint32 i = 0; i < Sprites.size(); i++)
+		{
+			Widths.push_back(Sprites[i].Width);
+		};
+
+		std::sort(Widths.begin(), Widths.end());
+
+		int32 MaxWidth = Widths[Widths.size() - 1];
+		int32 MedianWidth = Widths[Widths.size() / 2];
+
+		int32 Width = MedianWidth * (int32)(MathUtils::Round(sqrtf((f32)Sprites.size())));
+
+		return (int32)MathUtils::Max((f32)Width, (f32)MaxWidth);
+	};
+
+	int32 FindIntersectingSprite(const std::vector<TexturePacker::SortedTexture> &Sprites, int32 Index, int32 x, int32 y)
+	{
+		int32 Width = Sprites[Index].Width;
+		int32 Height = Sprites[Index].Height;
+
+		for(int i = 0; i < Index; i++)
+		{
+			if(Sprites[i].x >= x + Width || Sprites[i].x + Sprites[i].Width <= x || Sprites[i].y >= y + Height  || Sprites[i].y + Sprites[i].Height <= y)
+				continue;
+
+			return i;
+		};
+
+		return -1;
+	};
+
+	void PositionSprite(const std::vector<TexturePacker::SortedTexture> &Sprites, TexturePacker::SortedTexture &Target, int32 TargetIndex, int32 TextureWidth)
+	{
+		int32 x = 0, y = 0;
+
+		for(;;)
+		{
+			int32 IntersectionIndex = FindIntersectingSprite(Sprites, TargetIndex, x, y);
+
+			if(IntersectionIndex < 0)
+			{
+				Target.x = x;
+				Target.y = y;
+
+				return;
+			};
+
+			x = Sprites[IntersectionIndex].x + Sprites[IntersectionIndex].Width;
+
+			if(x + Target.Width > TextureWidth)
+			{
+				x = 0;
+				y++;
+			};
+		};
+	};
+
+	SuperSmartPointer<TexturePacker> TexturePacker::FromTextures(const std::vector<SuperSmartPointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
+	{
+		SuperSmartPointer<TexturePacker> Out(new TexturePacker());
+
+		for(uint32 i = 0; i < Textures.size(); i++)
+		{
+			SortedTexture Texture;
+			Texture.Index = i;
+			Texture.Width = Textures[i]->Width() + 2;
+			Texture.Height = Textures[i]->Height() + 2;
+
+			Out->Indices.push_back(Texture);
+		};
+
+		std::sort(Out->Indices.begin(), Out->Indices.end(), SortSprites);
+
+		int32 Width = GuessSpriteWidth(Out->Indices), Height = 0, Size = 0;
+
+		if(Width > MaxWidth)
+			Width = MaxWidth;
+
+		for(uint32 i = 0; i < Textures.size(); i++)
+		{
+			PositionSprite(Out->Indices, Out->Indices[i], i, Width);
+			
+			int32 OldHeight = Height;
+
+			Height = (int32)MathUtils::Max((f32)Height, Out->Indices[i].y + Out->Indices[i].Height);
+
+			if(Height > MaxHeight)
+			{
+				Height = OldHeight;
+
+				Out->Indices.resize(i);
+
+				break;
+			};
+
+			Size += Out->Indices[i].Width * Out->Indices[i].Height;
+		};
+
+		std::sort(Out->Indices.begin(), Out->Indices.end(), SortSpriteIndices);
+
+		Out->MainTexture.Reset(new Texture());
+		TextureBuffer Temp;
+		Temp.CreateEmpty(Width, Height);
+
+		memset(&Temp.Data[0], 255, Temp.Data.size());
+
+		int32 RowSize = Width * 4;
+
+		for(uint32 i = 0; i < Out->Indices.size(); i++)
+		{
+			int32 MyRowSize = (Out->Indices[i].Width - 2) * 4;
+			int32 xpos = (Out->Indices[i].x + 1) * 4;
+
+			for(int32 y = 0, ypos = (Out->Indices[i].y + 1) * RowSize, ypostarget = 0; y < Out->Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
+			{
+				memcpy(&Temp.Data[xpos + ypos], &Textures[Out->Indices[i].Index]->GetData()->Data[ypostarget], MyRowSize);
+			};
+
+			Out->Indices[i].TextureInstance.Reset(new Texture());
+
+			TexturePackerIndex Index;
+			Index.Index = Out->Indices[i].Index;
+			Index.Owner = Out;
+
+			Out->Indices[i].TextureInstance->SetIndex(Index);
+		};
+
+		if(!Out->MainTexture->FromData(&Temp.Data[0], Width, Height))
+			return SuperSmartPointer<TexturePacker>();
+
+		return Out;
+	};
+
+	SuperSmartPointer<Texture> TexturePacker::GetTexture(uint32 Index)
+	{
+		return Index < Indices.size() ? Indices[Index].TextureInstance : SuperSmartPointer<Texture>();
 	};
 };

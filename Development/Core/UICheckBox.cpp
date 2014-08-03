@@ -66,12 +66,14 @@ namespace FlamingTorch
 	{
 		FLASSERT(Children.size() == 0, "This control does not support children!");
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x || ActualPosition.y + SizeValue.y < 0 ||
 			ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		Sprite TheSprite;
 		TheSprite.SpriteTexture = Checked ? CheckTexture : UnCheckTexture;

@@ -125,8 +125,7 @@ namespace FlamingTorch
 		{
 			Libs.push_back(GameInterface::Instance);
 
-			if(GameInterface::Instance->IsScriptedInterface)
-				ScriptInstance = GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance;
+			ScriptInstance = GameInterface::Instance->GetScriptInstance();
 		};
 
 		if(ScriptInstance.Get() == NULL)
@@ -417,7 +416,7 @@ namespace FlamingTorch
 			if(Parent)
 				Parent->AddChild(Panel);
 
-			std::stringstream PositionScriptX, PositionScriptY, SizeScript;
+			std::stringstream PositionScriptX, PositionScriptY, OffsetScriptX, OffsetScriptY, SizeScript;
 
 			Value = Data.get("Wide", Json::Value("0"));
 			std::string Temp;
@@ -778,6 +777,184 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, "Ypos", string);
 			};
 
+			Value = Data.get("XOffset", Json::Value("0"));
+
+			if(Value.isString())
+			{
+				Temp = Value.asString();
+
+				bool Invalid = false;
+
+				int32 Offset = 0;
+
+				while(Temp.find('%', Offset) != std::string::npos)
+				{
+					int32 Index = Temp.find('%', Offset);
+
+					bool Found = false;
+
+					for(int32 j = Index - 1; j >= 0; j--)
+					{
+						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
+						{
+							Found = true;
+
+							if(j == Index - 1) //In case of modulus
+							{
+								Offset = Index + 1;
+
+								break;
+							};
+
+							std::string Percentage = Temp.substr(j, Index - Offset);
+
+							f32 Percent = 0;
+
+							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
+							{
+								Percent /= 100.f;
+
+								Temp = Temp.substr(0, j) + "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
+
+								Offset = Index;
+								Offset -= Percentage.length();
+							}
+							else
+							{
+								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
+
+								Invalid = true;
+
+								break;
+							};
+						};
+					};
+
+					if(!Found)
+					{
+						std::string Percentage = Temp.substr(0, Index);
+
+						f32 Percent = 0;
+
+						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
+						{
+							Percent /= 100.f;
+
+							Temp = "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
+						}
+						else
+						{
+							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
+
+							Invalid = true;
+
+							break;
+						};
+					};
+
+					if(Invalid)
+						break;
+				};
+
+				if(Invalid)
+					continue;
+
+				OffsetScriptX << "local XOffset = " << Temp << "\n";
+			}
+			else
+			{
+				CHECKJSONVALUE(Value, "XOffset", string);
+			};
+
+			Value = Data.get("YOffset", Json::Value("0"));
+
+			if(Value.isString())
+			{
+				Temp = Value.asString();
+
+				bool Invalid = false;
+
+				int32 Offset = 0;
+
+				while(Temp.find('%', Offset) != std::string::npos)
+				{
+					int32 Index = Temp.find('%', Offset);
+
+					bool Found = false;
+
+					for(int32 j = Index - 1; j >= 0; j--)
+					{
+						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
+						{
+							Found = true;
+
+							if(j == Index - 1) //In case of modulus
+							{
+								Offset = Index + 1;
+
+								break;
+							};
+
+							std::string Percentage = Temp.substr(j, Index - Offset);
+
+							f32 Percent = 0;
+
+							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
+							{
+								Percent /= 100.f;
+
+								Temp = Temp.substr(0, j) + "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
+
+								Offset = Index;
+								Offset -= Percentage.length();
+							}
+							else
+							{
+								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
+
+								Invalid = true;
+
+								break;
+							};
+						};
+					};
+
+					if(!Found)
+					{
+						std::string Percentage = Temp.substr(0, Index);
+
+						f32 Percent = 0;
+
+						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
+						{
+							Percent /= 100.f;
+
+							Temp = "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
+						}
+						else
+						{
+							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
+
+							Invalid = true;
+
+							break;
+						};
+					};
+
+					if(Invalid)
+						break;
+				};
+
+				if(Invalid)
+					continue;
+
+				OffsetScriptY << "local YOffset = " << Temp << "\n";
+			}
+			else
+			{
+				CHECKJSONVALUE(Value, "YOffset", string);
+			};
+
 			std::stringstream ComposedPositionFunction, ComposedSizeFunction;
 
 			ComposedPositionFunction << "function " << BaseFunctionName.str() << "Position(Self, Parent, ScreenWidth, ScreenHeight)\n"
@@ -804,10 +981,13 @@ namespace FlamingTorch
 				"top = Self.ExtraSize.y / 2\n"
 				"bottom = (parent_tall + parent_extra_size_y / 2) - (Self.Size.y + Self.ExtraSize.y / 2)\n"
 				"center = ((parent_wide + parent_extra_size_x / 2) - (Self.Size.x + Self.ExtraSize.x / 2)) / 2\n\n" <<
-				PositionScriptX.str() <<
+				PositionScriptX.str() << 
+				OffsetScriptX.str() << 
 				"center = ((parent_tall + parent_extra_size_y / 2) - (Self.Size.y + Self.ExtraSize.y / 2)) / 2\n" <<
-				PositionScriptY.str() <<
+				PositionScriptY.str() << 
+				OffsetScriptY.str() << 
 				"Self.Position = Vector2(PositionX, PositionY)\n"
+				"Self.Offset = Vector2(XOffset, YOffset)\n"
 				"\nend\n";
 
 			ComposedSizeFunction << "function " << BaseFunctionName.str() << "Size(Self, Parent, ScreenWidth, ScreenHeight)\n"
@@ -1074,19 +1254,55 @@ namespace FlamingTorch
 
 				if(Value.isString())
 				{
-					std::string Mode = StringUtils::ToUpperCase(Value.asString());
+					std::vector<std::string> Modes = StringUtils::Split(StringUtils::ToUpperCase(Value.asString()), '|');
+					UIGroup *Group = Panel.AsDerived<UIGroup>();
 
-					if(Mode == "HORIZONTAL")
+					for(uint32 j = 0; j < Modes.size(); j++)
 					{
-						Panel.AsDerived<UIGroup>()->LayoutMode = UIGroupLayoutMode::Horizontal;
-					}
-					else if(Mode == "VERTICAL")
-					{
-						Panel.AsDerived<UIGroup>()->LayoutMode = UIGroupLayoutMode::Vertical;
-					}
-					else if(Mode == "NONE")
-					{
-						Panel.AsDerived<UIGroup>()->LayoutMode = UIGroupLayoutMode::None;
+						if(Modes[j] == "HORIZONTAL")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::Horizontal;
+						}
+						else if(Modes[j] == "VERTICAL")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::Vertical;
+						}
+						else if(Modes[j] == "ADJUSTHEIGHT")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::AdjustHeight;
+						}
+						else if(Modes[j] == "ADJUSTWIDTH")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::AdjustWidth;
+						}
+						else if(Modes[j] == "NONE")
+						{
+							Group->LayoutMode = UIGroupLayoutMode::None;
+						}
+						else if(Modes[j] == "CENTER")
+						{
+							Group->LayoutMode = UIGroupLayoutMode::Center;
+						}
+						else if(Modes[j] == "VCENTER")
+						{
+							Group->LayoutMode = UIGroupLayoutMode::VerticalCenter;
+						}
+						else if(Modes[j] == "ADJUSTCLOSER")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::AdjustCloser;
+						}
+						else if(Modes[j] == "INVERTDIRECTION")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::InvertDirection;
+						}
+						else if(Modes[j] == "INVERTX")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::InvertX;
+						}
+						else if(Modes[j] == "INVERTY")
+						{
+							Group->LayoutMode |= UIGroupLayoutMode::InvertY;
+						};
 					};
 				}
 				else
@@ -1707,6 +1923,26 @@ namespace FlamingTorch
 											else if(Mode == "NONE")
 											{
 												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::None;
+											}
+											else if(Mode == "ADJUSTHEIGHT")
+											{
+												((UIGroup *)TargetElement)->LayoutMode |= UIGroupLayoutMode::AdjustHeight;
+											}
+											else if(Mode == "ADJUSTWIDTH")
+											{
+												((UIGroup *)TargetElement)->LayoutMode |= UIGroupLayoutMode::AdjustWidth;
+											}
+											else if(Mode == "CENTER")
+											{
+												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::Center;
+											}
+											else if(Mode == "VCENTER")
+											{
+												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::VerticalCenter;
+											}
+											else if(Mode == "ADJUSTCLOSER")
+											{
+												((UIGroup *)TargetElement)->LayoutMode |= UIGroupLayoutMode::AdjustCloser;
 											};
 										}
 										else
@@ -1759,21 +1995,21 @@ namespace FlamingTorch
 
 											std::vector<std::string> Fragments = StringUtils::Split(AlignmentString, '|');
 
-											for(uint32 j = 0; j < Fragments.size(); j++)
+											for(uint32 l = 0; l < Fragments.size(); l++)
 											{
-												if(Fragments[j] == "CENTER")
+												if(Fragments[l] == "CENTER")
 												{
 													Alignment |= UITextAlignment::Center;
 												}
-												else if(Fragments[j] == "LEFT")
+												else if(Fragments[l] == "LEFT")
 												{
 													Alignment |= UITextAlignment::Left;
 												}
-												else if(Fragments[j] == "RIGHT")
+												else if(Fragments[l] == "RIGHT")
 												{
 													Alignment |= UITextAlignment::Right;
 												}
-												else if(Fragments[j] == "VCENTER")
+												else if(Fragments[l] == "VCENTER")
 												{
 													Alignment |= UITextAlignment::VCenter;
 												};
@@ -2087,8 +2323,6 @@ namespace FlamingTorch
 							};
 						};
 					};
-
-					break;
 				};
 			}
 			else if(Control == "DROPDOWN")
@@ -2507,6 +2741,8 @@ namespace FlamingTorch
 
 				if(DrawOrderCache[j]->Panel == InputBlocker)
 				{
+					SpriteCache::Instance.Flush(Renderer);
+
 					Renderer->BindTexture(NULL);
 					Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
 					Renderer->DisableState(GL_NORMAL_ARRAY);
@@ -2539,7 +2775,7 @@ namespace FlamingTorch
 			FocusedElementValue->Draw(RendererManager::Instance.Input.MousePosition, Renderer);
 		};
 
-		Tooltip->Update(Vector2());
+		Tooltip->Update(RendererManager::Instance.Input.MousePosition);
 		Tooltip->Draw(RendererManager::Instance.Input.MousePosition, Renderer);
 	};
 
@@ -2550,7 +2786,7 @@ namespace FlamingTorch
 
 		static AxisAlignedBoundingBox AABB;
 
-		AABB.min = ParentPosition + p->GetPosition() - p->SelectBoxExtraSize / 2;
+		AABB.min = ParentPosition + p->GetPosition() - p->SelectBoxExtraSize / 2 + p->GetOffset();
 		AABB.max = AABB.min + p->GetSize() + p->SelectBoxExtraSize;
 
 		if(AABB.IsInside(RendererManager::Instance.Input.MousePosition) &&
@@ -2560,7 +2796,7 @@ namespace FlamingTorch
 
 			for(uint32 i = 0; i < p->Children.size(); i++)
 			{
-				RecursiveFindFocusedElement(ParentPosition + p->GetPosition() - p->GetTranslation(),
+				RecursiveFindFocusedElement(ParentPosition + p->GetPosition() - p->GetTranslation() + p->GetOffset(),
 					p->Children[i], FoundElement);
 			};
 		};

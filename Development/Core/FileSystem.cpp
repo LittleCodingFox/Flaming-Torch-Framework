@@ -1,4 +1,5 @@
 #include "FlamingCore.hpp"
+#include <FileWatcher/FileWatcher.h>
 
 #ifdef FLPLATFORM_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
@@ -20,6 +21,39 @@
 namespace FlamingTorch
 {
 #	define TAG "PackageFileSystemManager"
+#	define TAGWATCHER "FileSystemWatcher"
+
+	FW::FileWatcher GlobalFileWatcher;
+	FileSystemWatcher FileSystemWatcher::Instance;
+
+	class FileSystemWatcherCallback : public FW::FileWatchListener
+	{
+	public:
+		void handleFileAction(FW::WatchID watchid, const FW::String& dir, const FW::String& filename, FW::Action action)
+		{
+			uint32 ActionID = 0;
+
+			switch(action)
+			{
+			case FW::Action::Add:
+				ActionID = FileSystemWatcherAction::Added;
+
+				break;
+
+			case FW::Action::Delete:
+				ActionID = FileSystemWatcherAction::Deleted;
+
+				break;
+
+			case FW::Action::Modified:
+				ActionID = FileSystemWatcherAction::Modified;
+
+				break;
+			};
+
+			FileSystemWatcher::Instance.OnAction(dir, filename, ActionID);
+		};
+	};
 
 	bool FileInfo::Remove(const std::string Name)
 	{
@@ -1299,5 +1333,53 @@ namespace FlamingTorch
 		};
 
 		return Out;
+	};
+
+
+	void FileSystemWatcher::StartUp(uint32 Priority)
+	{
+		SUBSYSTEM_STARTUP_CHECK()
+
+		SubSystem::StartUp(Priority);
+
+		SUBSYSTEM_PRIORITY_CHECK();
+
+		Log::Instance.LogInfo(TAGWATCHER, "Initializing FileSystem Watcher...");
+	};
+
+	void FileSystemWatcher::Shutdown(uint32 Priority)
+	{
+		SUBSYSTEM_PRIORITY_CHECK();
+
+		SubSystem::Shutdown(Priority);
+
+		Log::Instance.LogInfo(TAGWATCHER, "Terminating FileSystem Watcher...");
+	};
+
+	void FileSystemWatcher::Update(uint32 Priority)
+	{
+		PROFILE("FileSystemWatcherManager::Update", StatTypes::Game);
+
+		SubSystem::Update(Priority);
+
+		SUBSYSTEM_PRIORITY_CHECK();
+
+		GlobalFileWatcher.update();
+	};
+
+	bool FileSystemWatcher::WatchDirectory(const std::string &Path)
+	{
+		FLASSERT(WasStarted, "FileSystem Watcher not Started!");
+
+		try
+		{
+			GlobalFileWatcher.addWatch(Path, new FileSystemWatcherCallback());
+		}
+		catch(std::exception &e)
+		{
+			return false;
+		};
+
+		return true;
 	};
 };

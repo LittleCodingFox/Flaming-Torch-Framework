@@ -72,7 +72,7 @@ namespace FlamingTorch
 		if(o.Name != sf::Mouse::Left)
 			return;
 
-		UIMenu *Menu = Self->GetManager()->CreateMenu(GetParentPosition() + PositionValue + Vector2(0, DropdownHeight));
+		UIMenu *Menu = Self->GetManager()->CreateMenu(GetParentPosition() + PositionValue + OffsetValue + Vector2(0, DropdownHeight));
 
 		for(uint32 i = 0; i < Items.size(); i++)
 		{
@@ -92,12 +92,14 @@ namespace FlamingTorch
 	{
 		static AxisAlignedBoundingBox AABB;
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		Sprite TheSprite;
 		TheSprite.SpriteTexture = BackgroundTexture;

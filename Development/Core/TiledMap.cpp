@@ -361,6 +361,8 @@ namespace FlamingTorch
 		if(!ResourcesInitedValue || Layer >= Layers.size() || Layers[Layer]->Visible == false)
 			return;
 
+		SpriteCache::Instance.Flush(Renderer);
+
 		bool DoTranslation = Translation != Vector2() || Scale != Vector2(1, 1);
 
 		if(DoTranslation)
@@ -385,6 +387,8 @@ namespace FlamingTorch
 		glDrawArrays(GL_TRIANGLES, 0, Layers[Layer]->Vertices.size());
 
 		Layers[Layer]->OnLayerDraw(this, Layer, Renderer);
+
+		SpriteCache::Instance.Flush(Renderer);
 
 		glColor4f(1, 1, 1, 1);
 

@@ -43,7 +43,7 @@ class FLAMING_API UIPanel
 	friend class UILayout;
 protected:
 	bool VisibleValue, EnabledValue, MouseInputValue, KeyboardInputValue;
-	Vector2 PositionValue, SizeValue, TranslationValue, SelectBoxExtraSize;
+	Vector2 PositionValue, SizeValue, TranslationValue, SelectBoxExtraSize, OffsetValue;
 	f32 AlphaValue;
 	UILayout *Layout;
 	UIManager *Manager;
@@ -137,7 +137,7 @@ public:
 	*	\param Renderer the Renderer to draw to
 	*	\note Should iterate on all children
 	*/
-	virtual void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer) = 0;
+	virtual void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
 
 	/*!
 	*	Draws the UI rect for this element
@@ -199,6 +199,23 @@ public:
 	const Vector2 &TooltipsPosition()
 	{
 		return TooltipPosition;
+	};
+
+	/*!
+	*	\return this element's offset
+	*/
+	const Vector2 &GetOffset()
+	{
+		return OffsetValue;
+	};
+
+	/*!
+	*	Sets this element's position offset
+	*	\param Offset the offset to set
+	*/
+	void SetOffset(const Vector2 &Offset)
+	{
+		OffsetValue = Offset;
 	};
 
 	/*!
@@ -337,7 +354,7 @@ public:
 
 		while(p)
 		{
-			Position += p->GetPosition() + p->GetTranslation();
+			Position += p->GetPosition() + p->GetTranslation() + p->GetOffset();
 
 			p = p->GetParent();
 		};
@@ -549,7 +566,7 @@ public:
 
 			Children[i]->PerformLayout();
 
-			Size = Children[i]->GetPosition() + Children[i]->GetSize() + Children[i]->GetExtraSize() / 2;
+			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetSize() + Children[i]->GetExtraSize() / 2;
 
 			if(Out.x < Size.x)
 				Out.x = Size.x;
@@ -604,9 +621,17 @@ namespace UIGroupLayoutMode
 {
 	enum
 	{
-		None,
-		Horizontal,
-		Vertical
+		None = 0,
+		Horizontal = FLAGVALUE(1),
+		Vertical = FLAGVALUE(2),
+		AdjustWidth = FLAGVALUE(3),
+		AdjustHeight = FLAGVALUE(4),
+		Center = FLAGVALUE(5),
+		VerticalCenter = FLAGVALUE(6),
+		AdjustCloser = FLAGVALUE(7),
+		InvertDirection = FLAGVALUE(8),
+		InvertX = FLAGVALUE(9),
+		InvertY = FLAGVALUE(10)
 	};
 };
 
@@ -633,18 +658,20 @@ public:
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
-			Children[i]->Update(ParentPosition + PositionValue);
+			Children[i]->Update(ParentPosition + PositionValue + OffsetValue);
 		};
 	};
 
 	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{

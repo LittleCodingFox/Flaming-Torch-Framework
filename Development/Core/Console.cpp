@@ -274,6 +274,72 @@ namespace FlamingTorch
 
 		LogConsole("[" + Action + "] => [" + Target + "]");
 	};
+
+	void Console::ScreenshotCommand(const std::vector<std::string> &Parameters)
+	{
+		bool WasShowing = RendererManager::Instance.ShowConsole;
+		//Hide console
+		RendererManager::Instance.ShowConsole = false;
+
+		//Get a full frame twice due to double buffering
+		RendererManager::Instance.RequestFrame();
+		RendererManager::Instance.RequestFrame();
+
+		RendererManager::Renderer *TargetRenderer = RendererManager::Instance.ActiveRenderer();
+
+		TextureBuffer t;
+
+		t.CreateEmpty(TargetRenderer->Size().x, TargetRenderer->Size().y);
+
+		GLCHECK();
+
+		//RGB Buffer
+		//Need to read as RGB since in RGBA it gets weird artifacts
+		std::vector<uint8> Temp(TargetRenderer->Size().x * TargetRenderer->Size().y * 3);
+
+		glReadPixels(0, 0, TargetRenderer->Size().x, TargetRenderer->Size().y, GL_RGB, GL_UNSIGNED_BYTE, &Temp[0]);
+
+		//Convert from RGB to RGBA
+		for(uint32 i = 0, x = 0; i < Temp.size(); i += 3, x += 4)
+		{
+			t.Data[x] = Temp[i];
+			t.Data[x + 1] = Temp[i + 1];
+			t.Data[x + 2] = Temp[i + 2];
+			t.Data[x + 3] = 255;
+		};
+
+		GLCHECK();
+
+		t.FlipY();
+
+		//Restore console
+		RendererManager::Instance.ShowConsole = WasShowing;
+
+		FileStream Out;
+
+		std::string ScreenFileName = StringUtils::Replace(GameInterface::Instance->GameName(),
+			" ", "_") + "_" + StringUtils::Replace(GameClock::Instance.CurrentTimeAsString(), ":", "_") + ".png";
+
+		if(!Out.Open(DirectoryInfo::PreferredStorageDirectory() + "/" + ScreenFileName, StreamFlags::Write))
+		{
+			LogConsole("Failed to take screenshot: Unable to open '" + ScreenFileName + "' for writing");
+
+			return;
+		};
+
+		TextureEncoderInfo TEInfo;
+		TEInfo.Encoder = TextureEncoderType::PNG;
+
+		if(!t.Save(&Out, TEInfo))
+		{
+			LogConsole("Failed to take screenshot: Unable to save '" + ScreenFileName + "'");
+
+			return;
+		};
+
+		LogConsole("Successfully took screenshot '" + ScreenFileName + "'");
+	};
+
 #endif
 
 	void Console::StartUp(uint32 Priority)
@@ -319,6 +385,12 @@ namespace FlamingTorch
 		DrawGUI.UintValue = 1;
 
 		RegisterVariable(DrawGUI);
+
+		SuperSmartPointer<ConsoleCommand> ScreenshotCommand(new ConsoleCommand());
+		ScreenshotCommand->Name = "screenshot";
+		ScreenshotCommand->Method.Connect(this, &Console::ScreenshotCommand);
+
+		RegisterCommand(ScreenshotCommand);
 #endif
 	};
 

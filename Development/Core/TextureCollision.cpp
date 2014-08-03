@@ -1,5 +1,4 @@
 #include "FlamingCore.hpp"
-#if USE_GRAPHICS
 namespace FlamingTorch
 {
 	TextureCollision TextureCollision::FromTexture(Texture *TheTexture, uint8 MinTransparency)
@@ -45,6 +44,8 @@ namespace FlamingTorch
 		if(!Polygon.size())
 			return;
 
+		SpriteCache::Instance.Flush(Renderer);
+
 		Renderer->BindTexture(NULL);
 		Renderer->EnableState(GL_VERTEX_ARRAY);
 		Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
@@ -69,4 +70,3 @@ namespace FlamingTorch
 		return Out;
 	};
 };
-#endif

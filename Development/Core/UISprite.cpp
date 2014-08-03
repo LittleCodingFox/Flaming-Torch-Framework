@@ -14,7 +14,7 @@ namespace FlamingTorch
 
 		PerformLayout();
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
@@ -24,18 +24,20 @@ namespace FlamingTorch
 
 	void UISprite::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
+		UIPanel::Draw(ParentPosition, Renderer);
+
 		Sprite TempSprite = TheSprite;
 
 		if(TempSprite.Options.ScaleValue.x > 0 && TempSprite.Options.ScaleValue.y > 0)
 		{
-			TempSprite.Options = TempSprite.Options.Position(ActualPosition).Color(TheSprite.Options.ColorValue * Vector4(1, 1, 1, GetParentAlpha()));
+			TempSprite.Options = TempSprite.Options.Position(ActualPosition + TheSprite.Options.PositionValue).Color(TheSprite.Options.ColorValue * Vector4(1, 1, 1, GetParentAlpha()));
 			TempSprite.Draw(Renderer);
 		};
 

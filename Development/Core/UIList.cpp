@@ -50,7 +50,7 @@ namespace FlamingTorch
 		if(o.Name != sf::Mouse::Left)
 			return;
 
-		Vector2 ActualPosition = GetParentPosition() + PositionValue;
+		Vector2 ActualPosition = GetParentPosition() + PositionValue + OffsetValue;
 		AxisAlignedBoundingBox AABB;
 		f32 Height = 0;
 		UIScrollableFrame *Parent = ParentValue.AsDerived<UIScrollableFrame>();
@@ -81,7 +81,7 @@ namespace FlamingTorch
 	{
 		UIPanel::Update(ParentPosition);
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 		AxisAlignedBoundingBox AABB;
 		f32 Height = 0;
 		UIScrollableFrame *Parent = ParentValue.AsDerived<UIScrollableFrame>();
@@ -116,12 +116,14 @@ namespace FlamingTorch
 		static AxisAlignedBoundingBox AABB;
 		UIScrollableFrame *Parent = ParentValue.AsDerived<UIScrollableFrame>();
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		f32 Height = 0;
 

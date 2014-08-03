@@ -36,13 +36,13 @@ namespace FlamingTorch
 
 			for(std::list<FutureInfo>::reverse_iterator rit = Futures.rbegin(); rit != Futures.rend(); rit++)
 			{
-				std::list<FutureInfo>::reverse_iterator rit2 = Futures.rbegin();
-
 				if(GameClockDiff(rit->StartTime) >= rit->Length)
 				{
+					std::list<FutureInfo>::iterator it = --rit.base();
+
 					rit->Signal(rit->Stream);
 
-					Futures.erase(--rit.base());
+					Futures.erase(it);
 
 					Found = true;
 

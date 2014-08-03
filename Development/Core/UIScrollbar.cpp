@@ -59,7 +59,7 @@ namespace FlamingTorch
 
 		if(this == Manager->GetFocusedElement().Get() && RendererManager::Instance.Input.MouseButtons[sf::Mouse::Left].Pressed)
 		{
-			Vector2 ActualPosition = ParentPosition + PositionValue;
+			Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 			uint32 Steps = (MaxValue - MinValue) / ValueStep;
 
@@ -93,12 +93,14 @@ namespace FlamingTorch
 
 	void UIScrollbar::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
 
 		uint32 Steps = (MaxValue - MinValue) / ValueStep;
 		f32 StepOffset = Vertical ? (SizeValue.y + SelectBoxExtraSize.y) / Steps * CurrentStep : (SizeValue.x + SelectBoxExtraSize.x) / Steps * CurrentStep;

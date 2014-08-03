@@ -10,6 +10,12 @@ namespace FlamingTorch
 		Instance = TheInstance;
 	};
 
+	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
+	{
+		if(FileName == "GUILayout.resource")
+			ReloadGUI();
+	};
+
 	bool GameInterface::LoadPackage(const std::string &PackageName)
 	{
 		SuperSmartPointer<Stream> TheStream(new FileStream());
@@ -29,6 +35,21 @@ namespace FlamingTorch
 		};
 
 		return true;
+	};
+
+	void GameInterface::ReloadGUI()
+	{
+		RendererManager::Instance.ActiveRenderer()->UI->ClearLayouts();
+
+		SuperSmartPointer<FileStream> InputStream(new FileStream());
+
+		if(!InputStream->Open(DirectoryInfo::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text))
+			return;
+
+		if(!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream))
+		{
+			Log::Instance.LogErr(TAG, "Failed to reload our GUI Layouts!");
+		};
 	};
 
 #if USE_GRAPHICS
@@ -138,7 +159,7 @@ namespace FlamingTorch
 	{
 		InitSubsystems();
 
-		if(!Initialize())
+		if(!Initialize(argc, argv))
 		{
 			Log::Instance.LogErr(TAG, "Failed to perform basic initialization, quitting...");
 
@@ -147,6 +168,24 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
+		};
+
+		if(IsGUISandbox)
+		{
+			if(!FileSystemWatcher::Instance.WatchDirectory(DirectoryInfo::ResourcesDirectory()))
+			{
+				Log::Instance.LogErr(TAG, "Failed to watch resources directory for GUI Sandbox Mode, quitting...");
+
+				Instance.Dispose();
+
+				DeInitSubsystems();
+
+				return 1;
+			};
+
+			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+
+			ReloadGUI();
 		};
 
 #if USE_GRAPHICS
@@ -225,8 +264,6 @@ namespace FlamingTorch
 		World::Instance.Entities.clear();
 		World::Instance.Components.clear();
 		World::Instance.ComponentArchetypes.clear();
-
-		ScriptInstance.Dispose();
 	};
 
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
@@ -415,7 +452,14 @@ namespace FlamingTorch
 
 		try
 		{
-			Success = ProtectedLuaCast<bool>(InitFunction());
+			luabind::object Arguments = luabind::newtable(ScriptInstance->State);
+
+			for(int32 i = 0; i < argc; i++)
+			{
+				Arguments[i + 1] = std::string(argv[i]);
+			};
+
+			Success = ProtectedLuaCast<bool>(InitFunction(Arguments));
 		}
 		catch(std::exception &e)
 		{
@@ -437,6 +481,22 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
+		};
+
+		if(IsGUISandbox)
+		{
+			if(!FileSystemWatcher::Instance.WatchDirectory(DirectoryInfo::ResourcesDirectory()))
+			{
+				Instance.Dispose();
+
+				DeInitSubsystems();
+
+				return 1;
+			};
+
+			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+
+			ReloadGUI();
 		};
 
 #if USE_GRAPHICS

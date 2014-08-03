@@ -14,13 +14,17 @@ struct RenderCreateOptions
 
 class GameInterface : public LuaLib
 {
+	friend class NativeGameInterface;
+	friend class ScriptedGameInterface;
+private:
+	void OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action);
 public:
 	bool DevelopmentBuild;
-	bool IsScriptedInterface;
+	bool IsGUISandbox;
 
 	static SuperSmartPointer<GameInterface> Instance;
 
-	GameInterface() : DevelopmentBuild(false), IsScriptedInterface(false) {};
+	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false) {};
 	virtual ~GameInterface() {};
 
 	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);
@@ -42,8 +46,10 @@ public:
 	virtual int32 FixedUpdateRate() = 0;
 	/*!
 	*	Run your initialization code here
+	*	\param argc argument count
+	*	\param argv argument values
 	*/
-	virtual bool Initialize() { return true; };
+	virtual bool Initialize(int32 argc, char **argv) { return true; };
 	/*!
 	*	Run your cleanup code here
 	*/
@@ -60,6 +66,18 @@ public:
 	*	Whether we should quit
 	*/
 	virtual bool ShouldQuit() { return false; };
+
+	/*!
+	*	Gets any script instances available for this game
+	*	Used to interact with the game's scripting or methods if you have any
+	*/
+	virtual SuperSmartPointer<LuaScript> GetScriptInstance() { return SuperSmartPointer<LuaScript>(); };
+
+	/*!
+	*	Used by the UI Sandbox
+	*	Tries to get the GUILayout.resource file from the game's directory and load it
+	*/
+	void ReloadGUI();
 
 #if USE_GRAPHICS
 	/*!
@@ -139,10 +157,14 @@ public:
 
 	ScriptedGameInterface() : UpdateRateValue(30), GameNameValue("Game")
 	{
-		IsScriptedInterface = true;
 	};
 
 	~ScriptedGameInterface();
+
+	SuperSmartPointer<LuaScript> GetScriptInstance()
+	{
+		return ScriptInstance;
+	};
 
 #if USE_GRAPHICS
 	void OnFrameBegin(RendererManager::Renderer *TheRenderer);

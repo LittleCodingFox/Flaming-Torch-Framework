@@ -72,6 +72,8 @@ namespace FlamingTorch
 		if(String.getSize() == 0)
 			return;
 
+		SpriteCache::Instance.Flush(TheRenderer);
+
 		Vector2 ActualPosition = Params.PositionValue;
 
 		sf::Font *TheFont = Params.FontValue ? Params.FontValue : DefaultFont.Get();

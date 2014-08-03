@@ -109,7 +109,7 @@ namespace FlamingTorch
 
 		PerformLayout();
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
@@ -121,7 +121,9 @@ namespace FlamingTorch
 	{
 		PerformLayout();
 
-		Vector2 ActualPosition = ParentPosition + PositionValue;
+		UIPanel::Draw(ParentPosition, Renderer);
+
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		if(IgnoreHeightBoundsValue)
 		{
