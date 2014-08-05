@@ -2,6 +2,38 @@
 
 #define DEFAULT_GUI_TEXTURE_FILTERING TextureFiltering::Linear
 
+#define RUN_GUI_SCRIPT_EVENTS(Variable, Parameters)\
+	for(std::list<luabind::object>::iterator mit = Variable.Members.begin(); mit != Variable.Members.end(); mit++)\
+	{\
+		if(*mit)\
+		{\
+			try\
+			{\
+				(*mit) ## Parameters;\
+			}\
+			catch(std::exception &e)\
+			{\
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());\
+			};\
+		};\
+	};
+
+#define RUN_GUI_SCRIPT_EVENTS2(Variable, Parameters, IDVar)\
+	for(std::list<luabind::object>::iterator mit = Variable.Members.begin(); mit != Variable.Members.end(); mit++)\
+	{\
+		if(*mit)\
+		{\
+			try\
+			{\
+				(*mit) ## Parameters;\
+			}\
+			catch(std::exception &e)\
+			{\
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(IDVar).c_str(), e.what());\
+			};\
+		};\
+	};
+
 class UIManager;
 class UILayout;
 class RendererManager;
@@ -64,12 +96,6 @@ protected:
 
 	std::list<SuperSmartPointer<UIAnimation> > AnimationQueue;
 
-	luabind::object OnMouseJustPressedFunction, OnMousePressedFunction, OnMouseReleasedFunction,
-		OnKeyJustPressedFunction, OnKeyPressedFunction, OnKeyReleasedFunction, OnMouseMovedFunction,
-		OnCharacterEnteredFunction, OnGainFocusFunction, OnLoseFocusFunction, OnUpdateFunction, OnDrawFunction,
-		OnMouseEnteredFunction, OnMouseOverFunction, OnMouseLeftFunction, OnClickFunction, OnDragBeginFunction, OnDragEndFunction,
-		OnDraggingFunction, OnDropFunction, PositionFunction, SizeFunction, OnStartFunction;
-
 	/*!
 	*	Called by the UI Manager when the UI Skin is changed
 	*/
@@ -111,6 +137,13 @@ protected:
 	*/
 	void OnConstructed();
 public:
+	LuaEventGroup OnMouseJustPressedFunction, OnMousePressedFunction, OnMouseReleasedFunction,
+		OnKeyJustPressedFunction, OnKeyPressedFunction, OnKeyReleasedFunction, OnMouseMovedFunction,
+		OnCharacterEnteredFunction, OnGainFocusFunction, OnLoseFocusFunction, OnUpdateFunction, OnDrawFunction,
+		OnMouseEnteredFunction, OnMouseOverFunction, OnMouseLeftFunction, OnClickFunction, OnDragBeginFunction, OnDragEndFunction,
+		OnDraggingFunction, OnDropFunction, PositionFunction, SizeFunction, OnStartFunction;
+
+	luabind::object Properties;
 	std::string Name, LayoutName, NativeType;
 
 	Signal1<UIPanel *> OnLoseFocus, OnGainFocus, OnCharacterEntered, OnMouseMove, OnMouseEntered, OnMouseOver, OnMouseLeft;
@@ -1050,11 +1083,14 @@ private:
 	void OnSkinChange();
 	void OnItemClick(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
 	void OnItemSelected(UIMenu::Item *Item);
+	void OnItemSelectedLua(const sf::String &Caption);
 
 	TextParams TextParameters;
 
 	UIMenuBar(UIManager *Manager);
 public:
+	LuaEventGroup LuaOnClickCallback;
+
 	/*!
 	*	On Menu Item Selected Event
 	*/
@@ -1415,7 +1451,7 @@ public:
 	LayoutMap Layouts;
 
 	UIManager(RendererManager::Renderer *TheOwner);
-	~UIManager() { UnRegisterInput(); Clear(); ScriptInstance.Dispose(); };
+	~UIManager() { UnRegisterInput(); Clear(); Tooltip.Dispose(); ScriptInstance.Dispose(); };
 
 	/*!
 	*	\return the Renderer that owns this UI Manager

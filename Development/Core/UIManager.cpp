@@ -4,6 +4,30 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
+	void LuaEventGroup::Add(luabind::object Member)
+	{
+		for(std::list<luabind::object>::iterator it = Members.begin(); it != Members.end(); it++)
+		{
+			if(*it == Member)
+				return;
+		};
+
+		Members.push_back(Member);
+	};
+
+	void LuaEventGroup::Remove(luabind::object Member)
+	{
+		for(std::list<luabind::object>::iterator it = Members.begin(); it != Members.end(); it++)
+		{
+			if(*it == Member)
+			{
+				Members.erase(it);
+
+				return;
+			};
+		};
+	};
+
 	void RemoveElementFuture(MemoryStream &Stream)
 	{
 		StringID ID = 0;
@@ -377,7 +401,7 @@ namespace FlamingTorch
 						\
 						ScriptInstance->DoString(ComposedCode.str().c_str());\
 						\
-						Panel->name##Function = luabind::globals(ScriptInstance->State)[ComposedFunctionName.str().c_str()];\
+						Panel->name##Function.Add(luabind::globals(ScriptInstance->State)[ComposedFunctionName.str().c_str()]);\
 					}\
 				}\
 				else\
@@ -1008,16 +1032,16 @@ namespace FlamingTorch
 
 			luaL_dostring(ScriptInstance->State, ComposedSizeFunction.str().c_str());
 
-			Panel->PositionFunction = luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Position"];
-			Panel->SizeFunction = luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Size"];
+			Panel->PositionFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Position"]);
+			Panel->SizeFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Size"]);
 
-			if(!Panel->PositionFunction)
+			if(!Panel->PositionFunction.Members.front())
 			{
 				Log::Instance.LogWarn(TAG, "Unable to create an element '%s' due to invalid Position", ElementName.c_str());
 
 				continue;
 			}
-			else if(!Panel->SizeFunction)
+			else if(!Panel->SizeFunction.Members.front())
 			{
 				Log::Instance.LogWarn(TAG, "Unable to create an element '%s' due to invalid Size", ElementName.c_str());
 
@@ -1026,7 +1050,7 @@ namespace FlamingTorch
 
 			try
 			{
-				Panel->SizeFunction(Panel, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
+				Panel->SizeFunction.Members.front()(Panel, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
 			}
 			catch(std::exception &e)
 			{
@@ -1037,7 +1061,7 @@ namespace FlamingTorch
 
 			try
 			{
-				Panel->PositionFunction(Panel, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
+				Panel->PositionFunction.Members.front()(Panel, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
 			}
 			catch(std::exception &e)
 			{
@@ -1654,7 +1678,7 @@ namespace FlamingTorch
 							{
 								std::string CurrentElementID = GetStringIDString(it->first);
 
-								for(int32 k = 0; k < Parts.size() - 1; k++)
+								for(uint32 k = 0; k < Parts.size() - 1; k++)
 								{
 									CurrentElementID += "." + Parts[k];
 
@@ -2542,17 +2566,7 @@ namespace FlamingTorch
 
 			for(UILayout::ElementMap::iterator it = Layout->Elements.begin(); it != Layout->Elements.end(); it++)
 			{
-				if(it->second->OnStartFunction)
-				{
-					try
-					{
-						it->second->OnStartFunction(it->second.Get());
-					}
-					catch(std::exception &e)
-					{
-						Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
-					};
-				};
+				RUN_GUI_SCRIPT_EVENTS2(it->second->OnStartFunction, (it->second.Get()), it->second->ID);
 			};
 
 			StringID LayoutID = MakeStringID((Parent.Get() ? Parent->GetLayout()->Name + "_" : "") + LayoutName);

@@ -81,6 +81,8 @@ public:
 	StringID MusicFromPackage(StringID Directory, StringID FileName);
 	StringID MusicFromFile(const char *FileName);
 
+	void Cleanup();
+
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);

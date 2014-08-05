@@ -1335,9 +1335,10 @@ GL_NEAREST : GL_LINEAR);
 		int32 Width = Sprites[Index].Width;
 		int32 Height = Sprites[Index].Height;
 
-		for(int i = 0; i < Index; i++)
+		for(int32 i = 0; i < Index; i++)
 		{
-			if(Sprites[i].x >= x + Width || Sprites[i].x + Sprites[i].Width <= x || Sprites[i].y >= y + Height  || Sprites[i].y + Sprites[i].Height <= y)
+			if(Sprites[i].x >= (uint32)(x + Width) || Sprites[i].x + (uint32)Sprites[i].Width <= (uint32)x || Sprites[i].y >= (uint32)(y + Height) ||
+				Sprites[i].y + Sprites[i].Height <= (uint32)y)
 				continue;
 
 			return i;
@@ -1364,7 +1365,7 @@ GL_NEAREST : GL_LINEAR);
 
 			x = Sprites[IntersectionIndex].x + Sprites[IntersectionIndex].Width;
 
-			if(x + Target.Width > TextureWidth)
+			if(x + Target.Width > (uint32)TextureWidth)
 			{
 				x = 0;
 				y++;
@@ -1390,8 +1391,8 @@ GL_NEAREST : GL_LINEAR);
 
 		int32 Width = GuessSpriteWidth(Out->Indices), Height = 0, Size = 0;
 
-		if(Width > MaxWidth)
-			Width = MaxWidth;
+		if(Width > (int32)MaxWidth)
+			Width = (int32)MaxWidth;
 
 		for(uint32 i = 0; i < Textures.size(); i++)
 		{
@@ -1399,9 +1400,9 @@ GL_NEAREST : GL_LINEAR);
 			
 			int32 OldHeight = Height;
 
-			Height = (int32)MathUtils::Max((f32)Height, Out->Indices[i].y + Out->Indices[i].Height);
+			Height = (int32)MathUtils::Max((f32)Height, (f32)(Out->Indices[i].y + Out->Indices[i].Height));
 
-			if(Height > MaxHeight)
+			if(Height > (int32)MaxHeight)
 			{
 				Height = OldHeight;
 
@@ -1421,14 +1422,14 @@ GL_NEAREST : GL_LINEAR);
 
 		memset(&Temp.Data[0], 255, Temp.Data.size());
 
-		int32 RowSize = Width * 4;
+		uint32 RowSize = Width * 4;
 
 		for(uint32 i = 0; i < Out->Indices.size(); i++)
 		{
-			int32 MyRowSize = (Out->Indices[i].Width - 2) * 4;
-			int32 xpos = (Out->Indices[i].x + 1) * 4;
+			uint32 MyRowSize = (Out->Indices[i].Width - 2) * 4;
+			uint32 xpos = (Out->Indices[i].x + 1) * 4;
 
-			for(int32 y = 0, ypos = (Out->Indices[i].y + 1) * RowSize, ypostarget = 0; y < Out->Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
+			for(uint32 y = 0, ypos = (Out->Indices[i].y + 1) * RowSize, ypostarget = 0; y < Out->Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
 			{
 				memcpy(&Temp.Data[xpos + ypos], &Textures[Out->Indices[i].Index]->GetData()->Data[ypostarget], MyRowSize);
 			};

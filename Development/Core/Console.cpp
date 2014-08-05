@@ -289,15 +289,15 @@ namespace FlamingTorch
 
 		TextureBuffer t;
 
-		t.CreateEmpty(TargetRenderer->Size().x, TargetRenderer->Size().y);
+		t.CreateEmpty((uint32)TargetRenderer->Size().x, (uint32)TargetRenderer->Size().y);
 
 		GLCHECK();
 
 		//RGB Buffer
 		//Need to read as RGB since in RGBA it gets weird artifacts
-		std::vector<uint8> Temp(TargetRenderer->Size().x * TargetRenderer->Size().y * 3);
+		std::vector<uint8> Temp((uint32)(TargetRenderer->Size().x * TargetRenderer->Size().y * 3));
 
-		glReadPixels(0, 0, TargetRenderer->Size().x, TargetRenderer->Size().y, GL_RGB, GL_UNSIGNED_BYTE, &Temp[0]);
+		glReadPixels(0, 0, (GLsizei)TargetRenderer->Size().x, (GLsizei)TargetRenderer->Size().y, GL_RGB, GL_UNSIGNED_BYTE, &Temp[0]);
 
 		//Convert from RGB to RGBA
 		for(uint32 i = 0, x = 0; i < Temp.size(); i += 3, x += 4)

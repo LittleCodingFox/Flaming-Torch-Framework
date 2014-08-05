@@ -2,6 +2,8 @@
 namespace FlamingTorch
 {
 #	if USE_SOUND
+#	define TAG "SoundManager"
+
 	SoundManager SoundManager::Instance;
 
 	void SoundManager::Music::Play()
@@ -166,11 +168,9 @@ namespace FlamingTorch
 
 		SoundMap::iterator sit = Sounds.find(SoundID);
 
-		FLASSERT(sit == Sounds.end(), "Sound already loaded!");
-
 		if(sit != Sounds.end())
 		{
-			return 0xFFFFFFFF;
+			return sit->first;
 		};
 
 		SoundBufferMap::iterator it = SoundBuffers.find(SoundID);
@@ -257,11 +257,9 @@ namespace FlamingTorch
 
 		MusicMap::iterator sit = Musics.find(MusicID);
 
-		FLASSERT(sit == Musics.end(), "Music already loaded!");
-
 		if(sit != Musics.end())
 		{
-			return 0xFFFFFFFF;
+			return sit->first;
 		};
 
 		SuperSmartPointer<Music> Out(new Music());
@@ -320,14 +318,14 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo("SoundManager", "SoundManager Subsystem starting..");
+		Log::Instance.LogInfo(TAG, "SoundManager Subsystem starting..");
 	};
 
 	void SoundManager::Shutdown(uint32 Priority)
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo("SoundManager", "SoundManager Subsystem terminating..");
+		Log::Instance.LogInfo(TAG, "SoundManager Subsystem terminating..");
 
 		while(Sounds.begin() != Sounds.end())
 		{
@@ -355,7 +353,50 @@ namespace FlamingTorch
 		SubSystem::Update(Priority);
 
 		SUBSYSTEM_PRIORITY_CHECK();
+
+		Cleanup();
 	};
 
+	void SoundManager::Cleanup()
+	{
+		uint32 TotalObjects = Sounds.size() + Musics.size();
+
+		for(SoundMap::iterator it = Sounds.begin(); it != Sounds.end(); it++)
+		{
+			while(it->second.Get() == NULL || it->second.ObserverCount() == 1)
+			{
+				Sounds.erase(it);
+				it = Sounds.begin();
+
+				if(it == Sounds.end())
+					break;
+			};
+
+			if(it == Sounds.end())
+				break;
+		};
+
+		for(MusicMap::iterator it = Musics.begin(); it != Musics.end(); it++)
+		{
+			while(it->second.Get() == NULL || it->second.ObserverCount() == 1)
+			{
+				Musics.erase(it);
+				it = Musics.begin();
+
+				if(it == Musics.end())
+					break;
+			};
+
+			if(it == Musics.end())
+				break;
+		};
+
+		uint32 CurrentObjects = Sounds.size() + Musics.size();
+
+		if(CurrentObjects != TotalObjects)
+		{
+			Log::Instance.LogDebug(TAG, "Cleared %d objects (Prev: %d/Now: %d)", TotalObjects - CurrentObjects, TotalObjects, CurrentObjects);
+		};
+	};
 #endif
 };

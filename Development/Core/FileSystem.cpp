@@ -1375,7 +1375,7 @@ namespace FlamingTorch
 		{
 			GlobalFileWatcher.addWatch(Path, new FileSystemWatcherCallback());
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			return false;
 		};

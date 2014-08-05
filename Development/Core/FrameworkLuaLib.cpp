@@ -33,7 +33,7 @@ namespace luabind
 		\
 		void to(lua_State* L, x const& t)\
 		{\
-			lua_pushnumber(L, t);\
+			lua_pushnumber(L, (lua_Number)t);\
 		}\
 	};\
 	\
@@ -259,7 +259,7 @@ namespace FlamingTorch
 		{
 			Self.StringValue = luabind::object_cast<const char *>(arg);
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 		};
 	};
@@ -537,6 +537,48 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
+	std::string GetUIMenuBarItemCaption(UIMenuBar::Item &Self)
+	{
+		return Self.Caption.toAnsiString();
+	};
+
+	void SetUIMenuBarItemCaption(UIMenuBar::Item &Self, const std::string &Caption)
+	{
+		Self.Caption = Caption;
+	};
+
+	luabind::object GetUIMenuBarItemSubItems(UIMenuBar::Item &Self, lua_State *State)
+	{
+		luabind::object Out = luabind::newtable(State);
+
+		for(uint32 i = 0; i < Self.SubItems.size(); i++)
+		{
+			Out[i + 1] = Self.SubItems[i].toAnsiString();
+		};
+
+		return Out;
+	};
+
+	void SetUIMenuBarItemSubItems(UIMenuBar::Item &Self, luabind::argument Argument)
+	{
+		std::vector<sf::String> Items;
+
+		try
+		{
+			for(luabind::iterator it(Argument), end; it != end; it++)
+			{
+				Items.push_back(ProtectedLuaCast<const char *>(*it));
+			};
+
+			Self.SubItems = Items;
+		}
+		catch(std::exception &)
+		{
+			LuaScriptManager::Instance.LogError("@SetUIMenuBarItemSubItems: Unable to replace SubItems for item '" + 
+				Self.Caption.toAnsiString() + "'");
+		};
+	};
+
 	bool AddUIManagerElement(UIManager &Self, lua_Number ID, SuperSmartPointer<UIPanel> Element)
 	{
 		return Self.AddElement((StringID)ID, Element);
@@ -1355,6 +1397,11 @@ namespace FlamingTorch
 			//LuaScriptManager
 			luabind::class_<LuaScriptManager, SubSystem>("LuaScriptManager")
 				.def("CreateScript", &LuaScriptManager::CreateScript),
+
+			//LuaEventGroup
+			luabind::class_<LuaEventGroup>("LuaEventGroup")
+				.def("Add", &LuaEventGroup::Add)
+				.def("Remove", &LuaEventGroup::Remove),
 
 			//Matrix4x4
 			luabind::class_<Matrix4x4>("Matrix4x4")
@@ -2330,6 +2377,28 @@ namespace FlamingTorch
 
 			//UIPanel
 			luabind::class_<UIPanel, SuperSmartPointer<UIPanel> >("UIPanel")
+				.def_readwrite("OnMouseJustPressed", &UIPanel::OnMouseJustPressedFunction)
+				.def_readwrite("OnMousePressed", &UIPanel::OnMousePressedFunction)
+				.def_readwrite("OnMouseReleased", &UIPanel::OnMouseReleasedFunction)
+				.def_readwrite("OnKeyJustPressed", &UIPanel::OnKeyJustPressedFunction)
+				.def_readwrite("OnKeyPressed", &UIPanel::OnKeyPressedFunction)
+				.def_readwrite("OnKeyReleased", &UIPanel::OnKeyReleasedFunction)
+				.def_readwrite("OnMouseMoved", &UIPanel::OnMouseMovedFunction)
+				.def_readwrite("OnCharacterEntered", &UIPanel::OnCharacterEnteredFunction)
+				.def_readwrite("OnGainFocus", &UIPanel::OnGainFocusFunction)
+				.def_readwrite("OnLoseFocus", &UIPanel::OnLoseFocusFunction)
+				.def_readwrite("OnUpdate", &UIPanel::OnUpdateFunction)
+				.def_readwrite("OnDraw", &UIPanel::OnDrawFunction)
+				.def_readwrite("OnMouseEntered", &UIPanel::OnMouseEnteredFunction)
+				.def_readwrite("OnMouseOver", &UIPanel::OnMouseOverFunction)
+				.def_readwrite("OnMouseLeft", &UIPanel::OnMouseLeftFunction)
+				.def_readwrite("OnClick", &UIPanel::OnClickFunction)
+				.def_readwrite("OnDragBegin", &UIPanel::OnDragBeginFunction)
+				.def_readwrite("OnDragEnd", &UIPanel::OnDragEndFunction)
+				.def_readwrite("OnDragging", &UIPanel::OnDraggingFunction)
+				.def_readwrite("OnDrop", &UIPanel::OnDropFunction)
+				.def_readwrite("OnStart", &UIPanel::OnStartFunction)
+				.def_readwrite("Properties", &UIPanel::Properties)
 				.property("RespondsToTooltips", &GetUIPanelRespondsToTooltips, &SetUIPanelRespondsToTooltips)
 				.property("TooltipsFixed", &GetUIPanelTooltipsFixed, &SetUIPanelTooltipsFixed)
 				.property("TooltipsPosition", &GetUIPanelTooltipsPosition, &SetUIPanelTooltipsPosition)
@@ -2401,7 +2470,17 @@ namespace FlamingTorch
 			//UIMenu
 			luabind::class_<UIMenu, UIPanel>("UIMenu"),
 			//UIMenuBar
-			luabind::class_<UIMenuBar, UIPanel>("UIMenuBar"),
+			luabind::class_<UIMenuBar, UIPanel>("UIMenuBar")
+				.scope [
+					luabind::class_<UIMenuBar::Item>("Item")
+						.property("Caption", &GetUIMenuBarItemCaption, &SetUIMenuBarItemCaption)
+						.def_readwrite("UserData", &UIMenuBar::Item::UserData)
+						.property("SubItems", &GetUIMenuBarItemSubItems, &SetUIMenuBarItemSubItems)
+						.def(luabind::constructor<>())
+				]
+				.def_readwrite("OnClick", &UIMenuBar::LuaOnClickCallback)
+				.def("AddItem", &UIMenuBar::AddItem),
+
 			//UIScrollableFrame
 			luabind::class_<UIScrollableFrame, UIPanel>("UIScrollableFrame"),
 			//UIScrollbar

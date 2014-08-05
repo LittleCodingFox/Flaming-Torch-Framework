@@ -10,6 +10,13 @@ namespace FlamingTorch
 		OnClick.Connect(this, &UIMenuBar::OnItemClick);
 		TextParameters = TextParameters.Font(Manager->GetDefaultFont()).Color(Manager->GetDefaultFontColor())
 			.SecondaryColor(Manager->GetDefaultSecondaryFontColor()).FontSize(Manager->GetDefaultFontSize());
+
+		OnMenuItemSelected.Connect(this, &UIMenuBar::OnItemSelectedLua);
+	};
+
+	void UIMenuBar::OnItemSelectedLua(const sf::String &Caption)
+	{
+		RUN_GUI_SCRIPT_EVENTS(LuaOnClickCallback, (Caption.toAnsiString()));
 	};
 
 	void UIMenuBar::OnSkinChange()

@@ -56,17 +56,7 @@ namespace FlamingTorch
 				it->second->SetVisible(true);
 			};
 
-			if(it->second->OnStartFunction)
-			{
-				try
-				{
-					it->second->OnStartFunction(it->second.Get());
-				}
-				catch(std::exception &e)
-				{
-					Log::Instance.LogDebug(TAG, "Scripting Exception: %s", e.what());
-				};
-			};
+			RUN_GUI_SCRIPT_EVENTS2(it->second->OnStartFunction, (it->second.Get()), it->second->ID)
 		};
 
 		return Out;

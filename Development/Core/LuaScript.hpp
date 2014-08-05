@@ -111,3 +111,24 @@ public:
 	*/
 	int32 PerformMainLoop(SuperSmartPointer<LuaScript> LoopScript);
 };
+
+/*!
+*	Groups Lua Functions together
+*/
+class FLAMING_API LuaEventGroup
+{
+public:
+	std::list<luabind::object> Members;
+
+	/*!
+	*	Adds a member to the group
+	*	\param Member the member to add
+	*/
+	void Add(luabind::object Member);
+
+	/*!
+	*	Removes a member to the group
+	*	\param Member the member to remove
+	*/
+	void Remove(luabind::object Member);
+};

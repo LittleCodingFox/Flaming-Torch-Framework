@@ -100,6 +100,8 @@ namespace FlamingTorch
 		DraggingValue(false), TooltipFixed(false)
 	{
 		FLASSERT(Manager != NULL, "Invalid UI Manager!");
+		FLASSERT(Manager->ScriptInstance, "Invalid UI Manager Script!");
+
 		OnMouseJustPressed.Connect(this, &UIPanel::OnMouseJustPressedDraggable);
 		OnMouseReleased.Connect(this, &UIPanel::OnMouseReleasedDraggable);
 
@@ -121,6 +123,8 @@ namespace FlamingTorch
 		OnDragEnd.Connect(this, &UIPanel::OnDragEndScript);
 		OnDragging.Connect(this, &UIPanel::OnDraggingScript);
 		OnDrop.Connect(this, &UIPanel::OnDropScript);
+
+		Properties = luabind::newtable(Manager->ScriptInstance->State);
 	};
 
 	f32 UIPanel::GetParentAlpha()
@@ -158,17 +162,7 @@ namespace FlamingTorch
 			};
 		};
 
-		if(OnUpdateFunction)
-		{
-			try
-			{
-				OnUpdateFunction(this, ParentPosition);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnUpdateFunction, (this, ParentPosition))
 	};
 
 	void UIPanel::OnMouseJustPressedPriv(const InputCenter::MouseButtonInfo &o)
@@ -270,17 +264,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnMouseJustPressedFunction)
-		{
-			try
-			{
-				Self->OnMouseJustPressedFunction(Self, o);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnMouseJustPressedFunction, (Self, o));
 	};
 
 	void UIPanel::OnMousePressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o)
@@ -288,17 +272,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnMousePressedFunction)
-		{
-			try
-			{
-				Self->OnMousePressedFunction(Self, o);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnMousePressedFunction, (Self, o));
 	};
 
 	void UIPanel::OnMouseReleasedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o)
@@ -306,17 +280,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnMouseReleasedFunction)
-		{
-			try
-			{
-				Self->OnMouseReleasedFunction(Self, o);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnMouseReleasedFunction, (Self, o))
 	};
 
 	void UIPanel::OnKeyJustPressedScript(UIPanel *Self, const InputCenter::KeyInfo &o)
@@ -324,17 +288,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnKeyJustPressedFunction)
-		{
-			try
-			{
-				Self->OnKeyJustPressedFunction(Self, o);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnKeyJustPressedFunction, (Self, o))
 	};
 
 	void UIPanel::OnKeyPressedScript(UIPanel *Self, const InputCenter::KeyInfo &o)
@@ -342,17 +296,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnKeyPressedFunction)
-		{
-			try
-			{
-				Self->OnKeyPressedFunction(Self, o);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnKeyPressedFunction, (Self, o))
 	};
 
 	void UIPanel::OnKeyReleasedScript(UIPanel *Self, const InputCenter::KeyInfo &o)
@@ -360,17 +304,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnKeyReleasedFunction)
-		{
-			try
-			{
-				Self->OnKeyReleasedFunction(Self, o);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnKeyReleasedFunction, (Self, o))
 	};
 
 	void UIPanel::OnMouseMovedScript(UIPanel *Self)
@@ -378,17 +312,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnMouseMovedFunction)
-		{
-			try
-			{
-				Self->OnMouseMovedFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnMouseMovedFunction, (Self))
 	};
 
 	void UIPanel::OnCharacterEnteredScript(UIPanel *Self)
@@ -396,17 +320,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnCharacterEnteredFunction)
-		{
-			try
-			{
-				Self->OnCharacterEnteredFunction(Self, RendererManager::Instance.Input.Character);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnCharacterEnteredFunction, (Self, RendererManager::Instance.Input.Character))
 	};
 
 	void UIPanel::OnGainFocusScript(UIPanel *Self)
@@ -414,17 +328,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnGainFocusFunction)
-		{
-			try
-			{
-				Self->OnGainFocusFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnGainFocusFunction, (Self))
 	};
 
 	void UIPanel::OnLoseFocusScript(UIPanel *Self)
@@ -432,17 +336,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnLoseFocusFunction)
-		{
-			try
-			{
-				Self->OnLoseFocusFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnLoseFocusFunction, (Self))
 	};
 
 	void UIPanel::OnMouseEnteredScript(UIPanel *Self)
@@ -450,17 +344,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnMouseEnteredFunction)
-		{
-			try
-			{
-				Self->OnMouseEnteredFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnMouseEnteredFunction, (Self))
 	};
 
 	void UIPanel::OnMouseOverScript(UIPanel *Self)
@@ -468,17 +352,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnMouseOverFunction)
-		{
-			try
-			{
-				Self->OnMouseOverFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnMouseOverFunction, (Self))
 	};
 
 	void UIPanel::OnMouseLeftScript(UIPanel *Self)
@@ -486,17 +360,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnMouseLeftFunction)
-		{
-			try
-			{
-				Self->OnMouseLeftFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnMouseLeftFunction, (Self))
 	};
 
 	void UIPanel::OnClickScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o)
@@ -504,17 +368,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnClickFunction)
-		{
-			try
-			{
-				Self->OnClickFunction(Self, o);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnClickFunction, (Self, o))
 	};
 
 	void UIPanel::OnDragBeginScript(UIPanel *Self)
@@ -522,17 +376,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnDragBeginFunction)
-		{
-			try
-			{
-				Self->OnDragBeginFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnDragBeginFunction, (Self))
 	};
 
 	void UIPanel::OnDragEndScript(UIPanel *Self)
@@ -540,17 +384,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnDragEndFunction)
-		{
-			try
-			{
-				Self->OnDragEndFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnDragEndFunction, (Self))
 	};
 
 	void UIPanel::OnDraggingScript(UIPanel *Self)
@@ -558,17 +392,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnDraggingFunction)
-		{
-			try
-			{
-				Self->OnDraggingFunction(Self);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnDraggingFunction, (Self))
 	};
 
 	void UIPanel::OnDropScript(UIPanel *Self, UIPanel *Target)
@@ -576,17 +400,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		if(Self->OnDropFunction)
-		{
-			try
-			{
-				Self->OnDropFunction(Self, Target);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnDropFunction, (Self, Target))
 	};
 	
 	void UIPanel::OnMouseJustPressedDraggable(UIPanel *This, const InputCenter::MouseButtonInfo &o)
@@ -621,17 +435,7 @@ namespace FlamingTorch
 
 	void UIPanel::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		if(OnDrawFunction)
-		{
-			try
-			{
-				OnDrawFunction(this, ParentPosition);
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());
-			};
-		};
+		RUN_GUI_SCRIPT_EVENTS(OnDrawFunction, (this, ParentPosition))
 	};
 
 	void UIPanel::DrawUIRect(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
