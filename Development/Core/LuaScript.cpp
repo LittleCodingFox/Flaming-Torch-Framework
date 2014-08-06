@@ -4,6 +4,30 @@ namespace FlamingTorch
 #	define TAG "LuaScriptManager"
 #	define TAG2 "LuaScript"
 
+	void LuaEventGroup::Add(luabind::object Member)
+	{
+		for(std::list<luabind::object>::iterator it = Members.begin(); it != Members.end(); it++)
+		{
+			if(*it == Member)
+				return;
+		};
+
+		Members.push_back(Member);
+	};
+
+	void LuaEventGroup::Remove(luabind::object Member)
+	{
+		for(std::list<luabind::object>::iterator it = Members.begin(); it != Members.end(); it++)
+		{
+			if(*it == Member)
+			{
+				Members.erase(it);
+
+				return;
+			};
+		};
+	};
+
 	int LuabindPCall(lua_State* State)
 	{
 		lua_Debug d;

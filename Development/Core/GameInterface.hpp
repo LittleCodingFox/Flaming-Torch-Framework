@@ -17,7 +17,9 @@ class GameInterface : public LuaLib
 	friend class NativeGameInterface;
 	friend class ScriptedGameInterface;
 private:
+#if USE_GRAPHICS
 	void OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action);
+#endif
 public:
 	bool DevelopmentBuild;
 	bool IsGUISandbox;
@@ -73,13 +75,13 @@ public:
 	*/
 	virtual SuperSmartPointer<LuaScript> GetScriptInstance() { return SuperSmartPointer<LuaScript>(); };
 
+#if USE_GRAPHICS
 	/*!
 	*	Used by the UI Sandbox
 	*	Tries to get the GUILayout.resource file from the game's directory and load it
 	*/
 	void ReloadGUI();
 
-#if USE_GRAPHICS
 	/*!
 	*	Creates a renderer from options
 	*	\param Options the options to create the renderer

@@ -10,12 +10,6 @@ namespace FlamingTorch
 		Instance = TheInstance;
 	};
 
-	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
-	{
-		if(FileName == "GUILayout.resource")
-			ReloadGUI();
-	};
-
 	bool GameInterface::LoadPackage(const std::string &PackageName)
 	{
 		SuperSmartPointer<Stream> TheStream(new FileStream());
@@ -37,6 +31,13 @@ namespace FlamingTorch
 		return true;
 	};
 
+#if USE_GRAPHICS
+	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
+	{
+		if(FileName == "GUILayout.resource")
+			ReloadGUI();
+	};
+
 	void GameInterface::ReloadGUI()
 	{
 		RendererManager::Instance.ActiveRenderer()->UI->ClearLayouts();
@@ -52,7 +53,6 @@ namespace FlamingTorch
 		};
 	};
 
-#if USE_GRAPHICS
 	RendererManager::Renderer *GameInterface::CreateRenderer(const RenderCreateOptions &Options)
 	{
 		RendererHandle Handle = 0xFFFFFFFF;
@@ -170,6 +170,7 @@ namespace FlamingTorch
 			return 1;
 		};
 
+#if USE_GRAPHICS
 		if(IsGUISandbox)
 		{
 			if(!FileSystemWatcher::Instance.WatchDirectory(DirectoryInfo::ResourcesDirectory()))
@@ -187,8 +188,8 @@ namespace FlamingTorch
 
 			ReloadGUI();
 		};
+#endif
 
-#if USE_GRAPHICS
 		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(DirectoryInfo::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
@@ -208,7 +209,7 @@ namespace FlamingTorch
 				};
 			};
 		};
-#endif
+#
 
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 
@@ -483,6 +484,7 @@ namespace FlamingTorch
 			return 1;
 		};
 
+#if USE_GRAPHICS
 		if(IsGUISandbox)
 		{
 			if(!FileSystemWatcher::Instance.WatchDirectory(DirectoryInfo::ResourcesDirectory()))
@@ -498,8 +500,8 @@ namespace FlamingTorch
 
 			ReloadGUI();
 		};
+#endif
 
-#if USE_GRAPHICS
 		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(DirectoryInfo::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
@@ -519,7 +521,6 @@ namespace FlamingTorch
 				};
 			};
 		};
-#endif
 
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 

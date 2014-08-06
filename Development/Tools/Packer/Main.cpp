@@ -1,6 +1,4 @@
 #include "FlamingCore.hpp"
-#include <vector>
-#include <map>
 
 using namespace FlamingTorch;
 #include <stdio.h>
