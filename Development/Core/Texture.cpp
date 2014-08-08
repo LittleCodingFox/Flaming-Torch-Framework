@@ -519,31 +519,35 @@ namespace FlamingTorch
 		return true;
 	};
 
-	bool TextureBuffer::Blend(TextureBuffer *Other)
+	bool TextureBuffer::Blend(uint32 X, uint32 Y, TextureBuffer *Other)
 	{
 		FLASSERT(Other != NULL, "Invalid Buffer to blend into");
 
-		if(Other->WidthValue != WidthValue || Other->HeightValue != HeightValue || Other->ColorTypeValue != ColorTypeValue)
+		if(Other->ColorTypeValue != ColorTypeValue)
 			return false;
 
 		uint32 SkipComponent = ColorTypeValue == ColorType::RGB8 ? 3 : 4;
-		uint32 RowBytes = WidthValue * SkipComponent;
+		uint32 RowBytes = WidthValue * SkipComponent, TheirRowBytes = Other->WidthValue * SkipComponent;
 
-		for(uint32 y = 0, yindex = 0; y < HeightValue; y++, yindex += RowBytes)
+		uint32 TargetWidth = X + Other->WidthValue > WidthValue ? WidthValue : X + Other->WidthValue;
+		uint32 TargetHeight = Y + Other->HeightValue > HeightValue ? HeightValue : X + Other->HeightValue;
+
+		for(uint32 y = Y, yindex = RowBytes * Y, TheirYIndex = 0; y < TargetHeight; y++, yindex += RowBytes, TheirYIndex += TheirRowBytes)
 		{
-			for(uint32 x = 0, xindex = 0; x < WidthValue; x++, xindex += SkipComponent)
+			for(uint32 x = X, xindex = SkipComponent * X, TheirXIndex = 0; x < TargetWidth; x++, xindex += SkipComponent,
+				TheirXIndex += SkipComponent)
 			{
-				uint8 *MyPixels = &Data[xindex + yindex], *TheirPixels = &Other->Data[xindex + yindex];
+				uint8 *MyPixels = &Data[xindex + yindex], *TheirPixels = &Other->Data[TheirXIndex + TheirYIndex];
 
 				if(SkipComponent == 4)
 				{
-					if(MyPixels[3] == TheirPixels[3] && MyPixels[3] == 0)
+					if((MyPixels[3] == TheirPixels[3] && MyPixels[3] == 0) || TheirPixels[3] == 0)
 						continue;
 
-					MyPixels[0] = ((MyPixels[0] * TheirPixels[3]) >> 8) + ((TheirPixels[0] * (255 - TheirPixels[3])) >> 8);
-					MyPixels[1] = ((MyPixels[1] * TheirPixels[3]) >> 8) + ((TheirPixels[1] * (255 - TheirPixels[3])) >> 8);
-					MyPixels[2] = ((MyPixels[2] * TheirPixels[3]) >> 8) + ((TheirPixels[2] * (255 - TheirPixels[3])) >> 8);
-					MyPixels[3] = ((MyPixels[3] * TheirPixels[3]) >> 8) + ((TheirPixels[3] * (255 - TheirPixels[3])) >> 8);
+					MyPixels[0] = ((TheirPixels[0] * TheirPixels[3]) >> 8) + ((MyPixels[0] * (255 - TheirPixels[3])) >> 8);
+					MyPixels[1] = ((TheirPixels[1] * TheirPixels[3]) >> 8) + ((MyPixels[1] * (255 - TheirPixels[3])) >> 8);
+					MyPixels[2] = ((TheirPixels[2] * TheirPixels[3]) >> 8) + ((MyPixels[2] * (255 - TheirPixels[3])) >> 8);
+					MyPixels[3] = ((TheirPixels[3] * TheirPixels[3]) >> 8) + ((MyPixels[3] * (255 - TheirPixels[3])) >> 8);
 				}
 				else
 				{

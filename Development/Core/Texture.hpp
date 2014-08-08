@@ -69,7 +69,7 @@ public:
 	SuperSmartPointer<TextureBuffer> Clone();
 	bool Overlay(TextureBuffer *Other);
 	bool Multiply(TextureBuffer *Other);
-	bool Blend(TextureBuffer *Other);
+	bool Blend(uint32 x, uint32 y, TextureBuffer *Other);
 
 	uint32 Width() const;
 	uint32 Height() const;
