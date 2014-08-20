@@ -29,7 +29,7 @@ solution "DefaultProject"
 		pchsource "../Core/FlamingCore.cpp"
 
 		if os.get() == "windows" then
-			buildoptions { "/Zm139", "/bigobj" }
+			buildoptions { "/Zm200", "/bigobj" }
 			postbuildcommands {
 				"finishbuild.bat \"$(TargetPath)\" \"$(SolutionDir)..\\..\\Content\\$(TargetName)\\$(TargetFileName)\" \"$(SolutionDir)..\\..\\Binaries\\$(ProjectName)\\$(ConfigurationName)\\$(TargetName).pdb\""
 			}
