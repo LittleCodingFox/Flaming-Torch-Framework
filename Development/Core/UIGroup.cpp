@@ -4,6 +4,48 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
+	void UIGroup::Update(const Vector2 &ParentPosition)
+	{
+		UIPanel::Update(ParentPosition);
+
+		PerformLayout();
+
+		Vector2 ParentSizeHalf = SizeValue / 2;
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
+
+		for(uint32 i = 0; i < Children.size(); i++)
+		{
+			Vector2 ChildrenSizeHalf = (Children[i]->GetSize() + Children[i]->GetScaledExtraSize()) / 2;
+			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset() - Children[i]->GetScaledExtraSize() / 4;
+
+			Children[i]->Update(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition);
+		};
+	};
+
+	void UIGroup::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	{
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
+
+		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
+			ActualPosition.x > Renderer->Size().x ||
+			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
+			return;
+
+		UIPanel::Draw(ParentPosition, Renderer);
+
+		Vector2 ParentSizeHalf = SizeValue / 2;
+
+		for(uint32 i = 0; i < Children.size(); i++)
+		{
+			Vector2 ChildrenSizeHalf = (Children[i]->GetSize() + Children[i]->GetScaledExtraSize()) / 2;
+			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset() - Children[i]->GetScaledExtraSize() / 4;
+
+			Children[i]->Draw(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition, Renderer);
+		};
+
+		DrawUIRect(ParentPosition, Renderer);
+	};
+
 	void UIGroup::PerformLayout()
 	{
 		f32 InitialExtent = 0;
@@ -23,14 +65,14 @@ namespace FlamingTorch
 			if(LayoutMode & UIGroupLayoutMode::InvertDirection)
 			{
 				InitialExtent = CurrentExtent = SizeValue.x - (Children.size() ?
-					Children[0]->GetOffset().x + Children[0]->GetSize().x + Children[0]->GetExtraSize().x : 0);
+					Children[0]->GetOffset().x + Children[0]->GetSize().x + Children[0]->GetScaledExtraSize().x : 0);
 			};
 
 			for(uint32 i = 0; i < Children.size(); CurrentExtent += DirectionMultiplier *
-				(Children[i]->GetOffset().x + Children[i]->GetSize().x + Children[i]->GetExtraSize().x), i++)
+				(Children[i]->GetOffset().x + Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x), i++)
 			{
 				if((LayoutMode & UIGroupLayoutMode::AdjustWidth) && (DirectionMultiplier == 1 && CurrentExtent +
-					Children[i]->GetExtraSize().x / 2 + Children[i]->GetSize().x + Children[i]->GetOffset().x > SizeValue.x) ||
+					Children[i]->GetScaledExtraSize().x / 2 + Children[i]->GetSize().x + Children[i]->GetOffset().x > SizeValue.x) ||
 					(DirectionMultiplier == -1 && CurrentExtent < 0))
 				{
 					if(LayoutMode & UIGroupLayoutMode::InvertX)
@@ -39,7 +81,7 @@ namespace FlamingTorch
 
 						for(uint32 j = LineStartingElement; j < i; j++)
 						{
-							FullSize += Children[j]->GetSize().x + Children[j]->GetExtraSize().x + Children[j]->GetOffset().x;
+							FullSize += Children[j]->GetSize().x + Children[j]->GetScaledExtraSize().x + Children[j]->GetOffset().x;
 						};
 
 						FullSize = SizeValue.x - FullSize;
@@ -56,7 +98,7 @@ namespace FlamingTorch
 
 						for(uint32 j = LineStartingElement; j < i; j++)
 						{
-							FullSize = MathUtils::Max(Children[j]->GetSize().y + Children[j]->GetExtraSize().y +
+							FullSize = MathUtils::Max(Children[j]->GetSize().y + Children[j]->GetScaledExtraSize().y +
 								Children[j]->GetOffset().y, FullSize);
 						};
 
@@ -69,9 +111,9 @@ namespace FlamingTorch
 					LineStartingElement = i;
 				};
 
-				Children[i]->SetPosition(Vector2(CurrentPosition.x + CurrentExtent + Children[i]->GetExtraSize().x / 2,
-					CurrentPosition.y + Children[i]->GetExtraSize().y / 2 + Children[i]->GetOffset().y));
-				CurrentMaxMeasurement = MathUtils::Max(CurrentMaxMeasurement, Children[i]->GetSize().y + Children[i]->GetExtraSize().y);
+				Children[i]->SetPosition(Vector2(CurrentPosition.x + CurrentExtent + Children[i]->GetScaledExtraSize().x / 2,
+					CurrentPosition.y + Children[i]->GetScaledExtraSize().y / 2 + Children[i]->GetOffset().y));
+				CurrentMaxMeasurement = MathUtils::Max(CurrentMaxMeasurement, Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y);
 			};
 
 			if(LayoutMode & UIGroupLayoutMode::InvertX)
@@ -80,7 +122,7 @@ namespace FlamingTorch
 
 				for(uint32 i = LineStartingElement; i < Children.size(); i++)
 				{
-					FullSize += Children[i]->GetSize().x + Children[i]->GetExtraSize().x + Children[i]->GetOffset().x;
+					FullSize += Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x + Children[i]->GetOffset().x;
 				};
 
 				FullSize = SizeValue.x - FullSize;
@@ -97,7 +139,7 @@ namespace FlamingTorch
 				{
 					for(uint32 i = 0; i < Children.size(); i++)
 					{
-						FinalHeight = MathUtils::Max(Children[i]->GetSize().y + Children[i]->GetExtraSize().y + Children[i]->GetOffset().y, FinalHeight);
+						FinalHeight = MathUtils::Max(Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y + Children[i]->GetOffset().y, FinalHeight);
 					};
 				}
 				else
@@ -106,7 +148,7 @@ namespace FlamingTorch
 
 					for(uint32 i = LineStartingElement; i < Children.size(); i++)
 					{
-						FullSize = MathUtils::Max(Children[i]->GetSize().y + Children[i]->GetExtraSize().y +
+						FullSize = MathUtils::Max(Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y +
 							Children[i]->GetOffset().y, FullSize);
 					};
 
@@ -126,13 +168,13 @@ namespace FlamingTorch
 			if(LayoutMode & UIGroupLayoutMode::InvertDirection)
 			{
 				InitialExtent = CurrentExtent = SizeValue.y - (Children.size() ?
-					Children[0]->GetOffset().y + Children[0]->GetSize().y + Children[0]->GetExtraSize().y : 0);
+					Children[0]->GetOffset().y + Children[0]->GetSize().y + Children[0]->GetScaledExtraSize().y : 0);
 			};
 
-			for(uint32 i = 0; i < Children.size(); CurrentExtent += DirectionMultiplier * (Children[i]->GetOffset().y + Children[i]->GetSize().y + Children[i]->GetExtraSize().y), i++)
+			for(uint32 i = 0; i < Children.size(); CurrentExtent += DirectionMultiplier * (Children[i]->GetOffset().y + Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y), i++)
 			{
 				if((LayoutMode & UIGroupLayoutMode::AdjustHeight) && (DirectionMultiplier == 1 && CurrentExtent +
-					Children[i]->GetExtraSize().y / 2 + Children[i]->GetSize().y + Children[i]->GetOffset().y > SizeValue.y) ||
+					Children[i]->GetScaledExtraSize().y / 2 + Children[i]->GetSize().y + Children[i]->GetOffset().y > SizeValue.y) ||
 					(DirectionMultiplier == -1 && CurrentExtent < 0))
 				{
 					if(LayoutMode & UIGroupLayoutMode::InvertX)
@@ -141,7 +183,7 @@ namespace FlamingTorch
 
 						for(uint32 j = LineStartingElement; j < i; j++)
 						{
-							FullSize = MathUtils::Max(Children[j]->GetSize().x + Children[j]->GetExtraSize().x + Children[j]->GetOffset().x, FullSize);
+							FullSize = MathUtils::Max(Children[j]->GetSize().x + Children[j]->GetScaledExtraSize().x + Children[j]->GetOffset().x, FullSize);
 						};
 
 						FinalWidth += FullSize;
@@ -153,7 +195,7 @@ namespace FlamingTorch
 
 						for(uint32 j = LineStartingElement; j < i; j++)
 						{
-							FullSize += Children[j]->GetSize().y + Children[j]->GetExtraSize().y + Children[j]->GetOffset().y;
+							FullSize += Children[j]->GetSize().y + Children[j]->GetScaledExtraSize().y + Children[j]->GetOffset().y;
 						};
 
 						FullSize = SizeValue.y - FullSize;
@@ -170,9 +212,9 @@ namespace FlamingTorch
 					LineStartingElement = i;
 				};
 
-				Children[i]->SetPosition(Vector2(CurrentPosition.x + Children[i]->GetExtraSize().x / 2 + Children[i]->GetOffset().x,
-					CurrentPosition.y + CurrentExtent + Children[i]->GetExtraSize().y / 2));
-				CurrentMaxMeasurement = MathUtils::Max(CurrentMaxMeasurement, Children[i]->GetSize().x + Children[i]->GetExtraSize().x);
+				Children[i]->SetPosition(Vector2(CurrentPosition.x + Children[i]->GetScaledExtraSize().x / 2 + Children[i]->GetOffset().x,
+					CurrentPosition.y + CurrentExtent + Children[i]->GetScaledExtraSize().y / 2));
+				CurrentMaxMeasurement = MathUtils::Max(CurrentMaxMeasurement, Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x);
 			};
 
 			if(LayoutMode & UIGroupLayoutMode::InvertX)
@@ -181,7 +223,7 @@ namespace FlamingTorch
 				{
 					for(uint32 i = 0; i < Children.size(); i++)
 					{
-						FinalWidth = MathUtils::Max(Children[i]->GetSize().x + Children[i]->GetExtraSize().x + Children[i]->GetOffset().x, FinalWidth);
+						FinalWidth = MathUtils::Max(Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x + Children[i]->GetOffset().x, FinalWidth);
 					};
 				}
 				else
@@ -190,7 +232,7 @@ namespace FlamingTorch
 
 					for(uint32 i = LineStartingElement; i < Children.size(); i++)
 					{
-						FullSize = MathUtils::Max(Children[i]->GetSize().x + Children[i]->GetExtraSize().x +
+						FullSize = MathUtils::Max(Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x +
 							Children[i]->GetOffset().x, FullSize);
 					};
 
@@ -211,7 +253,7 @@ namespace FlamingTorch
 
 				for(uint32 i = LineStartingElement; i < Children.size(); i++)
 				{
-					FullSize += Children[i]->GetSize().y + Children[i]->GetExtraSize().y + Children[i]->GetOffset().y;
+					FullSize += Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y + Children[i]->GetOffset().y;
 				};
 
 				FullSize = SizeValue.y - FullSize;
@@ -228,7 +270,7 @@ namespace FlamingTorch
 
 			for(uint32 i = 0; i < Children.size(); i++)
 			{
-				Size += Children[i]->GetSize().x + Children[i]->GetExtraSize().x + Children[i]->GetOffset().x;
+				Size += Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x + Children[i]->GetOffset().x;
 			};
 
 			f32 Difference = SizeValue.x - Size;
@@ -237,9 +279,9 @@ namespace FlamingTorch
 			{
 				CurrentExtent = Difference / 2;
 
-				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().x + Children[i]->GetSize().x + Children[i]->GetExtraSize().x, i++)
+				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().x + Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x, i++)
 				{
-					Children[i]->SetPosition(Vector2(CurrentExtent + Children[i]->GetExtraSize().x / 2, CurrentPosition.y + Children[i]->GetExtraSize().y / 2 + Children[i]->GetOffset().y));
+					Children[i]->SetPosition(Vector2(CurrentExtent + Children[i]->GetScaledExtraSize().x / 2, CurrentPosition.y + Children[i]->GetScaledExtraSize().y / 2 + Children[i]->GetOffset().y));
 				};
 			}
 			else
@@ -247,9 +289,9 @@ namespace FlamingTorch
 				f32 SizeFragment = (Difference / Children.size()) / 2;
 				CurrentExtent = SizeFragment;
 
-				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().x + Children[i]->GetSize().x + Children[i]->GetExtraSize().x + SizeFragment * 2, i++)
+				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().x + Children[i]->GetSize().x + Children[i]->GetScaledExtraSize().x + SizeFragment * 2, i++)
 				{
-					Children[i]->SetPosition(Vector2(CurrentExtent + Children[i]->GetExtraSize().x / 2, CurrentPosition.y + Children[i]->GetExtraSize().y / 2 + Children[i]->GetOffset().y));
+					Children[i]->SetPosition(Vector2(CurrentExtent + Children[i]->GetScaledExtraSize().x / 2, CurrentPosition.y + Children[i]->GetScaledExtraSize().y / 2 + Children[i]->GetOffset().y));
 				};
 			};
 		}
@@ -259,7 +301,7 @@ namespace FlamingTorch
 
 			for(uint32 i = 0; i < Children.size(); i++)
 			{
-				Size += Children[i]->GetSize().y + Children[i]->GetExtraSize().y + Children[i]->GetOffset().y;
+				Size += Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y + Children[i]->GetOffset().y;
 			};
 
 			f32 Difference = SizeValue.y - Size;
@@ -268,9 +310,9 @@ namespace FlamingTorch
 			{
 				CurrentExtent = Difference / 2;
 
-				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().y + Children[i]->GetSize().y + Children[i]->GetExtraSize().y, i++)
+				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().y + Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y, i++)
 				{
-					Children[i]->SetPosition(Vector2(CurrentPosition.x + Children[i]->GetExtraSize().x / 2 + Children[i]->GetOffset().x, CurrentExtent + Children[i]->GetExtraSize().y / 2));
+					Children[i]->SetPosition(Vector2(CurrentPosition.x + Children[i]->GetScaledExtraSize().x / 2 + Children[i]->GetOffset().x, CurrentExtent + Children[i]->GetScaledExtraSize().y / 2));
 				};
 			}
 			else
@@ -278,9 +320,9 @@ namespace FlamingTorch
 				f32 SizeFragment = (Difference / Children.size()) / 2;
 				CurrentExtent = SizeFragment;
 
-				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().y + Children[i]->GetSize().y + Children[i]->GetExtraSize().y + SizeFragment * 2, i++)
+				for(uint32 i = 0; i < Children.size(); CurrentExtent += Children[i]->GetOffset().y + Children[i]->GetSize().y + Children[i]->GetScaledExtraSize().y + SizeFragment * 2, i++)
 				{
-					Children[i]->SetPosition(Vector2(CurrentPosition.x + Children[i]->GetExtraSize().x / 2 + Children[i]->GetOffset().x, CurrentExtent + Children[i]->GetExtraSize().y / 2));
+					Children[i]->SetPosition(Vector2(CurrentPosition.x + Children[i]->GetScaledExtraSize().x / 2 + Children[i]->GetOffset().x, CurrentExtent + Children[i]->GetScaledExtraSize().y / 2));
 				};
 			};
 		};

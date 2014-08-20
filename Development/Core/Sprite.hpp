@@ -48,6 +48,7 @@ public:
 	Vector4 ColorValue;
 	uint32 BlendingModeValue;
 	bool NinePatchValue;
+	f32 NinePatchScaleValue;
 	Rect NinePatchRectValue;
 	bool FlipX, FlipY;
 	Vector2 TexCoordBorderMin, TexCoordBorderMax, TexCoordPosition;
@@ -55,13 +56,13 @@ public:
 
 	SpriteDrawOptions() : ColorValue(1, 1, 1, 1), ScaleValue(1, 1), RotationValue(0), BlendingModeValue(BlendingMode::Alpha),
 		PinningModeValue(PinningMode::TopLeft), CropModeValue(CropMode::None), NinePatchValue(false), FlipX(false), FlipY(false),
-		TexCoordRotation(0), TexCoordBorderMax(1, 1) {};
+		TexCoordRotation(0), TexCoordBorderMax(1, 1), NinePatchScaleValue(1) {};
 	SpriteDrawOptions(const SpriteDrawOptions &o) : ColorValue(o.ColorValue), BlendingModeValue(o.BlendingModeValue),
 		PositionValue(o.PositionValue), ScaleValue(o.ScaleValue), RotationValue(o.RotationValue),
 		PinningModeValue(o.PinningModeValue), CropModeValue(o.CropModeValue), CropRectValue(o.CropRectValue),
 		NinePatchValue(o.NinePatchValue), NinePatchRectValue(o.NinePatchRectValue), FlipX(o.FlipX), FlipY(o.FlipY),
 		TexCoordRotation(o.TexCoordRotation), TexCoordBorderMin(o.TexCoordBorderMin), TexCoordBorderMax(o.TexCoordBorderMax),
-		OffsetValue(o.OffsetValue), TexCoordPosition(o.TexCoordPosition) {};
+		OffsetValue(o.OffsetValue), TexCoordPosition(o.TexCoordPosition), NinePatchScaleValue(o.NinePatchScaleValue) {};
 
 	SpriteDrawOptions &Position(const Vector2 &Pos) { PositionValue = Pos; return *this; };
 	/*!
@@ -144,6 +145,17 @@ public:
 	{
 		NinePatchValue = NinePatch;
 		NinePatchRectValue = NinePatchRect;
+
+		return *this;
+	};
+
+	/*!
+	*	Sets the Nine Patch Scale
+	*	\param Scale the Nine Patch Scale
+	*/
+	SpriteDrawOptions &NinePatchScale(f32 Scale)
+	{
+		NinePatchScaleValue = Scale;
 
 		return *this;
 	};

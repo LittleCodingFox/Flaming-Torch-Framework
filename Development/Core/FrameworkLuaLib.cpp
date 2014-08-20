@@ -50,6 +50,21 @@ namespace luabind
 namespace FlamingTorch
 {
 	FrameworkLib FrameworkLib::Instance;
+
+	int32 BitwiseSet(int32 a, int32 b)
+	{
+		return a | b;
+	};
+
+	bool BitwiseCheck(int32 a, int32 b)
+	{
+		return (a & b) != 0;
+	};
+
+	int32 BitwiseRemove(int32 a, int32 b)
+	{
+		return a | ~b;
+	};
 	
 	template<class type>
 	bool LuabindSimpleCompare(type &Self, type *Other)
@@ -406,7 +421,7 @@ namespace FlamingTorch
 	{
 		luabind::object Out = luabind::newtable(State);
 
-		for(uint32 i = 0; i < Self.Objects.size(); i++)
+		for(uint32 i = 0; i < Self.Layers.size(); i++)
 		{
 			Out[i + 1] = Self.Layers[i];
 		};
@@ -537,48 +552,6 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
-	std::string GetUIMenuBarItemCaption(UIMenuBar::Item &Self)
-	{
-		return Self.Caption.toAnsiString();
-	};
-
-	void SetUIMenuBarItemCaption(UIMenuBar::Item &Self, const std::string &Caption)
-	{
-		Self.Caption = Caption;
-	};
-
-	luabind::object GetUIMenuBarItemSubItems(UIMenuBar::Item &Self, lua_State *State)
-	{
-		luabind::object Out = luabind::newtable(State);
-
-		for(uint32 i = 0; i < Self.SubItems.size(); i++)
-		{
-			Out[i + 1] = Self.SubItems[i].toAnsiString();
-		};
-
-		return Out;
-	};
-
-	void SetUIMenuBarItemSubItems(UIMenuBar::Item &Self, luabind::argument Argument)
-	{
-		std::vector<sf::String> Items;
-
-		try
-		{
-			for(luabind::iterator it(Argument), end; it != end; it++)
-			{
-				Items.push_back(ProtectedLuaCast<const char *>(*it));
-			};
-
-			Self.SubItems = Items;
-		}
-		catch(std::exception &)
-		{
-			LuaScriptManager::Instance.LogError("@SetUIMenuBarItemSubItems: Unable to replace SubItems for item '" + 
-				Self.Caption.toAnsiString() + "'");
-		};
-	};
-
 	bool AddUIManagerElement(UIManager &Self, lua_Number ID, SuperSmartPointer<UIPanel> Element)
 	{
 		return Self.AddElement((StringID)ID, Element);
@@ -813,34 +786,14 @@ namespace FlamingTorch
 		return Self.FadeOut((uint64)Time);
 	};
 
-	std::string GetUIButtonCaption(UIButton &Self)
-	{
-		return Self.Caption.toAnsiString();
-	};
-
-	void SetUIButtonCaption(UIButton &Self, luabind::argument arg)
-	{
-		Self.Caption = luabind::object_cast<const char *>(arg);
-	};
-
-	std::string GetUICheckBoxCaption(UICheckBox &Self)
-	{
-		return Self.Caption.toAnsiString();
-	};
-
-	void SetUICheckBoxCaption(UICheckBox &Self, luabind::argument arg)
-	{
-		Self.Caption = luabind::object_cast<const char *>(arg);
-	};
-
 	std::string UITextGetText(UIText &Self)
 	{
 		return Self.GetText().toAnsiString();
 	};
 
-	void UITextSetText(UIText &Self, std::string &Text)
+	void UITextSetText(UIText &Self, const std::string &Text)
 	{
-		Self.SetText(Text, false);
+		Self.SetText(Text, Self.ExpandHeight);
 	};
 
 	luabind::object RenderTextFitTextOnRect(const std::string &String, TextParams Params, const Vector2 &Size, lua_State *State)
@@ -1161,17 +1114,21 @@ namespace FlamingTorch
 				.def("Info", &LogInfo)
 				.def("Warn", &LogWarn)
 				.def("Err", &LogErr)
-				.def("Warn", &LogWarn)
+				.def("Debug", &LogDebug)
 				.def("HideTag", &Log::HideTag)
 				.property("PrintTime", &Log::PrintTime),
 
 			//DirectoryInfo
 			luabind::class_<DirectoryInfo>("DirectoryInfo")
-				.def("ScanDirectory", &DirectoryInfoScan)
-				.def("CreateDirectory", &DirectoryInfo::CreateDirectory)
-				.def("ActiveDirectory", &DirectoryInfo::ActiveDirectory)
-				.def("ResourcesDirectory", &DirectoryInfo::ResourcesDirectory)
-				.def("PreferredStorageDirectory", &DirectoryInfo::PreferredStorageDirectory),
+				.scope [
+					luabind::def("ScanDirectory", &DirectoryInfoScan),
+					luabind::def("CreateDirectory", &DirectoryInfo::CreateDirectory),
+					luabind::def("ActiveDirectory", &DirectoryInfo::ActiveDirectory),
+					luabind::def("ResourcesDirectory", &DirectoryInfo::ResourcesDirectory),
+					luabind::def("PreferredStorageDirectory", &DirectoryInfo::PreferredStorageDirectory),
+					luabind::def("OpenFileDialog", &DirectoryInfo::OpenFileDialog),
+					luabind::def("SaveFileDialog", &DirectoryInfo::SaveFileDialog)
+				],
 
 			//FileInfo
 			luabind::class_<FileInfo>("FileInfo")
@@ -1229,6 +1186,7 @@ namespace FlamingTorch
 				.def("NewPackage", &PackageFileSystemManager::NewPackage)
 				.def("AddPackage", &PackageFileSystemManager::AddPackage)
 				.def("RemovePackage", &PackageFileSystemManager::RemovePackage)
+				.def("GetPackage", &PackageFileSystemManager::GetPackage)
 				.def("GetFile", &PackageFileSystemManager::GetFile)
 				.def("FindDirectories", &PackageFileSystemFindDirectories)
 				.def("FindFiles", &PackageFileSystemFindFiles),
@@ -1345,6 +1303,14 @@ namespace FlamingTorch
 				.def("TimeNoPause", &GameClockTimeNoPause)
 				.def("Difference", &GameClockDiff)
 				.def("DifferenceNoPause", &GameClockDiffNoPause),
+
+			//LinearTimer
+			luabind::class_<LinearTimer>("LinearTimer")
+				.property("Value", &LinearTimer::Value)
+				.property("ValueNoPause", &LinearTimer::ValueNoPause)
+				.def_readwrite("Interval", &LinearTimer::Interval)
+				.def("Reset", &LinearTimer::Reset)
+				.def(luabind::constructor<>()),
 
 			//GenericConfig
 			luabind::class_<GenericConfig, SuperSmartPointer<GenericConfig> >("GenericConfig")
@@ -1576,15 +1542,36 @@ namespace FlamingTorch
 				.def_readwrite("Right", &Rect::Right)
 				.def_readwrite("Top", &Rect::Top)
 				.def_readwrite("Bottom", &Rect::Bottom)
+				.property("Size", &Rect::Size)
+				.property("FullSize", &Rect::ToFullSize)
+				.property("Position", &Rect::Position)
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<const Rect &>())
 				.def(luabind::constructor<float, float>())
 				.def(luabind::constructor<float, float, float, float>())
 				.def(luabind::const_self + luabind::other<const Rect &>())
 				.def(luabind::const_self - luabind::other<const Rect &>())
-				.property("Size", &Rect::Size)
-				.property("FullSize", &Rect::ToFullSize)
-				.property("Position", &Rect::Position),
+				.def("IsInside", &Rect::IsInside)
+				.def("IsOutside", &Rect::IsOutside),
+
+			//RotateableRect
+			luabind::class_<RotateableRect>("RotateableRect")
+				.def_readwrite("Left", &RotateableRect::Left)
+				.def_readwrite("Right", &RotateableRect::Right)
+				.def_readwrite("Top", &RotateableRect::Top)
+				.def_readwrite("Bottom", &RotateableRect::Bottom)
+				.def_readwrite("Rotation", &RotateableRect::Rotation)
+				.property("Size", &RotateableRect::Size)
+				.property("FullSize", &RotateableRect::ToFullSize)
+				.property("Position", &RotateableRect::Position)
+				.def(luabind::constructor<>())
+				.def(luabind::constructor<const RotateableRect &>())
+				.def(luabind::constructor<float, float, float>())
+				.def(luabind::constructor<float, float, float, float, float>())
+				.def(luabind::const_self + luabind::other<const RotateableRect &>())
+				.def(luabind::const_self - luabind::other<const RotateableRect &>())
+				.def("IsInside", &RotateableRect::IsInside)
+				.def("IsOutside", &RotateableRect::IsOutside),
 
 			//AxisAlignedBoundingBox
 			luabind::class_<AxisAlignedBoundingBox>("AxisAlignedBoundingBox")
@@ -1776,11 +1763,12 @@ namespace FlamingTorch
 
 					luabind::class_<TiledMap::UniqueTilesetInfo>("UniqueTilesetInfo")
 						.property("Properties", &GetTilesetInfoProperties, &SetTilesetInfoProperties),
-
+						
 					luabind::class_<TiledMap::MapObject>("MapObject")
 						.def_readwrite("Position", &TiledMap::MapObject::Position)
 						.def_readwrite("Size", &TiledMap::MapObject::Size)
 						.def_readwrite("Name", &TiledMap::MapObject::Name)
+						.def_readwrite("ObjectType", &TiledMap::MapObject::Type)
 						.def_readwrite("IsPolyLine", &TiledMap::MapObject::IsPolyLine)
 						.property("PolygonData", &GetTiledMapPolygonData, &SetTiledMapPolygonData)
 						.property("Properties", &GetTiledMapObjectProperties, &SetTiledMapObjectProperties)
@@ -2045,6 +2033,7 @@ namespace FlamingTorch
 						.def_readwrite("FontSizeValue", &TextParams::FontSizeValue)
 						.def_readwrite("FontValue", &TextParams::FontValue)
 						.def_readwrite("StyleValue", &TextParams::StyleValue)
+						.def_readwrite("RotationValue", &TextParams::RotationValue)
 						.def(luabind::constructor<>())
 						.def(luabind::constructor<const TextParams &>())
 						.def("Style", &TextParams::Style, luabind::return_reference_to(_1))
@@ -2054,6 +2043,7 @@ namespace FlamingTorch
 						.def("SecondaryColor", &TextParams::SecondaryColor, luabind::return_reference_to(_1))
 						.def("BorderColor", &TextParams::BorderColor, luabind::return_reference_to(_1))
 						.def("BorderSize", &TextParams::BorderSize, luabind::return_reference_to(_1))
+						.def("Rotate", &TextParams::Rotate, luabind::return_reference_to(_1))
 						.def("Position", &TextParams::Position, luabind::return_reference_to(_1)),
 
 					luabind::def("LoadDefaultFont", &RenderTextUtils::LoadDefaultFont),
@@ -2369,11 +2359,7 @@ namespace FlamingTorch
 				.property("DefaultFontColor", &GetUIManagerDefaultFontColor)
 				.property("DefaultSecondaryFontColor", &GetUIManagerDefaultSecondaryFontColor)
 				.property("DefaultFontSize", &GetUIManagerDefaultFontSize)
-				.property("Skin", &UIManager::GetSkin, &UIManager::SetSkin)
-				.def("CreateMenu", &UIManager::CreateMenu)
-				.def("GetCurrentMenu", &UIManager::GetCurrentMenu)
-				.def("CreateMenuBar", &UIManager::CreateMenuBar)
-				.def("GetCurrentMenuBar", &UIManager::GetCurrentMenuBar),
+				.property("Skin", &UIManager::GetSkin, &UIManager::SetSkin),
 
 			//UIPanel
 			luabind::class_<UIPanel, SuperSmartPointer<UIPanel> >("UIPanel")
@@ -2428,6 +2414,7 @@ namespace FlamingTorch
 				.property("Opacity", &UIPanel::GetAlpha, &UIPanel::SetAlpha)
 				.property("Layout", &UIPanel::GetLayout)
 				.property("ExtraSize", &UIPanel::GetExtraSize)
+				.property("Rotation", &UIPanel::Rotation, &UIPanel::SetRotation)
 				.def("ClearAnimations", &UIPanel::ClearAnimations)
 				.def("FadeIn", &FadeInUIPanel)
 				.def("FadeOut", &FadeOutUIPanel)
@@ -2442,21 +2429,6 @@ namespace FlamingTorch
 					luabind::value("LayoutMode_Vertical", UIGroupLayoutMode::Vertical)
 				]
 				.def_readwrite("LayoutMode", &UIGroup::LayoutMode),
-
-			//UIButton
-			luabind::class_<UIButton, UIPanel>("UIButton")
-				.def_readwrite("TextParameters", &UIButton::TextParameters)
-				.property("Caption", &GetUIButtonCaption, &SetUIButtonCaption),
-				
-			//UICheckBox
-			luabind::class_<UICheckBox, UIPanel>("UICheckBox")
-				.property("Checked", &UICheckBox::IsChecked, &UICheckBox::SetChecked)
-				.property("Caption", &GetUICheckBoxCaption, &SetUICheckBoxCaption),
-
-			//UIDropdown
-			luabind::class_<UIDropdown, UIPanel>("UIDropdown"),
-			//UIFrame
-			luabind::class_<UIFrame, UIPanel>("UIFrame"),
 			//UILayout
 			luabind::class_<UILayout, SuperSmartPointer<UILayout> >("UILayout")
 				.def("Clone", &UILayout::Clone)
@@ -2465,26 +2437,6 @@ namespace FlamingTorch
 				.def_readwrite("Name", &UILayout::Name)
 				.property("Elements", &GetUILayoutElements),
 
-			//UIList
-			luabind::class_<UIList, UIPanel>("UIList"),
-			//UIMenu
-			luabind::class_<UIMenu, UIPanel>("UIMenu"),
-			//UIMenuBar
-			luabind::class_<UIMenuBar, UIPanel>("UIMenuBar")
-				.scope [
-					luabind::class_<UIMenuBar::Item>("Item")
-						.property("Caption", &GetUIMenuBarItemCaption, &SetUIMenuBarItemCaption)
-						.def_readwrite("UserData", &UIMenuBar::Item::UserData)
-						.property("SubItems", &GetUIMenuBarItemSubItems, &SetUIMenuBarItemSubItems)
-						.def(luabind::constructor<>())
-				]
-				.def_readwrite("OnClick", &UIMenuBar::LuaOnClickCallback)
-				.def("AddItem", &UIMenuBar::AddItem),
-
-			//UIScrollableFrame
-			luabind::class_<UIScrollableFrame, UIPanel>("UIScrollableFrame"),
-			//UIScrollbar
-			luabind::class_<UIScrollbar, UIPanel>("UIScrollbar"),
 			//UISprite
 			luabind::class_<UISprite, UIPanel>("UISprite")
 				.def_readwrite("Sprite", &UISprite::TheSprite),
@@ -2500,7 +2452,10 @@ namespace FlamingTorch
 #endif
 			
 			luabind::def("MakeStringID", &MakeStringID),
-			luabind::def("GetStringIDString", &GetStringIDString)
+			luabind::def("GetStringIDString", &GetStringIDString),
+			luabind::def("BitwiseSet", &BitwiseSet),
+			luabind::def("BitwiseCheck", &BitwiseCheck),
+			luabind::def("BitwiseRemove", &BitwiseRemove)
 		];
 
 		luabind::object Globals = luabind::globals(State);

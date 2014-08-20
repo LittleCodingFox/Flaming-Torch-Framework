@@ -5,29 +5,63 @@ class Component;
 /*!
 *	Game Entity class
 */
-class Entity
+class FLAMING_API Entity
 {
 public:
+	/*!
+	*	Entity Properties
+	*/
 	luabind::object Properties;
 
+	/*!
+	*	Entity Name
+	*/
 	std::string Name;
+
+	/*!
+	*	Entity ID
+	*/
 	StringID ID;
 
 	Entity() : ID(0) {};
 	~Entity();
 
+	/*!
+	*	Destroy this Entity
+	*/
 	void Destroy();
+
+	/*!
+	*	Make a copy of this Entity
+	*/
 	SuperSmartPointer<Entity> Clone() const;
 
+	/*!
+	*	Check whether this entity has a certain component
+	*	\param ComponentID the name of the Component
+	*/
 	bool HasComponent(const std::string &ComponentID) const;
+
+	/*!
+	*	Check whether this entity has a certain component
+	*	\param PropertyName the name of the Property
+	*/
 	bool HasProperty(const std::string &PropertyName) const;
 
+	/*!
+	*	Gets a component from this Entity
+	*	\param ComponentID the name of the Component
+	*/
 	Component *GetComponent(const std::string &ComponentID);
 
+	/*!
+	*	Adds a component to this Entity
+	*	\param ComponentID the name of the Component
+	*/
 	bool AddComponent(const std::string &ComponentID);
 };
 
-class World
+class FLAMING_API World
 {
 public:
 	typedef std::map<StringID, SuperSmartPointer<Entity> > EntityMap;

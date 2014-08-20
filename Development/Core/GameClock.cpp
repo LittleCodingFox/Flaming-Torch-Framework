@@ -186,4 +186,43 @@ namespace FlamingTorch
 	{
 		return GameClock::Instance.FixedStepDelta();
 	};
+
+	f32 LinearTimer::Value()
+	{
+		if(Interval == 0)
+			return 0;
+
+		f32 Result = GameClockDiff(StartTime) / (f32)Interval;
+		f32 ActualResult = MathUtils::Clamp(GoingUp ? Result : 1 - Result, 0, 1);
+
+		if(Result > 1)
+		{
+			GoingUp = !GoingUp;
+			StartTime = GameClockTime();
+		};
+
+		return ActualResult;
+	};
+
+	f32 LinearTimer::ValueNoPause()
+	{
+		if(Interval == 0)
+			return 0;
+
+		f32 Result = GameClockDiffNoPause(StartTime) / (f32)Interval;
+		f32 ActualResult = MathUtils::Clamp(GoingUp ? Result : 1 - Result, 0, 1);
+
+		if(Result > 1)
+		{
+			GoingUp = !GoingUp;
+			StartTime = GameClockTime();
+		};
+
+		return ActualResult;
+	};
+
+	void LinearTimer::Reset()
+	{
+		StartTime = GameClockTime();
+	};
 };

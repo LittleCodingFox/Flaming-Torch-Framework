@@ -3,7 +3,7 @@
 /*!
 *	2D/3D Camera Class
 */
-class Camera
+class FLAMING_API Camera
 {
 public:
 	/*!

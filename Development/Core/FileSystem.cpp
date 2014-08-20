@@ -7,6 +7,7 @@
 #	include <windows.h>
 #	include <direct.h>
 #	include <ShlObj.h>
+#	include <Commdlg.h>
 #	undef CreateDirectory
 #	define GetCWD _getcwd
 #else
@@ -62,6 +63,98 @@ namespace FlamingTorch
 #else
 		return unlink(Name.c_str()) != -1;
 #endif
+	};
+
+	std::string DirectoryInfo::OpenFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
+	{
+#if FLPLATFORM_WINDOWS
+		static std::vector<char> FileNameBuffer(MAX_PATH);
+
+		memset(&FileNameBuffer[0], 0, FileNameBuffer.size());
+
+		OPENFILENAMEA Config;
+
+		memset(&Config, 0, sizeof(Config));
+
+		Config.lStructSize = sizeof(Config);
+		Config.lpstrDefExt = (char *)Extension.c_str();
+		Config.nMaxFile = MAX_PATH;
+		Config.lpstrFilter = (char *)Filter.c_str();
+		Config.lpstrTitle = (char *)Title.c_str();
+		Config.lpstrFile = &FileNameBuffer[0];
+		Config.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+#if USE_GRAPHICS
+		RendererManager::Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
+
+		if(TheRenderer)
+		{
+			Config.hwndOwner = (HWND)TheRenderer->Window.getSystemHandle();
+		};
+#endif
+
+		if(Config.hwndOwner == NULL)
+		{
+			Config.hwndOwner = GetDesktopWindow();
+		};
+
+		if(GetOpenFileNameA(&Config))
+		{
+			return Config.lpstrFile;
+		}
+		else
+		{
+			Log::Instance.LogDebug("DirectoryInfo", "Failed to OpenFileDialog: 0x%04x", CommDlgExtendedError());
+		};
+#endif
+
+		return std::string();
+	};
+
+	std::string DirectoryInfo::SaveFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
+	{
+#if FLPLATFORM_WINDOWS
+		static std::vector<char> FileNameBuffer(MAX_PATH);
+
+		memset(&FileNameBuffer[0], 0, FileNameBuffer.size());
+
+		OPENFILENAMEA Config;
+
+		memset(&Config, 0, sizeof(Config));
+
+		Config.lStructSize = sizeof(Config);
+		Config.lpstrDefExt = (char *)Extension.c_str();
+		Config.nMaxFile = MAX_PATH;
+		Config.lpstrFilter = (char *)Filter.c_str();
+		Config.lpstrTitle = (char *)Title.c_str();
+		Config.lpstrFile = &FileNameBuffer[0];
+		Config.Flags = OFN_OVERWRITEPROMPT;
+
+#if USE_GRAPHICS
+		RendererManager::Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
+
+		if(TheRenderer)
+		{
+			Config.hwndOwner = (HWND)TheRenderer->Window.getSystemHandle();
+		};
+#endif
+
+		if(Config.hwndOwner == NULL)
+		{
+			Config.hwndOwner = GetDesktopWindow();
+		};
+
+		if(GetSaveFileNameA(&Config))
+		{
+			return Config.lpstrFile;
+		}
+		else
+		{
+			Log::Instance.LogDebug("DirectoryInfo", "Failed to SaveFileDialog: 0x%04x", CommDlgExtendedError());
+		};
+#endif
+
+		return std::string();
 	};
 
 	std::vector<std::string> DirectoryInfo::ScanDirectory(const std::string &Directory,

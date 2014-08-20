@@ -121,10 +121,10 @@ namespace FlamingTorch
 
 		for(uint32 i = 0, index = 0; i < VertexCount; i+=6, index+=4)
 		{
-			Positions[i] = Positions[i + 5] = ActualPosition + Vector2(Vertices[index].position.x, Vertices[index].position.y);
-			Positions[i + 1] = ActualPosition + Vector2(Vertices[index + 3].position.x, Vertices[index + 3].position.y);
-			Positions[i + 2] = Positions[i + 3] = ActualPosition + Vector2(Vertices[index + 2].position.x, Vertices[index + 2].position.y);
-			Positions[i + 4] = ActualPosition + Vector2(Vertices[index + 1].position.x, Vertices[index + 1].position.y);
+			Positions[i] = Positions[i + 5] = Vector2(Vertices[index].position.x, Vertices[index].position.y);
+			Positions[i + 1] = Vector2(Vertices[index + 3].position.x, Vertices[index + 3].position.y);
+			Positions[i + 2] = Positions[i + 3] = Vector2(Vertices[index + 2].position.x, Vertices[index + 2].position.y);
+			Positions[i + 4] = Vector2(Vertices[index + 1].position.x, Vertices[index + 1].position.y);
 
 			TexCoords[i] = TexCoords[i + 5] = Vector2(Vertices[index].texCoords.x, Vertices[index].texCoords.y) / FontTextureSize;
 			TexCoords[i + 1] = Vector2(Vertices[index + 3].texCoords.x, Vertices[index + 3].texCoords.y) / FontTextureSize;
@@ -143,6 +143,25 @@ namespace FlamingTorch
 
 		if(!Positions.size())
 			return;
+
+		sf::FloatRect ObjectRect = Text.getLocalBounds();
+
+		Vector2 ObjectSize = Vector2(ObjectRect.left + ObjectRect.width, ObjectRect.top + ObjectRect.height) / 2;
+
+		if(Params.RotationValue != 0)
+		{
+			for(uint32 i = 0; i < VertexCount; i++)
+			{
+				Positions[i] = Vector2::Rotate(Positions[i] - ObjectSize, Params.RotationValue) + ObjectSize + ActualPosition;
+			};
+		}
+		else
+		{
+			for(uint32 i = 0; i < VertexCount; i++)
+			{
+				Positions[i] = Positions[i] + ActualPosition;
+			};
+		};
 
 		TheRenderer->BindTexture(NULL);
 

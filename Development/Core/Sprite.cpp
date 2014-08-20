@@ -221,7 +221,8 @@ namespace FlamingTorch
 
 			for(uint32 i = 0, index = 0; i < 9; i++, index += 6)
 			{
-				GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, SpriteTexture->Size(), FragmentPositions[i], FragmentSizes[i], FragmentOffsets[i], FragmentSizeOverrides[i]);
+				GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, SpriteTexture->Size(), FragmentPositions[i], FragmentSizes[i] * Options.NinePatchScaleValue, FragmentOffsets[i] * Options.NinePatchScaleValue,
+					FragmentSizeOverrides[i] * Options.NinePatchScaleValue);
 			};
 		};
 
@@ -309,9 +310,11 @@ namespace FlamingTorch
 
 		if(Options.RotationValue != 0)
 		{
+			Vector2 ExtraSize = Options.NinePatchValue ? -ObjectSize / 2 + Options.NinePatchRectValue.ToFullSize() / 4 : -ObjectSize / 2;
+
 			for(uint32 i = 0; i < VertexCount; i++)
 			{
-				VerticesTarget[i] = Vector2::Rotate(VerticesTarget[i] - ObjectSize / 2, Options.RotationValue);
+				VerticesTarget[i] = Vector2::Rotate(VerticesTarget[i] + ExtraSize, Options.RotationValue) - ExtraSize;
 				VerticesTarget[i] += PinningTranslation + Options.OffsetValue + Options.PositionValue;
 			};
 		}

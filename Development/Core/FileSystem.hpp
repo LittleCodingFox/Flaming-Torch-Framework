@@ -3,25 +3,69 @@
 #undef CreateDirectory
 #endif
 
+/*!
+*	Directory Utility class
+*/
 class FLAMING_API DirectoryInfo
 {
 public:
-	//Extension should be in the form of <word>, not *.<word> or .<word>
+	/*!
+	*	Enumerate all files with a certain extension
+	*	\param Directory the directory to start scanning from
+	*	\param Extension the extension, without the *. portion (e.g., instead of "*.txt" it should be "txt")
+	*	\param Recursive whether it should recursively scan subdirectories
+	*/
 	static std::vector<std::string> ScanDirectory(const std::string &Directory,
 		const std::string &Extension, bool Recursive = false);
 
+	/*!
+	*	Creates a directory
+	*	\param Directory the directory path
+	*/
 	static bool CreateDirectory(const std::string &Directory);
-	//also known as Current Working Directory
+
+	/*!
+	*	The current working directory
+	*/
 	static const std::string &ActiveDirectory();
-	//Directory containing our resource files
+
+	/*!
+	*	The resources directory
+	*/
 	static const std::string &ResourcesDirectory();
-	//Directory where we should save files
+
+	/*!
+	*	The preferred storage directory
+	*/
 	static const std::string &PreferredStorageDirectory();
+
+	/*!
+	*	Creates an Open File Dialog
+	*	\param Title the title of the dialog
+	*	\param Extension the extension to use, without the *. portion (e.g., instead of "*.txt" it should be "txt")
+	*	\param Filter the filter to use in the form of Name\0Filter\0Repeat (e.g., "Text Files\0*.txt" or "Text Files\0*.txt\0RTF Files\0*.rtf")
+	*/
+	static std::string OpenFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter);
+
+	/*!
+	*	Creates a Save File Dialog
+	*	\param Title the title of the dialog
+	*	\param Extension the extension to use, without the *. portion (e.g., instead of "*.txt" it should be "txt")
+	*	\param Filter the filter to use in the form of Name\0Filter\0Repeat (e.g., "Text Files\0*.txt" or "Text Files\0*.txt\0RTF Files\0*.rtf")
+	*/
+	static std::string SaveFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter);
 };
 
+/*!
+*	File Utility Class
+*/
 class FLAMING_API FileInfo
 {
 public:
+	/*!
+	*	Removes a file from a storage device
+	*	\param Name the filename with path to remove
+	*/
 	static bool Remove(const std::string Name);
 };
 
@@ -35,6 +79,10 @@ namespace StreamFlags
 	};
 };
 
+/*!
+*	Stream Processor
+*	Processes Stream Data while it is read or written
+*/
 class FLAMING_API StreamProcessor 
 {
 public:
@@ -45,9 +93,15 @@ public:
 	virtual void Decode(void *Data, uint32 Length) = 0;
 };
 
+/*!
+*	XOR-Based Stream Processor
+*/
 class FLAMING_API XORStreamProcessor : public StreamProcessor
 {
 public:
+	/*!
+	*	XOR Key
+	*/
 	uint8 Key;
 
 	XORStreamProcessor() : StreamProcessor("XORStreamProcessor"), Key((uint8)'FL') {};
@@ -73,6 +127,9 @@ public:
 	};
 };
 
+/*!
+*	Data Stream Class
+*/
 class FLAMING_API Stream 
 {
 protected:

@@ -34,7 +34,7 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
 	{
-		if(FileName == "GUILayout.resource")
+		if(FileName == "GUILayout.resource" || FileName == "DefaultLayout.resource")
 			ReloadGUI();
 	};
 
@@ -44,12 +44,20 @@ namespace FlamingTorch
 
 		SuperSmartPointer<FileStream> InputStream(new FileStream());
 
-		if(!InputStream->Open(DirectoryInfo::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text))
-			return;
+		if(!InputStream->Open(DirectoryInfo::ResourcesDirectory() + "DefaultLayout.resource", StreamFlags::Read | StreamFlags::Text) ||
+			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream, SuperSmartPointer<UIPanel>(), true))
+		{
+			Log::Instance.LogErr(TAG, "Failed to reload our Default GUI Layouts!");
 
-		if(!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream))
+			return;
+		};
+		
+		if(!InputStream->Open(DirectoryInfo::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text) ||
+			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream))
 		{
 			Log::Instance.LogErr(TAG, "Failed to reload our GUI Layouts!");
+
+			return;
 		};
 	};
 

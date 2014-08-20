@@ -847,10 +847,63 @@ namespace FlamingTorch
 	bool Rect::IsInside(const Vector2 &Position) const
 	{
 		return(Position.x >= Left && Position.x <= Right &&
-			Position.y >= Bottom && Position.y <= Top);
+			Position.y >= Top && Position.y <= Bottom);
 	};
 
 	bool Rect::IsOutside(const Vector2 &Position) const
+	{
+		return !IsInside(Position);
+	};
+
+	RotateableRect::RotateableRect()
+	{
+		Left = Right = Top = Bottom = Rotation = 0.0f;
+	};
+
+	RotateableRect::RotateableRect(const RotateableRect &Other)
+	{
+		Left = Other.Left;
+		Right = Other.Right;
+		Top = Other.Top;
+		Bottom = Other.Bottom;
+		Rotation = Other.Rotation;
+	};
+
+	RotateableRect::RotateableRect(f32 Width, f32 Height, f32 Rotation)
+	{
+		Left = -Width;
+		Right = -Left;
+		Top = -Height;
+		Bottom = -Top;
+		this->Rotation = Rotation;
+	};
+
+	RotateableRect::RotateableRect(f32 Left, f32 Right, f32 Top, f32 Bottom, f32 Rotation)
+	{
+		this->Left = Left;
+		this->Right = Right;
+		this->Top = Top;
+		this->Bottom = Bottom;
+		this->Rotation = Rotation;
+	};
+
+	bool RotateableRect::IsInside(const Vector2 &Position) const
+	{
+		if(Rotation == 0)
+		{
+			return Position.x >= Left && Position.x <= Right && Position.y >= Top && Position.y <= Bottom;
+		};
+
+		Vector2 Size = Vector2(Right - Left, Bottom - Top);
+		Vector2 Delta = Position - this->Position();
+		f32 Distance = sqrtf(Delta.Dot(Delta));
+		f32 Angle = atan2f(Delta.y, Delta.x) - Rotation;
+		Vector2 NewPosition(cosf(Angle) * Distance, sinf(Angle) * Distance);
+
+		return NewPosition.x > -0.5 * Size.x && NewPosition.x < 0.5 * Size.x && NewPosition.y > -0.5 * Size.y && NewPosition.y < 0.5 * Size.y;
+	};
+
+	bool RotateableRect::IsOutside(const Vector2 &Position) const
 	{
 		return !IsInside(Position);
 	};

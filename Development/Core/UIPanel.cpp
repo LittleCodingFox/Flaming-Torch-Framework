@@ -97,7 +97,7 @@ namespace FlamingTorch
 	UIPanel::UIPanel(const std::string &NativeTypeName, UIManager *_Manager) : NativeType(NativeTypeName), Manager(_Manager), VisibleValue(true),
 		EnabledValue(true), MouseInputValue(true), KeyboardInputValue(true), AlphaValue(1),
 		ClickPressed(false), BlockingInput(false), IsDraggableValue(false), IsDroppableValue(false),
-		DraggingValue(false), TooltipFixed(false)
+		DraggingValue(false), TooltipFixed(false), RotationValue(0), ExtraSizeScaleValue(1)
 	{
 		FLASSERT(Manager != NULL, "Invalid UI Manager!");
 		FLASSERT(Manager->ScriptInstance, "Invalid UI Manager Script!");
@@ -452,15 +452,35 @@ namespace FlamingTorch
 			Renderer->DisableState(GL_NORMAL_ARRAY);
 			Renderer->BindTexture(NULL);
 
+			Vector2 SelectBoxExtraSize(GetScaledExtraSize());
+
 			Vector2 Vertices[8] = {
-				ActualPosition - SelectBoxExtraSize / 2,
-				ActualPosition + Vector2(SizeValue.x + SelectBoxExtraSize.x / 2, -SelectBoxExtraSize.y / 2),
-				ActualPosition + Vector2(SizeValue.x + SelectBoxExtraSize.x / 2, -SelectBoxExtraSize.y / 2),
-				ActualPosition + SizeValue + SelectBoxExtraSize / 2,
-				ActualPosition + SizeValue + SelectBoxExtraSize / 2,
-				ActualPosition + Vector2(-SelectBoxExtraSize.x / 2, SizeValue.y + SelectBoxExtraSize.y / 2),
-				ActualPosition + Vector2(-SelectBoxExtraSize.x / 2, SizeValue.y + SelectBoxExtraSize.y / 2),
-				ActualPosition - SelectBoxExtraSize / 2,
+				-SelectBoxExtraSize / 2,
+				Vector2(SizeValue.x + SelectBoxExtraSize.x / 2, -SelectBoxExtraSize.y / 2),
+				Vector2(SizeValue.x + SelectBoxExtraSize.x / 2, -SelectBoxExtraSize.y / 2),
+				SizeValue + SelectBoxExtraSize / 2,
+				SizeValue + SelectBoxExtraSize / 2,
+				Vector2(-SelectBoxExtraSize.x / 2, SizeValue.y + SelectBoxExtraSize.y / 2),
+				Vector2(-SelectBoxExtraSize.x / 2, SizeValue.y + SelectBoxExtraSize.y / 2),
+				-SelectBoxExtraSize / 2,
+			};
+
+			Vector2 ObjectSize(0, 0);
+
+			for(uint32 i = 0; i < 8; i++)
+			{
+				if(Vertices[i].x > ObjectSize.x)
+					ObjectSize.x = Vertices[i].x;
+
+				if(Vertices[i].y > ObjectSize.y)
+					ObjectSize.y = Vertices[i].y;
+			};
+
+			ObjectSize /= 2;
+
+			for(uint32 i = 0; i < 8; i++)
+			{
+				Vertices[i] = Vector2::Rotate(Vertices[i] - ObjectSize, GetParentRotation()) + ObjectSize + ActualPosition;
 			};
 
 			glColor4f(1, 0.75f, 0, 0.75f);

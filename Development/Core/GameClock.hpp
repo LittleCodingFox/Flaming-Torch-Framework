@@ -1,4 +1,41 @@
 #pragma once
+/*!
+*	Linear Timer
+*	A timer that calculates a value between 0 and 1 as time progresses, then returns to the original value, repeating this
+*/
+class FLAMING_API LinearTimer
+{
+private:
+	uint64 StartTime;
+	bool GoingUp;
+public:
+	/*!
+	*	Time Interval
+	*/
+	uint64 Interval;
+
+	LinearTimer() : Interval(0), StartTime(0), GoingUp(true) {};
+
+	/*!
+	*	Current Linear Value
+	*/
+	f32 Value();
+
+	/*!
+	*	Current Linear Value
+	*	\note Ignores clockpauses
+	*/
+	f32 ValueNoPause();
+	
+	/*!
+	*	Resets this LinearTimer
+	*/
+	void Reset();
+};
+
+/*!
+*	Game Clock
+*/
 class FLAMING_API GameClock : public SubSystem
 {
 private:
@@ -23,37 +60,104 @@ public:
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
 
+	/*!
+	*	Pauses the game clock
+	*/
 	void Pause();
+
+	/*!
+	*	Unpauses the game clock
+	*/
 	void Unpause();
+	
+	/*!
+	*	Gets the time since we started running
+	*/
 	uint64 GetElapsedTime();
-	float Delta();
+	
+	/*!
+	*	Gets the current frame delta time
+	*/
+	f32 Delta();
+	
+	/*!
+	*	Gets the current time as a string
+	*/
 	std::string CurrentTimeAsString();
+	
+	/*!
+	*	Gets the current time
+	*/
 	uint64 CurrentTime();
+	
+	/*!
+	*	Sets our fixed step Framerate
+	*	\param FPS the target FPS
+	*/
 	void SetFixedStepRate(uint32 FPS);
+
+	/*!
+	*	Gets the fixed step interval
+	*/
 	uint64 GetFixedStepInterval();
+
+	/*!
+	*	Gets the fixed step rate (FPS)
+	*/
 	uint32 GetFixedStepRate();
-	//Checks AccumulatedTime and subtracts the Fixed Step Interval should it pass.
-	//Call this while its true to run multiple Fixed Step frames
+	
+	/*!
+	*	Whether we may perform a Fixed Step Step
+	*/
 	bool MayPerformFixedStepStep();
+	
+	/*!
+	*	The Fixed Step Delta
+	*/
 	f32 FixedStepDelta();
 };
 
-//Current game time
+/*!
+*	Current Time
+*/
 uint64 FLAMING_API GameClockTime();
-//Current game time (no pauses applied)
+
+/*!
+*	Current Time
+*	\note ignores pauses
+*/
 uint64 FLAMING_API GameClockTimeNoPause();
 
-//Game time difference
-/*
-	Used like this:
-	Where you used to do <custom timer>.GetElapsedTime()
-	you do GameClockDiff(<starting time>)
-	where the starting time was set once with GameClockTime
+/*!
+*	Get the time difference with another time offset
+*	\param offset the other time offset
 */
 uint64 FLAMING_API GameClockDiff(uint64 offset);
+
+/*!
+*	Get the time difference with another time offset
+*	\param offset the other time offset
+*	\note ignores pauses
+*/
 uint64 FLAMING_API GameClockDiffNoPause(uint64 offset);
+
+/*!
+*	Get the delta time since the last frame
+*/
 f32 FLAMING_API GameClockDelta();
+
+/*!
+*	Sets the Fixed Frame Rate of the game clock
+*	\param FPS the target FPS
+*/
 void FLAMING_API GameClockSetFixedFrameRate(uint32 FPS);
+
+/*!
+*	Check whether we may perform a fixed time step
+*/
 bool FLAMING_API GameClockMayPerformFixedTimeStep();
-//Fixed-step delta
+
+/*!
+*	Get the fixed time step delta
+*/
 f32 FLAMING_API GameClockFixedDelta();

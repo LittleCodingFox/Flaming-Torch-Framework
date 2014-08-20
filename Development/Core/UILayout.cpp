@@ -39,27 +39,63 @@ namespace FlamingTorch
 		return it->second;
 	};
 
-	SuperSmartPointer<UILayout> UILayout::Clone(SuperSmartPointer<UIPanel> Parent, const std::string &ParentElementName)
+	SuperSmartPointer<UILayout> UILayout::Clone(SuperSmartPointer<UIPanel> Parent, const std::string &ParentElementName, bool ShouldDisplayParentlessElements, bool DoStartupEvents)
 	{
 		SuperSmartPointer<UILayout> Out(new UILayout());
 		Out->Name = Name;
 		Out->ContainedObjects = ContainedObjects;
 		Out->Owner = Owner;
+		Out->Parent = Parent;
 
 		Owner->CopyElementsToLayout(Out, ContainedObjects, Parent, ParentElementName + "." +
 			Out->Name);
 
-		for(ElementMap::iterator it = Out->Elements.begin(); it != Out->Elements.end(); it++)
+		if(ShouldDisplayParentlessElements)
+		{
+			Out->DisplayParentlessElements();
+		};
+
+		if(DoStartupEvents)
+			Out->PerformStartupEvents(NULL);
+
+		return Out;
+	};
+
+	void UILayout::DisplayParentlessElements()
+	{
+		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
 			if(it->second->GetParent() == Parent.Get())
 			{
 				it->second->SetVisible(true);
+
+				if(it->second->NativeType == "UIGroup" && it->second->GetChildrenCount())
+					it->second->SetSize(it->second->GetChildrenSize());
+			};
+		};
+	};
+
+	void UILayout::PerformStartupEvents(UIPanel *ParentElement)
+	{
+		if(ParentElement)
+		{
+			for(uint32 i = 0; i < ParentElement->GetChildrenCount(); i++)
+			{
+				PerformStartupEvents(ParentElement->GetChild(i));
 			};
 
-			RUN_GUI_SCRIPT_EVENTS2(it->second->OnStartFunction, (it->second.Get()), it->second->ID)
+			RUN_GUI_SCRIPT_EVENTS2(ParentElement->OnStartFunction, (ParentElement), ParentElement->ID);
+		}
+		else
+		{
+			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
+			{
+				for(uint32 i = 0; i < it->second->GetChildrenCount(); i++)
+				{
+					PerformStartupEvents(it->second.Get());
+				};
+			};
 		};
-
-		return Out;
 	};
 #endif
 };

@@ -1,7 +1,7 @@
 /*!
-	FPS Counter Subsystem
+*	FPS Counter Subsystem
 */
-class FPSCounter : public SubSystem
+class FLAMING_API FPSCounter : public SubSystem
 {
 private:
 	f32 Time;
@@ -12,7 +12,7 @@ public:
 	static FPSCounter Instance;
 
 	/*!
-		\return the Current Frames Per Second
+	*	\return the Current Frames Per Second
 	*/
 	uint32 FPS();
 

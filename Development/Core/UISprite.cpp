@@ -14,11 +14,15 @@ namespace FlamingTorch
 
 		PerformLayout();
 
+		Vector2 ParentSizeHalf = SizeValue / 2;
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
-			Children[i]->Update(ActualPosition);
+			Vector2 ChildrenSizeHalf = (Children[i]->GetSize() + Children[i]->GetScaledExtraSize()) / 2;
+			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset();
+
+			Children[i]->Update(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition);
 		};
 	};
 
@@ -37,16 +41,22 @@ namespace FlamingTorch
 
 		if(TempSprite.Options.ScaleValue.x > 0 && TempSprite.Options.ScaleValue.y > 0)
 		{
-			TempSprite.Options = TempSprite.Options.Position(ActualPosition + TheSprite.Options.PositionValue).Color(TheSprite.Options.ColorValue * Vector4(1, 1, 1, GetParentAlpha()));
+			TempSprite.Options = TempSprite.Options.Position(ActualPosition + TheSprite.Options.PositionValue).Color(TheSprite.Options.ColorValue * Vector4(1, 1, 1, GetParentAlpha()))
+				.Rotation(GetParentRotation() + TempSprite.Options.RotationValue).NinePatchScale(ExtraSizeScaleValue);
 			TempSprite.Draw(Renderer);
 		};
 
+		DrawUIRect(ParentPosition, Renderer);
+
+		Vector2 ParentSizeHalf = SizeValue / 2;
+
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
-			Children[i]->Draw(ActualPosition, Renderer);
-		};
+			Vector2 ChildrenSizeHalf = (Children[i]->GetSize() + Children[i]->GetScaledExtraSize()) / 2;
+			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset();
 
-		DrawUIRect(ParentPosition, Renderer);
+			Children[i]->Draw(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition, Renderer);
+		};
 	};
 #endif
 };

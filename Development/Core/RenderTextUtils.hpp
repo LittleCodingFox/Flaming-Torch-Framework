@@ -8,16 +8,16 @@ class FLAMING_API TextParams
 public:
 	Vector4 TextColorValue, SecondaryTextColorValue, BorderColorValue;
 	Vector2 PositionValue;
-	f32 BorderSizeValue;
+	f32 BorderSizeValue, RotationValue;
 	sf::Font *FontValue;
 	uint32 FontSizeValue;
 	uint32 StyleValue;
 
 	TextParams() : BorderSizeValue(0), TextColorValue(1, 1, 1, 1), SecondaryTextColorValue(1, 1, 1, 1), BorderColorValue(0, 0, 0, 1),
-		FontValue(NULL), FontSizeValue(12), StyleValue(sf::Text::Regular) {}
+		FontValue(NULL), FontSizeValue(12), StyleValue(sf::Text::Regular), RotationValue(0) {}
 	TextParams(const TextParams &o) : BorderSizeValue(o.BorderSizeValue), TextColorValue(o.TextColorValue),
 		SecondaryTextColorValue(o.SecondaryTextColorValue), BorderColorValue(o.BorderColorValue), PositionValue(o.PositionValue),
-		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), StyleValue(o.StyleValue) {};
+		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), StyleValue(o.StyleValue), RotationValue(o.RotationValue) {};
 
 	TextParams &operator=(const TextParams &o)
 	{
@@ -29,6 +29,18 @@ public:
 		FontValue = o.FontValue;
 		FontSizeValue = o.FontSizeValue;
 		StyleValue = o.StyleValue;
+		RotationValue = o.RotationValue;
+
+		return *this;
+	};
+
+	/*!
+	*	Sets the text's rotation
+	*	\param Rotation the rotation in Radians
+	*/
+	TextParams &Rotate(f32 Rotation)
+	{
+		RotationValue = Rotation;
 
 		return *this;
 	};

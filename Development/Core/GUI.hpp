@@ -76,7 +76,7 @@ class FLAMING_API UIPanel
 protected:
 	bool VisibleValue, EnabledValue, MouseInputValue, KeyboardInputValue;
 	Vector2 PositionValue, SizeValue, TranslationValue, SelectBoxExtraSize, OffsetValue;
-	f32 AlphaValue;
+	f32 AlphaValue, RotationValue, ExtraSizeScaleValue;
 	UILayout *Layout;
 	UIManager *Manager;
 	bool RespondsToTooltipsValue, TooltipFixed;
@@ -201,6 +201,23 @@ public:
 	UIPanel *FadeOut(uint64 Duration);
 
 	/*!
+	*	\return the extra size scale
+	*/
+	f32 ExtraSizeScale()
+	{
+		return ExtraSizeScaleValue;
+	};
+
+	/*!
+	*	Sets the Extra Size Scale
+	*	\param Scale the scale of the extra size
+	*/
+	void SetExtraSizeScale(f32 Scale)
+	{
+		ExtraSizeScaleValue = Scale;
+	};
+
+	/*!
 	*	Sets whether this element has tooltips
 	*	\param Value whether it does respond to tooltips
 	*/
@@ -215,6 +232,42 @@ public:
 	bool TooltipsFixed()
 	{
 		return TooltipFixed;
+	};
+
+	/*!
+	*	Sets this element's rotation
+	*	\param Value this element's rotation in Radians
+	*/
+	void SetRotation(f32 Value)
+	{
+		RotationValue = Value;
+	};
+
+	/*!
+	*	Gets this element's rotation in Radians
+	*/
+	f32 Rotation()
+	{
+		return RotationValue;
+	};
+
+	/*!
+	*	Gets the rotation of this element combined with its parents
+	*/
+	f32 GetParentRotation()
+	{
+		f32 Rotation = RotationValue;
+
+		UIPanel *Parent = ParentValue;
+
+		while(Parent != NULL)
+		{
+			Rotation += Parent->RotationValue;
+
+			Parent = Parent->GetParent();
+		};
+
+		return Rotation;
 	};
 
 	/*!
@@ -374,15 +427,15 @@ public:
 	};
 
 	/*!
-	*	Calculates the position of this element and all its parents to return the overall (absolute) position
-	*	\return the calculated absolute position of this UI Element
+	*	Calculates the position of this element's parents to return the overall (absolute) position
+	*	\return the calculated absolute position of this UI Element's parents
 	*/
 	Vector2 GetParentPosition()
 	{
 		if(!ParentValue)
 			return Vector2();
 
-		Vector2 Position;
+		Vector2 Position = PositionValue + OffsetValue + TranslationValue;
 		UIPanel *p = ParentValue;
 
 		while(p)
@@ -570,7 +623,6 @@ public:
 		return AlphaValue;
 	};
 
-
 	/*!
 	*	\return the Alpha Transparency of this element and all its parents
 	*/
@@ -599,7 +651,7 @@ public:
 
 			Children[i]->PerformLayout();
 
-			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetSize() + Children[i]->GetExtraSize() / 2;
+			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetSize() + Children[i]->GetScaledExtraSize() / 2;
 
 			if(Out.x < Size.x)
 				Out.x = Size.x;
@@ -645,6 +697,14 @@ public:
 	};
 
 	/*!
+	*	Gets the Scaled Extra Size
+	*/
+	Vector2 GetScaledExtraSize()
+	{
+		return SelectBoxExtraSize * ExtraSizeScaleValue;
+	};
+
+	/*!
 	*	Focuses this element
 	*/
 	void Focus();
@@ -682,432 +742,8 @@ public:
 	};
 
 	void PerformLayout();
-
-	void Update(const Vector2 &ParentPosition)
-	{
-		UIPanel::Update(ParentPosition);
-
-		PerformLayout();
-
-		for(uint32 i = 0; i < Children.size(); i++)
-		{
-			Children[i]->Update(ParentPosition + PositionValue + OffsetValue);
-		};
-	};
-
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
-	{
-		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
-
-		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
-			ActualPosition.x > Renderer->Size().x ||
-			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
-			return;
-
-		UIPanel::Draw(ParentPosition, Renderer);
-
-		for(uint32 i = 0; i < Children.size(); i++)
-		{
-			Children[i]->Draw(ActualPosition, Renderer);
-		};
-
-		DrawUIRect(ParentPosition, Renderer);
-	};
-};
-
-/*!
-*	UI Frame Element
-*/
-class FLAMING_API UIFrame : public UIPanel
-{
-protected:
-	SuperSmartPointer<Texture> BackgroundTexture;
-	Rect TextureRect;
-
-	void OnSkinChange();
-public:
-	UIFrame(UIManager *Manager) : UIPanel("UIFrame", Manager)
-	{
-		OnConstructed();
-	};
-
 	void Update(const Vector2 &ParentPosition);
 	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
-/*!
-*	UI Button Element
-*	\note Size can be 0, since it'll resize itself on draw
-*/
-class FLAMING_API UIButton : public UIPanel
-{
-protected:
-	SuperSmartPointer<Texture> NormalTexture, FocusedTexture;
-	Rect TextureRect;
-	Vector2 LabelOffset;
-
-	void OnSkinChange();
-public:
-	/*!
-	*	The Button's Text
-	*/
-	sf::String Caption;
-
-	TextParams TextParameters;
-
-	UIButton(UIManager *Manager);
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
-/*!
-*	UI Text Box Element
-*	\note Size can be 0 on Y, will autoresize that way
-*/
-class FLAMING_API UITextBox : public UIPanel
-{
-protected:
-	SuperSmartPointer<Texture> BackgroundTexture;
-	Rect TextureRect;
-	sf::String Text;
-	uint32 CursorPosition, TextOffset, Padding;
-	std::string FontName;
-	bool IsPasswordValue;
-
-	Vector2 LastSizeValue;
-
-	void OnMouseJustPressedTextBox(UIPanel *This, const InputCenter::MouseButtonInfo &o);
-	void OnKeyJustPressedTextBox(UIPanel *This, const InputCenter::KeyInfo &o);
-	void OnCharacterEnteredTextBox(UIPanel *This);
-	void OnSkinChange();
-public:
-	TextParams TextParameters;
-
-	UITextBox(UIManager *Manager);
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-
-	/*!
-	*	\return whether this textbox is a password
-	*/
-	bool IsPassword()
-	{
-		return IsPasswordValue;
-	};
-
-	/*!
-	*	Sets whether this textbox is a password
-	*	\param Value whether this textbox is a password
-	*/
-	void SetPassword(bool Value)
-	{
-		IsPasswordValue = Value;
-	};
-
-	/*!
-	*	\return the Text of this Text Box
-	*/
-	const sf::String &GetText() const
-	{
-		return Text;
-	};
-
-	/*!
-	*	Sets the Text of this Text Box
-	*	\param Text the new Text
-	*/
-	void SetText(const sf::String &Text)
-	{
-		this->Text = Text;
-		CursorPosition = TextOffset = 0;
-	};
-};
-
-#define SCROLLBAR_DRAGGABLE_SIZE 15
-
-class UIScrollbar;
-
-/*!
-*	UI Scrollable Frame Element
-*	\note Will not Autoresize
-*	\note Includes SCROLLBAR_DRAGGABLE_SIZE Pixels on the Size's Width should scrolling be required
-*/
-class FLAMING_API UIScrollableFrame : public UIPanel
-{
-	friend class UIList;
-protected:
-	SuperSmartPointer<UIScrollbar> VerticalScroll, HorizontalScroll;
-
-	void OnSkinChange();
-	void MakeScrolls();
-public:
-	UIScrollableFrame(UIManager *Manager) : UIPanel("UIScrollableFrame", Manager)
-	{
-		OnConstructed();
-	};
-
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
-/*!
-*	UI List Element
-*	\note Will AutoSize outwards vertically
-*	\note Must have a ScrollableFrame parent
-*/
-class FLAMING_API UIList : public UIPanel
-{
-private:
-	SuperSmartPointer<Texture> SelectorBackgroundTexture;
-	void OnSkinChange();
-	void OnItemClickCheck(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
-public:
-	/*!
-	*	All items contained by this List
-	*/
-	std::vector<std::string> Items;
-
-	TextParams TextParameters;
-
-	/*!
-	*	(UIList Self, uint32 ItemIndex)
-	*/
-	Signal2<UIList *, uint32> OnItemMouseOver, OnItemClick;
-
-	UIList(UIManager *Manager);
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
-/*!
-*	UI Check Box Element
-*/
-class FLAMING_API UICheckBox : public UIPanel
-{
-private:
-	SuperSmartPointer<Texture> CheckTexture, UnCheckTexture;
-	bool Checked;
-	Vector2 LabelOffset;
-
-	void CheckMouseClick(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
-	void OnSkinChange();
-public:
-	/*!
-	*	The Checkbox's Caption Text
-	*/
-	sf::String Caption;
-
-	TextParams TextParameters;
-
-	/*!
-	*	Events for when the Checkbox is Checked or Unchecked
-	*/
-	Signal1<UICheckBox *> OnChecked, OnUnChecked;
-
-	UICheckBox(UIManager *Manager);
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-
-	/*!
-	*	\return Whether the Checkbox has been checked
-	*/
-	bool IsChecked()
-	{
-		return Checked;
-	};
-
-	/*!
-	*	Set whether the Checkbox is checked
-	*	\param Value whether the Checkbox is checked
-	*/
-	void SetChecked(bool Value)
-	{
-		Checked = Value;
-
-		if(Checked)
-		{
-			OnChecked(this);
-		}
-		else
-		{
-			OnUnChecked(this);
-		};
-	};
-};
-
-/*!
-*	UI Menu Element
-*/
-class FLAMING_API UIMenu : public UIPanel
-{
-	friend class UIManager;
-private:
-	SuperSmartPointer<Texture> BackgroundTexture, SelectorBackgroundTexture;
-	Vector2 Padding, TextOffset;
-	uint32 SelectorPadding, ItemHeight;
-	Rect TextureRect;
-
-public:
-	/*!
-	*	UI Menu Item
-	*/
-	class Item
-	{
-	public:
-		/*!
-		*	The Item's Caption
-		*/
-		sf::String Caption;
-		/*!
-		*	The Item's User Data
-		*/
-		void *UserData;
-		/*!
-		*	The Item's Index
-		*/
-		uint32 Index;
-	};
-
-private:
-	std::vector<Item> Items;
-
-	void OnSkinChange();
-	void OnItemClick(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
-	void CloseSelf(UIPanel *Self);
-
-	UIMenu(UIManager *Manager);
-public:
-	TextParams TextParameters;
-
-	/*!
-	*	Adds an Item
-	*	\param Caption the Item's Caption
-	*	\param UserData the Item's User Data (Optional)
-	*/
-	void AddItem(const sf::String &Caption, void *UserData = NULL)
-	{
-		Item Out;
-		Out.Caption = Caption;
-		Out.UserData = UserData;
-		Out.Index = Items.size();
-
-		Items.push_back(Out);
-	};
-
-	/*!
-	*	On Item Selected Event
-	*/
-	Signal1<Item *> OnItemSelected;
-
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
-/*!
-*	UI Dropdown Element
-*/
-class FLAMING_API UIDropdown : public UIPanel
-{
-private:
-	SuperSmartPointer<Texture> BackgroundTexture, DropdownTexture;
-	Vector2 TextOffset, DropdownOffset;
-	f32 DropdownHeight;
-	Rect TextureRect;
-
-	void OnSkinChange();
-	void OnItemClickCheck(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
-	void SetSelectedItem(UIMenu::Item *Item);
-public:
-	/*!
-	*	Selected Index for this Dropdown
-	*/
-	int32 SelectedIndex;
-
-	/*!
-	*	All items contained by this Dropdown
-	*/
-	std::vector<std::string> Items;
-
-	TextParams TextParameters;
-
-	/*!
-	*	(UIDropdown Self)
-	*/
-	Signal1<UIDropdown *> OnItemClick;
-
-	UIDropdown(UIManager *Manager);
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
-/*!
-*	UI Menu Bar Element
-*/
-class FLAMING_API UIMenuBar : public UIPanel
-{
-	friend class UIManager;
-public:
-	/*!
-	*	UI Menu Bar Item
-	*/
-	class Item
-	{
-	public:
-		/*!
-		*	The Item's Caption Text
-		*/
-		sf::String Caption;
-		/*!
-		*	The Item's User Data
-		*/
-		void *UserData;
-
-		/*!
-		*	The Item's Sub Items
-		*/
-		std::vector<sf::String> SubItems;
-	};
-private:
-	std::vector<Item> Items;
-	SuperSmartPointer<Texture> SelectorBackgroundTexture;
-	Vector2 Padding, TextOffset;
-	uint32 SelectorPadding;
-	Rect TextureRect;
-
-	void OnSkinChange();
-	void OnItemClick(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
-	void OnItemSelected(UIMenu::Item *Item);
-	void OnItemSelectedLua(const sf::String &Caption);
-
-	TextParams TextParameters;
-
-	UIMenuBar(UIManager *Manager);
-public:
-	LuaEventGroup LuaOnClickCallback;
-
-	/*!
-	*	On Menu Item Selected Event
-	*/
-	Signal1<const sf::String &> OnMenuItemSelected;
-
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-
-	/*!
-	*	Adds an Item to the item list
-	*	\param TheItem the Item to add
-	*/
-	void AddItem(const Item &TheItem)
-	{
-		Items.push_back(TheItem);
-	};
 };
 
 /*!
@@ -1129,64 +765,6 @@ public:
 	void PerformLayout();
 	void Update(const Vector2 &ParentPosition);
 	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
-/*!
-*	UI Scroll Bar Element
-*/
-class FLAMING_API UIScrollbar : public UIPanel
-{
-private:
-	Rect BackgroundTextureRect, HandleTextureRect;
-	uint32 Padding;
-	uint32 MinSize;
-	SuperSmartPointer<Texture> BackgroundTexture, HandleTexture;
-	bool Vertical;
-
-	void OnSkinChange();
-public:
-	/*!
-	*	Minimum Value
-	*/
-	uint32 MinValue;
-	/*!
-	*	Maximum Value
-	*/
-	uint32 MaxValue;
-	/*!
-	*	Current Step
-	*/
-	uint32 CurrentStep;
-	/*!
-	*	How much to increase per step
-	*/
-	uint32 ValueStep;
-
-	UIScrollbar(UIManager *Manager, bool IsVertical) : UIPanel("UIScrollbar", Manager), MinValue(0), MaxValue(100),
-		CurrentStep(0), ValueStep(1), Vertical(IsVertical)
-	{
-		OnConstructed();
-	};
-
-	void PerformLayout();
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-
-	/*!
-	*	\return the current Value
-	*/
-	uint32 Value()
-	{
-		if(CurrentStep > MaxValue / ValueStep)
-			CurrentStep = MaxValue / ValueStep;
-
-		return MinValue + CurrentStep * ValueStep;
-	};
-
-	/*!
-	*	On Change Event
-	*/
-	Signal1<UIPanel *> OnChange;
 };
 
 /*!
@@ -1234,12 +812,20 @@ namespace UITextAlignment
 */
 class FLAMING_API UIText : public UIPanel
 {
-	std::vector<sf::String> Strings;
-	sf::String Text;
-
 protected:
 	void OnSkinChange();
 public:
+	struct StringInfo
+	{
+		sf::String TheString;
+		Rect Size;
+	};
+
+private:
+	std::vector<StringInfo> Strings;
+	sf::String Text;
+public:
+
 	/*!
 	*	Text Formatting Params
 	*	\note Only colors and border are used, Position is ignored
@@ -1251,7 +837,13 @@ public:
 	*/
 	uint32 TextAlignment;
 
+	/*!
+	*	Whether to expand height by default
+	*/
+	bool ExpandHeight;
+
 	UIText(UIManager *Manager);
+
 	/*!
 	*	Sets the Text of this UIText
 	*	\param String the new Text
@@ -1271,7 +863,7 @@ public:
 	/*!
 	*	\return the formatted text strings
 	*/
-	const std::vector<sf::String> GetStrings()
+	const std::vector<StringInfo> GetStrings()
 	{
 		return Strings;
 	};
@@ -1343,19 +935,6 @@ public:
 	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
 };
 
-class FLAMING_API UISplitPanel : public UIPanel
-{
-public:
-	SuperSmartPointer<UIPanel> Left, Right;
-	f32 Percentage;
-	bool Horizontal, GrabbingSplitter;
-	uint32 SplitSize;
-
-	UISplitPanel(UIManager *Owner);
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
-};
-
 /*!
 *	UI Layout
 *	Contains Elements and can be loaded from a scheme file
@@ -1364,20 +943,56 @@ class FLAMING_API UILayout
 {
 friend class UIManager;
 	UIManager *Owner;
+
+	Json::Value ContainedObjects;
 public:
 	typedef std::map<StringID, SuperSmartPointer<UIPanel> > ElementMap;
 	ElementMap Elements;
 
+	/*!
+	*	Layout Name
+	*/
 	std::string Name;
 
-	Json::Value ContainedObjects;
+	/*!
+	*	Parent Element of this Layout, if any
+	*/
+	SuperSmartPointer<UIPanel> Parent;
 
 	UILayout() {};
 	~UILayout();
 
-	SuperSmartPointer<UILayout> Clone(SuperSmartPointer<UIPanel> Parent, const std::string &ParentElementName);
+	/*!
+	*	Performs Startup Events of these elements
+	*	\param ParentElement Empty if we're at the root, otherwise current element being processed
+	*/
+	void PerformStartupEvents(UIPanel *ParentElement);
 
+	/*!
+	*	Displays Parentless Elements
+	*/
+	void DisplayParentlessElements();
+
+	/*!
+	*	Creates a copy of this Layout
+	*	\param Parent the Parent Element upon which to put this Layout
+	*	\param ParentElementName the name of the Parent Element we use as a prefix
+	*	\param PerformStartupEvents whether we should perform startup events now
+	*	\param DisplayParentlessElements whether we should turn Elements with no Parents visible
+	*/
+	SuperSmartPointer<UILayout> Clone(SuperSmartPointer<UIPanel> Parent, const std::string &ParentElementName,
+		bool DisplayParentlessElements = false, bool PerformStartupEvents = false);
+
+	/*!
+	*	Finds an element by ID
+	*	\param ID the element ID
+	*/
 	SuperSmartPointer<UIPanel> FindPanelById(StringID ID);
+
+	/*!
+	*	Finds an element by Name
+	*	\param Name the element name
+	*/
 	SuperSmartPointer<UIPanel> FindPanelByName(const std::string &Name);
 };
 
@@ -1388,7 +1003,6 @@ public:
 class FLAMING_API UIManager : public BaseScriptableInstance
 {
 	friend class UIPanel;
-	friend class UIMenu;
 	friend class UILayout;
 	friend class UIInputProcessor;
 private:
@@ -1414,8 +1028,6 @@ private:
 	SuperSmartPointer<UITooltip> Tooltip;
 	SuperSmartPointer<GenericConfig> Skin;
 	SuperSmartPointer<sf::Font> DefaultFont;
-	SuperSmartPointer<UIMenu> CurrentMenu;
-	SuperSmartPointer<UIMenuBar> CurrentMenuBar;
 
 	Vector4 DefaultFontColor, DefaultSecondaryFontColor;
 	uint32 DefaultFontSize;
@@ -1434,8 +1046,6 @@ private:
 
 	void RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement);
 
-	void RemoveMenuFuture(MemoryStream &Stream);
-
 	RendererManager::Renderer *Owner;
 
 	UIPanel *MouseOverElement;
@@ -1445,10 +1055,17 @@ private:
 	bool DrawOrderCacheDirty;
 	std::vector<ElementInfo *> DrawOrderCache;
 
-	void CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName);
+	void CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName);
+
+	void ProcessTextProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessTextJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessSpriteProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessSpriteJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessGroupProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessGroupJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 public:
 	typedef std::map<StringID, SuperSmartPointer<UILayout> > LayoutMap;
-	LayoutMap Layouts;
+	LayoutMap Layouts, DefaultLayouts;
 
 	UIManager(RendererManager::Renderer *TheOwner);
 	~UIManager() { UnRegisterInput(); Clear(); Tooltip.Dispose(); ScriptInstance.Dispose(); };
@@ -1513,8 +1130,9 @@ public:
 	*
 	*	\param In the stream
 	*	\param Parent the parent element if there is one
+	*	\param DefaultLayout whether these layouts are Default Layouts
 	*/
-	bool LoadLayouts(Stream *In, SuperSmartPointer<UIPanel> Parent = SuperSmartPointer<UIPanel>());
+	bool LoadLayouts(Stream *In, SuperSmartPointer<UIPanel> Parent = SuperSmartPointer<UIPanel>(), bool DefaultLayouts = false);
 
 	/*!
 	*	Gets a Layout from an ID
@@ -1588,34 +1206,6 @@ public:
 	SuperSmartPointer<sf::Font> GetDefaultFont()
 	{
 		return DefaultFont;
-	};
-
-	/*!
-	*	Creates an UI Menu at a certain position
-	*	\param Position the UI Menu's Position
-	*	\return the UI Menu that was created
-	*/
-	UIMenu *CreateMenu(const Vector2 &Position);
-
-	/*!
-	*	\return the current UI Menu
-	*/
-	UIMenu *GetCurrentMenu()
-	{
-		return CurrentMenu.Get();
-	};
-
-	/*!
-	*	\return the UI Menu Bar that was created
-	*/
-	UIMenuBar *CreateMenuBar();
-
-	/*!
-	*	\return the Current UI Menu Bar
-	*/
-	UIMenuBar *GetCurrentMenuBar()
-	{
-		return CurrentMenuBar.Get();
 	};
 
 	/*!

@@ -1,6 +1,6 @@
 #pragma once
 /*!
-	CRC32 Helper Class
+*	CRC32 Helper Class
 */
 class FLAMING_API CRC32 
 {
@@ -13,10 +13,10 @@ public:
 	CRC32();
 	
 	/*!
-		Calculates the CRC of a piece of data
-		\param Data the Data to calculate
-		\param DataLength the Length in bytes of the Data
-		\return the CRC as a uint32
+	*	Calculates the CRC of a piece of data
+	*	\param Data the Data to calculate
+	*	\param DataLength the Length in bytes of the Data
+	*	\return the CRC as a uint32
 	*/
 	uint32 CRC(const uint8 *Data, uint32 DataLength);
 };

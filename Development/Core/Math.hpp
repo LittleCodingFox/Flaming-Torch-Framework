@@ -346,6 +346,45 @@ public:
 	};
 };
 
+class FLAMING_API RotateableRect
+{
+public:
+	f32 Left, Right, Top, Bottom, Rotation;
+
+	RotateableRect();
+	RotateableRect(const RotateableRect &Other);
+	RotateableRect(f32 Width, f32 Height, f32 Rotation = 0);
+	RotateableRect(f32 Left, f32 Right, f32 Top, f32 Bottom, f32 Rotation = 0);
+
+	bool IsInside(const Vector2 &Position) const;
+	bool IsOutside(const Vector2 &Position) const;
+
+	RotateableRect operator+(const RotateableRect &Other) const
+	{
+		return RotateableRect(Left + Other.Left, Right + Other.Right, Top + Other.Top, Bottom + Other.Bottom);
+	};
+
+	RotateableRect operator-(const RotateableRect &Other) const
+	{
+		return RotateableRect(Left - Other.Left, Right - Other.Right, Top - Other.Top, Bottom - Other.Bottom);
+	};
+
+	Vector2 Size() const
+	{
+		return Vector2(Right - Left, Bottom - Top);
+	};
+
+	Vector2 Position() const
+	{
+		return Vector2(Left, Top);
+	};
+	
+	Vector2 ToFullSize() const
+	{
+		return Vector2(Right + Left, Bottom + Top);
+	};
+};
+
 class FLAMING_API AxisAlignedBoundingBox 
 {
 public:

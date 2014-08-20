@@ -157,10 +157,542 @@ namespace FlamingTorch
 		Log::Instance.LogWarn(TAG, "While parsing a layout: Value '%s' is non-null and not the expected type '%s'", Name, #type);\
 	};
 
-	void UIManager::CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName)
+	void UIManager::ProcessTextProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
+	{
+		UIText *TheText = (UIText *)Panel;
+
+		if(Property == "ExpandHeight")
+		{
+			uint32 IntValue = 0;
+
+			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
+			{
+				TheText->ExpandHeight = !!IntValue;
+			};
+		}
+		else if(Property == "FontSize")
+		{
+			uint32 FontSize = 0;
+
+			if(1 == sscanf(Value.c_str(), "%u", &FontSize))
+			{
+				TheText->TextParameters.FontSize(FontSize);
+			};
+		}
+		else if(Property == "Text")
+		{
+			TheText->SetText(Value, TheText->ExpandHeight);
+		}
+		else if(Property == "Bold")
+		{
+			uint32 IntValue = 0;
+
+			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
+			{
+				if(!!IntValue)
+				{
+					TheText->TextParameters.StyleValue |= sf::Text::Bold;
+				}
+				else
+				{
+					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~sf::Text::Bold;
+				};
+			};
+		}
+		else if(Property == "Italic")
+		{
+			uint32 IntValue = 0;
+
+			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
+			{
+				if(!!IntValue)
+				{
+					TheText->TextParameters.StyleValue |= sf::Text::Italic;
+				}
+				else
+				{
+					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~sf::Text::Italic;
+				};
+			};
+		}
+		else if(Property == "Underline")
+		{
+			uint32 IntValue = 0;
+
+			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
+			{
+				if(!!IntValue)
+				{
+					TheText->TextParameters.StyleValue |= sf::Text::Underlined;
+				}
+				else
+				{
+					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~sf::Text::Underlined;
+				};
+			};
+		}
+		else if(Property == "Alignment")
+		{
+			uint32 Alignment = 0;
+
+			std::string AlignmentString = StringUtils::ToUpperCase(Value);
+
+			std::vector<std::string> Fragments = StringUtils::Split(AlignmentString, '|');
+
+			for(uint32 j = 0; j < Fragments.size(); j++)
+			{
+				if(Fragments[j] == "CENTER")
+				{
+					Alignment |= UITextAlignment::Center;
+				}
+				else if(Fragments[j] == "LEFT")
+				{
+					Alignment |= UITextAlignment::Left;
+				}
+				else if(Fragments[j] == "RIGHT")
+				{
+					Alignment |= UITextAlignment::Right;
+				}
+				else if(Fragments[j] == "VCENTER")
+				{
+					Alignment |= UITextAlignment::VCenter;
+				};
+			};
+
+			if(Fragments.size() == 0)
+				Alignment = UITextAlignment::Left;
+
+			TheText->TextAlignment = Alignment;
+		}
+		else if(Property == "TextColor")
+		{
+			sscanf(Value.c_str(), "%f,%f,%f,%f", &TheText->TextParameters.TextColorValue.x, &TheText->TextParameters.TextColorValue.y,
+				&TheText->TextParameters.TextColorValue.z, &TheText->TextParameters.TextColorValue.w);
+			TheText->TextParameters.SecondaryTextColorValue = TheText->TextParameters.TextColorValue;
+		}
+		else if(Property == "SecondaryTextColor")
+		{
+			sscanf(Value.c_str(), "%f,%f,%f,%f", &TheText->TextParameters.SecondaryTextColorValue.x, &TheText->TextParameters.SecondaryTextColorValue.y,
+				&TheText->TextParameters.SecondaryTextColorValue.z, &TheText->TextParameters.SecondaryTextColorValue.w);
+		}
+		else if(Property == "Border")
+		{
+			sscanf(Value.c_str(), "%f", &TheText->TextParameters.BorderSizeValue);
+		}
+		else if(Property == "BorderSize")
+		{
+			sscanf(Value.c_str(), "%f,%f,%f,%f", &TheText->TextParameters.BorderColorValue.x, &TheText->TextParameters.BorderColorValue.y,
+				&TheText->TextParameters.BorderColorValue.z, &TheText->TextParameters.BorderColorValue.w);
+		};
+	};
+
+	void UIManager::ProcessTextJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	{
+		UIText *TheText = (UIText *)Panel;
+		Json::Value Value = Data.get("ExpandHeight", Json::Value(false));
+
+		if(Value.isBool())
+		{
+			ProcessTextProperty(Panel, "ExpandHeight", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
+		};
+
+		Value = Data.get("FontSize", Json::Value((Json::Value::Int)GetDefaultFontSize()));
+
+		if(Value.isInt())
+		{
+			ProcessTextProperty(Panel, "FontSize", StringUtils::MakeIntString((uint32)Value.asInt()), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "FontSize", int);
+		};
+
+		Value = Data.get("Text", Json::Value(""));
+
+		if(Value.isString())
+		{
+			ProcessTextProperty(Panel, "Text", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Text", string);
+		};
+
+		Value = Data.get("Bold", Json::Value(false));
+
+		if(Value.isBool())
+		{
+			ProcessTextProperty(Panel, "Bold", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Bold", string);
+		};
+
+		Value = Data.get("Italic", Json::Value(false));
+
+		if(Value.isBool())
+		{
+			ProcessTextProperty(Panel, "Italic", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Italic", string);
+		};
+
+		Value = Data.get("Underline", Json::Value(false));
+
+		if(Value.isBool())
+		{
+			ProcessTextProperty(Panel, "Underline", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Underline", string);
+		};
+
+		Value = Data.get("Alignment", Json::Value(""));
+
+		if(Value.isString())
+		{
+			ProcessTextProperty(Panel, "Alignment", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Alignment", string);
+		};
+
+		static std::stringstream str;
+		str.str("");
+		str << TheText->TextParameters.TextColorValue.x << "," << TheText->TextParameters.TextColorValue.y << "," << TheText->TextParameters.TextColorValue.z << "," <<
+			TheText->TextParameters.TextColorValue.w;
+
+		Value = Data.get("TextColor", Json::Value());
+
+		if(Value.type() == Json::stringValue)
+		{
+			if(Value.asString().length())
+			{
+				ProcessTextProperty(Panel, "TextColor", Value.asString(), ElementName, LayoutName);
+			};
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "TextColor", string);
+		};
+
+		str.str("");
+		str << TheText->TextParameters.SecondaryTextColorValue.x << "," << TheText->TextParameters.SecondaryTextColorValue.y << "," <<
+			TheText->TextParameters.SecondaryTextColorValue.z << "," << TheText->TextParameters.SecondaryTextColorValue.w;
+
+		Value = Data.get("SecondaryTextColor", Json::Value(str.str()));
+
+		if(Value.type() == Json::stringValue)
+		{
+			if(Value.asString().length())
+			{
+				ProcessTextProperty(Panel, "SecondaryTextColor", Value.asString(), ElementName, LayoutName);
+			};
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "SecondaryTextColor", string);
+		};
+
+		Value = Data.get("Border", Json::Value("0"));
+
+		if(Value.type() == Json::stringValue)
+		{
+			ProcessTextProperty(Panel, "Border", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Border", string);
+		};
+
+		str.str("");
+		str << TheText->TextParameters.BorderColorValue.x << "," << TheText->TextParameters.BorderColorValue.y << "," << TheText->TextParameters.BorderColorValue.z << "," <<
+			TheText->TextParameters.BorderColorValue.w;
+
+		Value = Data.get("BorderColor", Json::Value(str.str()));
+
+		if(Value.type() == Json::stringValue)
+		{
+			ProcessTextProperty(Panel, "BorderColor", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "BorderColor", string);
+		};
+	};
+
+	void UIManager::ProcessSpriteProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
+	{
+		UISprite *TheSprite = (UISprite *)Panel;
+
+		if(Property == "Path")
+		{
+			std::string FileName = Value;
+
+			if(FileName.length() == 0)
+			{
+				TheSprite->TheSprite.Options.Scale(TheSprite->GetSize()).Color(Vector4());
+			}
+			else
+			{
+				SuperSmartPointer<Texture> SpriteTexture;
+
+				if(FileName.find('/') == 0)
+				{
+					SpriteTexture = ResourceManager::Instance.GetTextureFromPackage(FileName.substr(0, FileName.rfind('/') + 1),
+						FileName.substr(FileName.rfind('/') + 1));
+				};
+
+				if(!SpriteTexture.Get())
+				{
+					SpriteTexture = ResourceManager::Instance.GetTexture(FileName);
+				};
+
+				if(!SpriteTexture.Get())
+				{
+					Log::Instance.LogWarn(TAG, "Unable to load texture '%s' for UI Sprite '%s' on Layout '%s'", FileName.c_str(), ElementName.c_str(),
+						LayoutName.c_str());
+				}
+				else
+				{
+					TheSprite->TheSprite.SpriteTexture = SpriteTexture;
+					TheSprite->TheSprite.Options.Scale(Panel->GetSize() != Vector2() ? Panel->GetSize() / SpriteTexture->Size() : Vector2(1, 1));
+					TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
+
+					if(TheSprite->GetSize() == Vector2())
+					{
+						TheSprite->SetSize(SpriteTexture->Size());
+					};
+				};
+			};
+		}
+		else if(Property == "Filtering")
+		{
+			std::string Temp = Value;
+
+			if(TheSprite->TheSprite.SpriteTexture.Get())
+			{
+				if(StringUtils::ToUpperCase(Temp) == "LINEAR")
+				{
+					TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
+				}
+				else if(StringUtils::ToUpperCase(Temp) == "NEAREST")
+				{
+					TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Nearest);
+				};
+			};
+		}
+		else if(Property == "CropTiled")
+		{
+			std::string CropTiledString = Value;
+
+			if(CropTiledString.length() && TheSprite->TheSprite.SpriteTexture.Get())
+			{
+				Vector2 FrameSize, FrameID;
+
+				sscanf(CropTiledString.c_str(), "%f, %f, %f, %f", &FrameSize.x, &FrameSize.y, &FrameID.x, &FrameID.y);
+
+				TheSprite->TheSprite.Options.Scale(FrameSize / TheSprite->TheSprite.SpriteTexture->Size()).Crop(CropMode::CropTiled,
+					Rect(FrameSize.x, FrameID.x, FrameSize.y, FrameID.y));
+			};
+		}
+		else if(Property == "NinePatch")
+		{
+			std::string NinePatchString = Value;
+
+			if(NinePatchString.length())
+			{
+				Rect NinePatchRect;
+
+				sscanf(NinePatchString.c_str(), "%f,%f,%f,%f", &NinePatchRect.Left, &NinePatchRect.Right, &NinePatchRect.Top,
+					&NinePatchRect.Bottom);
+
+				TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Panel->GetSize());
+				TheSprite->SelectBoxExtraSize = NinePatchRect.ToFullSize();
+			};
+		}
+		else if(Property == "Color")
+		{
+			std::string ColorString = Value;
+
+			Vector4 Color;
+
+			if(4 == sscanf(ColorString.c_str(), "%f, %f, %f, %f", &Color.x, &Color.y, &Color.z, &Color.w))
+			{
+				TheSprite->TheSprite.Options.Color(Color);
+			};
+		}
+		else if(Property == "ScaleWide")
+		{
+			f32 FloatValue = 0;
+
+			if(1 == sscanf(Value.c_str(), "%f", &FloatValue))
+				TheSprite->TheSprite.Options.Scale(Vector2(FloatValue, TheSprite->TheSprite.Options.ScaleValue.y));
+		}
+		else if(Property == "ScaleTall")
+		{
+			f32 FloatValue = 0;
+
+			if(1 == sscanf(Value.c_str(), "%f", &FloatValue))
+				TheSprite->TheSprite.Options.Scale(Vector2(TheSprite->TheSprite.Options.ScaleValue.x, FloatValue));
+		};
+	};
+
+	void UIManager::ProcessSpriteJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	{
+		Json::Value Value = Data.get("Path", Json::Value(""));
+
+		if(Value.isString())
+		{
+			ProcessSpriteProperty(Panel, "Path", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Path", string);
+		};
+
+		Value = Data.get("Filtering", Json::Value("LINEAR"));
+
+		if(Value.isString())
+		{
+			ProcessSpriteProperty(Panel, "Filtering", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Filtering", string);
+		};
+
+		Value = Data.get("CropTiled", Json::Value(""));
+
+		if(Value.isString())
+		{
+			ProcessSpriteProperty(Panel, "CropTiled", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "CropTiled", string);
+		};
+
+		Value = Data.get("NinePatch", Json::Value(""));
+
+		if(Value.isString())
+		{
+			ProcessSpriteProperty(Panel, "NinePatch", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "NinePatch", string)
+		};
+
+		Value = Data.get("Color", Json::Value(""));
+
+		if(Value.isString())
+		{
+			ProcessSpriteProperty(Panel, "Color", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Color", string)
+		};
+
+		Value = Data.get("ScaleWide", Json::Value(""));
+
+		if(Value.isDouble())
+		{
+			ProcessSpriteProperty(Panel, "ScaleWide", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
+		};
+
+		Value = Data.get("ScaleTall", Json::Value(""));
+
+		if(Value.isDouble())
+		{
+			ProcessSpriteProperty(Panel, "ScaleTall", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
+		};
+	};
+
+	void UIManager::ProcessGroupProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
+	{
+		UIGroup *Group = (UIGroup *)Panel;
+
+		if(Property == "LayoutMode")
+		{
+			std::vector<std::string> Modes = StringUtils::Split(StringUtils::ToUpperCase(Value), '|');
+
+			for(uint32 j = 0; j < Modes.size(); j++)
+			{
+				if(Modes[j] == "HORIZONTAL")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::Horizontal;
+				}
+				else if(Modes[j] == "VERTICAL")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::Vertical;
+				}
+				else if(Modes[j] == "ADJUSTHEIGHT")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::AdjustHeight;
+				}
+				else if(Modes[j] == "ADJUSTWIDTH")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::AdjustWidth;
+				}
+				else if(Modes[j] == "NONE")
+				{
+					Group->LayoutMode = UIGroupLayoutMode::None;
+				}
+				else if(Modes[j] == "CENTER")
+				{
+					Group->LayoutMode = UIGroupLayoutMode::Center;
+				}
+				else if(Modes[j] == "VCENTER")
+				{
+					Group->LayoutMode = UIGroupLayoutMode::VerticalCenter;
+				}
+				else if(Modes[j] == "ADJUSTCLOSER")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::AdjustCloser;
+				}
+				else if(Modes[j] == "INVERTDIRECTION")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::InvertDirection;
+				}
+				else if(Modes[j] == "INVERTX")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::InvertX;
+				}
+				else if(Modes[j] == "INVERTY")
+				{
+					Group->LayoutMode |= UIGroupLayoutMode::InvertY;
+				};
+			};
+		};
+	};
+
+	void UIManager::ProcessGroupJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	{
+		Json::Value Value = Data.get("LayoutMode", Json::Value("None"));
+
+		if(Value.isString())
+		{
+			ProcessGroupProperty(Panel, "LayoutMode", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "LayoutMode", string)
+		};
+	};
+
+	void UIManager::CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName)
 	{
 		if(Elements.type() != Json::arrayValue)
 			return;
+
+		RendererManager::Renderer *Renderer = Owner;
 
 		for(uint32 i = 0; i < Elements.size(); i+=2)
 		{
@@ -181,7 +713,7 @@ namespace FlamingTorch
 			std::string ElementIDName = ParentElementName + "." + ElementName;
 			StringID ElementID = MakeStringID(ElementIDName);
 
-			Json::Value &Data = Elements[i + 1];
+			const Json::Value &Data = Elements[i + 1];
 
 			Value = Data.get("Control", Json::Value());
 
@@ -205,21 +737,7 @@ namespace FlamingTorch
 
 			Control = StringUtils::ToUpperCase(Control);
 
-			RendererManager::Renderer *Renderer = RendererManager::Instance.ActiveRenderer();
-
-			if(Control == "FRAME")
-			{
-				Panel.Reset(new UIFrame(Renderer->UI));
-			}
-			else if(Control == "BUTTON")
-			{
-				Panel.Reset(new UIButton(Renderer->UI));
-			}
-			else if(Control == "CHECKBOX")
-			{
-				Panel.Reset(new UICheckBox(Renderer->UI));
-			}
-			else if(Control == "SPRITE")
+			if(Control == "SPRITE")
 			{
 				Panel.Reset(new UISprite(Renderer->UI));
 			}
@@ -231,39 +749,12 @@ namespace FlamingTorch
 			{
 				Panel.Reset(new UITextComposer(Renderer->UI));
 			}
-			else if(Control == "GROUP" || Control == "LAYOUT")
+			else
 			{
 				Panel.Reset(new UIGroup(Renderer->UI));
-			}
-			else if(Control == "TEXTBOX")
-			{
-				Panel.Reset(new UITextBox(Renderer->UI));
-			}
-			else if(Control == "LIST")
-			{
-				Panel.Reset(new UIList(Renderer->UI));
-			}
-			else if(Control == "SCROLLABLEFRAME")
-			{
-				Panel.Reset(new UIScrollableFrame(Renderer->UI));
-			}
-			else if(Control == "HSCROLL")
-			{
-				Panel.Reset(new UIScrollbar(Renderer->UI, false));
-			}
-			else if(Control == "VSCROLL")
-			{
-				Panel.Reset(new UIScrollbar(Renderer->UI, true));
-			}
-			else if(Control == "DROPDOWN")
-			{
-				Panel.Reset(new UIDropdown(Renderer->UI));
-			}
-			else if(Control == "SPLITPANEL")
-			{
-				Panel.Reset(new UISplitPanel(Renderer->UI));
 			};
 
+			/*
 			if(Panel.Get() == NULL)
 			{
 				Log::Instance.LogErr(TAG, "Failed to read a widget '%s' from a layout '%s': Invalid control '%s'", ElementName.c_str(),
@@ -271,6 +762,7 @@ namespace FlamingTorch
 
 				return;
 			};
+			*/
 
 			Panel->Layout = TheLayout;
 			Panel->LayoutName = ElementIDName;
@@ -955,6 +1447,32 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, "YOffset", string);
 			};
 
+			Value = Data.get("ExtraSizeScale", Json::Value(1.0));
+
+			if(Value.isDouble() || Value.isInt() || Value.isUInt())
+			{
+				f32 Scale = 0;
+
+				if(Value.isDouble())
+				{
+					Scale = (f32)Value.asDouble();
+				}
+				else if(Value.isInt())
+				{
+					Scale = (f32)Value.asInt();
+				}
+				else if(Value.isUInt())
+				{
+					Scale = (f32)Value.asUInt();
+				};
+
+				Panel->SetExtraSizeScale(Scale);
+			}
+			else
+			{
+				CHECKJSONVALUE(Value, "ExtraSizeScale", number);
+			};
+
 			std::stringstream ComposedPositionFunction, ComposedSizeFunction;
 
 			ComposedPositionFunction << "function " << BaseFunctionName.str() << "Position(Self, Parent, ScreenWidth, ScreenHeight)\n"
@@ -1046,550 +1564,25 @@ namespace FlamingTorch
 				continue;
 			};
 
-			if(Control == "BUTTON")
+			if(Control == "SPRITE")
 			{
-				UIButton *Button = Panel.AsDerived<UIButton>();
-				Value = Data.get("Caption", Json::Value());
-
-				if(Value.isString())
-				{
-					Button->Caption = Value.asString();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Caption", string);
-				};
-
-				Value = Data.get("FontSize", Json::Value((Json::Value::Int)Button->TextParameters.FontSizeValue));
-
-				if(Value.isInt())
-				{
-					int32 FontSize = Value.asInt();
-
-					Button->TextParameters.FontSize(FontSize);
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "FontSize", int);
-				};
-			}
-			else if(Control == "CHECKBOX")
-			{
-				Value = Data.get("Checked", Json::Value(false));
-
-				if(Value.isBool())
-				{
-					bool Checked = Value.asBool();
-
-					Panel.AsDerived<UICheckBox>()->SetChecked(Checked);
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Checked", bool);
-				};
-
-				Value = Data.get("Caption", Json::Value(""));
-
-				if(Value.isString())
-				{
-					Panel.AsDerived<UICheckBox>()->Caption = Value.asString();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Caption", string);
-				};
-			}
-			else if(Control == "SPRITE")
-			{
-				UISprite *TheSprite = Panel.AsDerived<UISprite>();
-				Value = Data.get("Path", Json::Value(""));
-
-				if(Value.isString())
-				{
-					std::string FileName = Value.asString();
-
-					if(FileName.length() == 0)
-					{
-						TheSprite->TheSprite.Options.Scale(TheSprite->GetSize()).Color(Vector4());
-					}
-					else
-					{
-						SuperSmartPointer<Texture> SpriteTexture;
-
-						if(FileName.find('/') == 0)
-						{
-							SpriteTexture = ResourceManager::Instance.GetTextureFromPackage(FileName.substr(0, FileName.rfind('/') + 1),
-								FileName.substr(FileName.rfind('/') + 1));
-						};
-
-						if(!SpriteTexture.Get())
-						{
-							SpriteTexture = ResourceManager::Instance.GetTexture(FileName);
-						};
-
-						if(!SpriteTexture.Get())
-						{
-							Log::Instance.LogWarn(TAG, "Unable to load texture '%s' for UI Sprite '%s' on Layout '%s'", FileName.c_str(), ElementName.c_str(),
-								TheLayout->Name.c_str());
-						}
-						else
-						{
-							TheSprite->TheSprite.SpriteTexture = SpriteTexture;
-							TheSprite->TheSprite.Options.Scale(Panel->GetSize() != Vector2() ? Panel->GetSize() / SpriteTexture->Size() : Vector2(1, 1));
-							TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
-
-							if(TheSprite->GetSize() == Vector2())
-							{
-								TheSprite->SetSize(SpriteTexture->Size());
-							};
-						};
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Path", string);
-				};
-
-				Value = Data.get("Filtering", Json::Value("LINEAR"));
-
-				if(Value.isString())
-				{
-					std::string Temp = Value.asString();
-
-					if(TheSprite->TheSprite.SpriteTexture.Get())
-					{
-						if(StringUtils::ToUpperCase(Temp) == "LINEAR")
-						{
-							TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
-						}
-						else if(StringUtils::ToUpperCase(Temp) == "NEAREST")
-						{
-							TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Nearest);
-						};
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Filtering", string);
-				};
-
-				Value = Data.get("CropTiled", Json::Value(""));
-
-				if(Value.isString())
-				{
-					std::string CropTiledString = Value.asString();
-
-					if(CropTiledString.length() && TheSprite->TheSprite.SpriteTexture.Get())
-					{
-						Vector2 FrameSize, FrameID;
-
-						sscanf(CropTiledString.c_str(), "%f, %f, %f, %f", &FrameSize.x, &FrameSize.y, &FrameID.x, &FrameID.y);
-
-						TheSprite->TheSprite.Options.Scale(FrameSize / TheSprite->TheSprite.SpriteTexture->Size()).Crop(CropMode::CropTiled,
-							Rect(FrameSize.x, FrameID.x, FrameSize.y, FrameID.y));
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "CropTiled", string);
-				};
-
-				Value = Data.get("NinePatch", Json::Value(""));
-
-				if(Value.isString())
-				{
-					std::string NinePatchString = Value.asString();
-
-					if(NinePatchString.length())
-					{
-						Rect NinePatchRect;
-
-						sscanf(NinePatchString.c_str(), "%f,%f,%f,%f", &NinePatchRect.Left, &NinePatchRect.Right, &NinePatchRect.Top,
-							&NinePatchRect.Bottom);
-
-						TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Panel->GetSize());
-						TheSprite->SelectBoxExtraSize = NinePatchRect.ToFullSize();
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "NinePatch", string)
-				};
-
-				Value = Data.get("Color", Json::Value(""));
-
-				if(Value.isString())
-				{
-					std::string ColorString = Value.asString();
-
-					Vector4 Color;
-
-					if(4 == sscanf(ColorString.c_str(), "%f, %f, %f, %f", &Color.x, &Color.y, &Color.z, &Color.w))
-					{
-						TheSprite->TheSprite.Options.Color(Color);
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Color", string)
-				};
-
-				Value = Data.get("ScaleWide", Json::Value(""));
-
-				if(Value.isDouble())
-				{
-					TheSprite->TheSprite.Options.Scale(Vector2((f32)Value.asDouble(), TheSprite->TheSprite.Options.ScaleValue.y));
-				};
-
-				Value = Data.get("ScaleTall", Json::Value(""));
-
-				if(Value.isDouble())
-				{
-					TheSprite->TheSprite.Options.Scale(Vector2(TheSprite->TheSprite.Options.ScaleValue.x, (f32)Value.asDouble()));
-				};
+				ProcessSpriteJSON(Panel, Data, ElementName, TheLayout->Name);
 			}
 			else if(Control == "GROUP")
 			{
-				Value = Data.get("LayoutMode", Json::Value("None"));
-
-				if(Value.isString())
-				{
-					std::vector<std::string> Modes = StringUtils::Split(StringUtils::ToUpperCase(Value.asString()), '|');
-					UIGroup *Group = Panel.AsDerived<UIGroup>();
-
-					for(uint32 j = 0; j < Modes.size(); j++)
-					{
-						if(Modes[j] == "HORIZONTAL")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::Horizontal;
-						}
-						else if(Modes[j] == "VERTICAL")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::Vertical;
-						}
-						else if(Modes[j] == "ADJUSTHEIGHT")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::AdjustHeight;
-						}
-						else if(Modes[j] == "ADJUSTWIDTH")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::AdjustWidth;
-						}
-						else if(Modes[j] == "NONE")
-						{
-							Group->LayoutMode = UIGroupLayoutMode::None;
-						}
-						else if(Modes[j] == "CENTER")
-						{
-							Group->LayoutMode = UIGroupLayoutMode::Center;
-						}
-						else if(Modes[j] == "VCENTER")
-						{
-							Group->LayoutMode = UIGroupLayoutMode::VerticalCenter;
-						}
-						else if(Modes[j] == "ADJUSTCLOSER")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::AdjustCloser;
-						}
-						else if(Modes[j] == "INVERTDIRECTION")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::InvertDirection;
-						}
-						else if(Modes[j] == "INVERTX")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::InvertX;
-						}
-						else if(Modes[j] == "INVERTY")
-						{
-							Group->LayoutMode |= UIGroupLayoutMode::InvertY;
-						};
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "LayoutMode", string)
-				};
+				ProcessGroupJSON(Panel, Data, ElementName, TheLayout->Name);
 			}
 			else if(Control == "TEXT")
 			{
-				Value = Data.get("ExpandHeight", Json::Value(false));
-				bool AutoExpand = Value.isBool() && Value.asBool();
-				Value = Data.get("FontSize", Json::Value((Json::Value::Int)Renderer->UI->GetDefaultFontSize()));
-				int32 FontSize = Renderer->UI->GetDefaultFontSize();
-
-				if(Value.isInt())
-				{
-					FontSize = Value.asInt();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "FontSize", int);
-				};
-
-				std::string Text;
-				Value = Data.get("Text", Json::Value(""));
-
-				if(Value.isString())
-				{
-					Text = Value.asString();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Text", string);
-				};
-
-				uint32 TextStyle = sf::Text::Regular;
-
-				Value = Data.get("Bold", Json::Value(false));
-
-				if(Value.isBool())
-				{
-					if(Value.asBool())
-						TextStyle |= sf::Text::Bold;
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Bold", string);
-				};
-
-				Value = Data.get("Italic", Json::Value(false));
-
-				if(Value.isBool())
-				{
-					if(Value.asBool())
-						TextStyle |= sf::Text::Italic;
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Italic", string);
-				};
-
-				Value = Data.get("Underline", Json::Value(false));
-
-				if(Value.isBool())
-				{
-					if(Value.asBool())
-						TextStyle |= sf::Text::Underlined;
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Underline", string);
-				};
-
-				uint32 Alignment = 0;
-
-				Value = Data.get("Alignment", Json::Value(""));
-
-				if(Value.isString())
-				{
-					std::string AlignmentString = StringUtils::ToUpperCase(Value.asString());
-
-					std::vector<std::string> Fragments = StringUtils::Split(AlignmentString, '|');
-
-					for(uint32 j = 0; j < Fragments.size(); j++)
-					{
-						if(Fragments[j] == "CENTER")
-						{
-							Alignment |= UITextAlignment::Center;
-						}
-						else if(Fragments[j] == "LEFT")
-						{
-							Alignment |= UITextAlignment::Left;
-						}
-						else if(Fragments[j] == "RIGHT")
-						{
-							Alignment |= UITextAlignment::Right;
-						}
-						else if(Fragments[j] == "VCENTER")
-						{
-							Alignment |= UITextAlignment::VCenter;
-						};
-					};
-
-					if(Fragments.size() == 0)
-						Alignment = UITextAlignment::Left;
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Alignment", string);
-				};
-
-				UIText *TheText = Panel.AsDerived<UIText>();
-
-				TheText->TextParameters.Style(TextStyle);
-
-				static std::stringstream str;
-				str.str("");
-				str << TheText->TextParameters.TextColorValue.x << "," << TheText->TextParameters.TextColorValue.y << "," << TheText->TextParameters.TextColorValue.z << "," <<
-					TheText->TextParameters.TextColorValue.w;
-
-				Value = Data.get("TextColor", Json::Value());
-
-				if(Value.type() == Json::stringValue)
-				{
-					if(Value.asString().length())
-					{
-						sscanf(Value.asString().c_str(), "%f,%f,%f,%f", &TheText->TextParameters.TextColorValue.x, &TheText->TextParameters.TextColorValue.y,
-							&TheText->TextParameters.TextColorValue.z, &TheText->TextParameters.TextColorValue.w);
-						TheText->TextParameters.SecondaryTextColorValue = TheText->TextParameters.TextColorValue;
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "TextColor", string);
-				};
-
-				str.str("");
-				str << TheText->TextParameters.SecondaryTextColorValue.x << "," << TheText->TextParameters.SecondaryTextColorValue.y << "," <<
-					TheText->TextParameters.SecondaryTextColorValue.z << "," << TheText->TextParameters.SecondaryTextColorValue.w;
-
-				Value = Data.get("SecondaryTextColor", Json::Value(str.str()));
-
-				if(Value.type() == Json::stringValue)
-				{
-					sscanf(Value.asString().c_str(), "%f,%f,%f,%f", &TheText->TextParameters.SecondaryTextColorValue.x, &TheText->TextParameters.SecondaryTextColorValue.y,
-						&TheText->TextParameters.SecondaryTextColorValue.z, &TheText->TextParameters.SecondaryTextColorValue.w);
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "SecondaryTextColor", string);
-				};
-
-				Value = Data.get("Border", Json::Value("0"));
-
-				if(Value.type() == Json::stringValue)
-				{
-					sscanf(Value.asString().c_str(), "%f", &TheText->TextParameters.BorderSizeValue);
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Border", string);
-				};
-
-				str.str("");
-				str << TheText->TextParameters.BorderColorValue.x << "," << TheText->TextParameters.BorderColorValue.y << "," << TheText->TextParameters.BorderColorValue.z << "," <<
-					TheText->TextParameters.BorderColorValue.w;
-
-				Value = Data.get("BorderColor", Json::Value(str.str()));
-
-				if(Value.type() == Json::stringValue)
-				{
-					sscanf(Value.asString().c_str(), "%f,%f,%f,%f", &TheText->TextParameters.BorderColorValue.x, &TheText->TextParameters.BorderColorValue.y,
-						&TheText->TextParameters.BorderColorValue.z, &TheText->TextParameters.BorderColorValue.w);
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "BorderColor", string);
-				};
-
-				TheText->TextAlignment = Alignment;
-				TheText->TextParameters.FontSize(FontSize);
-				TheText->SetText(Text, AutoExpand);
+				ProcessTextJSON(Panel, Data, ElementName, TheLayout->Name);
 			}
-			else if(Control == "TEXTBOX")
+			else
 			{
-				UITextBox *TheTextBox = Panel.AsDerived<UITextBox>();
-
-				Value = Data.get("Text", Json::Value(""));
-				std::string Text;
-
-				if(Value.isString())
-				{
-					Text = Value.asString();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Text", string);
-				};
-
-				Value = Data.get("Password", Json::Value(false));
-
-				if(Value.isBool())
-				{
-					TheTextBox->SetPassword(Value.asBool());
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Password", bool);
-				};
-
-				int32 FontSize = TheTextBox->TextParameters.FontSizeValue;
-
-				Value = Data.get("FontSize", Json::Value((Json::Value::Int)FontSize));
-
-				if(Value.isInt())
-				{
-					FontSize = Value.asInt();;
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "FontSize", int);
-				};
-
-				TheTextBox->TextParameters.FontSize(FontSize);
-				TheTextBox->SetText(Text);
-			}
-			else if(Control == "LIST")
-			{
-				UIList *TheList = Panel.AsDerived<UIList>();
-
-				Value = Data.get("Elements", Json::Value(""));
-
-				if(Value.isString())
-				{
-					std::string ElementString = Value.asString();
-
-					std::vector<std::string> Items = StringUtils::Split(ElementString, '|');
-
-					TheList->Items = Items;
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Elements", string);
-				};
-
-				int32 FontSize = TheList->GetManager()->GetDefaultFontSize();
-
-				Value = Data.get("FontSize", Json::Value((Json::Value::Int)TheList->GetManager()->GetDefaultFontSize()));
-
-				if(Value.isInt())
-				{
-					FontSize = Value.asInt();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "FontSize", int);
-				};
-
-				TheList->TextParameters.FontSize(FontSize);
-			}
-			else if(Control == "LAYOUT")
-			{
-				Json::Value Value = Data.get("ID", Json::Value());
-				std::string LayoutIDName;
-
-				if(Value.isString())
-				{
-					LayoutIDName = Value.asString();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "ID", string);
-				};
-
-				if(LayoutIDName.length() == 0)
-				{
-					Log::Instance.LogErr(TAG, "While processing Layout element '%s' of layout '%s': Invalid Layout ID", ElementName.c_str(),
-						TheLayout->Name.c_str());
-
-					return;
-				};
-
 				SuperSmartPointer<UILayout> TargetLayout;
 
 				for(LayoutMap::iterator it = Layouts.begin(); it != Layouts.end(); it++)
 				{
-					if(it->second->Name ==  LayoutIDName)
+					if(StringUtils::ToUpperCase(it->second->Name) == Control)
 					{
 						TargetLayout = it->second;
 
@@ -1599,15 +1592,28 @@ namespace FlamingTorch
 
 				if(TargetLayout.Get() == NULL)
 				{
+					for(LayoutMap::iterator it = DefaultLayouts.begin(); it != DefaultLayouts.end(); it++)
+					{
+						if(StringUtils::ToUpperCase(it->second->Name) == Control)
+						{
+							TargetLayout = it->second;
+
+							break;
+						};
+					};
+				};
+
+				if(TargetLayout.Get() == NULL)
+				{
 					Log::Instance.LogErr(TAG, "While processing Layout element '%s' of layout '%s': Layout '%s' not found (may not have been created already)",
-						ElementName.c_str(), TheLayout->Name.c_str(), LayoutIDName.c_str());
+						ElementName.c_str(), TheLayout->Name.c_str(), Control.c_str());
 
 					return;
 				};
 
-				Panel->SetSize(Parent ? Parent->GetSize() : Vector2());
+				Panel->SetSize(Parent ? Parent->GetSize() + Parent->GetScaledExtraSize() : Panel->GetSize() + Panel->GetScaledExtraSize());
 
-				SuperSmartPointer<UILayout> NewLayout = TargetLayout->Clone(Panel, ParentElementName + "." + ElementName);
+				SuperSmartPointer<UILayout> NewLayout = TargetLayout->Clone(Panel, ParentElementName + "." + ElementName, true);
 
 				Panel->SetSize(Panel->GetChildrenSize());
 
@@ -1631,18 +1637,15 @@ namespace FlamingTorch
 
 					Json::Value Value = Data.get(Name, Json::Value());
 
-					if(Name == "ID")
-						continue;
-
 					for(UILayout::ElementMap::iterator it = NewLayout->Elements.begin(); it != NewLayout->Elements.end(); it++)
 					{
-						std::string ElementName = GetStringIDString(it->first);
+						std::string ElementName = StringUtils::ToUpperCase(GetStringIDString(it->first));
 
-						int32 Index = ElementName.find(LayoutIDName);
+						int32 Index = ElementName.find(Control);
 
-						ElementName = ElementName.substr(Index + LayoutIDName.size() + 1);
+						ElementName = ElementName.substr(Index + Control.size() + 1);
 
-						if(Name.find(ElementName) == 0)
+						if(StringUtils::ToUpperCase(Name).find(ElementName) == 0)
 						{
 							Name = Name.substr(ElementName.length() + 1);
 
@@ -1689,634 +1692,44 @@ namespace FlamingTorch
 								std::string Property = Parts[Parts.size() - 1];
 								std::string CurrentElementID = GetStringIDString(TargetElement->ID);
 
-								if(ControlName == "UIBUTTON")
+								std::string FinalValue;
+
+								if(Value.isBool())
 								{
-									UIButton *Button = (UIButton *)TargetElement;
-
-									if(Property == "Caption")
-									{
-										if(Value.isString())
-										{
-											Button->Caption = Value.asString();
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Caption", string);
-										};
-									};
-
-									if(Property == "FontSize")
-									{
-										if(Value.isInt())
-										{
-											int32 FontSize = Value.asInt();
-
-											Button->TextParameters.FontSize(FontSize);
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "FontSize", int);
-										};
-									};
+									FinalValue = StringUtils::MakeIntString((uint32)Value.asBool());
 								}
-								else if(ControlName == "UICHECKBOX")
+								else if(Value.isInt())
 								{
-									if(Property == "Checked")
-									{
-										if(Value.isBool())
-										{
-											bool Checked = Value.asBool();
-
-											((UICheckBox *)TargetElement)->SetChecked(Checked);
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Checked", bool);
-										};
-									};
-
-									if(Property == "Caption")
-									{
-										if(Value.isString())
-										{
-											((UICheckBox *)TargetElement)->Caption = Value.asString();
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Caption", string);
-										};
-									};
+									FinalValue = StringUtils::MakeIntString((int32)Value.asInt());
 								}
-								else if(ControlName == "UISPRITE")
+								else if(Value.isUInt())
 								{
-									UISprite *TheSprite = (UISprite *)TargetElement;
+									FinalValue = StringUtils::MakeIntString((uint32)Value.asUInt());
+								}
+								else if(Value.isDouble())
+								{
+									FinalValue = StringUtils::MakeFloatString((f32)Value.asDouble());
+								}
+								else if(Value.isString())
+								{
+									FinalValue = Value.asString();
+								}
+								else
+								{
+									continue;
+								};
 
-									if(Property == "Path")
-									{
-										if(Value.isString())
-										{
-											std::string FileName = Value.asString();
-
-											if(FileName.length() == 0)
-											{
-												TheSprite->TheSprite.Options.Scale(TheSprite->GetSize()).Color(Vector4());
-											}
-											else
-											{
-												SuperSmartPointer<Texture> SpriteTexture;
-
-												if(FileName.find('/') == 0)
-												{
-													SpriteTexture = ResourceManager::Instance.GetTextureFromPackage(FileName.substr(0, FileName.rfind('/') + 1),
-														FileName.substr(FileName.rfind('/') + 1));
-												};
-
-												if(!SpriteTexture.Get())
-												{
-													SpriteTexture = ResourceManager::Instance.GetTexture(FileName);
-												};
-
-												if(!SpriteTexture.Get())
-												{
-													Log::Instance.LogWarn(TAG, "Unable to load texture '%s' for UI Sprite '%s' on Layout '%s'", FileName.c_str(), ElementName.c_str(),
-														TheLayout->Name.c_str());
-												}
-												else
-												{
-													TheSprite->TheSprite.SpriteTexture = SpriteTexture;
-													TheSprite->TheSprite.Options.Scale(Panel->GetSize() != Vector2() ? Panel->GetSize() / SpriteTexture->Size() : Vector2(1, 1));
-													TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
-
-													if(TheSprite->GetSize() == Vector2())
-													{
-														TheSprite->SetSize(SpriteTexture->Size());
-													};
-												};
-											};
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Path", string);
-										};
-									};
-
-									if(Property == "Filtering")
-									{
-										if(Value.isString())
-										{
-											std::string Temp = Value.asString();
-
-											if(TheSprite->TheSprite.SpriteTexture.Get())
-											{
-												if(StringUtils::ToUpperCase(Temp) == "LINEAR")
-												{
-													TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
-												}
-												else if(StringUtils::ToUpperCase(Temp) == "NEAREST")
-												{
-													TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Nearest);
-												};
-											};
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Filtering", string);
-										};
-									};
-
-									if(Property == "CropTiled")
-									{
-										if(Value.isString())
-										{
-											std::string CropTiledString = Value.asString();
-
-											if(CropTiledString.length() && TheSprite->TheSprite.SpriteTexture.Get())
-											{
-												Vector2 FrameSize, FrameID;
-
-												sscanf(CropTiledString.c_str(), "%f, %f, %f, %f", &FrameSize.x, &FrameSize.y, &FrameID.x, &FrameID.y);
-
-												TheSprite->TheSprite.Options.Scale(FrameSize / TheSprite->TheSprite.SpriteTexture->Size()).Crop(CropMode::CropTiled,
-													Rect(FrameSize.x, FrameID.x, FrameSize.y, FrameID.y));
-											};
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "CropTiled", string);
-										};
-									};
-
-									if(Property == "NinePatch")
-									{
-										if(Value.isString())
-										{
-											std::string NinePatchString = Value.asString();
-
-											if(NinePatchString.length())
-											{
-												Rect NinePatchRect;
-
-												sscanf(NinePatchString.c_str(), "%f,%f,%f,%f", &NinePatchRect.Left, &NinePatchRect.Right, &NinePatchRect.Top,
-													&NinePatchRect.Bottom);
-
-												TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Panel->GetSize());
-												TheSprite->SelectBoxExtraSize = NinePatchRect.ToFullSize();
-											};
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "NinePatch", string)
-										};
-									};
-
-									if(Property == "Color")
-									{
-										if(Value.isString())
-										{
-											std::string ColorString = Value.asString();
-
-											Vector4 Color;
-
-											if(4 == sscanf(ColorString.c_str(), "%f, %f, %f, %f", &Color.x, &Color.y, &Color.z, &Color.w))
-											{
-												TheSprite->TheSprite.Options.Color(Color);
-											};
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Color", string)
-										};
-									};
-
-									if(Property == "ScaleWide")
-									{
-										if(Value.isDouble())
-										{
-											TheSprite->TheSprite.Options.Scale(Vector2((f32)Value.asDouble(), TheSprite->TheSprite.Options.ScaleValue.y));
-										};
-									};
-
-									if(Property == "ScaleTall")
-									{
-										if(Value.isDouble())
-										{
-											TheSprite->TheSprite.Options.Scale(Vector2(TheSprite->TheSprite.Options.ScaleValue.x, (f32)Value.asDouble()));
-										};
-									};
+								if(ControlName == "UISPRITE")
+								{
+									ProcessSpriteProperty(TargetElement, Property, FinalValue, ElementName, NewLayout->Name);
 								}
 								else if(ControlName == "UIGROUP")
 								{
-									if(Property == "LayoutMode")
-									{
-										if(Value.isString())
-										{
-											std::string Mode = StringUtils::ToUpperCase(Value.asString());
-
-											if(Mode == "HORIZONTAL")
-											{
-												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::Horizontal;
-											}
-											else if(Mode == "VERTICAL")
-											{
-												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::Vertical;
-											}
-											else if(Mode == "NONE")
-											{
-												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::None;
-											}
-											else if(Mode == "ADJUSTHEIGHT")
-											{
-												((UIGroup *)TargetElement)->LayoutMode |= UIGroupLayoutMode::AdjustHeight;
-											}
-											else if(Mode == "ADJUSTWIDTH")
-											{
-												((UIGroup *)TargetElement)->LayoutMode |= UIGroupLayoutMode::AdjustWidth;
-											}
-											else if(Mode == "CENTER")
-											{
-												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::Center;
-											}
-											else if(Mode == "VCENTER")
-											{
-												((UIGroup *)TargetElement)->LayoutMode = UIGroupLayoutMode::VerticalCenter;
-											}
-											else if(Mode == "ADJUSTCLOSER")
-											{
-												((UIGroup *)TargetElement)->LayoutMode |= UIGroupLayoutMode::AdjustCloser;
-											};
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "LayoutMode", string)
-										};
-									};
+									ProcessGroupProperty(TargetElement, Property, FinalValue, ElementName, NewLayout->Name);
 								}
 								else if(ControlName == "UITEXT")
 								{
-									UIText *TheText = (UIText *)TargetElement;
-
-									if(Property == "FontSize")
-									{
-										int32 FontSize = Renderer->UI->GetDefaultFontSize();
-
-										if(Value.isInt())
-										{
-											FontSize = Value.asInt();
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "FontSize", int);
-										};
-
-										TheText->TextParameters.FontSize(FontSize);
-									};
-
-									if(Property == "Text")
-									{
-										if(Value.isString())
-										{
-											std::string Text = Value.asString();
-
-											TheText->SetText(Text, false);
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Text", string);
-										};
-									};
-
-									if(Property == "Alignment")
-									{
-										uint32 Alignment = 0;
-
-										if(Value.isString())
-										{
-											std::string AlignmentString = StringUtils::ToUpperCase(Value.asString());
-
-											std::vector<std::string> Fragments = StringUtils::Split(AlignmentString, '|');
-
-											for(uint32 l = 0; l < Fragments.size(); l++)
-											{
-												if(Fragments[l] == "CENTER")
-												{
-													Alignment |= UITextAlignment::Center;
-												}
-												else if(Fragments[l] == "LEFT")
-												{
-													Alignment |= UITextAlignment::Left;
-												}
-												else if(Fragments[l] == "RIGHT")
-												{
-													Alignment |= UITextAlignment::Right;
-												}
-												else if(Fragments[l] == "VCENTER")
-												{
-													Alignment |= UITextAlignment::VCenter;
-												};
-											};
-
-											if(Fragments.size() == 0)
-												Alignment = UITextAlignment::Left;
-
-											TheText->TextAlignment = Alignment;
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Alignment", string);
-										};
-									};
-
-									if(Property == "Border")
-									{
-										if(Value.type() == Json::stringValue)
-										{
-											sscanf(Value.asString().c_str(), "%f", &TheText->TextParameters.BorderSizeValue);
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Border", string);
-										};
-									};
-
-									if(Property == "BorderColor")
-									{
-										static std::stringstream str;
-
-										str.str("");
-										str << TheText->TextParameters.BorderColorValue.x << "," << TheText->TextParameters.BorderColorValue.y << "," << TheText->TextParameters.BorderColorValue.z << "," <<
-											TheText->TextParameters.BorderColorValue.w;
-
-										if(Value.type() == Json::stringValue)
-										{
-											sscanf(Value.asString().c_str(), "%f,%f,%f,%f", &TheText->TextParameters.BorderColorValue.x, &TheText->TextParameters.BorderColorValue.y,
-												&TheText->TextParameters.BorderColorValue.z, &TheText->TextParameters.BorderColorValue.w);
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "BorderColor", string);
-										};
-									};
-								}
-								else if(ControlName == "UITEXTBOX")
-								{
-									UITextBox *TheTextBox = (UITextBox *)TargetElement;
-
-									if(Property == "Text")
-									{
-										std::string Text;
-
-										if(Value.isString())
-										{
-											Text = Value.asString();
-
-											TheTextBox->SetText(Text);
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Text", string);
-										};
-									};
-
-									if(Property == "Password")
-									{
-										if(Value.isBool())
-										{
-											TheTextBox->SetPassword(Value.asBool());
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Password", bool);
-										};
-									};
-
-									if(Property == "FontSize")
-									{
-										int32 FontSize = TheTextBox->TextParameters.FontSizeValue;
-
-										if(Value.isInt())
-										{
-											FontSize = Value.asInt();
-
-											TheTextBox->TextParameters.FontSize(FontSize);
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "FontSize", int);
-										};
-									};
-								}
-								else if(ControlName == "UILIST")
-								{
-									UIList *TheList = (UIList *)TargetElement;
-
-									if(Property == "Elements")
-									{
-										if(Value.isString())
-										{
-											std::string ElementString = Value.asString();
-
-											std::vector<std::string> Items = StringUtils::Split(ElementString, '|');
-
-											TheList->Items = Items;
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Elements", string);
-										};
-									};
-
-									if(Property == "FontSize")
-									{
-										int32 FontSize = TheList->GetManager()->GetDefaultFontSize();
-
-										if(Value.isInt())
-										{
-											FontSize = Value.asInt();
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "FontSize", int);
-										};
-
-										TheList->TextParameters.FontSize(FontSize);
-									};
-								};
-
-								if(Property == "TooltipPosition")
-								{
-									if(Value.asString().length() > 0)
-									{
-										Vector2 Position;
-
-										if(2 != sscanf(Value.asString().c_str(), "%f,%f", &Position.x, &Position.y))
-										{
-											Log::Instance.LogWarn(TAG, "While processing Layout element '%s' of layout '%s': Invalid Tooltip Position, expected \"x, y\"",
-												ElementName.c_str(), TheLayout->Name.c_str());
-										}
-										else
-										{
-											TargetElement->SetTooltipsPosition(Position);
-										};
-									};
-								};
-
-								if(Property == "Tooltip")
-								{
-									if(Value.isString() && Value.asString().length())
-									{
-										TargetElement->SetRespondsToTooltips(true);
-										TargetElement->SetTooltipText(Value.asString());
-									}
-									else
-									{
-										if(Value.isArray())
-										{
-											SuperSmartPointer<UIPanel> TooltipGroup(new UIGroup(Renderer->UI));
-											TooltipGroup->SetVisible(false);
-											Renderer->UI->AddElement(MakeStringID(CurrentElementID + "_TOOLTIPELEMENT"), TooltipGroup);
-											TheLayout->Elements[TooltipGroup->GetID()] = TooltipGroup;
-
-											CopyElementsToLayout(TheLayout, Value, TooltipGroup, CurrentElementID + "_TOOLTIPELEMENT");
-
-											TooltipGroup->SetSize(TooltipGroup->GetChildrenSize());
-
-											TargetElement->SetRespondsToTooltips(true);
-											TargetElement->SetTooltipElement(TooltipGroup);
-										};
-									};
-								};
-
-								if(Property == "TooltipFixed")
-								{
-									if(Value.isBool())
-									{
-										TargetElement->SetTooltipsFixed(Value.asBool());
-									}
-									else
-									{
-										CHECKJSONVALUE(Value, "TooltipFixed", bool);
-									};
-								}
-								else if(ControlName == "UISPLITPANEL")
-								{
-									UISplitPanel *SplitPanel = (UISplitPanel *)TargetElement;
-
-									if(Property == "Percentage")
-									{
-										if(Value.isDouble())
-										{
-											SplitPanel->Percentage = (f32)Value.asDouble();
-										};
-									};
-
-									if(Property == "Orientation")
-									{
-										if(Value.isString())
-										{
-											std::string Temp = StringUtils::ToUpperCase(Value.asString());
-
-											if(Temp == "HORIZONTAL")
-											{
-												SplitPanel->Horizontal = true;
-											}
-											else if(Temp == "VERTICAL")
-											{
-												SplitPanel->Horizontal = false;
-											}
-											else
-											{
-												Log::Instance.LogWarn(TAG, "While parsing a layout: Value '%s' is neither Vertical or Horizontal", "Orientation");\
-											};
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Orientation", int);
-										};
-									};
-
-									if(Property == "Left")
-									{
-										if(Value.isArray())
-										{
-											SuperSmartPointer<UIPanel> Group(new UIGroup(Renderer->UI));
-											Renderer->UI->AddElement(MakeStringID(CurrentElementID + "_LEFTGROUP"), Group);
-											TheLayout->Elements[Group->GetID()] = Group;
-
-											if(SplitPanel->Horizontal)
-											{
-												Group->SetSize(SplitPanel->GetSize() * Vector2(SplitPanel->Percentage, 1) - Vector2(SplitPanel->SplitSize / 2.f, 0));
-											}
-											else
-											{
-												Group->SetSize(SplitPanel->GetSize() * Vector2(1, SplitPanel->Percentage) - Vector2(0, SplitPanel->SplitSize / 2.f));
-											};
-
-											CopyElementsToLayout(TheLayout, Value, Group, CurrentElementID + "_LEFTGROUP");
-
-											SplitPanel->Left = Group;
-											SplitPanel->AddChild(Group);
-										};
-									};
-
-									if(Property == "Right")
-									{
-										if(Value.isArray())
-										{
-											SuperSmartPointer<UIPanel> Group(new UIGroup(Renderer->UI));
-											Renderer->UI->AddElement(MakeStringID(CurrentElementID + "_RIGHTGROUP"), Group);
-											TheLayout->Elements[Group->GetID()] = Group;
-
-											if(SplitPanel->Horizontal)
-											{
-												Group->SetSize(SplitPanel->GetSize() * Vector2(1 - SplitPanel->Percentage, 1) - Vector2(SplitPanel->SplitSize / 2.f, 0));
-											}
-											else
-											{
-												Group->SetSize(SplitPanel->GetSize() * Vector2(1, 1 - SplitPanel->Percentage) - Vector2(0, SplitPanel->SplitSize / 2.f));
-											};
-
-											CopyElementsToLayout(TheLayout, Value, Group, CurrentElementID + "_RIGHTGROUP");
-
-											SplitPanel->Right = Group;
-											SplitPanel->AddChild(Group);
-										};
-									};
-								}
-								else if(ControlName == "UIDROPDOWN")
-								{
-									UIDropdown *TheDropdown = (UIDropdown *)TargetElement;
-
-									if(Property == "Elements")
-									{
-										if(Value.isString())
-										{
-											std::string ElementString = Value.asString();
-
-											std::vector<std::string> Items = StringUtils::Split(ElementString, '|');
-
-											TheDropdown->Items = Items;
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "Elements", string);
-										};
-									};
-
-									if(Property == "FontSize")
-									{
-										int32 FontSize = TheDropdown->GetManager()->GetDefaultFontSize();
-
-										if(Value.isInt())
-										{
-											FontSize = Value.asInt();
-										}
-										else
-										{
-											CHECKJSONVALUE(Value, "FontSize", int);
-										};
-
-										TheDropdown->TextParameters.FontSize(FontSize);
-									};
+									ProcessTextProperty(TargetElement, Property, FinalValue, ElementName, NewLayout->Name);
 								};
 
 								break;
@@ -2324,124 +1737,6 @@ namespace FlamingTorch
 						};
 					};
 				};
-			}
-			else if(Control == "DROPDOWN")
-			{
-				UIDropdown *TheDropdown = Panel.AsDerived<UIDropdown>();
-
-				Value = Data.get("Elements", Json::Value(""));
-
-				if(Value.isString())
-				{
-					std::string ElementString = Value.asString();
-
-					std::vector<std::string> Items = StringUtils::Split(ElementString, '|');
-
-					TheDropdown->Items = Items;
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Elements", string);
-				};
-
-				int32 FontSize = TheDropdown->GetManager()->GetDefaultFontSize();
-
-				Value = Data.get("FontSize", Json::Value((Json::Value::Int)TheDropdown->GetManager()->GetDefaultFontSize()));
-
-				if(Value.isInt())
-				{
-					FontSize = Value.asInt();
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "FontSize", int);
-				};
-
-				TheDropdown->TextParameters.FontSize(FontSize);
-			}
-			else if(Control == "SPLITPANEL")
-			{
-				UISplitPanel *SplitPanel = Panel.AsDerived<UISplitPanel>();
-
-				Value = Data.get("Percentage", Json::Value(""));
-
-				if(Value.isDouble())
-				{
-					SplitPanel->Percentage = (f32)Value.asDouble();
-				};
-
-				Value = Data.get("Orientation", Json::Value("Horizontal"));
-
-				if(Value.isString())
-				{
-					std::string Temp = StringUtils::ToUpperCase(Value.asString());
-
-					if(Temp == "HORIZONTAL")
-					{
-						SplitPanel->Horizontal = true;
-					}
-					else if(Temp == "VERTICAL")
-					{
-						SplitPanel->Horizontal = false;
-					}
-					else
-					{
-						Log::Instance.LogWarn(TAG, "While parsing a layout: Value '%s' is neither Vertical or Horizontal", "Orientation");\
-					};
-				}
-				else
-				{
-					CHECKJSONVALUE(Value, "Orientation", int);
-				};
-
-				Value = Data.get("Left", Json::Value(""));
-
-				if(Value.isArray())
-				{
-					SuperSmartPointer<UIPanel> Group(new UIGroup(Renderer->UI));
-					Renderer->UI->AddElement(MakeStringID(ParentElementName + "." + ElementName + "_LEFTGROUP"), Group);
-					TheLayout->Elements[Group->GetID()] = Group;
-
-					if(SplitPanel->Horizontal)
-					{
-						Group->SetSize(SplitPanel->GetSize() * Vector2(SplitPanel->Percentage, 1) - Vector2(SplitPanel->SplitSize / 2.f, 0));
-					}
-					else
-					{
-						Group->SetSize(SplitPanel->GetSize() * Vector2(1, SplitPanel->Percentage) - Vector2(0, SplitPanel->SplitSize / 2.f));
-					};
-
-					CopyElementsToLayout(TheLayout, Value, Group, ParentElementName + "." + ElementName + "_LEFTGROUP");
-
-					SplitPanel->Left = Group;
-					SplitPanel->AddChild(Group);
-				};
-
-				Value = Data.get("Right", Json::Value(""));
-
-				if(Value.isArray())
-				{
-					SuperSmartPointer<UIPanel> Group(new UIGroup(Renderer->UI));
-					Renderer->UI->AddElement(MakeStringID(ParentElementName + "." + ElementName + "_RIGHTGROUP"), Group);
-					TheLayout->Elements[Group->GetID()] = Group;
-
-					if(SplitPanel->Horizontal)
-					{
-						Group->SetSize(SplitPanel->GetSize() * Vector2(1 - SplitPanel->Percentage, 1) - Vector2(SplitPanel->SplitSize / 2.f, 0));
-					}
-					else
-					{
-						Group->SetSize(SplitPanel->GetSize() * Vector2(1, 1 - SplitPanel->Percentage) - Vector2(0, SplitPanel->SplitSize / 2.f));
-					};
-
-					CopyElementsToLayout(TheLayout, Value, Group, ParentElementName + "." + ElementName + "_RIGHTGROUP");
-
-					SplitPanel->Right = Group;
-					SplitPanel->AddChild(Group);
-				};
-
-				//Ignore tooltips and children
-				continue;
 			};
 
 			Panel->PerformLayout();
@@ -2508,6 +1803,32 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, "TooltipPosition", string);
 			};
 
+			Value = Data.get("Rotation", Json::Value(0.0));
+
+			if(Value.isDouble() || Value.isInt() || Value.isUInt())
+			{
+				f32 Angle = 0;
+
+				if(Value.isDouble())
+				{
+					Angle = (f32)Value.asDouble();
+				}
+				else if(Value.isInt())
+				{
+					Angle = (f32)Value.asInt();
+				}
+				else if(Value.isUInt())
+				{
+					Angle = (f32)Value.asUInt();
+				};
+
+				Panel->SetRotation(MathUtils::DegToRad(Angle));
+			}
+			else
+			{
+				CHECKJSONVALUE(Value, "Rotation", number);
+			};
+
 			Json::Value Children = Data.get("Children", Json::Value());
 
 			if(!Children.isArray())
@@ -2517,12 +1838,13 @@ namespace FlamingTorch
 		};
 	};
 
-	bool UIManager::LoadLayouts(Stream *In, SuperSmartPointer<UIPanel> Parent)
+	bool UIManager::LoadLayouts(Stream *In, SuperSmartPointer<UIPanel> Parent, bool DefaultLayout)
 	{
 		Json::Value Root;
 		Json::Reader Reader;
+		std::string Content = In->AsString();
 
-		if(!Reader.parse(In->AsString(), Root))
+		if(!Reader.parse(Content, Root))
 		{
 			Log::Instance.LogErr(TAG, "Failed to parse a GUI layout resource: %s", Reader.getFormatedErrorMessages().c_str());
 
@@ -2537,26 +1859,29 @@ namespace FlamingTorch
 			Layout->Name = LayoutName;
 			Layout->Owner = this;
 			Layout->ContainedObjects = Elements;
+			Layout->Parent = Parent;
 
 			CopyElementsToLayout(Layout, Elements, Parent, Layout->Name);
 
-			for(UILayout::ElementMap::iterator it = Layout->Elements.begin(); it != Layout->Elements.end(); it++)
-			{
-				RUN_GUI_SCRIPT_EVENTS2(it->second->OnStartFunction, (it->second.Get()), it->second->ID);
-			};
-
 			StringID LayoutID = MakeStringID((Parent.Get() ? Parent->GetLayout()->Name + "_" : "") + LayoutName);
 
-			LayoutMap::iterator it = Layouts.find(LayoutID);
+			LayoutMap &TargetLayoutMap = DefaultLayout ? DefaultLayouts : Layouts;
 
-			if(it != Layouts.end())
+			LayoutMap::iterator it = TargetLayoutMap.find(LayoutID);
+
+			if(it != TargetLayoutMap.end())
 			{
-				Log::Instance.LogWarn(TAG, "Found duplicate layout '%s', erasing old.", LayoutName.c_str());
+				Log::Instance.LogWarn(TAG, "Found duplicate layout '%s' in %s, erasing old.", LayoutName.c_str(), DefaultLayout ? "Default Layouts" : "Layouts");
 
-				Layouts.erase(it);
+				TargetLayoutMap.erase(it);
 			};
 
-			Layouts[LayoutID] = Layout;
+			TargetLayoutMap[LayoutID] = Layout;
+
+			if(!DefaultLayout)
+			{
+				Layout->PerformStartupEvents(NULL);
+			};
 		};
 
 		return true;
@@ -2568,6 +1893,12 @@ namespace FlamingTorch
 		{
 			Layouts.begin()->second.Dispose();
 			Layouts.erase(Layouts.begin());
+		};
+
+		while(DefaultLayouts.begin() != DefaultLayouts.end())
+		{
+			DefaultLayouts.begin()->second.Dispose();
+			DefaultLayouts.erase(DefaultLayouts.begin());
 		};
 
 		MouseOverElement = NULL;
@@ -2776,18 +2107,51 @@ namespace FlamingTorch
 
 		static AxisAlignedBoundingBox AABB;
 
-		AABB.min = ParentPosition + p->GetPosition() - p->SelectBoxExtraSize / 2 + p->GetOffset();
-		AABB.max = AABB.min + p->GetSize() + p->SelectBoxExtraSize;
+		static RotateableRect Rectangle;
 
-		if(AABB.IsInside(RendererManager::Instance.Input.MousePosition) &&
-			p->MouseInputValue)
+		Vector2 PanelSize = p->GetSize() + p->GetScaledExtraSize();
+
+		Vector2 ActualPosition = ParentPosition + p->GetPosition() + p->GetOffset();
+
+		AABB.min = ActualPosition;
+		AABB.max = AABB.min + PanelSize;
+
+		if(!!Console::Instance.GetVariable("r_drawuirects")->UintValue)
+		{
+			Sprite TheSprite;
+			TheSprite.Options.Position(AABB.min.ToVector2()).Scale(PanelSize).Color(Vector4(1, 0, 0, 0.1f)).Rotation(p->GetParentRotation());
+
+			TheSprite.Draw(Owner);
+		};
+
+		Rectangle.Left = AABB.min.x;
+		Rectangle.Right = AABB.max.x;
+		Rectangle.Top = AABB.min.y;
+		Rectangle.Bottom = AABB.max.y;
+		Rectangle.Rotation = p->GetParentRotation();
+
+		if(Rectangle.Rotation != 0)
+		{
+			PanelSize /= 2;
+			Rectangle.Left += PanelSize.x;
+			Rectangle.Right += PanelSize.x;
+			Rectangle.Top += PanelSize.y;
+			Rectangle.Bottom += PanelSize.y;
+		};
+
+		if(Rectangle.IsInside(RendererManager::Instance.Input.MousePosition))
 		{
 			FoundElement = p;
 
+			Vector2 ParentSizeHalf = PanelSize;
+
 			for(uint32 i = 0; i < p->Children.size(); i++)
 			{
-				RecursiveFindFocusedElement(ParentPosition + p->GetPosition() - p->GetTranslation() + p->GetOffset(),
-					p->Children[i], FoundElement);
+				Vector2 ChildrenSizeHalf = (p->Children[i]->GetSize() + p->Children[i]->GetScaledExtraSize()) / 2;
+				Vector2 ChildrenPosition = p->Children[i]->GetPosition() - p->Children[i]->GetTranslation() + p->Children[i]->GetOffset();
+
+				RecursiveFindFocusedElement(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, p->GetParentRotation()) + ParentSizeHalf -
+					ChildrenSizeHalf - ChildrenPosition + Vector2::Rotate(p->GetScaledExtraSize() / 2, p->GetParentRotation()), p->Children[i], FoundElement);
 			};
 		};
 	};
@@ -2878,12 +2242,6 @@ namespace FlamingTorch
 		if(FocusedElementValue)
 		{
 			FocusedElementValue->OnGainFocusPriv();
-		};
-
-		if(CurrentMenu.Get() && FocusedElementValue.Get() != CurrentMenu.Get())
-		{
-			MemoryStream Temp;
-			RemoveMenuFuture(Temp);
 		};
 
 		if(FocusedElementValue)
@@ -3072,12 +2430,6 @@ namespace FlamingTorch
 		if(FocusedElementValue.Get())
 			FocusedElementValue->OnLoseFocusPriv();
 
-		if(CurrentMenu.Get())
-		{
-			MemoryStream Temp;
-			RemoveMenuFuture(Temp);
-		};
-
 		FocusedElementValue = SuperSmartPointer<UIPanel>();
 	};
 
@@ -3145,37 +2497,6 @@ namespace FlamingTorch
 
 			it->second->Panel->SetSkin(Skin);
 		};
-	};
-
-	UIMenu *UIManager::CreateMenu(const Vector2 &Position)
-	{
-		if(CurrentMenu.Get())
-			RemoveElement(CurrentMenu->ID);
-
-		CurrentMenu.Reset(new UIMenu(this));
-		CurrentMenu->SetPosition(Position);
-
-		AddElement(MakeStringID("__UIMANAGER_CURRENT_MENU__"), CurrentMenu);
-
-		return CurrentMenu;
-	};
-
-	UIMenuBar *UIManager::CreateMenuBar()
-	{
-		if(CurrentMenuBar.Get())
-			RemoveElement(CurrentMenuBar->ID);
-
-		CurrentMenuBar.Dispose();
-		CurrentMenuBar.Reset(new UIMenuBar(this));
-
-		AddElement(MakeStringID("__UIMANAGER_CURRENT_MENU_BAR__"), CurrentMenuBar);
-
-		return CurrentMenuBar;
-	};
-
-	void UIManager::RemoveMenuFuture(MemoryStream &Stream)
-	{
-		RemoveElement(MakeStringID("__UIMANAGER_CURRENT_MENU__"));
 	};
 
 #endif

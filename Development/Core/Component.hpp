@@ -6,7 +6,7 @@ class Entity;
 *	Entity Component
 *	Adds behaviour to your entities
 */
-class Component 
+class FLAMING_API Component 
 {
 public:
 	std::string Name;
