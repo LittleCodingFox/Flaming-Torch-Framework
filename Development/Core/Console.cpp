@@ -378,6 +378,13 @@ namespace FlamingTorch
 
 		RegisterVariable(DrawGUIRects);
 
+		ConsoleVariable DrawGUIFocusZones;
+		DrawGUIFocusZones.Name = "r_drawuifocuszones";
+		DrawGUIFocusZones.Type = ConsoleVariableType::UInt;
+		DrawGUIFocusZones.UintValue = 0;
+
+		RegisterVariable(DrawGUIFocusZones);
+
 		ConsoleVariable DrawGUI;
 		DrawGUI.Name = "r_drawui";
 		DrawGUI.Type = ConsoleVariableType::UInt;

@@ -21,6 +21,7 @@ GameInitialize = function(Arguments)
 			Game.IsGUISandbox = true
 			
 			g_Console:GetVariable("r_drawuirects").UintValue = 1
+			g_Console:GetVariable("r_drawuifocuszones").UintValue = 1
 		end
 	end
 	
