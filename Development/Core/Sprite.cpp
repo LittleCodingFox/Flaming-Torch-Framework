@@ -308,7 +308,7 @@ namespace FlamingTorch
 			break;
 		};
 
-		if(Options.RotationValue != 0)
+		if(Options.RotationValue != 0 && !Options.WireframeValue)
 		{
 			Vector2 ExtraSize = Options.NinePatchValue ? -ObjectSize / 2 + Options.NinePatchRectValue.ToFullSize() / 4 : -ObjectSize / 2;
 
@@ -381,7 +381,50 @@ namespace FlamingTorch
 			};
 		};
 
-		SpriteCache::Instance.Register(VerticesTarget, TexCoordTarget, ColorsTarget, VertexCount, SpriteTexture, Options.BlendingModeValue, Renderer);
+		if(Options.WireframeValue)
+		{
+			SpriteCache::Instance.Flush(Renderer);
+
+			Renderer->EnableState(GL_VERTEX_ARRAY);
+			Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
+			Renderer->DisableState(GL_COLOR_ARRAY);
+			Renderer->DisableState(GL_NORMAL_ARRAY);
+			Renderer->BindTexture(NULL);
+
+			Vector2 ObjectSizeHalf = ObjectSize / 2;
+
+			Vector2 Vertices[8] = {
+				-ObjectSizeHalf,
+				Vector2(ObjectSizeHalf.x, -ObjectSizeHalf.y),
+				Vector2(ObjectSizeHalf.x, -ObjectSizeHalf.y),
+				ObjectSizeHalf,
+				ObjectSizeHalf,
+				Vector2(-ObjectSizeHalf.x, ObjectSizeHalf.y),
+				Vector2(-ObjectSizeHalf.x, ObjectSizeHalf.y),
+				-ObjectSizeHalf,
+			};
+
+			for(uint32 i = 0; i < 8; i++)
+			{
+				Vertices[i] = Vector2::Rotate(Vertices[i], Options.RotationValue) + ObjectSizeHalf + Options.PositionValue;
+			};
+
+			glColor4f(Options.ColorValue.x, Options.ColorValue.y, Options.ColorValue.z, Options.ColorValue.w);
+
+			glVertexPointer(2, GL_FLOAT, 0, Vertices);
+
+			glLineWidth(Options.WireframePixelSizeValue);
+
+			glDrawArrays(GL_LINES, 0, 8);
+
+			glLineWidth(1);
+
+			glColor4f(1, 1, 1, 1);
+		}
+		else
+		{
+			SpriteCache::Instance.Register(VerticesTarget, TexCoordTarget, ColorsTarget, VertexCount, SpriteTexture, Options.BlendingModeValue, Renderer);
+		};
 	};
 
 	void SpriteCache::Register(Vector2 *Vertices, Vector2 *TexCoords, Vector4 *Colors, uint32 VertexCount, SuperSmartPointer<Texture> Texture, uint32 BlendingMode, RendererManager::Renderer *Renderer)

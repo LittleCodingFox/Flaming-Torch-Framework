@@ -53,16 +53,19 @@ public:
 	bool FlipX, FlipY;
 	Vector2 TexCoordBorderMin, TexCoordBorderMax, TexCoordPosition;
 	f32 TexCoordRotation;
+	bool WireframeValue;
+	f32 WireframePixelSizeValue;
 
 	SpriteDrawOptions() : ColorValue(1, 1, 1, 1), ScaleValue(1, 1), RotationValue(0), BlendingModeValue(BlendingMode::Alpha),
 		PinningModeValue(PinningMode::TopLeft), CropModeValue(CropMode::None), NinePatchValue(false), FlipX(false), FlipY(false),
-		TexCoordRotation(0), TexCoordBorderMax(1, 1), NinePatchScaleValue(1) {};
+		TexCoordRotation(0), TexCoordBorderMax(1, 1), NinePatchScaleValue(1), WireframeValue(false), WireframePixelSizeValue(1) {};
 	SpriteDrawOptions(const SpriteDrawOptions &o) : ColorValue(o.ColorValue), BlendingModeValue(o.BlendingModeValue),
 		PositionValue(o.PositionValue), ScaleValue(o.ScaleValue), RotationValue(o.RotationValue),
 		PinningModeValue(o.PinningModeValue), CropModeValue(o.CropModeValue), CropRectValue(o.CropRectValue),
 		NinePatchValue(o.NinePatchValue), NinePatchRectValue(o.NinePatchRectValue), FlipX(o.FlipX), FlipY(o.FlipY),
 		TexCoordRotation(o.TexCoordRotation), TexCoordBorderMin(o.TexCoordBorderMin), TexCoordBorderMax(o.TexCoordBorderMax),
-		OffsetValue(o.OffsetValue), TexCoordPosition(o.TexCoordPosition), NinePatchScaleValue(o.NinePatchScaleValue) {};
+		OffsetValue(o.OffsetValue), TexCoordPosition(o.TexCoordPosition), NinePatchScaleValue(o.NinePatchScaleValue), WireframeValue(o.WireframeValue),
+		WireframePixelSizeValue(o.WireframePixelSizeValue) {};
 
 	SpriteDrawOptions &Position(const Vector2 &Pos) { PositionValue = Pos; return *this; };
 	/*!
@@ -75,7 +78,30 @@ public:
 	SpriteDrawOptions &Pin(uint32 PinningMode) { PinningModeValue = PinningMode; return *this; };
 	SpriteDrawOptions &Offset(const Vector2 &Offset) { OffsetValue = Offset; return *this; };
 
-	//Only works for non-Ninepatch
+	/*!
+	*	Sets whether this sprite should be wireframe (lines covering the sprite)
+	*	\param Value whether to make this wireframe
+	*	\note Will ignore actual Textures for rendering but will generate the usual geometry
+	*/
+	SpriteDrawOptions &Wireframe(bool Value)
+	{
+		WireframeValue = Value;
+
+		return *this;
+	};
+
+	/*!
+	*	Sets the wireframe size for this sprite
+	*	\param Value the size in pixels of the wireframe line
+	*	\note Will ignore actual Textures for rendering but will generate the usual geometry
+	*/
+	SpriteDrawOptions &WireframePixelSize(f32 Value)
+	{
+		WireframePixelSizeValue = Value;
+
+		return *this;
+	};
+
 	/*!
 	*	Sets the texture's rotation
 	*	\param Rotation rotation in Radians
