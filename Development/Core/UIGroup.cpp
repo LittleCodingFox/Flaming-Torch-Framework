@@ -10,15 +10,15 @@ namespace FlamingTorch
 
 		PerformLayout();
 
-		Vector2 ParentSizeHalf = SizeValue / 2;
+		Vector2 ParentSizeHalf = GetComposedSize() / 2;
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
-			Vector2 ChildrenSizeHalf = (Children[i]->GetSize() + Children[i]->GetScaledExtraSize()) / 2;
-			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset() - Children[i]->GetScaledExtraSize() / 4;
+			Vector2 ChildrenSizeHalf = Children[i]->GetComposedSize() / 2;
+			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset();
 
-			Children[i]->Update(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition);
+			Children[i]->Update(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition - GetScaledExtraSize() / 2);
 		};
 	};
 
@@ -26,24 +26,27 @@ namespace FlamingTorch
 	{
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
-		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
+		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + GetComposedSize().x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
-			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
+			ActualPosition.y + GetComposedSize().y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
 		UIPanel::Draw(ParentPosition, Renderer);
 
-		Vector2 ParentSizeHalf = SizeValue / 2;
+		DrawUIFocusZone(ParentPosition, Renderer);
+		DrawUIRect(ParentPosition, Renderer);
+
+		Vector2 ParentSizeHalf = GetComposedSize() / 2;
+		Vector2 ParentOffset = Vector2::Rotate(GetScaledExtraSize() / 2, GetParentRotation());
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
-			Vector2 ChildrenSizeHalf = (Children[i]->GetSize() + Children[i]->GetScaledExtraSize()) / 2;
-			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset() - Children[i]->GetScaledExtraSize() / 4;
+			Vector2 ChildrenSizeHalf = Children[i]->GetComposedSize() / 2;
+			Vector2 ChildrenPosition = Children[i]->GetPosition() - Children[i]->GetTranslation() + Children[i]->GetOffset();
 
-			Children[i]->Draw(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition, Renderer);
+			Children[i]->Draw(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf -
+				ChildrenSizeHalf - ChildrenPosition - ParentOffset, Renderer);
 		};
-
-		DrawUIRect(ParentPosition, Renderer);
 	};
 
 	void UIGroup::PerformLayout()

@@ -754,16 +754,6 @@ namespace FlamingTorch
 				Panel.Reset(new UIGroup(Renderer->UI));
 			};
 
-			/*
-			if(Panel.Get() == NULL)
-			{
-				Log::Instance.LogErr(TAG, "Failed to read a widget '%s' from a layout '%s': Invalid control '%s'", ElementName.c_str(),
-					TheLayout->Name.c_str(), Control.c_str());
-
-				return;
-			};
-			*/
-
 			Panel->Layout = TheLayout;
 			Panel->LayoutName = ElementIDName;
 
@@ -1515,8 +1505,8 @@ namespace FlamingTorch
 				"	parent_wide = Parent.Size.x\n"
 				"	parent_tall = Parent.Size.y\n"
 				"else\n"
-				"   parent_wide = ScreenWidth\n"
-				"   parent_tall = ScreenHeight\n"
+				"	parent_wide = ScreenWidth\n"
+				"	parent_tall = ScreenHeight\n"
 				"end\n\n" <<
 				SizeScript.str() <<
 				"Self.Size = Vector2(SizeX, SizeY)\n"
@@ -1611,11 +1601,20 @@ namespace FlamingTorch
 					return;
 				};
 
-				Panel->SetSize(Parent ? Parent->GetSize() + Parent->GetScaledExtraSize() : Panel->GetSize() + Panel->GetScaledExtraSize());
+				//We shouldn't override previous set sizes...
+				bool ResetPanelSize = Panel->GetSize() == Vector2();
+
+				if(ResetPanelSize)
+				{
+					Panel->SetSize(Parent ? Parent->GetComposedSize() : Panel->GetComposedSize());
+				};
 
 				SuperSmartPointer<UILayout> NewLayout = TargetLayout->Clone(Panel, ParentElementName + "." + ElementName, true);
 
-				Panel->SetSize(Panel->GetChildrenSize());
+				if(!ResetPanelSize)
+				{
+					Panel->SetSize(Panel->GetChildrenSize());
+				};
 
 				StringID LayoutID = MakeStringID(ParentElementName + "." + ElementName + "." + NewLayout->Name);
 
@@ -1640,6 +1639,8 @@ namespace FlamingTorch
 					for(UILayout::ElementMap::iterator it = NewLayout->Elements.begin(); it != NewLayout->Elements.end(); it++)
 					{
 						std::string ElementName = StringUtils::ToUpperCase(GetStringIDString(it->first));
+
+						ElementName = ElementName.substr(ParentElementName.length() + 1);
 
 						int32 Index = ElementName.find(Control);
 
@@ -1822,11 +1823,30 @@ namespace FlamingTorch
 					Angle = (f32)Value.asUInt();
 				};
 
-				Panel->SetRotation(MathUtils::DegToRad(Angle));
+				for(uint32 j = 0; j < Panel->Children.size(); j++)
+				{
+					Panel->Children[j]->SetRotation(Panel->Children[j]->Rotation() - Panel->Rotation());
+				};
+
+				Panel->SetRotation(Panel->Rotation() + MathUtils::DegToRad(Angle));
 			}
 			else
 			{
 				CHECKJSONVALUE(Value, "Rotation", number);
+			};
+
+			Value = Data.get("ContentPanel", Json::Value(false));
+
+			if(Value.isBool())
+			{
+				if(Value.asBool() && Panel->GetParent() != NULL)
+				{
+					Panel->GetParent()->SetContentPanel(Panel);
+				};
+			}
+			else
+			{
+				CHECKJSONVALUE(Value, "ContentPanel", bool);
 			};
 
 			Json::Value Children = Data.get("Children", Json::Value());
@@ -1834,7 +1854,7 @@ namespace FlamingTorch
 			if(!Children.isArray())
 				continue;
 
-			CopyElementsToLayout(TheLayout, Children, Panel, ParentElementName + "." + ElementName);
+			CopyElementsToLayout(TheLayout, Children, Panel->ContentPanel() ? Panel->ContentPanel() : Panel, ParentElementName + "." + ElementName);
 		};
 	};
 
@@ -2025,7 +2045,8 @@ namespace FlamingTorch
 
 	void UIManager::Draw(RendererManager::Renderer *Renderer)
 	{
-		DrawUIRects = !!Console::Instance.GetVariable("r_drawuirects")->UintValue;
+		DrawUIRects = !!(Console::Instance.GetVariable("r_drawuirects") ? Console::Instance.GetVariable("r_drawuirects")->UintValue : 0);
+		DrawUIFocusZones = !!(Console::Instance.GetVariable("r_drawuifocuszones") ? Console::Instance.GetVariable("r_drawuifocuszones")->UintValue : 0);
 
 		if(DrawOrderCacheDirty)
 		{
@@ -2109,20 +2130,16 @@ namespace FlamingTorch
 
 		static RotateableRect Rectangle;
 
-		Vector2 PanelSize = p->GetSize() + p->GetScaledExtraSize();
+		Vector2 PanelSize = p->GetComposedSize();
 
 		Vector2 ActualPosition = ParentPosition + p->GetPosition() + p->GetOffset();
 
 		AABB.min = ActualPosition;
 		AABB.max = AABB.min + PanelSize;
 
-		if(!!Console::Instance.GetVariable("r_drawuirects")->UintValue)
-		{
-			Sprite TheSprite;
-			TheSprite.Options.Position(AABB.min.ToVector2()).Scale(PanelSize).Color(Vector4(1, 0, 0, 0.1f)).Rotation(p->GetParentRotation());
-
-			TheSprite.Draw(Owner);
-		};
+		Sprite TheSprite;
+		TheSprite.Options.Position(AABB.min.ToVector2()).Scale(PanelSize);
+		//TheSprite.Draw(Owner);
 
 		Rectangle.Left = AABB.min.x;
 		Rectangle.Right = AABB.max.x;
@@ -2133,26 +2150,33 @@ namespace FlamingTorch
 		if(Rectangle.Rotation != 0)
 		{
 			PanelSize /= 2;
+
 			Rectangle.Left += PanelSize.x;
 			Rectangle.Right += PanelSize.x;
 			Rectangle.Top += PanelSize.y;
 			Rectangle.Bottom += PanelSize.y;
+
+			PanelSize *= 2;
 		};
 
 		if(Rectangle.IsInside(RendererManager::Instance.Input.MousePosition))
 		{
 			FoundElement = p;
 
-			Vector2 ParentSizeHalf = PanelSize;
+			Vector2 ParentSizeHalf = PanelSize / 2;
 
 			for(uint32 i = 0; i < p->Children.size(); i++)
 			{
-				Vector2 ChildrenSizeHalf = (p->Children[i]->GetSize() + p->Children[i]->GetScaledExtraSize()) / 2;
+				Vector2 ChildrenSizeHalf = (p->Children[i]->GetComposedSize()) / 2;
 				Vector2 ChildrenPosition = p->Children[i]->GetPosition() - p->Children[i]->GetTranslation() + p->Children[i]->GetOffset();
 
 				RecursiveFindFocusedElement(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, p->GetParentRotation()) + ParentSizeHalf -
-					ChildrenSizeHalf - ChildrenPosition + Vector2::Rotate(p->GetScaledExtraSize() / 2, p->GetParentRotation()), p->Children[i], FoundElement);
+					ChildrenSizeHalf - ChildrenPosition, p->Children[i], FoundElement);
 			};
+		}
+		else
+		{
+			//Log::Instance.LogDebug(TAG, "Failed Focus Test on '%s'", p->Name.c_str());
 		};
 	};
 

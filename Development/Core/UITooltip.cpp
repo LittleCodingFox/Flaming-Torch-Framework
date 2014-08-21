@@ -113,6 +113,7 @@ namespace FlamingTorch
 				TextParams(TextParameters).Color(Vector4(0, 0, 0, GetParentAlpha())).Position(ActualPosition + (SizeValue - ActualFontSize) / 2));
 		};
 
+		DrawUIFocusZone(ParentPosition, Renderer);
 		DrawUIRect(ParentPosition, Renderer);
 	};
 #endif

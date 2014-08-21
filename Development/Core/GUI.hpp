@@ -81,7 +81,7 @@ protected:
 	UIManager *Manager;
 	bool RespondsToTooltipsValue, TooltipFixed;
 	sf::String TooltipValue;
-	SuperSmartPointer<UIPanel> ParentValue, TooltipElement;
+	SuperSmartPointer<UIPanel> ParentValue, TooltipElement, ContentPanelValue;
 	//!<Children of this UI Panel
 	std::vector<UIPanel *> Children;
 	uint64 ClickTimer;
@@ -174,15 +174,24 @@ public:
 
 	/*!
 	*	Draws the UI rect for this element
+	*	\param ParentPosition the parent's position
 	*	\param Renderer the renderer to render to
 	*	\note should be called by all derived classes on Draw() after drawing the element
 	*/
 	void DrawUIRect(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
 
 	/*!
+	*	Draws the UI Focus Zone for this element
+	*	\param ParentPosition the parent's position
+	*	\param Renderer the renderer to render to
+	*	\note should be called by all derived classes on Draw() after drawing the element and before drawing the UI Rect
+	*/
+	void DrawUIFocusZone(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+
+	/*!
 	*	\return Whether this element respondes to Tooltips
 	*/
-	bool RespondsToTooltips() { return RespondsToTooltipsValue && (TooltipValue.getSize() || TooltipElement.Get()); };
+	bool RespondsToTooltips() const { return RespondsToTooltipsValue && (TooltipValue.getSize() || TooltipElement.Get()); };
 
 	/*!
 	*	Clears the current animations from this panel
@@ -201,9 +210,26 @@ public:
 	UIPanel *FadeOut(uint64 Duration);
 
 	/*!
+	*	Sets the Content Panel for this Panel
+	*	\param Panel the Content Panel of this Panel
+	*/
+	void SetContentPanel(SuperSmartPointer<UIPanel> Panel)
+	{
+		ContentPanelValue = Panel;
+	};
+
+	/*!
+	*	\return the Content Panel for this Panel
+	*/
+	SuperSmartPointer<UIPanel> ContentPanel() const
+	{
+		return ContentPanelValue;
+	};
+
+	/*!
 	*	\return the extra size scale
 	*/
-	f32 ExtraSizeScale()
+	f32 ExtraSizeScale() const
 	{
 		return ExtraSizeScaleValue;
 	};
@@ -227,9 +253,17 @@ public:
 	};
 
 	/*!
+	*	Gets the composed size (size + scaled extrasize)
+	*/
+	Vector2 GetComposedSize() const
+	{
+		return GetSize() + GetScaledExtraSize();
+	};
+
+	/*!
 	*	\return Whether this element's tooltips are fixed (don't move with the mouse)
 	*/
-	bool TooltipsFixed()
+	bool TooltipsFixed() const
 	{
 		return TooltipFixed;
 	};
@@ -246,7 +280,7 @@ public:
 	/*!
 	*	Gets this element's rotation in Radians
 	*/
-	f32 Rotation()
+	f32 Rotation() const
 	{
 		return RotationValue;
 	};
@@ -254,11 +288,11 @@ public:
 	/*!
 	*	Gets the rotation of this element combined with its parents
 	*/
-	f32 GetParentRotation()
+	f32 GetParentRotation() const
 	{
 		f32 Rotation = RotationValue;
 
-		UIPanel *Parent = ParentValue;
+		UIPanel *Parent = const_cast<UIPanel *>(ParentValue.Get());
 
 		while(Parent != NULL)
 		{
@@ -282,7 +316,7 @@ public:
 	/*!
 	*	\return this element's tooltips position (relative to mouse position if not Fixed, relative to Element if Fixed)
 	*/
-	const Vector2 &TooltipsPosition()
+	const Vector2 &TooltipsPosition() const
 	{
 		return TooltipPosition;
 	};
@@ -290,7 +324,7 @@ public:
 	/*!
 	*	\return this element's offset
 	*/
-	const Vector2 &GetOffset()
+	const Vector2 &GetOffset() const
 	{
 		return OffsetValue;
 	};
@@ -327,7 +361,7 @@ public:
 	/*!
 	*	\return the Tooltip Text to display
 	*/
-	const sf::String &GetTooltipText()
+	const sf::String &GetTooltipText() const
 	{
 		return TooltipValue;
 	};
@@ -335,7 +369,7 @@ public:
 	/*!
 	*	\return the Tooltip Element to display
 	*/
-	SuperSmartPointer<UIPanel> GetTooltipElement()
+	SuperSmartPointer<UIPanel> GetTooltipElement() const
 	{
 		return TooltipElement;
 	};
@@ -343,7 +377,7 @@ public:
 	/*
 	*	\return whether this panel is blocking input
 	*/
-	bool IsBlockingInput()
+	bool IsBlockingInput() const
 	{
 		return BlockingInput;
 	};
@@ -387,7 +421,7 @@ public:
 	/*!
 	*	\return whether we can drag this element
 	*/
-	bool IsDraggable()
+	bool IsDraggable() const
 	{
 		return IsDraggableValue;
 	};
@@ -404,7 +438,7 @@ public:
 	/*!
 	*	\return whether we can drop this element
 	*/
-	bool IsDroppable()
+	bool IsDroppable() const
 	{
 		return IsDroppableValue;
 	};
@@ -413,7 +447,7 @@ public:
 	*	\return the UIManager associated to this UI Element
 	*	\sa UIManager
 	*/
-	UIManager *GetManager()
+	UIManager *GetManager() const
 	{
 		return Manager;
 	};
@@ -421,7 +455,7 @@ public:
 	/*!
 	*	\return the ID of this UI Element
 	*/
-	StringID GetID()
+	StringID GetID() const
 	{
 		return ID;
 	};
@@ -430,17 +464,17 @@ public:
 	*	Calculates the position of this element's parents to return the overall (absolute) position
 	*	\return the calculated absolute position of this UI Element's parents
 	*/
-	Vector2 GetParentPosition()
+	Vector2 GetParentPosition() const
 	{
 		if(!ParentValue)
 			return Vector2();
 
-		Vector2 Position = PositionValue + OffsetValue + TranslationValue;
-		UIPanel *p = ParentValue;
+		Vector2 Position = PositionValue + OffsetValue + TranslationValue - GetScaledExtraSize() / 2;
+		UIPanel *p = const_cast<UIPanel *>(ParentValue.Get());
 
 		while(p)
 		{
-			Position += p->GetPosition() + p->GetTranslation() + p->GetOffset();
+			Position += p->GetPosition() + p->GetTranslation() + p->GetOffset() - p->GetScaledExtraSize() / 2;
 
 			p = p->GetParent();
 		};
@@ -553,7 +587,7 @@ public:
 	*	\param Index the index of the children
 	*	\return the children or NULL
 	*/
-	UIPanel *GetChild(uint32 Index)
+	UIPanel *GetChild(uint32 Index) const
 	{
 		return Children.size() > Index ? Children[Index] : NULL;
 	};
@@ -626,7 +660,7 @@ public:
 	/*!
 	*	\return the Alpha Transparency of this element and all its parents
 	*/
-	f32 GetParentAlpha();
+	f32 GetParentAlpha() const;
 
 	/*!
 	*	Sets the Alpha Transparency of this Element
@@ -640,7 +674,7 @@ public:
 	/*!
 	*	\return the Size of all children in this element
 	*/
-	Vector2 GetChildrenSize()
+	Vector2 GetChildrenSize() const
 	{
 		Vector2 Out, Size;
 
@@ -651,7 +685,33 @@ public:
 
 			Children[i]->PerformLayout();
 
-			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetSize() + Children[i]->GetScaledExtraSize() / 2;
+			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetComposedSize();
+
+			if(Out.x < Size.x)
+				Out.x = Size.x;
+
+			if(Out.y < Size.y)
+				Out.y = Size.y;
+		};
+
+		return Out;
+	};
+
+	/*!
+	*	\return the Scaled Extra Size of all children in this element
+	*/
+	Vector2 GetChildrenExtraSize() const
+	{
+		Vector2 Out, Size;
+
+		for(uint32 i = 0; i < Children.size(); i++)
+		{
+			if(!Children[i]->IsVisible())
+				continue;
+
+			Children[i]->PerformLayout();
+
+			Size = Children[i]->GetScaledExtraSize();
 
 			if(Out.x < Size.x)
 				Out.x = Size.x;
@@ -682,7 +742,7 @@ public:
 	*	Gets the layout this Panel belongs to
 	*	\return the Layout associated with this Panel, or NULL
 	*/
-	UILayout *GetLayout()
+	UILayout *GetLayout() const
 	{
 		return Layout;
 	};
@@ -691,7 +751,7 @@ public:
 	*	Gets the extra size for the element
 	*	Extra size is based on the Nine-Patch corner sizes
 	*/
-	const Vector2 &GetExtraSize()
+	const Vector2 &GetExtraSize() const
 	{
 		return SelectBoxExtraSize;
 	};
@@ -699,7 +759,7 @@ public:
 	/*!
 	*	Gets the Scaled Extra Size
 	*/
-	Vector2 GetScaledExtraSize()
+	Vector2 GetScaledExtraSize() const
 	{
 		return SelectBoxExtraSize * ExtraSizeScaleValue;
 	};
@@ -1050,7 +1110,7 @@ private:
 
 	UIPanel *MouseOverElement;
 
-	bool DrawUIRects;
+	bool DrawUIRects, DrawUIFocusZones;
 
 	bool DrawOrderCacheDirty;
 	std::vector<ElementInfo *> DrawOrderCache;

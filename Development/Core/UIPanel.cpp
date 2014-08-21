@@ -127,13 +127,13 @@ namespace FlamingTorch
 		Properties = luabind::newtable(Manager->ScriptInstance->State);
 	};
 
-	f32 UIPanel::GetParentAlpha()
+	f32 UIPanel::GetParentAlpha() const
 	{
 		if(!ParentValue)
 			return AlphaValue;
 
 		f32 Alpha = AlphaValue;
-		UIPanel *p = ParentValue;
+		UIPanel *p = const_cast<UIPanel *>(ParentValue.Get());
 
 		while(p)
 		{
@@ -438,56 +438,65 @@ namespace FlamingTorch
 		RUN_GUI_SCRIPT_EVENTS(OnDrawFunction, (this, ParentPosition))
 	};
 
+	void UIPanel::DrawUIFocusZone(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	{
+		if(GetManager()->DrawUIFocusZones)
+		{
+			static AxisAlignedBoundingBox AABB;
+
+			Vector2 PanelSize = GetComposedSize();
+
+			Vector2 PanelOffset(3, 3);
+
+			Vector2 ActualPosition = ParentPosition + GetPosition() + GetOffset() + PanelOffset;
+
+			AABB.min = ActualPosition;
+			AABB.max = AABB.min + PanelSize - PanelOffset;
+
+			Sprite TheSprite;
+			TheSprite.Options.Wireframe(true).WireframePixelSize(1).Position(AABB.min.ToVector2()).Scale(PanelSize - PanelOffset * 2).Color(Vector4(0, 0, 0.5f, 1)).Rotation(GetParentRotation());
+			
+			TheSprite.Draw(Renderer);
+
+			uint32 ParentCounter = 0;
+
+			UIPanel *ParentPanel = ParentValue;
+
+			f32 IndicatorPosition = 0;
+
+			Vector2 GlobalPosition = GetParentPosition();
+
+			while(ParentPanel != NULL)
+			{
+				if(ParentPanel->GetParentPosition() == GlobalPosition)
+					IndicatorPosition += RenderTextUtils::MeasureTextSimple(StringUtils::MakeIntString(ParentCounter), TextParams()).ToFullSize().x + 5;
+
+				ParentCounter++;
+
+				ParentPanel = ParentPanel->ParentValue;
+			};
+
+			RenderTextUtils::RenderText(Renderer, StringUtils::MakeIntString(ParentCounter), TextParams().Position(AABB.min.ToVector2() + Vector2(IndicatorPosition, 0)));
+		};
+	};
+
 	void UIPanel::DrawUIRect(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
 		if(GetManager()->DrawUIRects)
 		{
-			SpriteCache::Instance.Flush(Renderer);
+			static AxisAlignedBoundingBox AABB;
 
-			Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
+			Vector2 PanelSize = GetComposedSize();
 
-			Renderer->EnableState(GL_VERTEX_ARRAY);
-			Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
-			Renderer->DisableState(GL_COLOR_ARRAY);
-			Renderer->DisableState(GL_NORMAL_ARRAY);
-			Renderer->BindTexture(NULL);
+			Vector2 ActualPosition = ParentPosition + GetPosition() + GetOffset();
 
-			Vector2 SelectBoxExtraSize(GetScaledExtraSize());
+			AABB.min = ActualPosition;
+			AABB.max = AABB.min + PanelSize;
 
-			Vector2 Vertices[8] = {
-				-SelectBoxExtraSize / 2,
-				Vector2(SizeValue.x + SelectBoxExtraSize.x / 2, -SelectBoxExtraSize.y / 2),
-				Vector2(SizeValue.x + SelectBoxExtraSize.x / 2, -SelectBoxExtraSize.y / 2),
-				SizeValue + SelectBoxExtraSize / 2,
-				SizeValue + SelectBoxExtraSize / 2,
-				Vector2(-SelectBoxExtraSize.x / 2, SizeValue.y + SelectBoxExtraSize.y / 2),
-				Vector2(-SelectBoxExtraSize.x / 2, SizeValue.y + SelectBoxExtraSize.y / 2),
-				-SelectBoxExtraSize / 2,
-			};
-
-			Vector2 ObjectSize(0, 0);
-
-			for(uint32 i = 0; i < 8; i++)
-			{
-				if(Vertices[i].x > ObjectSize.x)
-					ObjectSize.x = Vertices[i].x;
-
-				if(Vertices[i].y > ObjectSize.y)
-					ObjectSize.y = Vertices[i].y;
-			};
-
-			ObjectSize /= 2;
-
-			for(uint32 i = 0; i < 8; i++)
-			{
-				Vertices[i] = Vector2::Rotate(Vertices[i] - ObjectSize, GetParentRotation()) + ObjectSize + ActualPosition;
-			};
-
-			glColor4f(1, 0.75f, 0, 0.75f);
-
-			glVertexPointer(2, GL_FLOAT, 0, Vertices);
-
-			glDrawArrays(GL_LINES, 0, 8);
+			Sprite TheSprite;
+			TheSprite.Options.Wireframe(true).WireframePixelSize(1).Position(AABB.min.ToVector2()).Scale(PanelSize).Color(Vector4(1, 0.75f, 0, 0.75f)).Rotation(GetParentRotation());
+			
+			TheSprite.Draw(Renderer);
 		};
 	};
 

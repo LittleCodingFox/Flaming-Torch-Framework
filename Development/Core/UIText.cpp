@@ -119,6 +119,7 @@ namespace FlamingTorch
 				.Rotate(GetParentRotation()));
 		};
 
+		DrawUIFocusZone(ParentPosition, Renderer);
 		DrawUIRect(ParentPosition, Renderer);
 	};
 #endif
