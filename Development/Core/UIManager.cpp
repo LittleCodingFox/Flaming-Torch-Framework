@@ -687,7 +687,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIManager::CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName)
+	void UIManager::CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName, UIPanel *ParentLimit)
 	{
 		if(Elements.type() != Json::arrayValue)
 			return;
@@ -1476,22 +1476,24 @@ namespace FlamingTorch
 				"local bottom = 0\n"
 				"local center = 0\n\n"
 				"if Parent ~= nil then\n"
-				"  parent_wide = Parent.Size.x\n"
-				"  parent_tall = Parent.Size.y\n"
-				"  parent_extra_size_x = Parent.ExtraSize.x\n"
-				"  parent_extra_size_y = Parent.ExtraSize.y\n"
+				"	parent_wide = Parent.Size.x\n"
+				"	parent_tall = Parent.Size.y\n"
+				"	parent_extra_size_x = Parent.ScaledExtraSize.x\n"
+				"	parent_extra_size_y = Parent.ScaledExtraSize.y\n"
 				"else\n"
-				"  parent_wide = ScreenWidth\n"
-				"  parent_tall = ScreenHeight\n"
+				"	parent_wide = ScreenWidth\n"
+				"	parent_tall = ScreenHeight\n"
+				"	parent_extra_size_x = 0\n"
+				"	parent_extra_size_y = 0\n"
 				"end\n\n"
 				"left = Self.ExtraSize.x / 2\n"
-				"right = (parent_wide + parent_extra_size_x / 2) - (Self.Size.x + Self.ExtraSize.x / 2)\n"
+				"right = (parent_wide + parent_extra_size_x) - (Self.Size.x + Self.ScaledExtraSize.x)\n"
 				"top = Self.ExtraSize.y / 2\n"
-				"bottom = (parent_tall + parent_extra_size_y / 2) - (Self.Size.y + Self.ExtraSize.y / 2)\n"
-				"center = ((parent_wide + parent_extra_size_x / 2) - (Self.Size.x + Self.ExtraSize.x / 2)) / 2\n\n" <<
+				"bottom = (parent_tall + parent_extra_size_y) - (Self.Size.y + Self.ScaledExtraSize.y)\n"
+				"center = ((parent_wide + parent_extra_size_x) - (Self.Size.x + Self.ScaledExtraSize.x)) / 2\n\n" <<
 				PositionScriptX.str() << 
 				OffsetScriptX.str() << 
-				"center = ((parent_tall + parent_extra_size_y / 2) - (Self.Size.y + Self.ExtraSize.y / 2)) / 2\n" <<
+				"center = ((parent_tall + parent_extra_size_y) - (Self.Size.y + Self.ScaledExtraSize.y)) / 2\n" <<
 				PositionScriptY.str() << 
 				OffsetScriptY.str() << 
 				"Self.Position = Vector2(PositionX, PositionY)\n"
@@ -1760,7 +1762,7 @@ namespace FlamingTorch
 					Renderer->UI->AddElement(MakeStringID(ParentElementName + "." + ElementName + "_TOOLTIPELEMENT"), TooltipGroup);
 					TheLayout->Elements[TooltipGroup->GetID()] = TooltipGroup;
 
-					CopyElementsToLayout(TheLayout, Value, TooltipGroup, ParentElementName + "." + ElementName + "_TOOLTIPELEMENT");
+					CopyElementsToLayout(TheLayout, Value, TooltipGroup, ParentElementName + "." + ElementName + "_TOOLTIPELEMENT", Panel);
 
 					TooltipGroup->SetSize(TooltipGroup->GetChildrenSize());
 
@@ -1849,12 +1851,14 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, "ContentPanel", bool);
 			};
 
+			Panel->AdjustSizeAndPosition(ParentLimit);
+
 			Json::Value Children = Data.get("Children", Json::Value());
 
 			if(!Children.isArray())
 				continue;
 
-			CopyElementsToLayout(TheLayout, Children, Panel->ContentPanel() ? Panel->ContentPanel() : Panel, ParentElementName + "." + ElementName);
+			CopyElementsToLayout(TheLayout, Children, Panel->ContentPanel() ? Panel->ContentPanel() : Panel, ParentElementName + "." + ElementName, ParentLimit);
 		};
 	};
 
@@ -1881,7 +1885,7 @@ namespace FlamingTorch
 			Layout->ContainedObjects = Elements;
 			Layout->Parent = Parent;
 
-			CopyElementsToLayout(Layout, Elements, Parent, Layout->Name);
+			CopyElementsToLayout(Layout, Elements, Parent, Layout->Name, Parent);
 
 			StringID LayoutID = MakeStringID((Parent.Get() ? Parent->GetLayout()->Name + "_" : "") + LayoutName);
 

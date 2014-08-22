@@ -48,7 +48,7 @@ namespace FlamingTorch
 		Out->Parent = Parent;
 
 		Owner->CopyElementsToLayout(Out, ContainedObjects, Parent, ParentElementName + "." +
-			Out->Name);
+			Out->Name, Parent);
 
 		if(ShouldDisplayParentlessElements)
 		{

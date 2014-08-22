@@ -433,6 +433,22 @@ namespace FlamingTorch
 		};
 	};
 
+	void UIPanel::AdjustSizeAndPosition(UIPanel *PanelToStopAt)
+	{
+		if(this == PanelToStopAt || ParentValue == NULL)
+			return;
+
+		if(ParentValue->SizeValue.x < GetComposedSize().x)
+			ParentValue->SizeValue.x = GetComposedSize().x;
+
+		if(ParentValue->SizeValue.y < GetComposedSize().y)
+			ParentValue->SizeValue.y = GetComposedSize().y;
+
+		PositionFunction.Members.front()(this, ParentValue, GetManager()->GetOwner()->Size().x, GetManager()->GetOwner()->Size().y);
+
+		ParentValue->AdjustSizeAndPosition(PanelToStopAt);
+	};
+
 	void UIPanel::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
 		RUN_GUI_SCRIPT_EVENTS(OnDrawFunction, (this, ParentPosition))

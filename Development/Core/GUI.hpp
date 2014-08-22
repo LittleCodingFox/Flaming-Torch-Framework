@@ -227,6 +227,12 @@ public:
 	};
 
 	/*!
+	*	Adjust the size and position of this panel and its parents if the size has changed somehow, like on ExtraSize changes
+	*	\param PanelToStopAt the panel to stop resizing/positioning. Will be ignored.
+	*/
+	void AdjustSizeAndPosition(UIPanel *PanelToStopAt);
+
+	/*!
 	*	\return the extra size scale
 	*/
 	f32 ExtraSizeScale() const
@@ -1115,7 +1121,7 @@ private:
 	bool DrawOrderCacheDirty;
 	std::vector<ElementInfo *> DrawOrderCache;
 
-	void CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName);
+	void CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName, UIPanel *ParentToStopAt);
 
 	void ProcessTextProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessTextJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
