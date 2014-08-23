@@ -65,6 +65,43 @@ namespace FlamingTorch
 	{
 		return a | ~b;
 	};
+
+	luabind::object LuaDoStream(Stream *In, lua_State *State)
+	{
+		if(In == NULL)
+			return luabind::object();
+
+		std::string Content = In->AsString();
+
+		static std::stringstream str;
+		str.str("");
+
+		std::string FunctionName = "LoadStreamContent_" + StringUtils::MakeIntString((uint32)In, true);
+
+		str << "function " << FunctionName << "()\n" << Content << "\nend\n";
+
+		if(0 != luaL_dostring(State, str.str().c_str()))
+		{
+			return luabind::object();
+		};
+
+		luabind::object Globals = luabind::globals(State);
+
+		luabind::object FunctionInstance = Globals[FunctionName];
+
+		if(!FunctionInstance)
+			return luabind::object();
+
+		try
+		{
+			return FunctionInstance();
+		}
+		catch(std::exception &)
+		{
+		};
+
+		return luabind::object();
+	};
 	
 	template<class type>
 	bool LuabindSimpleCompare(type &Self, type *Other)
@@ -2485,7 +2522,8 @@ namespace FlamingTorch
 			luabind::def("GetStringIDString", &GetStringIDString),
 			luabind::def("BitwiseSet", &BitwiseSet),
 			luabind::def("BitwiseCheck", &BitwiseCheck),
-			luabind::def("BitwiseRemove", &BitwiseRemove)
+			luabind::def("BitwiseRemove", &BitwiseRemove),
+			luabind::def("DoStream", &LuaDoStream)
 		];
 
 		luabind::object Globals = luabind::globals(State);
