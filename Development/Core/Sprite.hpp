@@ -89,7 +89,7 @@ public:
 	
 	SpriteDrawOptions &Color(const Vector4 &Color)
 	{
-		UsingColorsArray = true;
+		UsingColorsArray = false;
 
 		ColorValue = Color;
 		
