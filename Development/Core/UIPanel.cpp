@@ -97,7 +97,8 @@ namespace FlamingTorch
 	UIPanel::UIPanel(const std::string &NativeTypeName, UIManager *_Manager) : NativeType(NativeTypeName), Manager(_Manager), VisibleValue(true),
 		EnabledValue(true), MouseInputValue(true), KeyboardInputValue(true), AlphaValue(1),
 		ClickPressed(false), BlockingInput(false), IsDraggableValue(false), IsDroppableValue(false),
-		DraggingValue(false), TooltipFixed(false), RotationValue(0), ExtraSizeScaleValue(1)
+		DraggingValue(false), TooltipFixed(false), RotationValue(0), ExtraSizeScaleValue(1),
+		InputBlockerBackgroundValue(true)
 	{
 		FLASSERT(Manager != NULL, "Invalid UI Manager!");
 		FLASSERT(Manager->ScriptInstance, "Invalid UI Manager Script!");
@@ -174,6 +175,11 @@ namespace FlamingTorch
 		ClickPressed = true;
 
 		OnMouseJustPressed(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnMouseJustPressedPriv(o);
+		};
 	};
 
 	void UIPanel::OnMousePressedPriv(const InputCenter::MouseButtonInfo &o)
@@ -182,6 +188,11 @@ namespace FlamingTorch
 			return;
 
 		OnMousePressed(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnMousePressedPriv(o);
+		};
 	};
 
 	void UIPanel::OnMouseReleasedPriv(const InputCenter::MouseButtonInfo &o)
@@ -197,6 +208,11 @@ namespace FlamingTorch
 		ClickPressed = false;
 
 		OnMouseReleased(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnMouseReleasedPriv(o);
+		};
 	};
 
 	void UIPanel::OnMouseMovePriv()
@@ -213,6 +229,11 @@ namespace FlamingTorch
 			return;
 
 		OnKeyPressed(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnKeyPressedPriv(o);
+		};
 	};
 
 	void UIPanel::OnKeyJustPressedPriv(const InputCenter::KeyInfo &o)
@@ -221,6 +242,11 @@ namespace FlamingTorch
 			return;
 
 		OnKeyJustPressed(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnKeyJustPressedPriv(o);
+		};
 	};
 
 	void UIPanel::OnKeyReleasedPriv(const InputCenter::KeyInfo &o)
@@ -229,6 +255,11 @@ namespace FlamingTorch
 			return;
 
 		OnKeyReleased(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnKeyReleasedPriv(o);
+		};
 	};
 
 	void UIPanel::OnCharacterEnteredPriv()
@@ -237,6 +268,11 @@ namespace FlamingTorch
 			return;
 
 		OnCharacterEntered(this);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnCharacterEnteredPriv();
+		};
 	};
 
 	void UIPanel::OnLoseFocusPriv()

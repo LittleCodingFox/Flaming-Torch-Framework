@@ -39,6 +39,11 @@ namespace FlamingTorch
 				TheGUIManager.OnKeyReleasedPriv(Key);
 			};
 
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
+
 			return TheManager.Input.InputConsumed();
 		};
 
@@ -60,6 +65,11 @@ namespace FlamingTorch
 				TheGUIManager.OnMouseReleasedPriv(Button);
 			};
 
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
+
 			return TheManager.Input.InputConsumed();
 		};
 
@@ -67,6 +77,11 @@ namespace FlamingTorch
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
 
 			//TODO
 
@@ -77,6 +92,11 @@ namespace FlamingTorch
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
 
 			//TODO
 
@@ -93,6 +113,11 @@ namespace FlamingTorch
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
 			TheGUIManager.OnMouseMovePriv();
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
 		};
 
 		void OnCharacterEntered(wchar_t Character)
@@ -101,6 +126,11 @@ namespace FlamingTorch
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
 			TheGUIManager.OnCharacterEnteredPriv();
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
 		};
 
 		void OnAction(const InputCenter::Action &TheAction)
@@ -109,6 +139,11 @@ namespace FlamingTorch
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
 			//TODO
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
 		};
 
 		void OnGainFocus() {};
@@ -256,6 +291,10 @@ namespace FlamingTorch
 				else if(Fragments[j] == "VCENTER")
 				{
 					Alignment |= UITextAlignment::VCenter;
+				}
+				else if(Fragments[j] == "BOTTOM")
+				{
+					Alignment |= UITextAlignment::Bottom;
 				};
 			};
 
@@ -804,6 +843,7 @@ namespace FlamingTorch
 				AlphaValue = Data.get("Opacity", Json::Value(1.0)),
 				VisibleValue = Data.get("Visible", Json::Value(true)),
 				BlockingInputValue = Data.get("BlockingInput", Json::Value(false)),
+				InputBlockBackgroundValue = Data.get("InputBlockBackground", Json::Value(true)),
 				DraggableValue = Data.get("Draggable", Json::Value(false)),
 				DroppableValue = Data.get("Droppable", Json::Value(false));
 
@@ -859,6 +899,15 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(BlockingInputValue, "BlockingInput", bool);
+			};
+
+			if(InputBlockBackgroundValue.isBool())
+			{
+				Panel->SetInputBlockerBackground(InputBlockBackgroundValue.asBool());
+			}
+			else
+			{
+				CHECKJSONVALUE(InputBlockBackgroundValue, "InputBlockBackground", bool);
 			};
 
 			if(DraggableValue.isBool())
@@ -1966,6 +2015,32 @@ namespace FlamingTorch
 		MouseOverElement = NULL;
 	};
 
+	SuperSmartPointer<UIPanel> UIManager::GetInputBlocker()
+	{
+		SuperSmartPointer<UIPanel> Out;
+
+		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
+		{
+			while(it != Elements.end() && it->second.Get() == NULL)
+			{
+				Elements.erase(it);
+				it = Elements.begin();
+			};
+
+			if(it == Elements.end())
+				break;
+
+			if(it->second->Panel->BlockingInput && it->second->Panel->IsVisible())
+			{
+				Out = it->second->Panel;
+
+				break;
+			};
+		};
+
+		return Out;
+	};
+
 	SuperSmartPointer<UIPanel> UIManager::GetMouseOverElement()
 	{
 		if(DrawOrderCacheDirty)
@@ -1984,26 +2059,7 @@ namespace FlamingTorch
 
 		UIPanel *FoundElement = NULL;
 
-		SuperSmartPointer<UIPanel> InputBlocker;
-
-		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
-		{
-			while(it != Elements.end() && it->second.Get() == NULL)
-			{
-				Elements.erase(it);
-				it = Elements.begin();
-			};
-
-			if(it == Elements.end())
-				break;
-
-			if(it->second->Panel->BlockingInput && it->second->Panel->IsVisible())
-			{
-				InputBlocker = it->second->Panel;
-
-				break;
-			};
-		};
+		SuperSmartPointer<UIPanel> InputBlocker = GetInputBlocker();
 
 		if(InputBlocker.Get())
 		{
@@ -2123,31 +2179,11 @@ namespace FlamingTorch
 				if(DrawOrderCache[j]->Panel.Get() == NULL || DrawOrderCache[j]->DrawOrder != i || !DrawOrderCache[j]->Panel->IsVisible())
 					continue;
 
-				if(DrawOrderCache[j]->Panel == InputBlocker)
+				if(DrawOrderCache[j]->Panel == InputBlocker && DrawOrderCache[j]->Panel->InputBlockerBackground())
 				{
-					SpriteCache::Instance.Flush(Renderer);
-
-					Renderer->BindTexture(NULL);
-					Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
-					Renderer->DisableState(GL_NORMAL_ARRAY);
-					Renderer->DisableState(GL_COLOR_ARRAY);
-
-					Vector2 Vertices[6] = {
-						Vector2(),
-						Vector2(0, Renderer->Size().y),
-						Renderer->Size(),
-						Renderer->Size(),
-						Vector2(Renderer->Size().x, 0),
-						Vector2(),
-					};
-
-					glVertexPointer(2, GL_FLOAT, 0, Vertices);
-
-					glColor4f(0, 0, 0, 0.3f);
-
-					glDrawArrays(GL_TRIANGLES, 0, 6);
-
-					glColor4f(1, 1, 1, 1);
+					Sprite BackgroundSprite;
+					BackgroundSprite.Options.Scale(Renderer->Size()).Color(Vector4(0, 0, 0, 0.3f));
+					BackgroundSprite.Draw(Renderer);
 				};
 
 				DrawOrderCache[j]->Panel->Draw(Vector2(), Renderer);
@@ -2245,17 +2281,7 @@ namespace FlamingTorch
 		FocusedElementValue = SuperSmartPointer<UIPanel>();
 		UIPanel *FoundElement = NULL;
 
-		SuperSmartPointer<UIPanel> InputBlocker;
-
-		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
-		{
-			if(it->second->Panel->BlockingInput && it->second->Panel->IsVisible())
-			{
-				InputBlocker = it->second->Panel;
-
-				break;
-			};
-		};
+		SuperSmartPointer<UIPanel> InputBlocker = GetInputBlocker();
 
 		if(InputBlocker.Get())
 		{
@@ -2292,17 +2318,6 @@ namespace FlamingTorch
 		if(PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
 		{
 			PreviouslyFocusedElement->OnLoseFocusPriv();
-		};
-
-		if(FoundElement)
-		{
-			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
-			{
-				if(it->second->Panel.Get() == FoundElement)
-				{
-					FocusedElementValue = it->second->Panel;
-				};
-			};
 		};
 
 		if(FocusedElementValue)

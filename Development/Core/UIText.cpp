@@ -88,6 +88,15 @@ namespace FlamingTorch
 			};
 
 			YOffset = MathUtils::Clamp((SizeValue.y - YOffset) / 2, 0, SizeValue.y);
+		}
+		else if(TextAlignment & UITextAlignment::Bottom)
+		{
+			for(uint32 i = 0; i < Strings.size(); i++)
+			{
+				YOffset += (Strings[i].Size.Bottom + Strings[i].Size.Top);
+			};
+
+			YOffset = SizeValue.y - YOffset;
 		};
 
 		f32 TextYOffset = YOffset;

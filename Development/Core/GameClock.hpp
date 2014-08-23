@@ -89,6 +89,11 @@ public:
 	*	Gets the current time
 	*/
 	uint64 CurrentTime();
+
+	/*!
+	*	Gets the current date and time as a string
+	*/
+	std::string CurrentDateTimeAsString();
 	
 	/*!
 	*	Sets our fixed step Framerate

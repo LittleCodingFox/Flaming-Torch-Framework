@@ -117,6 +117,18 @@ namespace FlamingTorch
 		return Buffer;
 	};
 
+	std::string GameClock::CurrentDateTimeAsString()
+	{
+		time_t rawtime;
+		time(&rawtime);
+
+		static char Buffer[128];
+
+		strftime(Buffer, 128, "%d/%m/%Y %H:%M:%S", localtime(&rawtime));
+
+		return Buffer;
+	};
+
 	uint64 GameClock::CurrentTime()
 	{
 		//TODO: Remove or use this when we're only building the bare minimums of the Core

@@ -88,7 +88,7 @@ protected:
 	//!<Whether we are in the middle of a click
 	bool ClickPressed;
 	//!<Whether we are blocking Input
-	bool BlockingInput;
+	bool BlockingInput, InputBlockerBackgroundValue;
 	StringID ID;
 	SuperSmartPointer<GenericConfig> Skin;
 	bool DraggingValue, IsDraggableValue, IsDroppableValue;
@@ -224,6 +224,23 @@ public:
 	SuperSmartPointer<UIPanel> ContentPanel() const
 	{
 		return ContentPanelValue;
+	};
+
+	/*!
+	*	Sets whether this Panel, as an Input Blocker, draws a background over the screen
+	*	\param Value whether to draw the background
+	*/
+	void SetInputBlockerBackground(bool Value)
+	{
+		InputBlockerBackgroundValue = Value;
+	};
+
+	/*!
+	*	\return whether this Panel draws its Input Blocker Background if it becomes an Input Blocker
+	*/
+	bool InputBlockerBackground()
+	{
+		return InputBlockerBackgroundValue;
 	};
 
 	/*!
@@ -868,7 +885,8 @@ namespace UITextAlignment
 		Left = FLAGVALUE(0), //!<Align Left
 		Right = FLAGVALUE(1), //!<Align Right
 		Center = FLAGVALUE(2), //!<Align Center
-		VCenter = FLAGVALUE(3) //!<Align Vertical Center
+		VCenter = FLAGVALUE(3), //!<Align Vertical Center
+		Bottom = FLAGVALUE(4) //!<Align Bottom
 	};
 };
 
@@ -1292,6 +1310,11 @@ public:
 	{
 		return Skin;
 	};
+
+	/*!
+	*	\return the current Input Blocker, if any
+	*/
+	SuperSmartPointer<UIPanel> GetInputBlocker();
 
 	/*!
 	*	Removes Focus from the focused UI Element

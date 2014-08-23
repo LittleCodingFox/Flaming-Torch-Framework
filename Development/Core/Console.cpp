@@ -318,7 +318,7 @@ namespace FlamingTorch
 		FileStream Out;
 
 		std::string ScreenFileName = StringUtils::Replace(GameInterface::Instance->GameName(),
-			" ", "_") + "_" + StringUtils::Replace(GameClock::Instance.CurrentTimeAsString(), ":", "_") + ".png";
+			" ", "_") + "_" + StringUtils::Replace(StringUtils::Replace(StringUtils::Replace(GameClock::Instance.CurrentDateTimeAsString(), ":", "_"), "/", "_"), " ", "_") + ".png";
 
 		if(!Out.Open(DirectoryInfo::PreferredStorageDirectory() + "/" + ScreenFileName, StreamFlags::Write))
 		{
