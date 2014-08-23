@@ -473,6 +473,9 @@ namespace FlamingTorch
 		}
 		else if(Property == "Filtering")
 		{
+			if(TheSprite->TheSprite.SpriteTexture.Get() == NULL)
+				return;
+
 			std::string Temp = Value;
 
 			if(TheSprite->TheSprite.SpriteTexture.Get())
@@ -489,6 +492,9 @@ namespace FlamingTorch
 		}
 		else if(Property == "CropTiled")
 		{
+			if(TheSprite->TheSprite.SpriteTexture.Get() == NULL)
+				return;
+
 			std::string CropTiledString = Value;
 
 			if(CropTiledString.length() && TheSprite->TheSprite.SpriteTexture.Get())
@@ -503,6 +509,9 @@ namespace FlamingTorch
 		}
 		else if(Property == "NinePatch")
 		{
+			if(TheSprite->TheSprite.SpriteTexture.Get() == NULL)
+				return;
+
 			std::string NinePatchString = Value;
 
 			if(NinePatchString.length())
@@ -540,6 +549,23 @@ namespace FlamingTorch
 
 			if(1 == sscanf(Value.c_str(), "%f", &FloatValue))
 				TheSprite->TheSprite.Options.Scale(Vector2(TheSprite->TheSprite.Options.ScaleValue.x, FloatValue));
+		}
+		else if(Property == "Colors")
+		{
+			std::vector<std::string> Elements = StringUtils::Split(Value, '|');
+
+			if(Elements.size() != 4)
+				return;
+
+			Vector4 Colors[4];
+
+			for(uint32 i = 0; i < 4; i++)
+			{
+				if(4 != sscanf(Elements[i].c_str(), "%f,%f,%f,%f", &Colors[i].x, &Colors[i].y, &Colors[i].z, &Colors[i].w))
+					return;
+			};
+
+			TheSprite->TheSprite.Options.Colors(Colors[0], Colors[1], Colors[2], Colors[3]);
 		};
 	};
 
@@ -587,6 +613,17 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "NinePatch", string)
+		};
+
+		Value = Data.get("Colors", Json::Value("1,1,1,1"));
+
+		if(Value.isString())
+		{
+			ProcessSpriteProperty(Panel, "Colors", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Colors", string)
 		};
 
 		Value = Data.get("Color", Json::Value(""));
@@ -1613,9 +1650,10 @@ namespace FlamingTorch
 
 				SuperSmartPointer<UILayout> NewLayout = TargetLayout->Clone(Panel, ParentElementName + "." + ElementName, true);
 
+				//Probably not needed anymore?
 				if(!ResetPanelSize)
 				{
-					Panel->SetSize(Panel->GetChildrenSize());
+					//Panel->SetSize(Panel->GetChildrenSize());
 				};
 
 				StringID LayoutID = MakeStringID(ParentElementName + "." + ElementName + "." + NewLayout->Name);

@@ -44,6 +44,14 @@ namespace FlamingTorch
 
 		Colors[0] = Colors[1] = Colors[2] = Colors[3] = Colors[4] = Colors[5] = Options.ColorValue;
 
+		if(Options.UsingColorsArray)
+		{
+			Colors[0] = Colors[5] = Options.ColorsValue[0];
+			Colors[1] = Options.ColorsValue[1];
+			Colors[2] = Colors[3] = Options.ColorsValue[2];
+			Colors[4] = Options.ColorsValue[3];
+		};
+
 		NinePatchColors[0] = Options.ColorValue;
 		NinePatchColors[1] = Options.ColorValue;
 		NinePatchColors[2] = Options.ColorValue;

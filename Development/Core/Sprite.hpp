@@ -55,24 +55,47 @@ public:
 	f32 TexCoordRotation;
 	bool WireframeValue;
 	f32 WireframePixelSizeValue;
+	Vector4 ColorsValue[4];
+	bool UsingColorsArray;
 
 	SpriteDrawOptions() : ColorValue(1, 1, 1, 1), ScaleValue(1, 1), RotationValue(0), BlendingModeValue(BlendingMode::Alpha),
 		PinningModeValue(PinningMode::TopLeft), CropModeValue(CropMode::None), NinePatchValue(false), FlipX(false), FlipY(false),
-		TexCoordRotation(0), TexCoordBorderMax(1, 1), NinePatchScaleValue(1), WireframeValue(false), WireframePixelSizeValue(1) {};
+		TexCoordRotation(0), TexCoordBorderMax(1, 1), NinePatchScaleValue(1), WireframeValue(false), WireframePixelSizeValue(1),
+		UsingColorsArray(false) {
+
+		ColorsValue[0] = ColorsValue[1] = ColorsValue[2] = ColorsValue[3] = ColorValue;
+	};
+
 	SpriteDrawOptions(const SpriteDrawOptions &o) : ColorValue(o.ColorValue), BlendingModeValue(o.BlendingModeValue),
 		PositionValue(o.PositionValue), ScaleValue(o.ScaleValue), RotationValue(o.RotationValue),
 		PinningModeValue(o.PinningModeValue), CropModeValue(o.CropModeValue), CropRectValue(o.CropRectValue),
 		NinePatchValue(o.NinePatchValue), NinePatchRectValue(o.NinePatchRectValue), FlipX(o.FlipX), FlipY(o.FlipY),
 		TexCoordRotation(o.TexCoordRotation), TexCoordBorderMin(o.TexCoordBorderMin), TexCoordBorderMax(o.TexCoordBorderMax),
 		OffsetValue(o.OffsetValue), TexCoordPosition(o.TexCoordPosition), NinePatchScaleValue(o.NinePatchScaleValue), WireframeValue(o.WireframeValue),
-		WireframePixelSizeValue(o.WireframePixelSizeValue) {};
+		WireframePixelSizeValue(o.WireframePixelSizeValue), UsingColorsArray(o.UsingColorsArray) {
+
+		ColorsValue[0] = o.ColorsValue[0];
+		ColorsValue[1] = o.ColorsValue[1];
+		ColorsValue[2] = o.ColorsValue[2];
+		ColorsValue[3] = o.ColorsValue[3];
+	};
 
 	SpriteDrawOptions &Position(const Vector2 &Pos) { PositionValue = Pos; return *this; };
+
 	/*!
 	*	Scaling specifies the object's size when NinePatching
 	*/
 	SpriteDrawOptions &Scale(const Vector2 &Scale) { ScaleValue = Scale; return *this; };
-	SpriteDrawOptions &Color(const Vector4 &Color) { ColorValue = Color; return *this; };
+	
+	SpriteDrawOptions &Color(const Vector4 &Color)
+	{
+		UsingColorsArray = true;
+
+		ColorValue = Color;
+		
+		return *this;
+	};
+
 	SpriteDrawOptions &BlendingMode(uint32 Blending) { BlendingModeValue = Blending; return *this; };
 	SpriteDrawOptions &Rotation(f32 Rotation) { RotationValue = Rotation; return *this; };
 	SpriteDrawOptions &Pin(uint32 PinningMode) { PinningModeValue = PinningMode; return *this; };
@@ -98,6 +121,18 @@ public:
 	SpriteDrawOptions &WireframePixelSize(f32 Value)
 	{
 		WireframePixelSizeValue = Value;
+
+		return *this;
+	};
+
+	SpriteDrawOptions &Colors(const Vector4 &A, const Vector4 &B, const Vector4 &C, const Vector4 &D)
+	{
+		UsingColorsArray = true;
+
+		ColorsValue[0] = A;
+		ColorsValue[1] = B;
+		ColorsValue[2] = C;
+		ColorsValue[3] = D;
 
 		return *this;
 	};

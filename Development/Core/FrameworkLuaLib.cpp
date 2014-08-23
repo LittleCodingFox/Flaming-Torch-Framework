@@ -552,6 +552,28 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
+	luabind::object GetSpriteColors(SpriteDrawOptions &Self, lua_State *State)
+	{
+		luabind::object Out = luabind::newtable(State);
+
+		Out[1] = Self.ColorsValue[0];
+		Out[2] = Self.ColorsValue[1];
+		Out[3] = Self.ColorsValue[2];
+		Out[4] = Self.ColorsValue[3];
+
+		return Out;
+	};
+	
+	void SetSpriteColors(SpriteDrawOptions &Self, luabind::argument arg)
+	{
+		uint32 Index = 0;
+
+		for(luabind::iterator it(arg), end; it != end && Index < 4; it++, Index++)
+		{
+			Self.ColorsValue[Index] = ProtectedLuaCast<Vector4>(*it);
+		};
+	};
+
 	bool AddUIManagerElement(UIManager &Self, lua_Number ID, SuperSmartPointer<UIPanel> Element)
 	{
 		return Self.AddElement((StringID)ID, Element);
@@ -1949,6 +1971,9 @@ namespace FlamingTorch
 						.def_readwrite("TexCoordBorderMaxValue", &SpriteDrawOptions::TexCoordBorderMax)
 						.def_readwrite("TexCoordRotation", &SpriteDrawOptions::TexCoordRotation)
 						.def_readwrite("TexCoordPosition", &SpriteDrawOptions::TexCoordPosition)
+						.def_readwrite("WireframeValue", &SpriteDrawOptions::WireframeValue)
+						.def_readwrite("WireframePixelSizeValue", &SpriteDrawOptions::WireframePixelSizeValue)
+						.property("ColorsValue", &GetSpriteColors, &SetSpriteColors)
 						.def(luabind::constructor<>())
 						.def(luabind::constructor<const SpriteDrawOptions &>())
 						.def("Position", &SpriteDrawOptions::Position, luabind::return_reference_to(_1))
@@ -1964,6 +1989,9 @@ namespace FlamingTorch
 						.def("TextureBorders", &SpriteDrawOptions::TextureBorders, luabind::return_reference_to(_1))
 						.def("TextureRotation", &SpriteDrawOptions::TextureRotation, luabind::return_reference_to(_1))
 						.def("TexturePosition", &SpriteDrawOptions::TexturePosition, luabind::return_reference_to(_1))
+						.def("Wireframe", &SpriteDrawOptions::Wireframe, luabind::return_reference_to(_1))
+						.def("WireframePixelSize", &SpriteDrawOptions::WireframePixelSize, luabind::return_reference_to(_1))
+						.def("Colors", &SpriteDrawOptions::Colors, luabind::return_reference_to(_1))
 				]
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<const Sprite &>())

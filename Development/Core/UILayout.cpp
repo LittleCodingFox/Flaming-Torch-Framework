@@ -69,9 +69,6 @@ namespace FlamingTorch
 			{
 				it->second->SetVisible(true);
 				Parent->SetRotation(it->second->Rotation());
-
-				if(it->second->NativeType == "UIGroup" && it->second->GetChildrenCount())
-					it->second->SetSize(it->second->GetChildrenSize());
 			};
 		};
 	};
