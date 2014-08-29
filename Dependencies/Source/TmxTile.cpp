@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // TmxTile.cpp
 //
-// Copyright (c) 2010-2013, Tamir Atias
+// Copyright (c) 2010-2014, Tamir Atias
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,25 +31,28 @@
 
 namespace Tmx 
 {
-	Tile::Tile() : properties()
-	{}
+    Tile::Tile(int id) : id(id)
+    {}
 
-	Tile::~Tile() 
-	{}
+    Tile::Tile() : properties()
+    {}
 
-	void Tile::Parse(const TiXmlNode *tileNode) 
-	{
-		const TiXmlElement *tileElem = tileNode->ToElement();
+    Tile::~Tile() 
+    {}
 
-		// Parse the attributes.
-		tileElem->Attribute("id", &id);
+    void Tile::Parse(const TiXmlNode *tileNode) 
+    {
+        const TiXmlElement *tileElem = tileNode->ToElement();
 
-		// Parse the properties if any.
-		const TiXmlNode *propertiesNode = tileNode->FirstChild("properties");
-		
-		if (propertiesNode) 
-		{
-			properties.Parse(propertiesNode);
-		}
-	}
-};
+        // Parse the attributes.
+        tileElem->Attribute("id", &id);
+
+        // Parse the properties if any.
+        const TiXmlNode *propertiesNode = tileNode->FirstChild("properties");
+        
+        if (propertiesNode) 
+        {
+            properties.Parse(propertiesNode);
+        }
+    }
+}

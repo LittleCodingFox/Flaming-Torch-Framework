@@ -76,6 +76,7 @@ public:
 		std::string Name, Type;
 		std::vector<Vector2> PolygonData;
 		uint8 IsPolyLine;
+		f32 Rotation;
 		std::map<std::string, std::string> Properties;
 	};
 

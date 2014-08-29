@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // TmxPolygon.h
 //
-// Copyright (c) 2010-2013, Tamir Atias
+// Copyright (c) 2010-2014, Tamir Atias
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,24 +35,24 @@ class TiXmlNode;
 
 namespace Tmx
 {
-	//-------------------------------------------------------------------------
-	// Class to store a Polygon of an Object.
-	//-------------------------------------------------------------------------
-	class Polygon
-	{
-	public:
-		Polygon();
+    //-------------------------------------------------------------------------
+    // Class to store a Polygon of an Object.
+    //-------------------------------------------------------------------------
+    class Polygon
+    {
+    public:
+        Polygon();
 
-		// Parse the polygon node.
-		void Parse(const TiXmlNode *polygonNode);
+        // Parse the polygon node.
+        void Parse(const TiXmlNode *polygonNode);
 
-		// Get one of the vertices.
-		const Tmx::Point &GetPoint(int index) const { return points[index]; }
+        // Get one of the vertices.
+        const Tmx::Point &GetPoint(int index) const { return points[index]; }
 
-		// Get the number of vertices.
-		int GetNumPoints() const { return points.size(); }
+        // Get the number of vertices.
+        int GetNumPoints() const { return points.size(); }
 
-	private:
-		std::vector< Tmx::Point > points;
-	};
-};
+    private:
+        std::vector< Tmx::Point > points;
+    };
+}

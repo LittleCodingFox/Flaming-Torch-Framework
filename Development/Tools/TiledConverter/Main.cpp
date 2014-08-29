@@ -70,6 +70,7 @@ public:
 	struct MapObject
 	{
 		Vector2 Position, Size;
+		f32 Rotation;
 		std::string Name, Type;
 		std::vector<Vector2> PolygonData;
 		uint8 IsPolyLine;
@@ -361,6 +362,7 @@ public:
 
 			SVOIDFLASSERT(Stream.Write2<Vector2>(&MapObjects[i].Position));
 			SVOIDFLASSERT(Stream.Write2<Vector2>(&MapObjects[i].Size));
+			SVOIDFLASSERT(Stream.Write2<f32>(&MapObjects[i].Rotation));
 			SVOIDFLASSERT(Stream.Write2<uint8>(&MapObjects[i].IsPolyLine));
 
 			Length = MapObjects[i].PolygonData.size();
@@ -740,6 +742,7 @@ int main(int argc, char **argv)
 			Object.Type = CurrentGroup[j]->GetType();
 			Object.Position = Vector2((f32)CurrentGroup[j]->GetX(), (f32)CurrentGroup[j]->GetY());
 			Object.Size = Vector2((f32)CurrentGroup[j]->GetWidth(), (f32)CurrentGroup[j]->GetHeight());
+			Object.Rotation = CurrentGroup[j]->GetRotation();
 			Object.IsPolyLine = CurrentGroup[j]->GetPolyline() != NULL;
 
 			if(Object.IsPolyLine)

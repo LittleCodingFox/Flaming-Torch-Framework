@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // TmxPolygon.cpp
 //
-// Copyright (c) 2010-2013, Tamir Atias
+// Copyright (c) 2010-2014, Tamir Atias
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
 
 namespace Tmx 
 {
-	Ellipse::Ellipse( int _x, int _y, int width, int height )
-		: x(_x+(width/2))
-		, y(_y+(height/2))
-		, radiusX(width/2)
-		, radiusY(height/2)
-	{
-	}
+    Ellipse::Ellipse( int _x, int _y, int width, int height )
+        : x(_x+(width/2))
+        , y(_y+(height/2))
+        , radiusX(width/2)
+        , radiusY(height/2)
+    {
+    }
 }

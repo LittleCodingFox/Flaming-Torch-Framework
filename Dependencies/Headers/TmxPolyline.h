@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // TmxPolyline.h
 //
-// Copyright (c) 2010-2013, Tamir Atias
+// Copyright (c) 2010-2014, Tamir Atias
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,24 +35,24 @@ class TiXmlNode;
 
 namespace Tmx
 {
-	//-------------------------------------------------------------------------
-	// Class to store a Polyline of an Object.
-	//-------------------------------------------------------------------------
-	class Polyline
-	{
-	public:
-		Polyline();
+    //-------------------------------------------------------------------------
+    // Class to store a Polyline of an Object.
+    //-------------------------------------------------------------------------
+    class Polyline
+    {
+    public:
+        Polyline();
 
-		// Parse the polyline node.
-		void Parse(const TiXmlNode *polylineNode);
+        // Parse the polyline node.
+        void Parse(const TiXmlNode *polylineNode);
 
-		// Get one of the vertices.
-		const Tmx::Point &GetPoint(int index) const { return points[index]; }
+        // Get one of the vertices.
+        const Tmx::Point &GetPoint(int index) const { return points[index]; }
 
-		// Get the number of vertices.
-		int GetNumPoints() const { return points.size(); }
+        // Get the number of vertices.
+        int GetNumPoints() const { return points.size(); }
 
-	private:
-		std::vector< Tmx::Point > points;
-	};
-};
+    private:
+        std::vector< Tmx::Point > points;
+    };
+}

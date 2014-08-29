@@ -179,6 +179,7 @@ namespace FlamingTorch
 
 			SFLASSERT(In->Read2<Vector2>(&Object.Position));
 			SFLASSERT(In->Read2<Vector2>(&Object.Size));
+			SFLASSERT(In->Read2<f32>(&Object.Rotation));
 			SFLASSERT(In->Read2<uint8>(&Object.IsPolyLine));
 
 			SFLASSERT(In->Read2<uint16>(&Length));

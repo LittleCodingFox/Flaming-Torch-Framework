@@ -1826,6 +1826,7 @@ namespace FlamingTorch
 					luabind::class_<TiledMap::MapObject>("MapObject")
 						.def_readwrite("Position", &TiledMap::MapObject::Position)
 						.def_readwrite("Size", &TiledMap::MapObject::Size)
+						.def_readwrite("Rotation", &TiledMap::MapObject::Rotation)
 						.def_readwrite("Name", &TiledMap::MapObject::Name)
 						.def_readwrite("ObjectType", &TiledMap::MapObject::Type)
 						.def_readwrite("IsPolyLine", &TiledMap::MapObject::IsPolyLine)

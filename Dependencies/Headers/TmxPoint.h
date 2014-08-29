@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // TmxPoint.h
 //
-// Copyright (c) 2010-2013, Tamir Atias
+// Copyright (c) 2010-2014, Tamir Atias
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,12 @@
 
 namespace Tmx
 {
-	//-------------------------------------------------------------------------
-	// Used to store a vertex of a Polygon/Polyline.
-	//-------------------------------------------------------------------------
-	struct Point
-	{
-		int x;
-		int y;
-	};
+    //-------------------------------------------------------------------------
+    // Used to store a vertex of a Polygon/Polyline.
+    //-------------------------------------------------------------------------
+    struct Point
+    {
+        int x;
+        int y;
+    };
 }

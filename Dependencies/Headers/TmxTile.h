@@ -1,7 +1,5 @@
 //-----------------------------------------------------------------------------
-// TmxTile.h
-//
-// Copyright (c) 2010-2013, Tamir Atias
+// Copyright (c) 2010-2014, Tamir Atias
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,8 +20,6 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: Tamir Atias
 //-----------------------------------------------------------------------------
 #pragma once
 
@@ -31,31 +27,32 @@
 
 namespace Tmx 
 {
-	//-------------------------------------------------------------------------
-	// Class to contain information about every tile in the tileset/tiles 
-	// element.
-	// It may expand if there are more elements or attributes added into the
-	// the tile element.
-	// This class also contains a property set.
-	//-------------------------------------------------------------------------
-	class Tile 
-	{
-	public:
-		Tile();
-		~Tile();
-	
-		// Parse a tile node.
-		void Parse(const TiXmlNode *tileNode);
-		
-		// Get the Id. (relative to the tilset)
-		int GetId() const { return id; }
+    //-------------------------------------------------------------------------
+    // Class to contain information about every tile in the tileset/tiles 
+    // element.
+    // It may expand if there are more elements or attributes added into the
+    // the tile element.
+    // This class also contains a property set.
+    //-------------------------------------------------------------------------
+    class Tile 
+    {
+    public:
+        Tile(int id);
+        Tile();
+        ~Tile();
+    
+        // Parse a tile node.
+        void Parse(const TiXmlNode *tileNode);
+        
+        // Get the Id. (relative to the tilset)
+        int GetId() const { return id; }
 
-		// Get a set of properties regarding the tile.
-		const Tmx::PropertySet &GetProperties() const { return properties; }
+        // Get a set of properties regarding the tile.
+        const Tmx::PropertySet &GetProperties() const { return properties; }
 
-	private:
-		int id;
+    private:
+        int id;
 
-		Tmx::PropertySet properties;
-	};
-};
+        Tmx::PropertySet properties;
+    };
+}

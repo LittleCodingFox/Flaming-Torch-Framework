@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // TmxPropertySet.cpp
 //
-// Copyright (c) 2010-2013, Tamir Atias
+// Copyright (c) 2010-2014, Tamir Atias
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,63 +32,64 @@
 using std::string;
 using std::map;
 
-namespace Tmx 
+namespace Tmx
 {
-		
-	PropertySet::PropertySet() : properties()  
-	{}
 
-	PropertySet::~PropertySet()
-	{
-		properties.clear();
-	}
+    PropertySet::PropertySet() : properties()
+    {}
 
-	void PropertySet::Parse(const TiXmlNode *propertiesNode) 
-	{
-		// Iterate through all of the property nodes.
-		const TiXmlNode *propertyNode = propertiesNode->FirstChild("property");
-		string propertyName;
-		string propertyValue;
+    PropertySet::~PropertySet()
+    {
+        properties.clear();
+    }
 
-		while (propertyNode) 
-		{
-			const TiXmlElement* propertyElem = propertyNode->ToElement();
+    void PropertySet::Parse(const TiXmlNode *propertiesNode)
+    {
+        // Iterate through all of the property nodes.
+        const TiXmlNode *propertyNode = propertiesNode->FirstChild("property");
+        string propertyName;
+        string propertyValue;
 
-			// Read the attributes of the property and add it to the map
-			propertyName = string(propertyElem->Attribute("name"));
-			propertyValue = string(propertyElem->Attribute("value"));
-			properties[propertyName] = propertyValue;
-			
-			propertyNode = propertiesNode->IterateChildren(
-				"property", propertyNode);
-		}
-	}
+        while (propertyNode)
+        {
+            const TiXmlElement* propertyElem = propertyNode->ToElement();
 
-	string PropertySet::GetLiteralProperty(const string &name) const 
-	{
-		// Find the property in the map.
-		map< string, string >::const_iterator iter = properties.find(name);
+            // Read the attributes of the property and add it to the map
+            propertyName = string(propertyElem->Attribute("name"));
+            propertyValue = string(propertyElem->Attribute("value"));
+            properties[propertyName] = propertyValue;
 
-		if (iter == properties.end())
-			return std::string("No such property!");
+            propertyNode = propertiesNode->IterateChildren(
+                "property", propertyNode);
+        }
+    }
 
-		return iter->second;
-	}
+    string PropertySet::GetStringProperty(const string &name) const
+    {
+        map< string, string >::const_iterator iter = properties.find(name);
 
-	int PropertySet::GetNumericProperty(const string &name) const 
-	{
-		return atoi(GetLiteralProperty(name).c_str());
-	}
+        if (iter == properties.end())
+            return std::string();
 
-	float PropertySet::GetFloatProperty(const string &name) const 
-	{
-		return float(atof(GetLiteralProperty(name).c_str()));
-	}
+        return iter->second;
+    }
 
-	bool PropertySet::HasProperty( const string& name ) const
-	{
-		if( properties.empty() ) return false;
-		return ( properties.find(name) != properties.end() );
-	}
+    int PropertySet::GetIntProperty(const string &name, int defaultValue) const
+    {
+        std::string str = GetStringProperty(name);
+        return (str.size() == 0) ? defaultValue : atoi(GetStringProperty(name).c_str());
+    }
 
-};
+    float PropertySet::GetFloatProperty(const string &name, float defaultValue) const
+    {
+        std::string str = GetStringProperty(name);
+        return (str.size() == 0) ? defaultValue : atof(GetStringProperty(name).c_str());
+    }
+
+    bool PropertySet::HasProperty( const string& name ) const
+    {
+        if( properties.empty() ) return false;
+        return ( properties.find(name) != properties.end() );
+    }
+
+}
