@@ -86,7 +86,7 @@ namespace FlamingTorch
 		Out.Params = Params;
 		Out.Instance.Reset(new UIText(GetManager()));
 
-		GetManager()->AddElement(MakeStringID("UITEXTCOMPOSER_" + StringUtils::MakeIntString((uint32)this, true) + "_" +
+		GetManager()->AddElement(MakeStringID("UITEXTCOMPOSER_" + StringUtils::MakeIntString((uint64)this, true) + "_" +
 			StringUtils::MakeIntString((uint32)Nodes.size()) + "_NODE"), Out.Instance);
 
 		Out.Instance->TextParameters = Params;

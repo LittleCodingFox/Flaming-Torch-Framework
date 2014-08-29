@@ -112,6 +112,44 @@ namespace FlamingTorch
 
 		return str.str();
 	};
+    
+	std::string StringUtils::MakeIntString(const int64 &i, bool Hex)
+	{
+		static std::stringstream str;
+		str.str("");
+        
+		if(Hex)
+		{
+			str << std::hex;
+		}
+		else
+		{
+			str << std::dec;
+		};
+        
+		str << i;
+        
+		return str.str();
+	};
+    
+	std::string StringUtils::MakeIntString(const uint64 &i, bool Hex)
+	{
+		static std::stringstream str;
+		str.str("");
+        
+		if(Hex)
+		{
+			str << std::hex;
+		}
+		else
+		{
+			str << std::dec;
+		};
+        
+		str << i;
+        
+		return str.str();
+	};
 
 	std::string StringUtils::MakeFloatString(const f32 &f)
 	{

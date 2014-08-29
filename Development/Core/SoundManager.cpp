@@ -162,7 +162,7 @@ namespace FlamingTorch
 		};
 
 		std::stringstream str;
-		str << "SOUND__STREAM__" << std::hex << (uint32)In << GameClockTimeNoPause();
+		str << "SOUND__STREAM__" << std::hex << (uint64)In << GameClockTimeNoPause();
 
 		StringID SoundID = MakeStringID(str.str());
 
@@ -251,7 +251,7 @@ namespace FlamingTorch
 		};
 
 		std::stringstream str;
-		str << "MUSIC__STREAM__" << std::hex << (uint32)In << GameClockTimeNoPause();
+		str << "MUSIC__STREAM__" << std::hex << (uint64)In << GameClockTimeNoPause();
 
 		StringID MusicID = MakeStringID(str.str());
 

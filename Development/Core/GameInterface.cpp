@@ -23,7 +23,7 @@ namespace FlamingTorch
 
 		if(!PackageFileSystemManager::Instance.AddPackage(MakeStringID(PackageName), TheStream))
 		{
-			Log::Instance.LogErr("Game", "Unable to load the '%s' Package!", PackageName.c_str());
+			Log::Instance.LogErr(TAG, "Unable to load the '%s' Package!", PackageName.c_str());
 
 			return false;
 		};
@@ -280,16 +280,27 @@ namespace FlamingTorch
 		PackageFileSystemManager::Instance.Register();
 
 		InitSubsystems();
+        
+        std::string DefaultPackageFileName = DirectoryInfo::ResourcesDirectory() + "/Content/Default.package";
+        
+        std::string ConfigurationPackageFileName = DirectoryInfo::ResourcesDirectory() + "/Content/Configuration.package";
 
-		if(!LoadPackage(DirectoryInfo::ResourcesDirectory() + "/Content/Default.package") ||
-			!LoadPackage(DirectoryInfo::ResourcesDirectory() + "/Content/Configuration.package"))
-		{
+		if(!LoadPackage(DefaultPackageFileName))
+        {
 			Instance.Dispose();
-
+            
 			DeInitSubsystems();
-
+            
 			return 1;
-		};
+        }
+        else if(!LoadPackage(ConfigurationPackageFileName))
+        {
+			Instance.Dispose();
+            
+			DeInitSubsystems();
+            
+			return 1;
+        };
 
 		{
 			SuperSmartPointer<Stream> ConfigurationFileStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("Config.cfg"));

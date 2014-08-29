@@ -9,7 +9,7 @@
 		{\
 			try\
 			{\
-				(*mit) ## Parameters;\
+				(*mit) (Parameters);\
 			}\
 			catch(std::exception &e)\
 			{\
@@ -25,7 +25,7 @@
 		{\
 			try\
 			{\
-				(*mit) ## Parameters;\
+				(*mit) (Parameters);\
 			}\
 			catch(std::exception &e)\
 			{\
@@ -36,8 +36,6 @@
 
 class UIManager;
 class UILayout;
-class RendererManager;
-class RendererManager::Renderer;
 
 class UIPanel;
 

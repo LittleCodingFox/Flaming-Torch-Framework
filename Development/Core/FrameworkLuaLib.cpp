@@ -76,7 +76,7 @@ namespace FlamingTorch
 		static std::stringstream str;
 		str.str("");
 
-		std::string FunctionName = "LoadStreamContent_" + StringUtils::MakeIntString((uint32)In, true);
+		std::string FunctionName = "LoadStreamContent_" + StringUtils::MakeIntString((uint64)In, true);
 
 		str << "function " << FunctionName << "()\n" << Content << "\nend\n";
 

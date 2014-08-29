@@ -26,9 +26,11 @@ solution "Tools"
 			"../Core/"
 		}
 		
-		pchheader "FlamingCore.hpp"
-		pchsource "../Core/FlamingCore.cpp"
-
+		if os.get() ~= "macosx" then
+			pchheader "../Core/FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
+		end
+		
 		excludes {
 			"../../Dependencies/Source/lua/luac.c", 
 			"../../Dependencies/Source/lua/lua.c"
@@ -46,7 +48,16 @@ solution "Tools"
 		if os.get() == "windows" then
 			buildoptions { "/Zm139", "/bigobj" }
 		end
- 
+		
+		if os.get() == "macosx" then
+			libdirs {
+				"../../Dependencies/Libs/OSX/"
+			}
+			
+			files { "../Core/FileSystem_OSX.mm" }
+			links { "Foundation.framework" }
+		end
+		 
 		configuration "Debug"
 			libdirs {
 				"../../Binaries/FlamingDependencies/Debug/"
@@ -83,13 +94,13 @@ solution "Tools"
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
 			end
+		
+			if os.get() == "macosx" then
+				defines({ "NDEBUG", "__APPLE__" })
+				links { "FlamingDependencies" }
+			end
 
 			flags { "Optimize" }
-			
-		configuration "macosx"
-			files { "../Core/FileSystem_OSX.mm" }
-			defines({ "DEBUG", "__APPLE__" })
-			links { "FlamingDependenciesd" }
 	
 	-- A project defines one build target
 	project "TiledConverter"
@@ -122,8 +133,10 @@ solution "Tools"
 			"../../Dependencies/Libs/"
 		}
 		
-		pchheader "FlamingCore.hpp"
-		pchsource "../Core/FlamingCore.cpp"
+		if os.get() ~= "macosx" then
+			pchheader "../Core/FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
+		end
 		
 		defines({
 			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
@@ -132,6 +145,15 @@ solution "Tools"
 		
 		if os.get() == "windows" then
 			buildoptions { "/Zm139", "/bigobj" }
+		end
+		
+		if os.get() == "macosx" then
+			libdirs {
+				"../../Dependencies/Libs/OSX/"
+			}
+				
+			files { "../Core/FileSystem_OSX.mm" }
+			links { "Foundation.framework" }
 		end
  
 		configuration "Debug"

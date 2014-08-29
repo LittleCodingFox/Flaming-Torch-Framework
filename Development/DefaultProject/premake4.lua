@@ -25,8 +25,10 @@ solution "DefaultProject"
 			"../Core/"
 		}
 		
-		pchheader "FlamingCore.hpp"
-		pchsource "../Core/FlamingCore.cpp"
+		if os.get() ~= "macosx" then
+			pchheader "../Core/FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
+		end
 
 		if os.get() == "windows" then
 			buildoptions { "/Zm200", "/bigobj" }
@@ -46,6 +48,10 @@ solution "DefaultProject"
 			
 			libdirs {
 				"../../Dependencies/Libs/OSX/"
+			}
+			
+			linkoptions {
+				"-F ../../Dependencies/Libs/OSX/"
 			}
 				
 			files { "../Core/FileSystem_OSX.mm" }
@@ -77,7 +83,7 @@ solution "DefaultProject"
 
 				links { "OpenGL.framework", "glew", "FlamingDependenciesd",
 					"Foundation.framework", "AppKit.framework", "IOKit.framework", "Carbon.framework",
-					"GLEW", "OpenAL.framework", "jpeg", "sndfile.framework"
+					"GLEW", "OpenAL.framework", "jpeg", "../../Dependencies/Libs/OSX/sndfile.framework"
 				}
 			end
 
@@ -108,7 +114,10 @@ solution "DefaultProject"
 			if os.get() == "macosx" then
 				defines({ "__APPLE__" })
 				
-				links { "OpenGL.framework", "glew", "FlamingDependencies"}
+				links { "OpenGL.framework", "glew", "FlamingDependencies",
+					"Foundation.framework", "AppKit.framework", "IOKit.framework", "Carbon.framework",
+					"GLEW", "OpenAL.framework", "jpeg", "sndfile.framework"
+				}
 			end
 
 			flags { "Optimize" }
@@ -130,8 +139,8 @@ for sln in premake.solution.each() do
 			configuration(cfgname)
  
 			-- do my custom stuff
-			targetdir(path.join(prj.basedir, "../../Binaries/" .. prj.name .. "/" .. cfgname .. " native"))
-			objdir(path.join(prj.basedir, "../../Temp/" .. prj.name .. "/" .. cfgname .. " native"))
+			targetdir(path.join(prj.basedir, "../../Binaries/" .. prj.name .. "/" .. cfgname))
+			objdir(path.join(prj.basedir, "../../Temp/" .. prj.name .. "/" .. cfgname))
 		end
 	end
 end

@@ -26,7 +26,7 @@ namespace FlamingTorch
 	f32 PerlinNoise::Interpolate(f32 a, f32 b, f32 x)
 	{
 		f32 ft = x * 3.1415927f;
-		f32 f = (1 - std::cos(ft)) * .5f;
+		f32 f = (1 - cosf(ft)) * .5f;
 
 		return  a*(1-f) + b*f;
 	}

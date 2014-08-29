@@ -1,4 +1,5 @@
 #include "FlamingCore.hpp"
+#include <float.h>
 namespace FlamingTorch
 {
 	int32 RandomSeed()

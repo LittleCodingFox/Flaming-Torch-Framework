@@ -36,17 +36,17 @@ namespace FlamingTorch
 
 			switch(action)
 			{
-			case FW::Action::Add:
+            case FW::Actions::Add:
 				ActionID = FileSystemWatcherAction::Added;
 
 				break;
 
-			case FW::Action::Delete:
+			case FW::Actions::Delete:
 				ActionID = FileSystemWatcherAction::Deleted;
 
 				break;
 
-			case FW::Action::Modified:
+			case FW::Actions::Modified:
 				ActionID = FileSystemWatcherAction::Modified;
 
 				break;

@@ -51,6 +51,22 @@ public:
 		\return the converted string
 	*/
 	static std::string MakeIntString(const uint32 &i, bool Hex = false);
+    
+	/*!
+     Converts a int64 to a String
+     \param i the int64 to convert
+     \param Hex whether to convert to a Hex string
+     \return the converted string
+     */
+	static std::string MakeIntString(const int64 &i, bool Hex = false);
+    
+	/*!
+     Converts a uint64 to a String
+     \param i the uint64 to convert
+     \param Hex whether to convert to a Hex string
+     \return the converted string
+     */
+	static std::string MakeIntString(const uint64 &i, bool Hex = false);
 
 	/*!
 		Converts a f32 to a String
