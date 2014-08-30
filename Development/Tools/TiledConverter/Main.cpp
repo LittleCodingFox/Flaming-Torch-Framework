@@ -199,78 +199,89 @@ public:
 				};
 			};
 
-			Vector2 MaxImageSize((f32)MapSplitSize, (f32)MapSplitSize);
-			bool Done = false;
+            if(UniqueTiles.size() != 0)
+            {
+                Vector2 MaxImageSize((f32)MapSplitSize, (f32)MapSplitSize);
+                bool Done = false;
+                
+                TextureBuffer UniqueTilesBuffer;
+                uint32 UniqueTileSideCount = (uint32)sqrt(UniqueTiles.size());
+                
+                while(UniqueTileSideCount * UniqueTileSideCount < UniqueTiles.size())
+                {
+                    UniqueTileSideCount++;
+                };
+                
+                Vector2 ImageSize(MapTileSize * (f32)UniqueTileSideCount);
+                
+                if(ImageSize.x > MaxImageSize.x || ImageSize.y > MaxImageSize.y)
+                {
+                    Log::Instance.LogErr(TAG, "Unable to handle Unique Tiles Textures bigger than %dx%d, quitting...", MapSplitSize, MapSplitSize);
+                    
+                    return;
+                };
+                
+                UniqueTilesBuffer.CreateEmpty((uint32)ImageSize.x, (uint32)ImageSize.y);
+                
+                TextureEncoderInfo TInfo;
+                TInfo.Encoder = TextureEncoderType::PNG;
+                TInfo.Quality = 100;
+                TInfo.Lossless = true;
+                
+                for(uint32 i = 0; i < UniqueTiles.size(); i++)
+                {
+                    uint32 UniqueTilesRowWidth = UniqueTiles[i].Data.Width() * 4;
+                    uint32 UniqueTilesBufferRowWidth = UniqueTilesBuffer.Width() * 4;
+                    Vector2 StartXY = MapTileSize * Vector2((f32)(i % UniqueTileSideCount), (f32)(i / UniqueTileSideCount));
+                    uint32 Start = (uint32)(StartXY.x * 4 + StartXY.y * UniqueTilesBufferRowWidth);
+                    
+                    for(uint32 y = 0, SourceIndex = 0; y < MapTileSize.y; y++, SourceIndex += UniqueTilesRowWidth, Start += UniqueTilesBufferRowWidth)
+                    {
+                        memcpy(&UniqueTilesBuffer.Data[Start], &UniqueTiles[i].Data.Data[SourceIndex], sizeof(uint8) * UniqueTilesRowWidth);
+                    };
+                };
+                
+                FileStream Out;
+                
+                std::stringstream str;
+                str << OutFileName << "_UniqueTiles.png";
+                
+                if(!Out.Open(str.str(), StreamFlags::Write) || !UniqueTilesBuffer.Save(&Out, TInfo))
+                {
+                    Log::Instance.LogErr(TAG, "Unable to save Unique Tiles Texture");
+                    
+                    return;
+                };
+                
+                std::string ActualFileName = str.str();
+                
+                int32 Index = ActualFileName.rfind('/');
+                
+                if(Index != std::string::npos)
+                {
+                    ActualFileName = ActualFileName.substr(Index + 1);
+                };
+                
+                Index = ActualFileName.rfind('\\');
+                
+                if(Index != std::string::npos)
+                {
+                    ActualFileName = ActualFileName.substr(Index + 1);
+                };
+                
+                uint16 Length = ActualFileName.length();
+                
+                SVOIDFLASSERT(Stream.Write2<uint16>(&Length));
+                SVOIDFLASSERT(Stream.Write2<char>(ActualFileName.c_str(), Length));
+            }
+            else
+            {
+                uint16 Empty = 0;
 
-			TextureBuffer UniqueTilesBuffer;
-			uint32 UniqueTileSideCount = (uint32)sqrt(UniqueTiles.size());
-			
-			while(UniqueTileSideCount * UniqueTileSideCount < UniqueTiles.size())
-			{
-				UniqueTileSideCount++;
-			};
-
-			Vector2 ImageSize(MapTileSize * (f32)UniqueTileSideCount);
-
-			if(ImageSize.x > MaxImageSize.x || ImageSize.y > MaxImageSize.y)
-			{
-				Log::Instance.LogErr(TAG, "Unable to handle Unique Tiles Textures bigger than %dx%d, quitting...", MapSplitSize, MapSplitSize);
-
-				return;
-			};
-
-			UniqueTilesBuffer.CreateEmpty((uint32)ImageSize.x, (uint32)ImageSize.y);
-
-			TextureEncoderInfo TInfo;
-			TInfo.Encoder = TextureEncoderType::PNG;
-			TInfo.Quality = 100;
-			TInfo.Lossless = true;
-
-			for(uint32 i = 0; i < UniqueTiles.size(); i++)
-			{
-				uint32 UniqueTilesRowWidth = UniqueTiles[i].Data.Width() * 4;
-				uint32 UniqueTilesBufferRowWidth = UniqueTilesBuffer.Width() * 4;
-				Vector2 StartXY = MapTileSize * Vector2((f32)(i % UniqueTileSideCount), (f32)(i / UniqueTileSideCount));
-				uint32 Start = (uint32)(StartXY.x * 4 + StartXY.y * UniqueTilesBufferRowWidth);
-
-				for(uint32 y = 0, SourceIndex = 0; y < MapTileSize.y; y++, SourceIndex += UniqueTilesRowWidth, Start += UniqueTilesBufferRowWidth)
-				{
-					memcpy(&UniqueTilesBuffer.Data[Start], &UniqueTiles[i].Data.Data[SourceIndex], sizeof(uint8) * UniqueTilesRowWidth);
-				};
-			};
-
-			FileStream Out;
-
-			std::stringstream str;
-			str << OutFileName << "_UniqueTiles.png";
-
-			if(!Out.Open(str.str(), StreamFlags::Write) || !UniqueTilesBuffer.Save(&Out, TInfo))
-			{
-				Log::Instance.LogErr(TAG, "Unable to save Unique Tiles Texture");
-
-				return;
-			};
-
-			std::string ActualFileName = str.str();
-
-			int32 Index = ActualFileName.rfind('/');
-
-			if(Index != std::string::npos)
-			{
-				ActualFileName = ActualFileName.substr(Index + 1);
-			};
-
-			Index = ActualFileName.rfind('\\');
-
-			if(Index != std::string::npos)
-			{
-				ActualFileName = ActualFileName.substr(Index + 1);
-			};
-
-			uint16 Length = ActualFileName.length();
-
-			SVOIDFLASSERT(Stream.Write2<uint16>(&Length));
-			SVOIDFLASSERT(Stream.Write2<char>(ActualFileName.c_str(), Length));
+                SVOIDFLASSERT(Stream.Write2<uint16>(&Empty));
+            };
+            
+            uint16 Length = 0;
 
 			uint8 UniqueTileCount = UniqueTiles.size();
 			SVOIDFLASSERT(Stream.Write2<uint8>(&UniqueTileCount));
@@ -728,7 +739,7 @@ int main(int argc, char **argv)
 
 	const std::vector<Tmx::ObjectGroup *> &Objects = Map->GetObjectGroups();
 
-	Log::Instance.LogInfo(TAG, "Parsing %d Objects", Objects.size());
+	Log::Instance.LogInfo(TAG, "Parsing %d Object Groups", Objects.size());
 
 	for(uint32 i = 0; i < Objects.size(); i++)
 	{

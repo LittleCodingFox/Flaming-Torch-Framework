@@ -122,7 +122,7 @@ int main(int argc, char **argv)
         
         Log::Instance.LogInfo(TAG, "...    Packing...");
         
-        std::string CommandString = "../../Binaries/Packer/Release/Packer -dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
+        std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/../../Binaries/Packer/Release/Packer -dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
         
         system(CommandString.c_str());
     };
