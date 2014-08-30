@@ -25,11 +25,14 @@ solution "DefaultProject"
 			"../Core/"
 		}
 		
-		if os.get() ~= "macosx" then
+		if os.get() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
+		elseif os.get() == "windows" then
+			pchheader "FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
 		end
-
+		
 		if os.get() == "windows" then
 			buildoptions { "/Zm200", "/bigobj" }
 			postbuildcommands {

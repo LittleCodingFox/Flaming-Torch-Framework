@@ -130,7 +130,7 @@ namespace FlamingTorch
 
 	StringID World::MakeEntityID(Entity *This)
 	{
-		return MakeStringID(This->Name + "_" + StringUtils::MakeIntString((uint64)This, true));
+		return MakeStringID(This->Name + "_" + StringUtils::PointerString(This));
 	};
 
 	std::vector<Entity *> World::EntitiesWithComponent(const std::string &ComponentName)

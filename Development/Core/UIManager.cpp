@@ -2428,7 +2428,7 @@ namespace FlamingTorch
 	void UIManager::RegisterInput()
 	{
 		SuperSmartPointer<UIInputProcessor> Out(new UIInputProcessor());
-		Out->Name = "GUIPROCESSOR_" + StringUtils::MakeIntString((int64)this, true);
+		Out->Name = "GUIPROCESSOR_" + StringUtils::PointerString(this);
 
 		RendererManager::Instance.Input.AddContext(Out);
 		RendererManager::Instance.Input.EnableContext(MakeStringID(Out->Name));
@@ -2436,7 +2436,7 @@ namespace FlamingTorch
 
 	void UIManager::UnRegisterInput()
 	{
-		RendererManager::Instance.Input.DisableContext(MakeStringID("GUIPROCESSOR_" + StringUtils::MakeIntString((int64)this, true)));
+		RendererManager::Instance.Input.DisableContext(MakeStringID("GUIPROCESSOR_" + StringUtils::PointerString(this)));
 	};
 
 	bool UIManager::AddElement(StringID ID, SuperSmartPointer<UIPanel> Element)

@@ -10,6 +10,7 @@
 #	include <Commdlg.h>
 #	undef CreateDirectory
 #	define GetCWD _getcwd
+#	include <windirent/dirent.h>
 #else
 #	include <sys/stat.h>
 #	include <sys/types.h>
@@ -288,9 +289,9 @@ namespace FlamingTorch
                 
                 DirectoryName = To;
                 
-                for(uint32 i = 0; i < MissingDirectories.size(); i++)
+                for(uint32 j = 0; j < MissingDirectories.size(); j++)
                 {
-                    DirectoryName += "/" + MissingDirectories[i];
+                    DirectoryName += "/" + MissingDirectories[j];
                     
                     CreateDirectory(DirectoryName);
                 };

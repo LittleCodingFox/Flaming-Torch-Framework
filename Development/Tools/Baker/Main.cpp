@@ -1,11 +1,17 @@
 #include "FlamingCore.hpp"
-
 using namespace FlamingTorch;
-#include <stdio.h>
 
+#include <stdio.h>
+#
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
 #define TAG "Baker"
+#
+#if FLPLATFORM_WINDOWS
+#	include <windows.h>
+#	include <direct.h>
+#	undef CreateDirectory
+#endif
 
 std::string FLGameName()
 {
@@ -58,6 +64,9 @@ int main(int argc, char **argv)
         
         MapDirectories.push_back(Info);
     };
+
+	std::string PackerPath = Configuration.GetString("Tools", "Packer", "../../Binaries/Packer/Release/Packer");
+	std::string TiledConverterPath = Configuration.GetString("Tools", "TiledConverter", "../../Binaries/TiledConverter/Release/TiledConverter");
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
 
@@ -102,7 +111,7 @@ int main(int argc, char **argv)
                 
                 //TODO: Do this the "right way"
                 
-                std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/../../Binaries/TiledConverter/Release/TiledConverter -dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
+                std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/" + TiledConverterPath + " -dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
                     MapFiles[k] + "\"";
                 
                 system(CommandString.c_str());
@@ -122,7 +131,7 @@ int main(int argc, char **argv)
         
         Log::Instance.LogInfo(TAG, "...    Packing...");
         
-        std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/../../Binaries/Packer/Release/Packer -dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
+        std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/" + PackerPath + " -dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
         
         system(CommandString.c_str());
     };

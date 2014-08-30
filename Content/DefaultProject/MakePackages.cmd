@@ -1,5 +1,5 @@
 @echo off
 
-call amp
+call Baker
 
 pause

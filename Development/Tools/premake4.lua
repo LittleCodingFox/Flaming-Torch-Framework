@@ -26,8 +26,11 @@ solution "Tools"
 			"../Core/"
 		}
 		
-		if os.get() ~= "macosx" then
+		if os.get() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
+		elseif os.get() == "windows" then
+			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
 		
@@ -133,8 +136,11 @@ solution "Tools"
 			"../../Dependencies/Libs/"
 		}
 		
-		if os.get() ~= "macosx" then
+		if os.get() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
+		elseif os.get() == "windows" then
+			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
 		
@@ -231,8 +237,11 @@ solution "Tools"
 			"../../Dependencies/Libs/"
 		}
 		
-		if os.get() ~= "macosx" then
+		if os.get() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
+		elseif os.get() == "windows" then
+			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
 		

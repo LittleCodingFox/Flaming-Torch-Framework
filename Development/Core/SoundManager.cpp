@@ -161,10 +161,7 @@ namespace FlamingTorch
 			return 0xFFFFFFFF;
 		};
 
-		std::stringstream str;
-		str << "SOUND__STREAM__" << std::hex << (uint64)In << GameClockTimeNoPause();
-
-		StringID SoundID = MakeStringID(str.str());
+		StringID SoundID = MakeStringID("SOUND__STREAM__" + StringUtils::PointerString(In) + "_" + StringUtils::MakeIntString(GameClockTimeNoPause()));
 
 		SoundMap::iterator sit = Sounds.find(SoundID);
 
@@ -253,7 +250,7 @@ namespace FlamingTorch
 		std::stringstream str;
 		str << "MUSIC__STREAM__" << std::hex << (uint64)In << GameClockTimeNoPause();
 
-		StringID MusicID = MakeStringID(str.str());
+		StringID MusicID = MakeStringID("MUSIC__STREAM__" + StringUtils::PointerString(In) + "_" + StringUtils::MakeIntString(GameClockTimeNoPause()));
 
 		MusicMap::iterator sit = Musics.find(MusicID);
 

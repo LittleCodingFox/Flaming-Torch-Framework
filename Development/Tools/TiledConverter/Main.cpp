@@ -753,7 +753,7 @@ int main(int argc, char **argv)
 			Object.Type = CurrentGroup[j]->GetType();
 			Object.Position = Vector2((f32)CurrentGroup[j]->GetX(), (f32)CurrentGroup[j]->GetY());
 			Object.Size = Vector2((f32)CurrentGroup[j]->GetWidth(), (f32)CurrentGroup[j]->GetHeight());
-			Object.Rotation = CurrentGroup[j]->GetRotation();
+			Object.Rotation = (f32)CurrentGroup[j]->GetRotation();
 			Object.IsPolyLine = CurrentGroup[j]->GetPolyline() != NULL;
 
 			if(Object.IsPolyLine)
