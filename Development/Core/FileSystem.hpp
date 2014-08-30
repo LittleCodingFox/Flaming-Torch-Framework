@@ -17,12 +17,32 @@ public:
 	*/
 	static std::vector<std::string> ScanDirectory(const std::string &Directory,
 		const std::string &Extension, bool Recursive = false);
+    
+    /*!
+    *   Enumerate all directories within a directory (non-recursive)
+    *   \param Directory the directory to scan
+    */
+    static std::vector<std::string> GetAllDirectories(const std::string &Directory);
 
 	/*!
 	*	Creates a directory
 	*	\param Directory the directory path
 	*/
 	static bool CreateDirectory(const std::string &Directory);
+    
+    /*!
+    *   Copies a directory and its contents
+    *   \param From the directory to copy from
+    *   \param To the directory to copy to
+    *   \param Recursive whether to copy all subdirectories too
+    */
+    static bool CopyDirectory(const std::string &From, const std::string &To, bool Recursive = false);
+    
+    /*!
+    *   Deletes a directory
+    *	\param Directory the directory path
+    */
+    static bool DeleteDirectory(const std::string &Directory);
 
 	/*!
 	*	The current working directory

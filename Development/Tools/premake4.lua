@@ -199,6 +199,104 @@ solution "Tools"
 			end
 
 			flags { "Optimize" }
+	
+	-- A project defines one build target
+	project "Baker"
+		kind "ConsoleApp"
+		language "C++"
+		files {
+			"../Core/*.hpp",
+			"../Core/*.cpp",
+			"../../Dependencies/Headers/**.hpp",
+			"Baker/**.h",
+			"Baker/**.cpp"
+		}
+		
+		includedirs {
+			"Baker/",
+			"../../Dependencies/Headers/",
+			"../../Dependencies/Headers/lua/",
+			"../../Dependencies/Headers/zlib/",
+			"../../Dependencies/Source/angelscript/",
+			"../../Dependencies/Source/webp/",
+			"../Core/"
+		}
+
+		excludes {
+			"../../Dependencies/Source/lua/luac.c", 
+			"../../Dependencies/Source/lua/lua.c"
+		}
+		
+		libdirs {
+			"../../Dependencies/Libs/"
+		}
+		
+		if os.get() ~= "macosx" then
+			pchheader "../Core/FlamingCore.hpp"
+			pchsource "../Core/FlamingCore.cpp"
+		end
+		
+		defines({
+			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
+			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
+		})
+		
+		if os.get() == "windows" then
+			buildoptions { "/Zm139", "/bigobj" }
+		end
+		
+		if os.get() == "macosx" then
+			libdirs {
+				"../../Dependencies/Libs/OSX/"
+			}
+				
+			files { "../Core/FileSystem_OSX.mm" }
+			links { "Foundation.framework" }
+		end
+ 
+		configuration "Debug"
+			libdirs {
+				"../../Binaries/FlamingDependencies/Debug/"
+			}
+		
+			if os.get() == "windows" then
+				defines({ "DEBUG", "_WIN32", "WIN32" })
+				links { "winmm", "ws2_32", "FlamingDependenciesd" }
+			end
+		
+			if os.get() == "linux" then
+				defines({ "DEBUG", "__LINUX__" })
+				links { "FlamingDependenciesd", "dl", "pthread" }
+			end
+		
+			if os.get() == "macosx" then
+				defines({ "DEBUG", "__APPLE__" })
+				links { "FlamingDependenciesd" }
+			end
+
+			flags { "Symbols" }
+ 
+		configuration "Release"
+			libdirs {
+				"../../Binaries/FlamingDependencies/Release/"
+			}
+
+			if os.get() == "windows" then
+				defines({ "NDEBUG", "_WIN32", "WIN32" })
+				links { "winmm", "ws2_32", "FlamingDependencies" }
+			end
+		
+			if os.get() == "linux" then
+				defines({ "NDEBUG", "__LINUX__" })
+				links { "FlamingDependencies", "dl", "pthread" }
+			end
+		
+			if os.get() == "macosx" then
+				defines({ "NDEBUG", "__APPLE__" })
+				links { "FlamingDependencies" }
+			end
+
+			flags { "Optimize" }
 
 -- From http://industriousone.com/topic/how-get-current-configuration
 -- iterate over all solutions

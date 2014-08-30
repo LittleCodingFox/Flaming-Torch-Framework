@@ -259,6 +259,65 @@ namespace FlamingTorch
 		return Files;
 	};
 
+    bool DirectoryInfo::CopyDirectory(const std::string &From, const std::string &To, bool Recursive)
+    {
+        if(From == To)
+            return false;
+        
+        std::vector<std::string> Files = ScanDirectory(From, "*", Recursive);
+        
+        FileStream In, Out;
+        
+        for(uint32 i = 0; i < Files.size(); i++)
+        {
+            if(!In.Open(Files[i], StreamFlags::Read))
+            {
+                Log::Instance.LogDebug("DirectoryInfo", "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
+                
+                continue;
+            };
+            
+            std::string OutName = Files[i].substr(Files[i].find(From) + From.length());
+            std::string OutFileName = To + "/" + OutName;
+            
+            if(!Out.Open(OutFileName, StreamFlags::Write))
+            {
+                std::string DirectoryName = StringUtils::DirectoryName(OutFileName);
+                
+                std::vector<std::string> MissingDirectories = StringUtils::Split(DirectoryName.substr(To.length() + 1), '/');
+                
+                DirectoryName = To;
+                
+                for(uint32 i = 0; i < MissingDirectories.size(); i++)
+                {
+                    DirectoryName += "/" + MissingDirectories[i];
+                    
+                    CreateDirectory(DirectoryName);
+                };
+                
+                if(!Out.Open(OutFileName, StreamFlags::Write))
+                {
+                    Log::Instance.LogDebug("DirectoryInfo", "Unable to copy a file '%s' while copying a directory: Cannot open '%s' for writing",
+                                         Files[i].c_str(), OutFileName.c_str());
+                    
+                    continue;
+                };
+            };
+            
+            if(!In.CopyTo(&Out))
+            {
+                FileInfo::Remove(OutFileName);
+                
+                Log::Instance.LogDebug("DirectoryInfo", "Unable to copy a file '%s' while copying a directory: Cannot copy to '%s'",
+                                     Files[i].c_str(), OutFileName.c_str());
+                
+                continue;
+            };
+        };
+        
+        return true;
+    };
+
 	bool DirectoryInfo::CreateDirectory(const std::string &Directory)
 	{
 #if FLPLATFORM_WINDOWS
@@ -272,6 +331,90 @@ namespace FlamingTorch
         
         return result;
 	};
+    
+    bool DirectoryInfo::DeleteDirectory(const std::string &Directory)
+    {
+        DIR *Root = opendir (Directory.c_str());
+        
+        if(Root == NULL)
+        {
+            Log::Instance.LogDebug("DirectoryInfo", "Failed to remove directory %s", Directory.c_str());
+            
+            return false;
+        };
+        
+        dirent *Entry = readdir(Root);
+        
+        while(Entry != NULL)
+        {
+            std::string FileName(Entry->d_name);
+            
+            if(FileName[0] != '.')
+            {
+                if(Entry->d_type == DT_DIR)
+                {
+                    if(!DeleteDirectory(Directory + "/" + FileName))
+                    {
+                        Log::Instance.LogDebug("DirectoryInfo", "Failed to remove subdirectory %s/%s", Directory.c_str(), FileName.c_str());
+
+                        return false;
+                    };
+                }
+                else if(Entry->d_type == DT_REG)
+                {
+                    if(!FileInfo::Remove(Directory + "/" + FileName))
+                    {
+                        Log::Instance.LogDebug("DirectoryInfo", "Failed to remove file %s/%s", Directory.c_str(), FileName.c_str());
+                        
+                        return false;
+                    };
+                };
+            };
+            
+            Entry = readdir(Root);
+        };
+        
+        closedir(Root);
+        
+        remove(Directory.c_str());
+        
+        return true;
+    };
+    
+    std::vector<std::string> DirectoryInfo::GetAllDirectories(const std::string &Directory)
+    {
+        std::vector<std::string> Out;
+        
+        DIR *Root = opendir (Directory.c_str());
+        
+        if(Root == NULL)
+        {
+            Log::Instance.LogErr("DirectoryInfo", "Failed to open Directory '%s' for reading!", Directory.c_str());
+            
+            return Out;
+        };
+        
+        dirent *Entry = readdir(Root);
+        
+        while(Entry != NULL)
+        {
+            std::string FileName(Entry->d_name);
+            
+            if(FileName[0] != '.')
+            {
+                if(Entry->d_type == DT_DIR)
+                {
+                    Out.push_back(Directory + "/" + FileName);
+                };
+            };
+            
+            Entry = readdir(Root);
+        };
+        
+        closedir(Root);
+        
+        return Out;
+    };
 
 #if FLPLATFORM_MACOSX
 	const char *OSXResourcesDirectory();
