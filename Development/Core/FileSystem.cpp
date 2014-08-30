@@ -173,7 +173,7 @@ namespace FlamingTorch
 
 			std::string FileName(FileData.cFileName);
 			
-			if(FileName[0] != '.')
+            if(FileName != "." && FileName != "..")
 			{
 				if(FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
@@ -231,7 +231,7 @@ namespace FlamingTorch
 			{
 				std::string FileName(Entry->d_name);
 
-				if(FileName[0] != '.')
+                if(FileName != "." && FileName != "..")
 				{
 					if(Entry->d_type == DT_DIR)
 					{
@@ -349,7 +349,7 @@ namespace FlamingTorch
         {
             std::string FileName(Entry->d_name);
             
-            if(FileName[0] != '.')
+            if(FileName != "." && FileName != "..")
             {
                 if(Entry->d_type == DT_DIR)
                 {
@@ -376,9 +376,7 @@ namespace FlamingTorch
         
         closedir(Root);
         
-        remove(Directory.c_str());
-        
-        return true;
+        return rmdir (Directory.c_str()) == 0;
     };
     
     std::vector<std::string> DirectoryInfo::GetAllDirectories(const std::string &Directory)

@@ -12,6 +12,11 @@ std::string FLGameName()
 	return TAG;
 };
 
+struct MapDirectoryInfo
+{
+    std::string From, To, WorkingDirectory;
+};
+
 int main(int argc, char **argv)
 {
 	Log::Instance.Register();
@@ -24,7 +29,8 @@ int main(int argc, char **argv)
     FileStream ConfigStream;
     GenericConfig Configuration;
     
-    /*
+    std::vector<MapDirectoryInfo> MapDirectories;
+    
     if(!ConfigStream.Open(DirectoryInfo::ResourcesDirectory() + "/Baker.cfg", StreamFlags::Read | StreamFlags::Text) || !Configuration.DeSerialize(&ConfigStream))
     {
         Log::Instance.LogErr(TAG, "Failed to load Baker.cfg");
@@ -33,7 +39,25 @@ int main(int argc, char **argv)
         
         return 1;
     };
-    */
+    
+    GenericConfig::Section &MapDirectoriesSection = Configuration.Sections["MapDirectories"];
+    
+    for(GenericConfig::Section::ValueMap::iterator it = MapDirectoriesSection.Values.begin(); it != MapDirectoriesSection.Values.end(); it++)
+    {
+        std::vector<std::string> Pieces = StringUtils::Split(it->second.Content, '|');
+        
+        if(Pieces.size() != 3)
+            continue;
+        
+        Log::Instance.LogInfo(TAG, "Added Map Folder '%s' => '%s' ('%s')", Pieces[0].c_str(), Pieces[1].c_str(), Pieces[2].c_str());
+        
+        MapDirectoryInfo Info;
+        Info.From = Pieces[0];
+        Info.To = Pieces[1];
+        Info.WorkingDirectory = Pieces[2];
+        
+        MapDirectories.push_back(Info);
+    };
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
 
@@ -63,7 +87,40 @@ int main(int argc, char **argv)
             return 1;
         };
         
+        Log::Instance.LogInfo(TAG, "...    Compiling Maps (if any)");
+        
+        for(uint32 j = 0; j < MapDirectories.size(); j++)
+        {
+            std::vector<std::string> MapFiles = DirectoryInfo::ScanDirectory(TargetDirectory + "/" + MapDirectories[j].From, "tmx");
+            
+            for(uint32 k = 0; k < MapFiles.size(); k++)
+            {
+                DirectoryInfo::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].To);
+                
+                if(chdir((TargetDirectory + "/" + MapDirectories[j].WorkingDirectory).c_str()) != 0)
+                    continue;
+                
+                //TODO: Do this the "right way"
+                
+                std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/../../Binaries/TiledConverter/Release/TiledConverter -dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
+                    MapFiles[k] + "\"";
+                
+                system(CommandString.c_str());
+                
+                if(chdir(DirectoryInfo::ResourcesDirectory().c_str()) != 0)
+                {
+                    Log::Instance.LogErr(TAG, "Unable to restore working directory while compiling maps!");
+                    
+                    DeInitSubsystems();
+                    
+                    return 1;
+                };
+            };
+        };
+        
         //TODO: Do this the "right way"
+        
+        Log::Instance.LogInfo(TAG, "...    Packing...");
         
         std::string CommandString = "../../Binaries/Packer/Release/Packer -dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
         
