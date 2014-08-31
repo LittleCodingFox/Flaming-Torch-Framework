@@ -162,100 +162,41 @@ namespace FlamingTorch
 		const std::string &Extension, bool Recursive)
 	{
 		std::vector<std::string> Files;
+
+		DIR *Root = opendir (Directory.c_str());
+
+		if(Root == NULL)
+			return Files;
+
+		dirent *Entry = readdir(Root);
+
+		while(Entry != NULL)
 		{
-#ifdef FLPLATFORM_WINDOWS
-			std::string Query = Directory + std::string("\\*.") + Extension;
-			WIN32_FIND_DATAA FileData;
-			HANDLE hFindHandle = INVALID_HANDLE_VALUE;
-			hFindHandle = FindFirstFileA(Query.c_str(), &FileData);
+			std::string FileName(Entry->d_name);
 
-			if(hFindHandle == INVALID_HANDLE_VALUE)
-				return Files;
-
-			std::string FileName(FileData.cFileName);
-			
-            if(FileName != "." && FileName != "..")
+			if(FileName != "." && FileName != "..")
 			{
-				if(FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				if(Entry->d_type == DT_DIR)
 				{
 					if(Recursive)
 					{
 						std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
-							std::string(FileData.cFileName), Extension, Recursive));
+							FileName, Extension, Recursive));
 
 						Files.insert(Files.end(), t.begin(), t.end());
 					};
 				}
-				else
+				else if(Entry->d_type == DT_REG)
 				{
-					std::string FileName(FileData.cFileName);
-					Files.push_back(Directory + std::string("/") + FileData.cFileName);
-				};
-			};
-
-			while(FindNextFileA(hFindHandle, &FileData))
-			{
-				FileName = FileData.cFileName;
-
-				if(FileName[0] != '.')
-				{
-					if(FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-					{
-						if(Recursive)
-						{
-							std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
-								std::string(FileData.cFileName), Extension, Recursive));
-
-							Files.insert(Files.end(), t.begin(), t.end());
-						};
-					}
-					else
-					{
-						std::string FileName(FileData.cFileName);
-						Files.push_back(Directory + std::string("/") + FileData.cFileName);
-					};
-				};
-			};
-
-			FindClose(hFindHandle);
-#else
-			DIR *Root = opendir (Directory.c_str());
-
-			if(Root == NULL)
-			{
-				return Files;
-			}
-
-			dirent *Entry = readdir(Root);
-
-			while(Entry != NULL)
-			{
-				std::string FileName(Entry->d_name);
-
-                if(FileName != "." && FileName != "..")
-				{
-					if(Entry->d_type == DT_DIR)
-					{
-						if(Recursive)
-						{
-							std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
-								FileName, Extension, Recursive));
-
-							Files.insert(Files.end(), t.begin(), t.end());
-						};
-					}
-					else if(Entry->d_type == DT_REG)
-					{
+					if(Extension.length() == 0 || Extension == "*" || FileName.rfind(Extension) == FileName.length() - Extension.length())
 						Files.push_back(Directory + std::string("/") + FileName);
-					};
 				};
+			};
 
-				Entry = readdir(Root);
-			}
+			Entry = readdir(Root);
+		};
 
-			closedir(Root);
-#endif
-		}
+		closedir(Root);
 
 		return Files;
 	};
