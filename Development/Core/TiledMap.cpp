@@ -70,17 +70,13 @@ namespace FlamingTorch
 
 		SFLASSERT(In->Read2<uint16>(&Length));
 
-		if(Length == 0)
-		{
-			Log::Instance.LogErr(TAG, "Unable to deserialize a tiled map: Invalid Length 0");
-
-			return false;
-		};
-
 		//TileSets
 #if USE_GRAPHICS
-		TileSet.UniqueTilesetTextureName.resize(Length);
-		SFLASSERT(In->Read2<char>(&TileSet.UniqueTilesetTextureName[0], Length));
+		if(Length)
+		{
+			TileSet.UniqueTilesetTextureName.resize(Length);
+			SFLASSERT(In->Read2<char>(&TileSet.UniqueTilesetTextureName[0], Length));
+		};
 #else
 		SFLASSERT(In->Seek(In->Position() + Length));
 #endif
@@ -290,6 +286,13 @@ namespace FlamingTorch
 	{
 		PROFILE("TiledMap::InitResources", StatTypes::Rendering);
 
+		if(TileSet.UniqueTilesetTextureName.length() == 0)
+		{
+			ResourcesInitedValue = true;
+
+			return true;
+		};
+
 		bool KeepData = Texture::KeepData;
 		Texture::KeepData = false;
 
@@ -359,7 +362,7 @@ namespace FlamingTorch
 	{
 		PROFILE("TiledMap::Draw", StatTypes::Rendering);
 
-		if(!ResourcesInitedValue || Layer >= Layers.size() || Layers[Layer]->Visible == false)
+		if(!ResourcesInitedValue || Layer >= Layers.size() || Layers[Layer]->Visible == false || Layers[Layer]->Vertices.size() == 0)
 			return;
 
 		SpriteCache::Instance.Flush(Renderer);
