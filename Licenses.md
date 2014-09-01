@@ -5,7 +5,7 @@ Flaming Torch Framework is licensed under the [zlib/libpng license](http://opens
 
 ##Dependencies
 
-FTGF depends on the following libraries:
+FTGF depends on the following libraries which are already included:
 
  - [Boost](http://www.boost.org/users/license.html) Boost License
  - [ENet](http://enet.bespin.org/License.html) zlib License
@@ -20,3 +20,5 @@ FTGF depends on the following libraries:
  - [WinDirent](http://softagalleria.net/dirent.php) MIT License
  - [zlib](http://www.zlib.net/zlib_license.html) / [libpng](http://www.libpng.org/pub/png/) zlib License
  - [TMXParser](https://github.com/andrewrk/tmxparser) zlib License
+ - [OpenAL](http://en.wikipedia.org/wiki/OpenAL) LGPL License
+ - [libsndfile](http://en.wikipedia.org/wiki/Libsndfile) LGPL License
