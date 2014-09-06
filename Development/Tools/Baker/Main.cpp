@@ -110,11 +110,19 @@ int main(int argc, char **argv)
                     continue;
                 
                 //TODO: Do this the "right way"
-                
-                std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/" + TiledConverterPath + " -dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
+
+				std::string ExePath = DirectoryInfo::ResourcesDirectory() + "/" + TiledConverterPath;
+				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
                     MapFiles[k] + "\"";
-                
-                system(CommandString.c_str());
+
+				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, DirectoryInfo::ResourcesDirectory());
+
+				if(0 != ExitCode)
+				{
+					Log::Instance.LogErr(TAG, "Unable to run TiledMap: Exit Code '%d'", ExitCode);
+
+					continue;
+				};
                 
                 if(chdir(DirectoryInfo::ResourcesDirectory().c_str()) != 0)
                 {
@@ -130,10 +138,18 @@ int main(int argc, char **argv)
         //TODO: Do this the "right way"
         
         Log::Instance.LogInfo(TAG, "...    Packing...");
-        
-        std::string CommandString = DirectoryInfo::ResourcesDirectory() + "/" + PackerPath + " -dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
-        
-        system(CommandString.c_str());
+
+		std::string ExePath = DirectoryInfo::ResourcesDirectory() + "/" + PackerPath;
+		std::string Parameters = "-dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
+
+		int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, DirectoryInfo::ResourcesDirectory());
+
+		if(0 != ExitCode)
+		{
+			Log::Instance.LogErr(TAG, "Unable to run Packer: Exit Code '%d'", ExitCode);
+
+			continue;
+		};
     };
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");

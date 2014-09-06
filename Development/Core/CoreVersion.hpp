@@ -40,6 +40,16 @@ namespace FlamingTorch
 	{
 	public:
 		/*!
+		*	Runs a program from the OS
+		*	\param ExePath the path to the executable file
+		*	\param Parameters the parameters to pass to the executable
+		*	\param WorkingDirectory the directory from which to run the executable
+		*	\return the return code from running the .exe, or -1 if there was a problem running it
+		*	\note on non-Windows systems this always returns 0 for now
+		*/
+		static int32 RunProgram(const std::string &ExePath, const std::string &Parameters, const std::string &WorkingDirectory);
+
+		/*!
 		*	Makes a VersionType from two bytes
 		*	\param a the major version
 		*	\param b the minor version
