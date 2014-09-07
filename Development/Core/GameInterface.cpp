@@ -114,6 +114,11 @@ namespace FlamingTorch
 		TheRenderer->OnResized.Connect(this, &GameInterface::OnResize);
 		TheRenderer->OnResourcesReloaded.Connect(this, &GameInterface::OnResourcesReloaded);
 
+		if(Options.FrameRate != 0)
+		{
+			TheRenderer->Window.setFramerateLimit(Options.FrameRate);
+		};
+
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(0, Options.Width, Options.Height, 0, -1, 1);
@@ -217,7 +222,6 @@ namespace FlamingTorch
 				};
 			};
 		};
-#
 
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 
@@ -347,6 +351,18 @@ namespace FlamingTorch
 				if(1 != sscanf(it->second.Content.c_str(), "%d", &UpdateRateValue))
 				{
 					UpdateRateValue = CurrentUpdateRate;
+				};
+			};
+
+			it = GameSection.Values.find("FrameRate");
+
+			if(it != GameSection.Values.end())
+			{
+				int32 CurrentFrameRate = FrameRateValue;
+
+				if(1 != sscanf(it->second.Content.c_str(), "%d", &FrameRateValue) || FrameRateValue < 0)
+				{
+					FrameRateValue = CurrentFrameRate;
 				};
 			};
 		};

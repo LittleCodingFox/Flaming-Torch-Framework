@@ -1403,6 +1403,8 @@ namespace FlamingTorch
 			//GameInterface
 			luabind::class_<GameInterface>("GameInterface")
 				.property("GameName", &GameInterface::GameName)
+				.def_readwrite("UpdateRate", &GameInterface::UpdateRateValue)
+				.def_readwrite("FrameRate", &GameInterface::FrameRateValue)
 				.def_readwrite("DevelopmentBuild", &GameInterface::DevelopmentBuild)
 				.def_readwrite("IsGUISandbox", &GameInterface::IsGUISandbox)
 #if USE_GRAPHICS
@@ -1968,6 +1970,7 @@ namespace FlamingTorch
 				.def_readwrite("Title", &RenderCreateOptions::Title)
 				.def_readwrite("Width", &RenderCreateOptions::Width)
 				.def_readwrite("Height", &RenderCreateOptions::Height)
+				.def_readwrite("FrameRate", &RenderCreateOptions::FrameRate)
 				.def_readwrite("Style", &RenderCreateOptions::Style),
 
 			//Sprite

@@ -29,6 +29,7 @@ GameInitialize = function(Arguments)
 	Options.Title = Game.GameName
 	Options.Width = 960
 	Options.Height = 600
+	Options.FrameRate = Game.FrameRate
 	
 	local Renderer = Game:CreateRenderer(Options)
 	

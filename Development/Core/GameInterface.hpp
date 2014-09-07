@@ -6,9 +6,10 @@ struct RenderCreateOptions
 	std::string Title;
 	uint32 Width, Height;
 	uint32 Style;
+	uint32 FrameRate;
 	sf::WindowHandle Handle;
 
-	RenderCreateOptions() : Style(sf::Style::Titlebar | sf::Style::Close), Handle(NULL) {};
+	RenderCreateOptions() : Style(sf::Style::Titlebar | sf::Style::Close), Handle(NULL), FrameRate(0) {};
 };
 #endif
 
@@ -23,10 +24,11 @@ private:
 public:
 	bool DevelopmentBuild;
 	bool IsGUISandbox;
+	uint32 UpdateRateValue, FrameRateValue;
 
 	static SuperSmartPointer<GameInterface> Instance;
 
-	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false) {};
+	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0) {};
 	virtual ~GameInterface() {};
 
 	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);
@@ -141,7 +143,6 @@ class ScriptedGameInterface : public GameInterface
 public:
 	SuperSmartPointer<LuaScript> ScriptInstance;
 	std::string GameNameValue;
-	int32 UpdateRateValue;
 
 	luabind::object PreInitFunction, InitFunction, DeInitFunction, OnFixedUpdateFunction, OnFrameUpdateFunction,
 		OnFrameBeginFunction, OnFrameEndFunction, OnFrameDrawFunction, OnResizeFunction, OnResourcesReloadedFunction,
@@ -157,7 +158,7 @@ public:
 		return UpdateRateValue;
 	};
 
-	ScriptedGameInterface() : UpdateRateValue(30), GameNameValue("Game")
+	ScriptedGameInterface() : GameNameValue("Game")
 	{
 	};
 
