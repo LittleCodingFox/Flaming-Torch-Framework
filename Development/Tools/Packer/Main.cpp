@@ -16,6 +16,8 @@ int main(int argc, char **argv)
 {
 	Log::Instance.Register();
 
+	Log::Instance.FolderName = FLGameName();
+
 	if(argc == 1)
 	{
 		Log::Instance.LogInfo(TAG, "Usage: %s -dir [folder] [folder in package] -file [file][folder in package] "

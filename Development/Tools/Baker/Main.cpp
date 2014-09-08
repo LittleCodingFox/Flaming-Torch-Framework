@@ -27,6 +27,8 @@ int main(int argc, char **argv)
 {
 	Log::Instance.Register();
 
+	Log::Instance.FolderName = FLGameName();
+
 	InitSubsystems();
 
 	Log::Instance.LogInfo(TAG, "Version %s starting up", CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
@@ -104,10 +106,18 @@ int main(int argc, char **argv)
             
             for(uint32 k = 0; k < MapFiles.size(); k++)
             {
+				std::string WorkingDirectory = TargetDirectory + "/" + MapDirectories[j].WorkingDirectory;
+
+				WorkingDirectory = StringUtils::Replace(WorkingDirectory, "//", "/");
+
                 DirectoryInfo::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].To);
                 
-                if(chdir((TargetDirectory + "/" + MapDirectories[j].WorkingDirectory).c_str()) != 0)
-                    continue;
+                if(chdir(WorkingDirectory.c_str()) != 0)
+				{
+					Log::Instance.LogWarn(TAG, "Unable to change to map working directory '%s': Errno is %d", WorkingDirectory.c_str(), errno);
+
+					continue;
+				};
                 
                 //TODO: Do this the "right way"
 

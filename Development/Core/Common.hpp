@@ -2,18 +2,21 @@
 #define SFLASSERT(var) \
 	if(!(var))\
 	{\
+		printf("ASSERT FAILED: %s at %s:%s:%d\n", #var, __FILE__, __FUNCTION__, __LINE__);\
 		return 0;\
 	}
 
 #define SVOIDFLASSERT(var) \
 	if(!(var))\
 	{\
+		printf("ASSERT FAILED: %s at %s:%s:%d\n", #var, __FILE__, __FUNCTION__, __LINE__);\
 		return;\
 	}
 
 #define SFUNCFLASSERT(var, func) \
 	if(!(var))\
 	{\
+		printf("ASSERT FAILED: %s at %s:%s:%d\n", #var, __FILE__, __FUNCTION__, __LINE__);\
 		func;\
 	}
 

@@ -350,6 +350,16 @@ public:
 					};
 				};
 			};
+		}
+		else
+		{
+			uint16 Empty = 0;
+
+			SVOIDFLASSERT(Stream.Write2<uint16>(&Empty));
+
+			uint8 EmptyByte = 0;
+
+			SVOIDFLASSERT(Stream.Write2<uint8>(&EmptyByte));
 		};
 
 		//Map Objects
@@ -417,6 +427,8 @@ public:
 int main(int argc, char **argv)
 {
 	Log::Instance.Register();
+
+	Log::Instance.FolderName = FLGameName();
 
 	if(argc == 1)
 	{

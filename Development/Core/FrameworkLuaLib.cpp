@@ -66,6 +66,25 @@ namespace FlamingTorch
 		return a | ~b;
 	};
 
+	luabind::object GetGenericConfigSections(GenericConfig &Self, lua_State *State)
+	{
+		luabind::object Out = luabind::newtable(State);
+
+		for(GenericConfig::SectionMap::iterator it = Self.Sections.begin(); it != Self.Sections.end(); it++)
+		{
+			luabind::object Inner = luabind::newtable(State);
+
+			for(GenericConfig::Section::ValueMap::iterator vit = it->second.Values.begin(); vit != it->second.Values.end(); vit++)
+			{
+				Inner[vit->first] = vit->second.Content;
+			};
+
+			Out[it->first] = Inner;
+		};
+
+		return Out;
+	};
+
 	luabind::object LuaDoStream(Stream *In, lua_State *State)
 	{
 		if(In == NULL)
@@ -1327,6 +1346,14 @@ namespace FlamingTorch
 				.def("GetPixel", &Texture::GetPixel)
 				.def(luabind::const_self == luabind::other<const Texture &>()),
 
+			//TexturePacker
+			luabind::class_<TexturePacker>("TexturePacker")
+				.scope [
+					luabind::def("FromConfig", &TexturePacker::FromConfig)
+				]
+				.def("GetTexture", &TexturePacker::GetTexture)
+				.property("IndexCount", &TexturePacker::IndexCount),
+
 			//FrustumCuller
 			luabind::class_<FrustumCuller>("FrustumCuller")
 				.enum_("constants") [
@@ -1381,6 +1408,7 @@ namespace FlamingTorch
 				.def("GetFloat", &GenericConfig::GetFloat)
 				.def("GetString", &GenericConfig::GetString)
 				.def("SetValue", &GenericConfig::SetValue)
+				.property("Sections", &GetGenericConfigSections)
 				.scope [
 					luabind::class_<GenericConfig::Value>("Value")
 						.def(luabind::constructor<>())

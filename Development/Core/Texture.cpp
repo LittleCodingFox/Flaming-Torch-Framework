@@ -439,7 +439,7 @@ namespace FlamingTorch
 					Log::Instance.LogWarn("TextureBuffer", "Unable to read Stream '0x%08x' as a webP or FTI.", Stream);
 
 					return false;
-				}
+				};
 			};
 		};
 
@@ -1449,6 +1449,40 @@ GL_NEAREST : GL_LINEAR);
 
 		if(!Out->MainTexture->FromData(&Temp.Data[0], Width, Height))
 			return SuperSmartPointer<TexturePacker>();
+
+		return Out;
+	};
+
+	SuperSmartPointer<TexturePacker> TexturePacker::FromConfig(SuperSmartPointer<Texture> MainTexture, GenericConfig Config)
+	{
+		SuperSmartPointer<TexturePacker> Out(new TexturePacker());
+
+		Out->MainTexture = MainTexture;
+
+		GenericConfig::Section &Animations = Config.Sections["Animations"];
+
+		SortedTexture Item;
+
+		for(GenericConfig::Section::ValueMap::iterator it = Animations.Values.begin(); it != Animations.Values.end(); it++)
+		{
+			std::vector<std::string> Pieces = StringUtils::Split(it->second.Content, '|');
+
+			for(uint32 i = 0; i < Pieces.size(); i++)
+			{
+				if(5 != sscanf(Pieces[i].c_str(), "%d,%d,%d,%d,%d", &Item.x, &Item.y, &Item.Width, &Item.Height, &Item.Index))
+					return SuperSmartPointer<TexturePacker>();
+
+				Item.TextureInstance.Reset(new Texture());
+
+				TexturePackerIndex Index;
+				Index.Index = Item.Index;
+				Index.Owner = Out;
+
+				Item.TextureInstance->SetIndex(Index);
+
+				Out->Indices.push_back(Item);
+			};
+		};
 
 		return Out;
 	};

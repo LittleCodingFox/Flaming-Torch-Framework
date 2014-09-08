@@ -205,8 +205,19 @@ namespace FlamingTorch
     {
         if(From == To)
             return false;
+
+		DirectoryInfo::CreateDirectory(To);
         
-        std::vector<std::string> Files = ScanDirectory(From, "*", Recursive);
+		std::vector<std::string> Directories = DirectoryInfo::GetAllDirectories(From);
+
+		for(uint32 i = 0; i < Directories.size(); i++)
+		{
+			std::string TargetDirectory = To + "/" + Directories[i].substr(From.length());
+
+			DirectoryInfo::CreateDirectory(TargetDirectory);
+		};
+		
+		std::vector<std::string> Files = ScanDirectory(From, "*", Recursive);
         
         FileStream In, Out;
         
@@ -260,8 +271,10 @@ namespace FlamingTorch
         return true;
     };
 
-	bool DirectoryInfo::CreateDirectory(const std::string &Directory)
+	bool DirectoryInfo::CreateDirectory(const std::string &_Directory)
 	{
+		std::string Directory = StringUtils::Replace(_Directory, "//", "/");
+
 #if FLPLATFORM_WINDOWS
         bool result = _mkdir(Directory.c_str()) == 0;
 #else
@@ -269,7 +282,14 @@ namespace FlamingTorch
 #endif
         
         if(!result)
-            printf("DirectoryInfo: Failed to create directory '%s': %d\n", Directory.c_str(), errno);
+		{
+			int32 Errno = errno;
+
+			if(Errno != EEXIST)
+			{
+				Log::Instance.LogWarn("DirectoryInfo", "Failed to create directory '%s': %d", Directory.c_str(), Errno);
+			};
+		};
         
         return result;
 	};
@@ -454,7 +474,14 @@ namespace FlamingTorch
 			DirectoryInfo::CreateDirectory(ActualStorageDirectory.c_str());
 #endif
 
-			if(GameInterface::Instance != NULL)
+			if(Log::Instance.FolderName.length())
+			{
+				ActualStorageDirectory += "/" + Log::Instance.FolderName;
+				GeneralizeSeparators(ActualDirectory);
+
+				DirectoryInfo::CreateDirectory(ActualStorageDirectory.c_str());
+			}
+			else if(GameInterface::Instance != NULL)
 			{
 				ActualStorageDirectory += "/" + GameInterface::Instance->GameName() + "_files";
 				GeneralizeSeparators(ActualDirectory);

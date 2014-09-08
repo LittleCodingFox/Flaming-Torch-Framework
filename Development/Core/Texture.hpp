@@ -419,6 +419,14 @@ public:
 	SuperSmartPointer<Texture> GetTexture(uint32 Index);
 
 	/*!
+	*	\return the total amount of indices in this Texture Packer
+	*/
+	inline uint32 IndexCount()
+	{
+		return Indices.size();
+	};
+
+	/*!
 	*	Creates a TexturePacker from multiple textures
 	*	\param Textures the Textures to load from
 	*	\param MaxWidth the maximum width of the texture
@@ -426,4 +434,11 @@ public:
 	*/
 	static SuperSmartPointer<TexturePacker> FromTextures(const std::vector<SuperSmartPointer<Texture> > &Textures,
 		uint32 MaxWidth, uint32 MaxHeight);
+
+	/*!
+	*	Creates a TexturePacker from a prepacked Texture
+	*	\param MainTexture the prepacked Texture
+	*	\param Config the prepacked texture configuration
+	*/
+	static SuperSmartPointer<TexturePacker> FromConfig(SuperSmartPointer<Texture> MainTexture, GenericConfig Config);
 };

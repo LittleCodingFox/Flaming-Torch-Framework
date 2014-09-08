@@ -18,6 +18,13 @@ public:
 	*/
 	bool PrintTime;
 
+	/*!
+	*	Folder Name Override
+	*	Used to override the default folder name
+	*	Leave empty to use the normal log folder name
+	*/
+	std::string FolderName;
+
 	static Log Instance;
 
 	Log() : SubSystem(LOG_PRIORITY), LogFile(NULL) {};

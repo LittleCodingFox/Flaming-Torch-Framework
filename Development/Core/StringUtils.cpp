@@ -233,7 +233,7 @@ namespace FlamingTorch
 		int32 Index = Path.rfind('/');
 
 		if(Index == std::string::npos || Index == Path.length() - 1)
-			return std::string();
+			return Path;
 
 		return Path.substr(Index + 1);
 	};
