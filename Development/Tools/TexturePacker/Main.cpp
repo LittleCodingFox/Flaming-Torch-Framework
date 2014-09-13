@@ -33,6 +33,10 @@ int32 MaxWidth = 4096, MaxHeight = 4096;
 */
 int main(int argc, char **argv)
 {
+#if FLPLATFORM_WINDOWS
+	EnableMinidumps(FLGameName().c_str(), CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
+#endif
+
 	Log::Instance.Register();
 	ResourceManager::Instance.Register();
 

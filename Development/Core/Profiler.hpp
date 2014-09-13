@@ -11,7 +11,7 @@ namespace StatTypes
 	};
 };
 
-class FLAMING_API Profiler : public SubSystem
+class Profiler : public SubSystem
 {
 public:
 	struct Packet
@@ -49,7 +49,7 @@ public:
 	Signal1<const PacketMap &> OnFinishFrame;
 };
 
-class FLAMING_API ProfilerFragment
+class ProfilerFragment
 {
 private:
 	uint64 Start;

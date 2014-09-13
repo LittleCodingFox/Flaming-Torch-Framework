@@ -28,7 +28,7 @@ namespace FlamingTorch
 		sei.lpVerb = "open";
 		sei.lpFile = ExePath.c_str();
 		sei.lpParameters = Parameters.c_str();
-		sei.lpDirectory = DirectoryInfo::ResourcesDirectory().c_str();
+		sei.lpDirectory = WorkingDirectory.c_str();
 		sei.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI;
 		sei.nShow = SW_HIDE;
 

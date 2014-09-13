@@ -37,7 +37,7 @@ namespace BlendingMode
 	};
 };
 
-class FLAMING_API SpriteDrawOptions
+class SpriteDrawOptions
 {
 public:
 	Vector2 PositionValue, ScaleValue, OffsetValue;
@@ -222,7 +222,7 @@ public:
 	};
 };
 
-class FLAMING_API Sprite
+class Sprite
 {
 public:
 	SuperSmartPointer<Texture> SpriteTexture;
@@ -231,7 +231,7 @@ public:
 	void Draw(RendererManager::Renderer *Renderer);
 };
 
-class FLAMING_API AnimatedSprite : public Sprite
+class AnimatedSprite : public Sprite
 {
 	struct AnimationInfo
 	{

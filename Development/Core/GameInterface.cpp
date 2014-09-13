@@ -44,7 +44,7 @@ namespace FlamingTorch
 
 		SuperSmartPointer<FileStream> InputStream(new FileStream());
 
-		if(!InputStream->Open(DirectoryInfo::ResourcesDirectory() + "DefaultLayout.resource", StreamFlags::Read | StreamFlags::Text) ||
+		if(!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "DefaultLayout.resource", StreamFlags::Read | StreamFlags::Text) ||
 			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream, SuperSmartPointer<UIPanel>(), true))
 		{
 			Log::Instance.LogErr(TAG, "Failed to reload our Default GUI Layouts!");
@@ -52,7 +52,7 @@ namespace FlamingTorch
 			return;
 		};
 		
-		if(!InputStream->Open(DirectoryInfo::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text) ||
+		if(!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text) ||
 			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream))
 		{
 			Log::Instance.LogErr(TAG, "Failed to reload our GUI Layouts!");
@@ -186,7 +186,7 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 		if(IsGUISandbox)
 		{
-			if(!FileSystemWatcher::Instance.WatchDirectory(DirectoryInfo::ResourcesDirectory()))
+			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
 			{
 				Log::Instance.LogErr(TAG, "Failed to watch resources directory for GUI Sandbox Mode, quitting...");
 
@@ -205,7 +205,7 @@ namespace FlamingTorch
 
 		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
 
-		if(!AutoExecStream.AsDerived<FileStream>()->Open(DirectoryInfo::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
+		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
 		{
 			AutoExecStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("autoexec.cfg"));
 		};
@@ -285,9 +285,9 @@ namespace FlamingTorch
 
 		InitSubsystems();
         
-        std::string DefaultPackageFileName = DirectoryInfo::ResourcesDirectory() + "/Content/Default.package";
+        std::string DefaultPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Default.package";
         
-        std::string ConfigurationPackageFileName = DirectoryInfo::ResourcesDirectory() + "/Content/Configuration.package";
+        std::string ConfigurationPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Configuration.package";
 
 		if(!LoadPackage(DefaultPackageFileName))
         {
@@ -323,7 +323,7 @@ namespace FlamingTorch
 
 			for(GenericConfig::Section::ValueMap::iterator it = PackagesSection.Values.begin(); it != PackagesSection.Values.end(); it++)
 			{
-				if(!LoadPackage(DirectoryInfo::ResourcesDirectory() + "/Content/" + it->second.Content))
+				if(!LoadPackage(FileSystemUtils::ResourcesDirectory() + "/Content/" + it->second.Content))
 				{
 					Instance.Dispose();
 
@@ -522,7 +522,7 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 		if(IsGUISandbox)
 		{
-			if(!FileSystemWatcher::Instance.WatchDirectory(DirectoryInfo::ResourcesDirectory()))
+			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
 			{
 				Instance.Dispose();
 
@@ -539,7 +539,7 @@ namespace FlamingTorch
 
 		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
 
-		if(!AutoExecStream.AsDerived<FileStream>()->Open(DirectoryInfo::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
+		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
 		{
 			AutoExecStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("autoexec.cfg"));
 		};

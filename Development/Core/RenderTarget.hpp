@@ -28,7 +28,7 @@ namespace ColorBufferAttachments
 	Rendering Target
 	Allows for rendering a frame of content to one or more textures
 */
-class FLAMING_API RenderTarget
+class RenderTarget
 {
 private:
 	uint32 FBOHandle;

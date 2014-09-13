@@ -22,11 +22,16 @@
 
 namespace FlamingTorch
 {
-#	define TAG "PackageFileSystemManager"
+#	define TAGMANAGER "PackageFileSystemManager"
+#	define TAGPATH "Path"
+#	define TAGUTILS "FileSystemUtils"
 #	define TAGWATCHER "FileSystemWatcher"
 
 	FW::FileWatcher GlobalFileWatcher;
 	FileSystemWatcher FileSystemWatcher::Instance;
+
+	std::string Path::PathSeparator = FLPLATFORM_UNIVERSAL_PATHSPLITSTRING;
+	std::string Path::PlatformPathSeparator = FLPLATFORM_PATHSPLITSTRING;
 
 	class FileSystemWatcherCallback : public FW::FileWatchListener
 	{
@@ -57,7 +62,61 @@ namespace FlamingTorch
 		};
 	};
 
-	bool FileInfo::Remove(const std::string Name)
+	Path::Path()
+	{
+	};
+
+	Path::Path(const std::string &Directory, const std::string &BaseName)
+	{
+		Path::Path(Normalize(Directory + "/" + BaseName));
+	};
+
+	Path::Path(const std::string &_PathName)
+	{
+		std::string PathName = Normalize(_PathName);
+
+		int32 DirectorySeparator = PathName.rfind(Path::PathSeparator);
+
+		if(DirectorySeparator == -1)
+		{
+			BaseName = PathName;
+		}
+		else
+		{
+			Directory = PathName.substr(0, DirectorySeparator + 1);
+
+			if(DirectorySeparator + 2 < (int32)PathName.length())
+				BaseName = PathName.substr(DirectorySeparator + 2);
+		};
+	};
+
+	std::string Path::FullPath() const
+	{
+		return Directory + BaseName;
+	};
+
+	std::string Path::Extension() const
+	{
+		int32 ExtensionIndex = BaseName.rfind('.');
+
+		if(ExtensionIndex == -1)
+			return "";
+
+		return BaseName.substr(ExtensionIndex + 1);
+	};
+
+	Path Path::ChangeExtension(const std::string &NewExtension) const
+	{
+		return Path(Directory, StringUtils::Replace(BaseName, Extension(), NewExtension));
+	};
+
+	std::string Path::Normalize(const std::string &PathName)
+	{
+		return StringUtils::Replace(StringUtils::Replace(StringUtils::Replace(PathName, "\\", Path::PathSeparator), "/", Path::PathSeparator),
+			Path::PathSeparator + Path::PathSeparator, Path::PathSeparator);
+	};
+
+	bool FileSystemUtils::RemoveFile(const std::string Name)
 	{
 #ifdef FLPLATFORM_WINDOWS
 		return _unlink(Name.c_str()) != -1;
@@ -66,7 +125,14 @@ namespace FlamingTorch
 #endif
 	};
 
-	std::string DirectoryInfo::OpenFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
+	bool FileSystemUtils::CopyFile(const std::string &From, const std::string &To)
+	{
+		FileStream In, Out;
+
+		return In.Open(From, StreamFlags::Read) && Out.Open(To, StreamFlags::Write) && In.CopyTo(&Out);
+	};
+
+	std::string FileSystemUtils::OpenFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
 	{
 #if FLPLATFORM_WINDOWS
 		static std::vector<char> FileNameBuffer(MAX_PATH);
@@ -105,14 +171,14 @@ namespace FlamingTorch
 		}
 		else
 		{
-			Log::Instance.LogDebug("DirectoryInfo", "Failed to OpenFileDialog: 0x%04x", CommDlgExtendedError());
+			Log::Instance.LogDebug(TAGUTILS, "Failed to OpenFileDialog: 0x%04x", CommDlgExtendedError());
 		};
 #endif
 
 		return std::string();
 	};
 
-	std::string DirectoryInfo::SaveFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
+	std::string FileSystemUtils::SaveFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
 	{
 #if FLPLATFORM_WINDOWS
 		static std::vector<char> FileNameBuffer(MAX_PATH);
@@ -151,14 +217,14 @@ namespace FlamingTorch
 		}
 		else
 		{
-			Log::Instance.LogDebug("DirectoryInfo", "Failed to SaveFileDialog: 0x%04x", CommDlgExtendedError());
+			Log::Instance.LogDebug("FileSystemUtils", "Failed to SaveFileDialog: 0x%04x", CommDlgExtendedError());
 		};
 #endif
 
 		return std::string();
 	};
 
-	std::vector<std::string> DirectoryInfo::ScanDirectory(const std::string &Directory,
+	std::vector<std::string> FileSystemUtils::ScanDirectory(const std::string &Directory,
 		const std::string &Extension, bool Recursive)
 	{
 		std::vector<std::string> Files;
@@ -201,20 +267,20 @@ namespace FlamingTorch
 		return Files;
 	};
 
-    bool DirectoryInfo::CopyDirectory(const std::string &From, const std::string &To, bool Recursive)
+    bool FileSystemUtils::CopyDirectory(const std::string &From, const std::string &To, bool Recursive)
     {
         if(From == To)
             return false;
 
-		DirectoryInfo::CreateDirectory(To);
+		FileSystemUtils::CreateDirectory(To);
         
-		std::vector<std::string> Directories = DirectoryInfo::GetAllDirectories(From);
+		std::vector<std::string> Directories = FileSystemUtils::GetAllDirectories(From);
 
 		for(uint32 i = 0; i < Directories.size(); i++)
 		{
 			std::string TargetDirectory = To + "/" + Directories[i].substr(From.length());
 
-			DirectoryInfo::CreateDirectory(TargetDirectory);
+			FileSystemUtils::CreateDirectory(TargetDirectory);
 		};
 		
 		std::vector<std::string> Files = ScanDirectory(From, "*", Recursive);
@@ -225,7 +291,7 @@ namespace FlamingTorch
         {
             if(!In.Open(Files[i], StreamFlags::Read))
             {
-                Log::Instance.LogDebug("DirectoryInfo", "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
+                Log::Instance.LogDebug(TAGUTILS, "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
                 
                 continue;
             };
@@ -235,7 +301,7 @@ namespace FlamingTorch
             
             if(!Out.Open(OutFileName, StreamFlags::Write))
             {
-                std::string DirectoryName = StringUtils::DirectoryName(OutFileName);
+				std::string DirectoryName = Path(OutFileName).Directory;
                 
                 std::vector<std::string> MissingDirectories = StringUtils::Split(DirectoryName.substr(To.length() + 1), '/');
                 
@@ -250,7 +316,7 @@ namespace FlamingTorch
                 
                 if(!Out.Open(OutFileName, StreamFlags::Write))
                 {
-                    Log::Instance.LogDebug("DirectoryInfo", "Unable to copy a file '%s' while copying a directory: Cannot open '%s' for writing",
+                    Log::Instance.LogDebug(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot open '%s' for writing",
                                          Files[i].c_str(), OutFileName.c_str());
                     
                     continue;
@@ -259,9 +325,9 @@ namespace FlamingTorch
             
             if(!In.CopyTo(&Out))
             {
-                FileInfo::Remove(OutFileName);
+                FileSystemUtils::RemoveFile(OutFileName);
                 
-                Log::Instance.LogDebug("DirectoryInfo", "Unable to copy a file '%s' while copying a directory: Cannot copy to '%s'",
+                Log::Instance.LogDebug(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot copy to '%s'",
                                      Files[i].c_str(), OutFileName.c_str());
                 
                 continue;
@@ -271,7 +337,7 @@ namespace FlamingTorch
         return true;
     };
 
-	bool DirectoryInfo::CreateDirectory(const std::string &_Directory)
+	bool FileSystemUtils::CreateDirectory(const std::string &_Directory)
 	{
 		std::string Directory = StringUtils::Replace(_Directory, "//", "/");
 
@@ -287,20 +353,20 @@ namespace FlamingTorch
 
 			if(Errno != EEXIST)
 			{
-				Log::Instance.LogWarn("DirectoryInfo", "Failed to create directory '%s': %d", Directory.c_str(), Errno);
+				Log::Instance.LogWarn(TAGUTILS, "Failed to create directory '%s': %d", Directory.c_str(), Errno);
 			};
 		};
         
         return result;
 	};
     
-    bool DirectoryInfo::DeleteDirectory(const std::string &Directory)
+    bool FileSystemUtils::DeleteDirectory(const std::string &Directory)
     {
         DIR *Root = opendir (Directory.c_str());
         
         if(Root == NULL)
         {
-            Log::Instance.LogDebug("DirectoryInfo", "Failed to remove directory %s", Directory.c_str());
+            Log::Instance.LogDebug(TAGUTILS, "Failed to remove directory %s", Directory.c_str());
             
             return false;
         };
@@ -317,16 +383,16 @@ namespace FlamingTorch
                 {
                     if(!DeleteDirectory(Directory + "/" + FileName))
                     {
-                        Log::Instance.LogDebug("DirectoryInfo", "Failed to remove subdirectory %s/%s", Directory.c_str(), FileName.c_str());
+                        Log::Instance.LogDebug(TAGUTILS, "Failed to remove subdirectory %s/%s", Directory.c_str(), FileName.c_str());
 
                         return false;
                     };
                 }
                 else if(Entry->d_type == DT_REG)
                 {
-                    if(!FileInfo::Remove(Directory + "/" + FileName))
+                    if(!FileSystemUtils::RemoveFile(Directory + "/" + FileName))
                     {
-                        Log::Instance.LogDebug("DirectoryInfo", "Failed to remove file %s/%s", Directory.c_str(), FileName.c_str());
+                        Log::Instance.LogDebug(TAGUTILS, "Failed to remove file %s/%s", Directory.c_str(), FileName.c_str());
                         
                         return false;
                     };
@@ -341,7 +407,7 @@ namespace FlamingTorch
         return rmdir (Directory.c_str()) == 0;
     };
     
-    std::vector<std::string> DirectoryInfo::GetAllDirectories(const std::string &Directory)
+    std::vector<std::string> FileSystemUtils::GetAllDirectories(const std::string &Directory)
     {
         std::vector<std::string> Out;
         
@@ -349,7 +415,7 @@ namespace FlamingTorch
         
         if(Root == NULL)
         {
-            Log::Instance.LogErr("DirectoryInfo", "Failed to open Directory '%s' for reading!", Directory.c_str());
+            Log::Instance.LogErr(TAGUTILS, "Failed to open Directory '%s' for reading!", Directory.c_str());
             
             return Out;
         };
@@ -392,7 +458,7 @@ namespace FlamingTorch
 		};
 	};
 	
-	const std::string &DirectoryInfo::ActiveDirectory()
+	const std::string &FileSystemUtils::ActiveDirectory()
 	{
 		if(ActualDirectory.length() == 0)
 		{
@@ -415,7 +481,7 @@ namespace FlamingTorch
 	};
 
 	//Platform-specific resources directory (used mainly on OSX)
-	const std::string &DirectoryInfo::ResourcesDirectory()
+	const std::string &FileSystemUtils::ResourcesDirectory()
 	{
 		if(ActualResourcesDirectory.length() == 0)
 #if FLPLATFORM_MACOSX
@@ -445,7 +511,7 @@ namespace FlamingTorch
 		return ActualResourcesDirectory;
 	};
 
-	const std::string &DirectoryInfo::PreferredStorageDirectory()
+	const std::string &FileSystemUtils::PreferredStorageDirectory()
 	{
 		if(ActualStorageDirectory.length() == 0)
 		{
@@ -471,7 +537,7 @@ namespace FlamingTorch
 			
 			ActualStorageDirectory += "/Games";
 #	endif
-			DirectoryInfo::CreateDirectory(ActualStorageDirectory.c_str());
+			FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 #endif
 
 			if(Log::Instance.FolderName.length())
@@ -479,14 +545,14 @@ namespace FlamingTorch
 				ActualStorageDirectory += "/" + Log::Instance.FolderName;
 				GeneralizeSeparators(ActualDirectory);
 
-				DirectoryInfo::CreateDirectory(ActualStorageDirectory.c_str());
+				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			}
 			else if(GameInterface::Instance != NULL)
 			{
 				ActualStorageDirectory += "/" + GameInterface::Instance->GameName() + "_files";
 				GeneralizeSeparators(ActualDirectory);
 
-				DirectoryInfo::CreateDirectory(ActualStorageDirectory.c_str());
+				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			};
 		};
 
@@ -1296,7 +1362,7 @@ namespace FlamingTorch
 
 		if(!Result)
 		{
-			Log::Instance.LogErr(TAG, "Unable to read '%d' bytes!", Length);
+			Log::Instance.LogErr(TAGMANAGER, "Unable to read '%d' bytes!", Length);
 		};
 	};
 
@@ -1310,7 +1376,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAG, "Initializing Package Filesystem...");
+		Log::Instance.LogInfo(TAGMANAGER, "Initializing Package Filesystem...");
 	};
 
 	void PackageFileSystemManager::Shutdown(uint32 Priority)
@@ -1319,7 +1385,7 @@ namespace FlamingTorch
 
 		SubSystem::Shutdown(Priority);
 
-		Log::Instance.LogInfo(TAG, "Terminating Package Filesystem...");
+		Log::Instance.LogInfo(TAGMANAGER, "Terminating Package Filesystem...");
 
 		for(PackageMap::iterator it = Packages.begin(); it != Packages.end(); it++)
 		{
@@ -1342,7 +1408,7 @@ namespace FlamingTorch
 
 		if(!WasStarted)
 		{
-			Log::Instance.LogErr(TAG, "While calling NewPackage: Subsystem was not inited!");
+			Log::Instance.LogErr(TAGMANAGER, "While calling NewPackage: Subsystem was not inited!");
 
 			return SuperSmartPointer<Package>();
 		};
@@ -1356,7 +1422,7 @@ namespace FlamingTorch
 
 		if(Packages.find(ID) != Packages.end())
 		{
-			Log::Instance.LogWarn(TAG, "Attempted to add a package '%08x' that already exists!", ID);
+			Log::Instance.LogWarn(TAGMANAGER, "Attempted to add a package '%08x' that already exists!", ID);
 
 			return false;
 		};
@@ -1365,7 +1431,7 @@ namespace FlamingTorch
 
 		if(!ThePackage->FromStream(PackageStream))
 		{
-			Log::Instance.LogErr(TAG, "Package '%08x' failed to be deserialized!", ID);
+			Log::Instance.LogErr(TAGMANAGER, "Package '%08x' failed to be deserialized!", ID);
 
 			return false;
 		};
@@ -1382,7 +1448,7 @@ namespace FlamingTorch
 
 				if(mit != Files.end() && mit->second.find(NameID) != mit->second.end())
 				{
-					Log::Instance.LogWarn(TAG, "While adding Package '%08x': Overriding file %08x/%08x",
+					Log::Instance.LogWarn(TAGMANAGER, "While adding Package '%08x': Overriding file %08x/%08x",
 						ID, it->first, NameID);
 				};
 

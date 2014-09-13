@@ -35,7 +35,7 @@ namespace FlamingTorch
 		return EXCEPTION_EXECUTE_HANDLER;
 	};
 
-	void FLAMING_API EnableMinidumps(const char *AppName, const char *VersionString)
+	void EnableMinidumps(const char *AppName, const char *VersionString)
 	{
 		Name = AppName;
 		Version = VersionString;

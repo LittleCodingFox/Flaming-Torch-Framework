@@ -3,7 +3,7 @@
 /*!
 *	Text rendering parameters
 */
-class FLAMING_API TextParams
+class TextParams
 {
 public:
 	Vector4 TextColorValue, SecondaryTextColorValue, BorderColorValue;
@@ -139,7 +139,7 @@ public:
 	};
 };
 
-class FLAMING_API RenderTextUtils
+class RenderTextUtils
 {
 public:
 	static SuperSmartPointer<sf::Font> DefaultFont;

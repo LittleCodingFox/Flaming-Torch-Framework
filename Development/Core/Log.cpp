@@ -1,4 +1,9 @@
 #include "FlamingCore.hpp"
+#if FLPLATFORM_WINDOWS
+#	include <windows.h>
+#	include <direct.h>
+#	undef CreateDirectory
+#endif
 namespace FlamingTorch
 {
 	Log Log::Instance;
@@ -37,10 +42,10 @@ namespace FlamingTorch
 
 		PrintTime = false;
 
-		DirectoryInfo::CreateDirectory(std::string(DirectoryInfo::PreferredStorageDirectory()));
-		DirectoryInfo::CreateDirectory(std::string(DirectoryInfo::PreferredStorageDirectory()) + "/Logs");
+		FileSystemUtils::CreateDirectory(std::string(FileSystemUtils::PreferredStorageDirectory()));
+		FileSystemUtils::CreateDirectory(std::string(FileSystemUtils::PreferredStorageDirectory()) + "/Logs");
 
-		std::string FileName = std::string(DirectoryInfo::PreferredStorageDirectory()) + std::string("/Logs/") +
+		std::string FileName = std::string(FileSystemUtils::PreferredStorageDirectory()) + std::string("/Logs/") +
 			LogTime(true) + ".txt";
 
 		LogFile = fopen(FileName.c_str(), "a+");
@@ -52,10 +57,17 @@ namespace FlamingTorch
 		else
 		{
 			fputs("\n\n>>>>>> Starting Session <<<<<<\n", LogFile);
-			fprintf(LogFile, "Core Build: %s\n\n", CoreUtils::MakeVersionString(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR).c_str());
 		};
 
+		std::string CWD;
+
+		CWD.resize(2048);
+
+		getcwd(&CWD[0], CWD.size());
+
 		LogInfo("Log", "Starting Logging Subsystem");
+		LogInfo("Log", "Core Build: %s", CoreUtils::MakeVersionString(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR).c_str());
+		LogInfo("Log", "Working Directory: %s\n\n", CWD.c_str());
 	};
 
 	void Log::Shutdown(uint32 Priority)

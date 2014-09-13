@@ -389,7 +389,7 @@ public:
 
 	operator bool()
 	{
-		return !!Get();
+		return Get() != NULL;
 	};
 
 	operator type*()

@@ -35,6 +35,7 @@ extern "C"
 #endif
 namespace FlamingTorch
 {
+#	include "MiniDump.hpp"
 #	include "SubSystem.hpp"
 #	include "Log.hpp"
 #	include "GameClock.hpp"

@@ -1,12 +1,37 @@
 #pragma once
 #ifdef CreateDirectory
-#undef CreateDirectory
+#	undef CreateDirectory
+#endif
+#
+#ifdef CopyFile
+#	undef CopyFile
 #endif
 
 /*!
-*	Directory Utility class
+*	FileSystem Path Utiity class
 */
-class FLAMING_API DirectoryInfo
+class Path
+{
+public:
+	std::string Directory, BaseName;
+
+	Path();
+	Path(const std::string &PathName);
+	Path(const std::string &Directory, const std::string &BaseName);
+
+	std::string FullPath() const;
+	std::string Extension() const;
+	Path ChangeExtension(const std::string &NewExtension) const;
+
+	static std::string Normalize(const std::string &PathName);
+	static std::string PathSeparator;
+	static std::string PlatformPathSeparator;
+};
+
+/*!
+*	FileSystem Utility Class
+*/
+class FileSystemUtils
 {
 public:
 	/*!
@@ -74,19 +99,19 @@ public:
 	*	\param Filter the filter to use in the form of Name\0Filter\0Repeat (e.g., "Text Files\0*.txt" or "Text Files\0*.txt\0RTF Files\0*.rtf")
 	*/
 	static std::string SaveFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter);
-};
 
-/*!
-*	File Utility Class
-*/
-class FLAMING_API FileInfo
-{
-public:
 	/*!
 	*	Removes a file from a storage device
 	*	\param Name the filename with path to remove
 	*/
-	static bool Remove(const std::string Name);
+	static bool RemoveFile(const std::string Name);
+
+	/*!
+	*	Copies a file
+	*	\param From the file to copy
+	*	\param To where to store the file
+	*/
+	static bool CopyFile(const std::string &From, const std::string &To);
 };
 
 namespace StreamFlags
@@ -103,7 +128,7 @@ namespace StreamFlags
 *	Stream Processor
 *	Processes Stream Data while it is read or written
 */
-class FLAMING_API StreamProcessor 
+class StreamProcessor 
 {
 public:
 	StreamProcessor(const std::string &NativeType) {};
@@ -116,7 +141,7 @@ public:
 /*!
 *	XOR-Based Stream Processor
 */
-class FLAMING_API XORStreamProcessor : public StreamProcessor
+class XORStreamProcessor : public StreamProcessor
 {
 public:
 	/*!
@@ -150,7 +175,7 @@ public:
 /*!
 *	Data Stream Class
 */
-class FLAMING_API Stream 
+class Stream 
 {
 protected:
 	SuperSmartPointer<StreamProcessor> Processor;
@@ -253,7 +278,7 @@ public:
 /*!
 *	A stream made of RAM data
 */
-class FLAMING_API MemoryStream : public Stream
+class MemoryStream : public Stream
 {
 private:
 	std::vector<uint8> Data;
@@ -279,7 +304,7 @@ public:
 /*!
 *	An immutable Memory Stream
 */
-class FLAMING_API ConstantMemoryStream : public Stream
+class ConstantMemoryStream : public Stream
 {
 private:
 	uint8 *Data;
@@ -302,7 +327,7 @@ public:
 /*!
 *	A stream from a file
 */
-class FLAMING_API FileStream : public Stream
+class FileStream : public Stream
 {
 private:
 	void *Handle;
@@ -331,7 +356,7 @@ public:
 /*!
 *	Manager of package filesystems
 */
-class FLAMING_API PackageFileSystemManager : public SubSystem
+class PackageFileSystemManager : public SubSystem
 {
 public:
 	class Package
@@ -472,7 +497,7 @@ namespace FileSystemWatcherAction
 *	FileSystem Watching Class
 *	Provides notifications when files are modified in some way within a directory
 */
-class FLAMING_API FileSystemWatcher : public SubSystem
+class FileSystemWatcher : public SubSystem
 {
 public:
 	static FileSystemWatcher Instance;

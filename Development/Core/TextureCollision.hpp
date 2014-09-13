@@ -1,6 +1,6 @@
 #pragma once
 
-class FLAMING_API TextureCollision
+class TextureCollision
 {
 public:
 	std::vector<Vector2> Polygon;

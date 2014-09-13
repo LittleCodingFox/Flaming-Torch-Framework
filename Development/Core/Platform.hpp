@@ -36,9 +36,8 @@
 #	error Unknown or unsupported platform
 #endif
 
-#ifndef FLAMING_API
-#	define FLAMING_API
-#endif
+#define FLPLATFORM_UNIVERSAL_PATHSPLIT '/'
+#define FLPLATFORM_UNIVERSAL_PATHSPLITSTRING "/"
 
 #ifdef _DEBUG
 #	define FLPLATFORM_DEBUG 1

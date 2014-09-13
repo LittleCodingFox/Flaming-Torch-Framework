@@ -44,7 +44,7 @@ namespace FlamingTorch
 		Handle = dlopen(FileName.c_str(), RTLD_NOW | RTLD_GLOBAL );
 #endif
 
-		return !!Handle;
+		return Handle != NULL;
 	};
 
 	void* DynamicLibrary::GetAddressAt(const std::string &ProcName)

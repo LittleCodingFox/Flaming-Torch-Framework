@@ -52,7 +52,7 @@ namespace FlamingTorch
 
 	bool Entity::HasProperty(const std::string &PropertyName) const
 	{
-		return !!Properties[PropertyName];
+		return Properties[PropertyName] != NULL;
 	};
 
 	Component *Entity::GetComponent(const std::string &ComponentName)

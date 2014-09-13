@@ -25,6 +25,10 @@ struct MapDirectoryInfo
 
 int main(int argc, char **argv)
 {
+#if FLPLATFORM_WINDOWS
+	EnableMinidumps(FLGameName().c_str(), CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
+#endif
+
 	Log::Instance.Register();
 
 	Log::Instance.FolderName = FLGameName();
@@ -112,36 +116,29 @@ int main(int argc, char **argv)
 
                 DirectoryInfo::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].To);
                 
-                if(chdir(WorkingDirectory.c_str()) != 0)
-				{
-					Log::Instance.LogWarn(TAG, "Unable to change to map working directory '%s': Errno is %d", WorkingDirectory.c_str(), errno);
-
-					continue;
-				};
-                
                 //TODO: Do this the "right way"
 
 				std::string ExePath = DirectoryInfo::ResourcesDirectory() + "/" + TiledConverterPath;
 				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
                     MapFiles[k] + "\"";
 
-				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, DirectoryInfo::ResourcesDirectory());
+				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, WorkingDirectory);
 
 				if(0 != ExitCode)
 				{
 					Log::Instance.LogErr(TAG, "Unable to run TiledMap: Exit Code '%d'", ExitCode);
 
+					std::vector<std::string> Dumps = DirectoryInfo::ScanDirectory(WorkingDirectory.c_str(), "dmp", false);
+
+					for(uint32 l = 0; l < Dumps.size(); l++)
+					{
+						FileInfo::Copy(Dumps[i], DirectoryInfo::ResourcesDirectory() + "/" + StringUtils::FileName(Dumps[i]));
+					};
+
+					Log::Instance.LogErr(TAG, "Copied '%d' Crash Files", Dumps.size());
+
 					continue;
 				};
-                
-                if(chdir(DirectoryInfo::ResourcesDirectory().c_str()) != 0)
-                {
-                    Log::Instance.LogErr(TAG, "Unable to restore working directory while compiling maps!");
-                    
-                    DeInitSubsystems();
-                    
-                    return 1;
-                };
             };
         };
         

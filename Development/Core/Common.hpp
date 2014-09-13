@@ -44,6 +44,6 @@ namespace FlamingTorch
 	typedef float f32;
 	typedef double f64;
 
-	void FLAMING_API LibWarning(unsigned int Line, const char* FileName, 
+	void LibWarning(unsigned int Line, const char* FileName, 
 		const char* Function, const char* Variable, const char *Message, ...);
 };

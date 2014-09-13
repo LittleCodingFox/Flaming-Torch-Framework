@@ -3,7 +3,7 @@
 /*!
 *	Logging class
 */
-class FLAMING_API Log : public SubSystem
+class Log : public SubSystem
 {
 private:
 	FILE *LogFile;

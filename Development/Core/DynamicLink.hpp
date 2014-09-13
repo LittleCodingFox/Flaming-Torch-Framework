@@ -2,7 +2,7 @@
 /*!
 	Dynamic Library class
 */
-class FLAMING_API DynamicLibrary
+class DynamicLibrary
 {
 private:
 	void* Handle;

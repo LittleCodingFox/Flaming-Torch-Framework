@@ -1,7 +1,7 @@
 #include "FlamingCore.hpp"
 namespace FlamingTorch
 {
-	class FLAMING_API StringIDManager
+	class StringIDManager
 	{
 	public:
 		std::map<StringID, std::string> StringIDMap;

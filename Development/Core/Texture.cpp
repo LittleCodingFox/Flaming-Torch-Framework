@@ -270,8 +270,6 @@ namespace FlamingTorch
 				return true;
 			};
 
-			break;
-
 		case PNG_COLOR_TYPE_RGB:
 			{
 				int32 Size = Width * sizeof(uint8[3]);
@@ -296,8 +294,6 @@ namespace FlamingTorch
 
 				return true;
 			};
-
-			break;
 
 		default:
 			png_destroy_read_struct(&png_ptr, &info_ptr,  NULL);
@@ -665,15 +661,11 @@ namespace FlamingTorch
 		case TextureEncoderType::PNG:
 			return WritePNG(Out, WidthValue, HeightValue, Data);
 
-			break;
 		case TextureEncoderType::WebP:
 			return WriteWebP(Out, WidthValue, HeightValue, Data, Info.Lossless, Info.Quality, Info.TargetWidth, Info.TargetHeight);
 
-			break;
 		case TextureEncoderType::FTI:
 			return WriteFTI(Out, WidthValue, HeightValue, ColorTypeValue, Data);
-
-			break;
 		};
 
 		return false;

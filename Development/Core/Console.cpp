@@ -320,7 +320,7 @@ namespace FlamingTorch
 		std::string ScreenFileName = StringUtils::Replace(GameInterface::Instance->GameName(),
 			" ", "_") + "_" + StringUtils::Replace(StringUtils::Replace(StringUtils::Replace(GameClock::Instance.CurrentDateTimeAsString(), ":", "_"), "/", "_"), " ", "_") + ".png";
 
-		if(!Out.Open(DirectoryInfo::PreferredStorageDirectory() + "/" + ScreenFileName, StreamFlags::Write))
+		if(!Out.Open(FileSystemUtils::PreferredStorageDirectory() + "/" + ScreenFileName, StreamFlags::Write))
 		{
 			LogConsole("Failed to take screenshot: Unable to open '" + ScreenFileName + "' for writing");
 

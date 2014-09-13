@@ -3,7 +3,7 @@
 /*!
 *	Tiled Map Init Options class
 */
-class FLAMING_API TiledMapInitOptions
+class TiledMapInitOptions
 {
 public:
 	std::vector<std::string> PackageDirectoriesValue;
@@ -20,7 +20,7 @@ public:
 /*!
 *	Tiled Map class
 */
-class FLAMING_API TiledMap
+class TiledMap
 {
 private:
 	bool ResourcesInitedValue;

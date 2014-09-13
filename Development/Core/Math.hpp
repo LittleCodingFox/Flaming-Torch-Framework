@@ -3,7 +3,7 @@
 class Vector3;
 class Vector4;
 
-class FLAMING_API Matrix4x4
+class Matrix4x4
 {
 public:
 	f32 m[4][4];
@@ -64,7 +64,7 @@ public:
 	static Matrix4x4 OrthoMatrixRH(f32 Left, f32 Right, f32 Bottom, f32 Top, f32 zNear, f32 zFar);
 };
 
-class FLAMING_API Vector2
+class Vector2
 {
 public:
 	f32 x, y;
@@ -132,7 +132,7 @@ public:
 	static Vector2 Rotate(const Vector2 &In, f32 Angle);
 };
 
-class FLAMING_API Vector3
+class Vector3
 {
 public:
 	f32 x, y, z;
@@ -203,7 +203,7 @@ public:
 	static Vector3 LinearInterpolate(const Vector3 &From, const Vector3 &To, const f32 &t);
 };
 
-class FLAMING_API Vector4
+class Vector4
 {
 public:
 	f32 x, y, z, w;
@@ -288,7 +288,7 @@ namespace PlanePointClassifications
 	};
 };
 
-class FLAMING_API Plane 
+class Plane 
 {
 public:
 	Vector3 Origin;
@@ -307,7 +307,7 @@ public:
 	*/
 };
 
-class FLAMING_API Rect 
+class Rect 
 {
 public:
 	f32 Left, Right, Top, Bottom;
@@ -346,7 +346,7 @@ public:
 	};
 };
 
-class FLAMING_API RotateableRect
+class RotateableRect
 {
 public:
 	f32 Left, Right, Top, Bottom, Rotation;
@@ -385,7 +385,7 @@ public:
 	};
 };
 
-class FLAMING_API AxisAlignedBoundingBox 
+class AxisAlignedBoundingBox 
 {
 public:
 	Vector3 min, max;
@@ -403,7 +403,7 @@ public:
 	void Corners(Vector3 *Destination) const;
 };
 
-class FLAMING_API BoundingSphere 
+class BoundingSphere 
 {
 public:
 	Vector3 Center;
@@ -415,7 +415,7 @@ public:
 	bool Intersects(const BoundingSphere &Sphere) const;
 };
 
-class FLAMING_API Ray 
+class Ray 
 {
 public:
 	Vector3 Position, Direction;
@@ -434,7 +434,7 @@ public:
 	bool IntersectsSphere(const BoundingSphere &bs, f32 *t = NULL) const;
 };
 
-class FLAMING_API Quaternion 
+class Quaternion 
 {
 public:
 	f32 x, y, z, w;
@@ -460,7 +460,7 @@ public:
 		const Quaternion &C, const Quaternion &D, f32 t);
 };
 
-class FLAMING_API MathUtils
+class MathUtils
 {
 public:
 	static const f64 Pi;

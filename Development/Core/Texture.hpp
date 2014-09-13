@@ -81,7 +81,7 @@ namespace TextureWrapMode
 /*!
 *	Texture Buffer
 */
-class FLAMING_API TextureBuffer
+class TextureBuffer
 {
 private:
 	uint32 WidthValue, HeightValue, ColorTypeValue;
@@ -182,7 +182,7 @@ public:
 
 class TexturePacker;
 
-class FLAMING_API TexturePackerIndex
+class TexturePackerIndex
 {
 public:
 	int32 Index, WrapMode, Filtering;
@@ -200,7 +200,7 @@ public:
 /*!
 *	Texture Class
 */
-class FLAMING_API Texture
+class Texture
 {
 private:
 	Texture(const Texture &o);

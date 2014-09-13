@@ -189,6 +189,9 @@ namespace FlamingTorch
 
 	std::string StringUtils::Replace(const std::string &str, const std::string &Find, const std::string &Replace)
 	{
+		if(Find.length() == 0)
+			return str;
+
 		static std::stringstream Out;
 		Out.str("");
 
@@ -211,30 +214,5 @@ namespace FlamingTorch
 		};
 
 		return Out.str();
-	};
-
-	std::string StringUtils::DirectoryName(const std::string &Path)
-	{
-		int32 Index = Path.rfind('/');
-
-		if(Index == std::string::npos || Index == Path.length() - 1)
-			return std::string();
-
-		std::string Directory = Path.substr(0, Index + 1);
-
-		if(Directory.length() == 0)
-			Directory = "/";
-
-		return Directory;
-	};
-
-	std::string StringUtils::FileName(const std::string &Path)
-	{
-		int32 Index = Path.rfind('/');
-
-		if(Index == std::string::npos || Index == Path.length() - 1)
-			return Path;
-
-		return Path.substr(Index + 1);
 	};
 };

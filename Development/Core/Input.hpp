@@ -17,7 +17,7 @@ namespace InputActionType
 /*!
 *	Input Center
 */
-class FLAMING_API InputCenter
+class InputCenter
 {
 	friend class RendererManager;
 public:

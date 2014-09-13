@@ -42,7 +42,7 @@ class UIPanel;
 /*!
 *	UI Animation Interface
 */
-class FLAMING_API UIAnimation
+class UIAnimation
 {
 public:
 	uint64 StartTime;
@@ -66,7 +66,7 @@ public:
 /*!
 *	UI Panel class
 */
-class FLAMING_API UIPanel 
+class UIPanel 
 {
 	friend class UIManager;
 	friend class UIScrollableFrame;
@@ -812,7 +812,7 @@ namespace UIGroupLayoutMode
 /*!
 *	Generic Group Container which does nothing more than perform layout and update/draw children
 */
-class FLAMING_API UIGroup : public UIPanel
+class UIGroup : public UIPanel
 {
 public:
 	uint32 LayoutMode;
@@ -830,7 +830,7 @@ public:
 /*!
 *	UI Sprite Element
 */
-class FLAMING_API UISprite : public UIPanel
+class UISprite : public UIPanel
 {
 public:
 	/*!
@@ -851,7 +851,7 @@ public:
 /*!
 *	UI Tooltip Element
 */
-class FLAMING_API UITooltip : public UIPanel
+class UITooltip : public UIPanel
 {
 	friend class UIManager;
 private:
@@ -892,7 +892,7 @@ namespace UITextAlignment
 *	UI Text Element
 *	\note Will not autosize
 */
-class FLAMING_API UIText : public UIPanel
+class UIText : public UIPanel
 {
 protected:
 	void OnSkinChange();
@@ -958,7 +958,7 @@ public:
 *	UI Text Composer Element
 *	\note Will not autosize
 */
-class FLAMING_API UITextComposer : public UIPanel
+class UITextComposer : public UIPanel
 {
 protected:
 	class TextComposerNode
@@ -1021,7 +1021,7 @@ public:
 *	UI Layout
 *	Contains Elements and can be loaded from a scheme file
 */
-class FLAMING_API UILayout 
+class UILayout 
 {
 friend class UIManager;
 	UIManager *Owner;
@@ -1082,7 +1082,7 @@ public:
 *	UI Manager
 *	Handles all input and processing and rendering of UI Elements
 */
-class FLAMING_API UIManager : public BaseScriptableInstance
+class UIManager : public BaseScriptableInstance
 {
 	friend class UIPanel;
 	friend class UILayout;

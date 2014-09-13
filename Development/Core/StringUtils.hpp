@@ -127,18 +127,4 @@ public:
 	*	\return the filtered string
 	*/
 	static std::string Replace(const std::string &str, const std::string &Find, const std::string &Replace);
-
-	/*!
-	*	Gets the directory part of a directory string
-	*	\param Path a slash (/) separated directory path (e.g. /User/Data/Files/Test.txt)
-	*	\return the Directory name (e.g. /User/Data/Files/) or an empty string
-	*/
-	static std::string DirectoryName(const std::string &Path);
-
-	/*!
-	*	Gets the FileName part of a directory string
-	*	\param Path a slash (/) separated directory path (e.g. /User/Data/Files/Test.txt)
-	*	\return the File name (e.g. Test.txt) or an empty string
-	*/
-	static std::string FileName(const std::string &Path);
 };

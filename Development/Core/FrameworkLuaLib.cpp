@@ -155,13 +155,29 @@ namespace FlamingTorch
 		return Self.Properties;
 	};
 
-	luabind::object DirectoryInfoScan(const std::string &Directory, const std::string &Extension, bool Recursive, lua_State *State)
+	luabind::object FileSystemUtilsGetDirectories(const std::string &Directory, lua_State *State)
+	{
+		luabind::object Out = luabind::newtable(State);
+
+		static std::vector<std::string> Directories;
+
+		Directories = FileSystemUtils::GetAllDirectories(Directory);
+
+		for(uint32 i = 0; i < Directories.size(); i++)
+		{
+			Out[i + 1] = Directories[i];
+		};
+
+		return Out;
+	};
+
+	luabind::object FileSystemUtilsScan(const std::string &Directory, const std::string &Extension, bool Recursive, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
 
 		static std::vector<std::string> Files;
 
-		Files = DirectoryInfo::ScanDirectory(Directory, Extension, Recursive);
+		Files = FileSystemUtils::ScanDirectory(Directory, Extension, Recursive);
 
 		for(uint32 i = 0; i < Files.size(); i++)
 		{
@@ -1196,21 +1212,22 @@ namespace FlamingTorch
 				.def("HideTag", &Log::HideTag)
 				.property("PrintTime", &Log::PrintTime),
 
-			//DirectoryInfo
-			luabind::class_<DirectoryInfo>("DirectoryInfo")
+			//FileSystemUtils
+			luabind::class_<FileSystemUtils>("FileSystemUtils")
 				.scope [
-					luabind::def("ScanDirectory", &DirectoryInfoScan),
-					luabind::def("CreateDirectory", &DirectoryInfo::CreateDirectory),
-					luabind::def("ActiveDirectory", &DirectoryInfo::ActiveDirectory),
-					luabind::def("ResourcesDirectory", &DirectoryInfo::ResourcesDirectory),
-					luabind::def("PreferredStorageDirectory", &DirectoryInfo::PreferredStorageDirectory),
-					luabind::def("OpenFileDialog", &DirectoryInfo::OpenFileDialog),
-					luabind::def("SaveFileDialog", &DirectoryInfo::SaveFileDialog)
+					luabind::def("ScanDirectory", &FileSystemUtilsScan),
+					luabind::def("GetAllDirectories", &FileSystemUtilsGetDirectories),
+					luabind::def("CreateDirectory", &FileSystemUtils::CreateDirectory),
+					luabind::def("CopyDirectory", &FileSystemUtils::CopyDirectory),
+					luabind::def("DeleteDirectory", &FileSystemUtils::DeleteDirectory),
+					luabind::def("ActiveDirectory", &FileSystemUtils::ActiveDirectory),
+					luabind::def("ResourcesDirectory", &FileSystemUtils::ResourcesDirectory),
+					luabind::def("PreferredStorageDirectory", &FileSystemUtils::PreferredStorageDirectory),
+					luabind::def("OpenFileDialog", &FileSystemUtils::OpenFileDialog),
+					luabind::def("SaveFileDialog", &FileSystemUtils::SaveFileDialog),
+					luabind::def("CopyFile", &FileSystemUtils::CopyFile),
+					luabind::def("RemoveFile", &FileSystemUtils::RemoveFile)
 				],
-
-			//FileInfo
-			luabind::class_<FileInfo>("FileInfo")
-				.def("Remove", &FileInfo::Remove),
 
 			//StreamProcessor
 			luabind::class_<StreamProcessor, SuperSmartPointer<StreamProcessor> >("StreamProcessor")
@@ -1934,8 +1951,6 @@ namespace FlamingTorch
 			//StringUtils
 			luabind::class_<StringUtils>("StringUtils")
 				.scope [
-					luabind::def("DirectoryName", &StringUtils::DirectoryName),
-					luabind::def("FileName", &StringUtils::FileName),
 					luabind::def("HexToFloat", &StringUtils::HexToFloat),
 					luabind::def("HexToInt", &StringUtils::HexToInt),
 					luabind::def("MakeByteString", &StringUtils::MakeByteString),

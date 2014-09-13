@@ -2,7 +2,7 @@
 /*!
 *	FPS Counter Subsystem
 */
-class FLAMING_API FPSCounter : public SubSystem
+class FPSCounter : public SubSystem
 {
 private:
 	f32 Time;

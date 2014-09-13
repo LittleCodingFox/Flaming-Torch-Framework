@@ -17,7 +17,7 @@ namespace AABBResults
 /*!
 *	A Frustum Culling class
 */
-class FLAMING_API FrustumCuller 
+class FrustumCuller 
 {
 private:
 	Plane Planes[6];

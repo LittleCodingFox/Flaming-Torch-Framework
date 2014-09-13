@@ -39,7 +39,7 @@ struct DijkstraEdge
 *	A Dijkstra Node
 *	\sa DijkstraField
 */
-class FLAMING_API DijkstraNode 
+class DijkstraNode 
 {
 public:
 	/*!
@@ -86,7 +86,7 @@ public:
 *	Dijkstra Field
 *	Used for Pathfinding
 */
-class FLAMING_API DijkstraField 
+class DijkstraField 
 {
 	friend class DijkstraNode;
 private:

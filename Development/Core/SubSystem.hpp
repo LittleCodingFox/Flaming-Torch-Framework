@@ -1,7 +1,7 @@
 #pragma once
-void FLAMING_API InitSubsystems();
-void FLAMING_API DeInitSubsystems();
-void FLAMING_API UpdateSubsystems();
+void InitSubsystems();
+void DeInitSubsystems();
+void UpdateSubsystems();
 
 #define SUBSYSTEM_PRIORITY_CHECK() \
 	if(!WasStarted || Priority != SubsystemPriority)\
@@ -11,7 +11,7 @@ void FLAMING_API UpdateSubsystems();
 	if(WasStarted || Priority != SubsystemPriority)\
 		return;
 
-class FLAMING_API SubSystem
+class SubSystem
 {
 protected:
 	bool WasStarted;

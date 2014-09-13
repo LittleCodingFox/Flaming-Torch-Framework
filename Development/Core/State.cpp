@@ -153,8 +153,6 @@ namespace FlamingTorch
 				break;
 			default:
 				continue;
-
-				break;
 			};
 
 			Variables[ID] = Variable;
@@ -165,7 +163,7 @@ namespace FlamingTorch
 
 	bool StateManager::Load(const std::string &Directory, const std::string &CollectionName)
 	{
-		std::string ActualName = DirectoryInfo::PreferredStorageDirectory() + "/" + Directory + "/States/" + StringUtils::MakeIntString(MakeStringID(CollectionName), true) + ".bin";
+		std::string ActualName = FileSystemUtils::PreferredStorageDirectory() + "/" + Directory + "/States/" + StringUtils::MakeIntString(MakeStringID(CollectionName), true) + ".bin";
 
 		FileStream Stream;
 		
@@ -191,10 +189,10 @@ namespace FlamingTorch
 		{
 			FileStream Stream;
 
-			DirectoryInfo::CreateDirectory(DirectoryInfo::PreferredStorageDirectory() + "/" + it->second.Directory);
-			DirectoryInfo::CreateDirectory(DirectoryInfo::PreferredStorageDirectory() + "/" + it->second.Directory + "/States");
+			FileSystemUtils::CreateDirectory(FileSystemUtils::PreferredStorageDirectory() + "/" + it->second.Directory);
+			FileSystemUtils::CreateDirectory(FileSystemUtils::PreferredStorageDirectory() + "/" + it->second.Directory + "/States");
 
-			if(!Stream.Open(DirectoryInfo::PreferredStorageDirectory() + "/" + it->second.Directory + "/States/" + StringUtils::MakeIntString(it->first, true) + ".bin", StreamFlags::Write))
+			if(!Stream.Open(FileSystemUtils::PreferredStorageDirectory() + "/" + it->second.Directory + "/States/" + StringUtils::MakeIntString(it->first, true) + ".bin", StreamFlags::Write))
 				continue;
 
 			if(!it->second.Serialize(&Stream))

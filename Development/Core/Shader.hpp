@@ -16,7 +16,7 @@ namespace ShaderType
 /*!
 	A Shader class
 */
-class FLAMING_API Shader
+class Shader
 {
 private:
 	uint32 VertexHandle, FragmentHandle, GeometryHandle, ProgramHandle;

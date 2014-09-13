@@ -3,7 +3,7 @@
 *	Linear Timer
 *	A timer that calculates a value between 0 and 1 as time progresses, then returns to the original value, repeating this
 */
-class FLAMING_API LinearTimer
+class LinearTimer
 {
 private:
 	uint64 StartTime;
@@ -36,7 +36,7 @@ public:
 /*!
 *	Game Clock
 */
-class FLAMING_API GameClock : public SubSystem
+class GameClock : public SubSystem
 {
 private:
 	f32 ActualDeltaTime;
@@ -125,44 +125,44 @@ public:
 /*!
 *	Current Time
 */
-uint64 FLAMING_API GameClockTime();
+uint64 GameClockTime();
 
 /*!
 *	Current Time
 *	\note ignores pauses
 */
-uint64 FLAMING_API GameClockTimeNoPause();
+uint64 GameClockTimeNoPause();
 
 /*!
 *	Get the time difference with another time offset
 *	\param offset the other time offset
 */
-uint64 FLAMING_API GameClockDiff(uint64 offset);
+uint64 GameClockDiff(uint64 offset);
 
 /*!
 *	Get the time difference with another time offset
 *	\param offset the other time offset
 *	\note ignores pauses
 */
-uint64 FLAMING_API GameClockDiffNoPause(uint64 offset);
+uint64 GameClockDiffNoPause(uint64 offset);
 
 /*!
 *	Get the delta time since the last frame
 */
-f32 FLAMING_API GameClockDelta();
+f32 GameClockDelta();
 
 /*!
 *	Sets the Fixed Frame Rate of the game clock
 *	\param FPS the target FPS
 */
-void FLAMING_API GameClockSetFixedFrameRate(uint32 FPS);
+void GameClockSetFixedFrameRate(uint32 FPS);
 
 /*!
 *	Check whether we may perform a fixed time step
 */
-bool FLAMING_API GameClockMayPerformFixedTimeStep();
+bool GameClockMayPerformFixedTimeStep();
 
 /*!
 *	Get the fixed time step delta
 */
-f32 FLAMING_API GameClockFixedDelta();
+f32 GameClockFixedDelta();

@@ -98,7 +98,7 @@ public:
 	int32 AttributeHandle;
 };
 
-class FLAMING_API GeometryBuffer
+class GeometryBuffer
 {
 	friend class RendererManager;
 private:

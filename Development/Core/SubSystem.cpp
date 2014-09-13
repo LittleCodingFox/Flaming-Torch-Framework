@@ -8,7 +8,7 @@ namespace FlamingTorch
 	Signal1<uint32> SubSystem::OnSubsystemShutdown;
 	Signal1<uint32> SubSystem::OnSubsystemUpdate;
 
-	void FLAMING_API InitSubsystems()
+	void InitSubsystems()
 	{
 		for(uint32 i = 0; i < 64; i++)
 		{
@@ -16,7 +16,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void FLAMING_API DeInitSubsystems()
+	void DeInitSubsystems()
 	{
 		for(int32 i = 63; i >= 0; i--)
 		{
@@ -24,7 +24,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void FLAMING_API UpdateSubsystems()
+	void UpdateSubsystems()
 	{
 		PROFILE("UpdateSubsystems", StatTypes::Game);
 

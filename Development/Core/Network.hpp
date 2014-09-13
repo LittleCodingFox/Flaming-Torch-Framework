@@ -86,7 +86,7 @@ inline std::string NetworkReadString16(MemoryStream &Packet)
 	return Out;
 };
 
-class FLAMING_API GameClient
+class GameClient
 {
 	friend class GameNetwork;
 private:
@@ -115,7 +115,7 @@ public:
 	Signal1<MemoryStream &> OnPacketReceived;
 };
 
-class FLAMING_API GameServer
+class GameServer
 {
 	friend class GameNetwork;
 private:
@@ -154,7 +154,7 @@ public:
 	Signal2<uint32, MemoryStream &> OnPacketReceived;
 };
 
-class FLAMING_API GameNetwork : public SubSystem
+class GameNetwork : public SubSystem
 {
 private:
 	typedef std::map<StringID, SuperSmartPointer<GameClient> > ClientMap;

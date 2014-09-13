@@ -261,7 +261,7 @@ namespace FlamingTorch
 
 		strftime(Buffer, 128, "%d_%m_%Y", localtime(&rawtime));
 
-		str << DirectoryInfo::PreferredStorageDirectory() << "/ScriptErrors_" << Buffer << ".txt";
+		str << FileSystemUtils::PreferredStorageDirectory() << "/ScriptErrors_" << Buffer << ".txt";
 
 		if(!ErrorStream->Open(str.str(), StreamFlags::Write | StreamFlags::Text))
 		{

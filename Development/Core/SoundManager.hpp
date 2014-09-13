@@ -1,6 +1,6 @@
 #pragma once
 
-class FLAMING_API SoundManager : public SubSystem
+class SoundManager : public SubSystem
 {
 private:
 	typedef std::map<StringID, SuperSmartPointer<sf::SoundBuffer> > SoundBufferMap;
@@ -18,7 +18,7 @@ private:
 	MusicMap Musics;
 
 public:
-	class FLAMING_API Sound
+	class Sound
 	{
 		friend class SoundManager;
 	private:
@@ -40,7 +40,7 @@ public:
 		bool IsLooping();
 	};
 
-	class FLAMING_API Music
+	class Music
 	{
 		friend class SoundManager;
 	private:

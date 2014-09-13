@@ -2,7 +2,7 @@
 
 class WorldStreamer;
 
-class FLAMING_API WorldChunk
+class WorldChunk
 {
 public:
 	/*!
@@ -33,7 +33,7 @@ public:
 	void UpdateCoordinate(uint32 ChunkIndex);
 };
 
-class FLAMING_API WorldStreamerCallback
+class WorldStreamerCallback
 {
 public:
 	virtual ~WorldStreamerCallback() {};
@@ -71,7 +71,7 @@ public:
 	virtual bool ChunkNeedsLoad(const Vector3 &GlobalCoordinate) = 0;
 };
 
-class FLAMING_API ScriptedWorldStreamerCallback : public WorldStreamerCallback
+class ScriptedWorldStreamerCallback : public WorldStreamerCallback
 {
 public:
 	luabind::object ChunkLoadFunction, ChunkUnloadFunction, ChunkCoordinateUpdateFunction, ChunkSizeFunction, ChunkNeedsLoadFunction;
@@ -177,7 +177,7 @@ public:
 	};
 };
 
-class FLAMING_API WorldStreamer
+class WorldStreamer
 {
 	friend class WorldChunk;
 private:

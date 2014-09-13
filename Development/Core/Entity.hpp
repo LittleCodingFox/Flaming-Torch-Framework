@@ -5,7 +5,7 @@ class Component;
 /*!
 *	Game Entity class
 */
-class FLAMING_API Entity
+class Entity
 {
 public:
 	/*!
@@ -61,7 +61,7 @@ public:
 	bool AddComponent(const std::string &ComponentID);
 };
 
-class FLAMING_API World
+class World
 {
 public:
 	typedef std::map<StringID, SuperSmartPointer<Entity> > EntityMap;

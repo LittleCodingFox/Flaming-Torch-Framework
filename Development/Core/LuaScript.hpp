@@ -28,7 +28,7 @@ type ProtectedLuaCast(luabind::object In)
 /*!
 *	Script
 */
-class FLAMING_API LuaScript
+class LuaScript
 {
 	friend class LuaScriptManager;
 
@@ -50,13 +50,13 @@ public:
 *	Base Scriptable Instance class
 *	Same as Type, except adds a Script Instance
 */
-class FLAMING_API BaseScriptableInstance 
+class BaseScriptableInstance 
 {
 public:
 	SuperSmartPointer<LuaScript> ScriptInstance;
 };
 
-class FLAMING_API LuaLib
+class LuaLib
 {
 public:
 	virtual ~LuaLib() {};
@@ -67,7 +67,7 @@ public:
 /*!
 *	Registers the entire framework into Lua
 */
-class FLAMING_API FrameworkLib : public LuaLib
+class FrameworkLib : public LuaLib
 {
 public:
 	bool Register(lua_State *State);
@@ -78,7 +78,7 @@ public:
 /*!
 	Script Manager
 */
-class FLAMING_API LuaScriptManager : public SubSystem
+class LuaScriptManager : public SubSystem
 {
 	friend class LuaScript;
 	std::list<SuperSmartPointer<LuaScript> > InstancedScripts;
@@ -115,7 +115,7 @@ public:
 /*!
 *	Groups Lua Functions together
 */
-class FLAMING_API LuaEventGroup
+class LuaEventGroup
 {
 public:
 	std::list<luabind::object> Members;

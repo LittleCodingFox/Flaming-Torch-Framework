@@ -1,6 +1,6 @@
 #pragma once
 
-class FLAMING_API ResourceManager : public SubSystem
+class ResourceManager : public SubSystem
 {
 private:
 #if USE_GRAPHICS

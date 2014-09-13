@@ -99,29 +99,17 @@ namespace FlamingTorch
 
 	bool Vector2::operator!=(const Vector2 &o) const
 	{
-		return !(*this == o);
+		return *this != o;
 	};
 
 	bool Vector2::operator<(const Vector2 &o) const
 	{
-		if(x < o.x)
-			return true;
-
-		if(y < o.y)
-			return true;
-
-		return false;
+		return x < o.x || y < o.y;
 	};
 
 	bool Vector2::operator>(const Vector2 &o) const
 	{
-		if(x > o.x)
-			return true;
-
-		if(y > o.y)
-			return true;
-
-		return false;
+        return x > o.x || y > o.y;
 	};
 
 	bool Vector2::operator<=(const Vector2 &o) const
@@ -327,35 +315,17 @@ namespace FlamingTorch
 
 	bool Vector3::operator!=(const Vector3 &o) const
 	{
-		return !(*this == o);
+		return *this != o;
 	};
 
 	bool Vector3::operator<(const Vector3 &o) const
 	{
-		if(x < o.x)
-			return true;
-
-		if(y < o.y)
-			return true;
-
-		if(z < o.z)
-			return true;
-
-		return false;
+		return x < o.x || y < o.y || z < o.z;
 	};
 
 	bool Vector3::operator>(const Vector3 &o) const
 	{
-		if(x > o.x)
-			return true;
-
-		if(y > o.y)
-			return true;
-
-		if(z > o.z)
-			return true;
-
-		return false;
+		return x > o.x || y > o.y || z > o.z;
 	};
 
 	bool Vector3::operator<=(const Vector3 &o) const
@@ -594,41 +564,17 @@ namespace FlamingTorch
 
 	bool Vector4::operator!=(const Vector4 &o) const
 	{
-		return !(*this == o);
+		return *this != o;
 	};
 
 	bool Vector4::operator<(const Vector4 &o) const
 	{
-		if(x < o.x)
-			return true;
-
-		if(y < o.y)
-			return true;
-
-		if(z < o.z)
-			return true;
-
-		if(w < o.w)
-			return true;
-
-		return false;
+		return x < o.x || y < o.y || z < o.z || w < o.w;
 	};
 
 	bool Vector4::operator>(const Vector4 &o) const
 	{
-		if(x > o.x)
-			return true;
-
-		if(y > o.y)
-			return true;
-
-		if(z > o.z)
-			return true;
-
-		if(w > o.w)
-			return true;
-
-		return false;
+        return x > o.x || y > o.y || z > o.z || w > o.w;
 	};
 
 	bool Vector4::operator<=(const Vector4 &o) const

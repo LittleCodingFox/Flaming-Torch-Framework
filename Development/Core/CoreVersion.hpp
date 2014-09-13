@@ -36,7 +36,7 @@ namespace FlamingTorch
 	/*!
 	*	Core Utilities
 	*/
-	class FLAMING_API CoreUtils
+	class CoreUtils
 	{
 	public:
 		/*!

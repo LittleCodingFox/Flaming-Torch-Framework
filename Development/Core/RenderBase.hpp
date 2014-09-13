@@ -25,7 +25,7 @@ namespace RendererFeature
 /*!
 *	Renderer Manager is a manager for multiple Renderers
 */
-class FLAMING_API RendererManager : public SubSystem
+class RendererManager : public SubSystem
 {
 	friend class RendererInputProcessor;
 public:

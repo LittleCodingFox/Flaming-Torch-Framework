@@ -2,7 +2,7 @@
 /*!
 *	CRC32 Helper Class
 */
-class FLAMING_API CRC32 
+class CRC32 
 {
 private:
 	uint32 LookupTable[256];
