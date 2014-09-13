@@ -4,6 +4,11 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
+	UISprite::UISprite(UIManager *Manager) : UIPanel("UISprite", Manager)
+	{
+		OnConstructed();
+	};
+
 	void UISprite::PerformLayout()
 	{
 	};

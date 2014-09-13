@@ -2580,5 +2580,43 @@ namespace FlamingTorch
 		};
 	};
 
+	UIManager::~UIManager()
+	{
+		UnRegisterInput();
+		Clear();
+
+		Tooltip.Dispose();
+		ScriptInstance.Dispose();
+	};
+
+	RendererManager::Renderer *UIManager::GetOwner()
+	{
+		return Owner;
+	};
+
+	const Vector4 &UIManager::GetDefaultFontColor()
+	{
+		return DefaultFontColor;
+	};
+
+	const Vector4 &UIManager::GetDefaultSecondaryFontColor()
+	{
+		return DefaultSecondaryFontColor;
+	};
+
+	uint32 UIManager::GetDefaultFontSize()
+	{
+		return DefaultFontSize;
+	};
+
+	SuperSmartPointer<sf::Font> UIManager::GetDefaultFont()
+	{
+		return DefaultFont;
+	};
+
+	SuperSmartPointer<GenericConfig> UIManager::GetSkin()
+	{
+		return Skin;
+	};
 #endif
 };

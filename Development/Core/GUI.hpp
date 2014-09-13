@@ -171,6 +171,11 @@ public:
 	virtual void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
 
 	/*!
+	*	Perform auto calculation of sizes here
+	*/
+	virtual void PerformLayout();
+
+	/*!
 	*	Draws the UI rect for this element
 	*	\param ParentPosition the parent's position
 	*	\param Renderer the renderer to render to
@@ -189,7 +194,7 @@ public:
 	/*!
 	*	\return Whether this element respondes to Tooltips
 	*/
-	bool RespondsToTooltips() const { return RespondsToTooltipsValue && (TooltipValue.getSize() || TooltipElement.Get()); };
+	bool RespondsToTooltips() const;
 
 	/*!
 	*	Clears the current animations from this panel
@@ -211,35 +216,23 @@ public:
 	*	Sets the Content Panel for this Panel
 	*	\param Panel the Content Panel of this Panel
 	*/
-	void SetContentPanel(SuperSmartPointer<UIPanel> Panel)
-	{
-		ContentPanelValue = Panel;
-	};
+	void SetContentPanel(SuperSmartPointer<UIPanel> Panel);
 
 	/*!
 	*	\return the Content Panel for this Panel
 	*/
-	SuperSmartPointer<UIPanel> ContentPanel() const
-	{
-		return ContentPanelValue;
-	};
+	SuperSmartPointer<UIPanel> ContentPanel() const;
 
 	/*!
 	*	Sets whether this Panel, as an Input Blocker, draws a background over the screen
 	*	\param Value whether to draw the background
 	*/
-	void SetInputBlockerBackground(bool Value)
-	{
-		InputBlockerBackgroundValue = Value;
-	};
+	void SetInputBlockerBackground(bool Value);
 
 	/*!
 	*	\return whether this Panel draws its Input Blocker Background if it becomes an Input Blocker
 	*/
-	bool InputBlockerBackground()
-	{
-		return InputBlockerBackgroundValue;
-	};
+	bool InputBlockerBackground() const;
 
 	/*!
 	*	Adjust the size and position of this panel and its parents if the size has changed somehow, like on ExtraSize changes
@@ -250,326 +243,189 @@ public:
 	/*!
 	*	\return the extra size scale
 	*/
-	f32 ExtraSizeScale() const
-	{
-		return ExtraSizeScaleValue;
-	};
+	f32 ExtraSizeScale() const;
 
 	/*!
 	*	Sets the Extra Size Scale
 	*	\param Scale the scale of the extra size
 	*/
-	void SetExtraSizeScale(f32 Scale)
-	{
-		ExtraSizeScaleValue = Scale;
-	};
+	void SetExtraSizeScale(f32 Scale);
 
 	/*!
 	*	Sets whether this element has tooltips
 	*	\param Value whether it does respond to tooltips
 	*/
-	void SetRespondsToTooltips(bool Value)
-	{
-		RespondsToTooltipsValue = Value;
-	};
+	void SetRespondsToTooltips(bool Value);
 
 	/*!
 	*	Gets the composed size (size + scaled extrasize)
 	*/
-	Vector2 GetComposedSize() const
-	{
-		return GetSize() + GetScaledExtraSize();
-	};
+	Vector2 GetComposedSize() const;
 
 	/*!
 	*	\return Whether this element's tooltips are fixed (don't move with the mouse)
 	*/
-	bool TooltipsFixed() const
-	{
-		return TooltipFixed;
-	};
+	bool TooltipsFixed() const;
 
 	/*!
 	*	Sets this element's rotation
 	*	\param Value this element's rotation in Radians
 	*/
-	void SetRotation(f32 Value)
-	{
-		RotationValue = Value;
-	};
+	void SetRotation(f32 Value);
 
 	/*!
 	*	Gets this element's rotation in Radians
 	*/
-	f32 Rotation() const
-	{
-		return RotationValue;
-	};
+	f32 Rotation() const;
 
 	/*!
 	*	Gets the rotation of this element combined with its parents
 	*/
-	f32 GetParentRotation() const
-	{
-		f32 Rotation = RotationValue;
-
-		UIPanel *Parent = const_cast<UIPanel *>(ParentValue.Get());
-
-		while(Parent != NULL)
-		{
-			Rotation += Parent->RotationValue;
-
-			Parent = Parent->GetParent();
-		};
-
-		return Rotation;
-	};
+	f32 GetParentRotation() const;
 
 	/*!
 	*	Sets whether this element's tooltips are fixed (don't move with the mouse)
 	*	\param Value whether the tooltips are fixed
 	*/
-	void SetTooltipsFixed(bool Value)
-	{
-		TooltipFixed = Value;
-	};
+	void SetTooltipsFixed(bool Value);
 
 	/*!
 	*	\return this element's tooltips position (relative to mouse position if not Fixed, relative to Element if Fixed)
 	*/
-	const Vector2 &TooltipsPosition() const
-	{
-		return TooltipPosition;
-	};
+	const Vector2 &TooltipsPosition() const;
 
 	/*!
 	*	\return this element's offset
 	*/
-	const Vector2 &GetOffset() const
-	{
-		return OffsetValue;
-	};
+	const Vector2 &GetOffset() const;
 
 	/*!
 	*	Sets this element's position offset
 	*	\param Offset the offset to set
 	*/
-	void SetOffset(const Vector2 &Offset)
-	{
-		OffsetValue = Offset;
-	};
+	void SetOffset(const Vector2 &Offset);
 
 	/*!
 	*	Sets this element's tooltips position
 	*	\param Position this element's tooltips position (relative to mouse position if not Fixed, relative to Element if Fixed)
 	*/
-	void SetTooltipsPosition(const Vector2 &Position)
-	{
-		TooltipPosition = Position;
-	};
-
-	/*!
-	*	Perform auto calculation of sizes here
-	*/
-	virtual void PerformLayout()
-	{
-		for(uint32 i = 0; i < Children.size(); i++)
-		{
-			Children[i]->PerformLayout();
-		};
-	};
+	void SetTooltipsPosition(const Vector2 &Position);
 
 	/*!
 	*	\return the Tooltip Text to display
 	*/
-	const sf::String &GetTooltipText() const
-	{
-		return TooltipValue;
-	};
+	const sf::String &GetTooltipText() const;
 
 	/*!
 	*	\return the Tooltip Element to display
 	*/
-	SuperSmartPointer<UIPanel> GetTooltipElement() const
-	{
-		return TooltipElement;
-	};
+	SuperSmartPointer<UIPanel> GetTooltipElement() const;
 
 	/*
 	*	\return whether this panel is blocking input
 	*/
-	bool IsBlockingInput() const
-	{
-		return BlockingInput;
-	};
+	bool IsBlockingInput() const;
 
 	/*
 	*	Sets whether this panel is blocking input
 	*	\param Value whether to block input
 	*/
-	void SetBlockingInput(bool Value)
-	{
-		BlockingInput = Value;
-	};
+	void SetBlockingInput(bool Value);
 
 	/*!
 	*	Sets the tooltip text for this element
 	*	\param Text the tooltip text
 	*/
-	void SetTooltipText(const sf::String &Text)
-	{
-		TooltipValue = Text;
-	};
+	void SetTooltipText(const sf::String &Text);
 
 	/*!
 	*	Sets the tooltip element for this element
 	*	\param Element the tooltip element
 	*/
-	void SetTooltipElement(SuperSmartPointer<UIPanel> Element)
-	{
-		TooltipElement = Element;
-	};
+	void SetTooltipElement(SuperSmartPointer<UIPanel> Element);
 
 	/*!
 	*	Sets whether we can drag this element to other elements
 	*	\param Value whether we can drag this element
 	*/
-	void SetDraggable(bool Value)
-	{
-		IsDraggableValue = Value;
-	};
+	void SetDraggable(bool Value);
 
 	/*!
 	*	\return whether we can drag this element
 	*/
-	bool IsDraggable() const
-	{
-		return IsDraggableValue;
-	};
+	bool IsDraggable() const;
 
 	/*!
 	*	Sets whether we can drop this element on other elements
 	*	\param Value whether we can drop this element
 	*/
-	void SetDroppable(bool Value)
-	{
-		IsDroppableValue = Value;
-	};
+	void SetDroppable(bool Value);
 
 	/*!
 	*	\return whether we can drop this element
 	*/
-	bool IsDroppable() const
-	{
-		return IsDroppableValue;
-	};
+	bool IsDroppable() const;
 
 	/*!
 	*	\return the UIManager associated to this UI Element
 	*	\sa UIManager
 	*/
-	UIManager *GetManager() const
-	{
-		return Manager;
-	};
+	UIManager *GetManager() const;
 
 	/*!
 	*	\return the ID of this UI Element
 	*/
-	StringID GetID() const
-	{
-		return ID;
-	};
+	StringID GetID() const;
 
 	/*!
 	*	Calculates the position of this element's parents to return the overall (absolute) position
 	*	\return the calculated absolute position of this UI Element's parents
 	*/
-	Vector2 GetParentPosition() const
-	{
-		if(!ParentValue)
-			return Vector2();
-
-		Vector2 Position = PositionValue + OffsetValue + TranslationValue - GetScaledExtraSize() / 2;
-		UIPanel *p = const_cast<UIPanel *>(ParentValue.Get());
-
-		while(p)
-		{
-			Position += p->GetPosition() + p->GetTranslation() + p->GetOffset() - p->GetScaledExtraSize() / 2;
-
-			p = p->GetParent();
-		};
-
-		return Position;
-	};
+	Vector2 GetParentPosition() const;
 
 	/*!
 	*	Set this Element's Visiblity
 	*	\param value whether the element should be visible
 	*/
-	void SetVisible(bool value)
-	{
-		VisibleValue = value;
-	};
+	void SetVisible(bool value);
 
 	/*!
 	*	\return whether this element is visible
 	*/
-	bool IsVisible() const
-	{
-		return VisibleValue;
-	};
+	bool IsVisible() const;
 
 	/*!
 	*	Sets this element's Enabled status
 	*	\param value whether this element is enabled
 	*/
-	void SetEnabled(bool value)
-	{
-		EnabledValue = value;
-	};
+	void SetEnabled(bool value);
 
 	/*!
 	*	\return whether this element is enabled
 	*/
-	bool IsEnabled() const
-	{
-		return EnabledValue;
-	};
+	bool IsEnabled() const;
 
 	/*!
 	*	Sets whether this element receives Mouse Input
 	*	\param value whether this element receives Mouse Input
 	*/
-	void SetMouseInputEnabled(bool value)
-	{
-		MouseInputValue = value;
-	};
+	void SetMouseInputEnabled(bool value);
 
 	/*!
 	*	\return whether this element receives Mouse Input
 	*/
-	bool IsMouseInputEnabled() const
-	{
-		return MouseInputValue;
-	};
+	bool IsMouseInputEnabled() const;
 
 	/*!
 	*	Sets whether this element receives Keyboard Input
 	*	\param value whether this element receives Keyboard Input
 	*/
-	void SetKeyboardInputEnabled(bool value)
-	{
-		KeyboardInputValue = value;
-	};
+	void SetKeyboardInputEnabled(bool value);
 
 	/*!
 	*	\return whether this element receivews Keyboard Input
 	*/
-	bool IsKeyboardInputEnabled() const
-	{
-		return KeyboardInputValue;
-	};
+	bool IsKeyboardInputEnabled() const;
 
 	/*!
 	*	Adds a child to this element
@@ -581,102 +437,57 @@ public:
 	*	Removes a children from this element
 	*	\param Child the Child to remove
 	*/
-	void RemoveChild(UIPanel *Child)
-	{
-		for(std::vector<UIPanel *>::iterator it = Children.begin(); it != Children.end(); it++)
-		{
-			if(*it == Child)
-			{
-				Child->ParentValue = SuperSmartPointer<UIPanel>();
-				Children.erase(it);
-
-				return;
-			};
-		};
-	};
+	void RemoveChild(UIPanel *Child);
 
 	/*!
 	*	\return the amount of children in this element
 	*/
-	uint32 GetChildrenCount() const
-	{
-		return Children.size();
-	};
+	uint32 GetChildrenCount() const;
 
 	/*!
 	*	Gets a children at a specific index
 	*	\param Index the index of the children
 	*	\return the children or NULL
 	*/
-	UIPanel *GetChild(uint32 Index) const
-	{
-		return Children.size() > Index ? Children[Index] : NULL;
-	};
+	UIPanel *GetChild(uint32 Index) const;
 
 	/*!
 	*	\return the Translation of this element
 	*	\note Used by elements such as Scrollbars to indicate how much translation there is
 	*/
-	const Vector2 &GetTranslation() const
-	{
-		return TranslationValue;
-	};
+	const Vector2 &GetTranslation() const;
 
 	/*!
 	*	\return the Parent of this Element (or NULL)
 	*/
-	UIPanel *GetParent() const
-	{
-		return (UIPanel *)ParentValue.Get();
-	};
+	UIPanel *GetParent() const;
 
 	/*!
 	*	\return the Position of this Element
 	*/
-	const Vector2 &GetPosition() const
-	{
-		return PositionValue;
-	};
+	const Vector2 &GetPosition() const;
 
 	/*!
 	*	Sets the Position of this element
 	*	\param Position the new position for this element
 	*/
-	void SetPosition(const Vector2 &Position)
-	{
-		PositionValue = Position;
-	};
+	void SetPosition(const Vector2 &Position);
 
 	/*!
 	*	\return the Size of this Element
 	*/
-	const Vector2 &GetSize() const
-	{
-		return SizeValue;
-	};
+	const Vector2 &GetSize() const;
 
 	/*!
 	*	Sets the Size of this element
 	*	\param Size the new size for this element
 	*/
-	void SetSize(const Vector2 &Size)
-	{
-		SizeValue = Size;
-
-		if(SizeValue.x < 0)
-			SizeValue.x = 0;
-
-		if(SizeValue.y < 0)
-			SizeValue.y = 0;
-	};
+	void SetSize(const Vector2 &Size);
 
 	/*!
 	*	\return the Alpha Transparency of this Element
 	*/
-	f32 GetAlpha() const
-	{
-		return AlphaValue;
-	};
+	f32 GetAlpha() const;
 
 	/*!
 	*	\return the Alpha Transparency of this element and all its parents
@@ -687,62 +498,17 @@ public:
 	*	Sets the Alpha Transparency of this Element
 	*	\param Alpha the new alpha for this element
 	*/
-	void SetAlpha(f32 Alpha)
-	{
-		AlphaValue = Alpha;
-	};
+	void SetAlpha(f32 Alpha);
 
 	/*!
 	*	\return the Size of all children in this element
 	*/
-	Vector2 GetChildrenSize() const
-	{
-		Vector2 Out, Size;
-
-		for(uint32 i = 0; i < Children.size(); i++)
-		{
-			if(!Children[i]->IsVisible())
-				continue;
-
-			Children[i]->PerformLayout();
-
-			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetComposedSize();
-
-			if(Out.x < Size.x)
-				Out.x = Size.x;
-
-			if(Out.y < Size.y)
-				Out.y = Size.y;
-		};
-
-		return Out;
-	};
+	Vector2 GetChildrenSize() const;
 
 	/*!
 	*	\return the Scaled Extra Size of all children in this element
 	*/
-	Vector2 GetChildrenExtraSize() const
-	{
-		Vector2 Out, Size;
-
-		for(uint32 i = 0; i < Children.size(); i++)
-		{
-			if(!Children[i]->IsVisible())
-				continue;
-
-			Children[i]->PerformLayout();
-
-			Size = Children[i]->GetScaledExtraSize();
-
-			if(Out.x < Size.x)
-				Out.x = Size.x;
-
-			if(Out.y < Size.y)
-				Out.y = Size.y;
-		};
-
-		return Out;
-	};
+	Vector2 GetChildrenExtraSize() const;
 
 	/*!
 	*	Clears all children (and destroys them)
@@ -753,37 +519,24 @@ public:
 	*	Sets the Skin of this Element
 	*	\param Skin the new skin to apply
 	*/
-	void SetSkin(SuperSmartPointer<GenericConfig> Skin)
-	{
-		this->Skin = Skin;
-		OnSkinChange();
-	};
+	void SetSkin(SuperSmartPointer<GenericConfig> Skin);
 
 	/*!
 	*	Gets the layout this Panel belongs to
 	*	\return the Layout associated with this Panel, or NULL
 	*/
-	UILayout *GetLayout() const
-	{
-		return Layout;
-	};
+	UILayout *GetLayout() const;
 
 	/*!
 	*	Gets the extra size for the element
 	*	Extra size is based on the Nine-Patch corner sizes
 	*/
-	const Vector2 &GetExtraSize() const
-	{
-		return SelectBoxExtraSize;
-	};
+	const Vector2 &GetExtraSize() const;
 
 	/*!
 	*	Gets the Scaled Extra Size
 	*/
-	Vector2 GetScaledExtraSize() const
-	{
-		return SelectBoxExtraSize * ExtraSizeScaleValue;
-	};
+	Vector2 GetScaledExtraSize() const;
 
 	/*!
 	*	Focuses this element
@@ -817,11 +570,7 @@ class UIGroup : public UIPanel
 public:
 	uint32 LayoutMode;
 
-	UIGroup(UIManager *Manager) : UIPanel("UIGroup", Manager), LayoutMode(UIGroupLayoutMode::None)
-	{
-		OnConstructed();
-	};
-
+	UIGroup(UIManager *Manager);
 	void PerformLayout();
 	void Update(const Vector2 &ParentPosition);
 	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
@@ -838,11 +587,7 @@ public:
 	*/
 	Sprite TheSprite;
 
-	UISprite(UIManager *Manager) : UIPanel("UISprite", Manager)
-	{
-		OnConstructed();
-	};
-
+	UISprite(UIManager *Manager);
 	void PerformLayout();
 	void Update(const Vector2 &ParentPosition);
 	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
@@ -974,11 +719,7 @@ protected:
 	uint32 LineHeight;
 	bool IgnoreHeightBoundsValue;
 public:
-	UITextComposer(UIManager *Manager) : UIPanel("UITextComposer", Manager), LineHeight(0), IgnoreHeightBoundsValue(false)
-	{
-		OnConstructed();
-	};
-
+	UITextComposer(UIManager *Manager);
 	/*!
 	*	Clears all text in this composer
 	*/
@@ -1041,7 +782,6 @@ public:
 	*/
 	SuperSmartPointer<UIPanel> Parent;
 
-	UILayout() {};
 	~UILayout();
 
 	/*!
@@ -1088,7 +828,6 @@ class UIManager : public BaseScriptableInstance
 	friend class UILayout;
 	friend class UIInputProcessor;
 private:
-
 	class ElementInfo
 	{
 	public:
@@ -1150,15 +889,12 @@ public:
 	LayoutMap Layouts, DefaultLayouts;
 
 	UIManager(RendererManager::Renderer *TheOwner);
-	~UIManager() { UnRegisterInput(); Clear(); Tooltip.Dispose(); ScriptInstance.Dispose(); };
+	~UIManager();
 
 	/*!
 	*	\return the Renderer that owns this UI Manager
 	*/
-	RendererManager::Renderer *GetOwner()
-	{
-		return Owner;
-	};
+	RendererManager::Renderer *GetOwner();
 
 	/*!
 	*	Updates all visible Elements
@@ -1261,34 +997,22 @@ public:
 	/*!
 	*	\return the Default Font Color
 	*/
-	const Vector4 &GetDefaultFontColor()
-	{
-		return DefaultFontColor;
-	};
+	const Vector4 &GetDefaultFontColor();
 
 	/*!
 	*	\return the Default Font Color
 	*/
-	const Vector4 &GetDefaultSecondaryFontColor()
-	{
-		return DefaultSecondaryFontColor;
-	};
+	const Vector4 &GetDefaultSecondaryFontColor();
 
 	/*!
 	*	\return the Default Font Size
 	*/
-	uint32 GetDefaultFontSize()
-	{
-		return DefaultFontSize;
-	};
+	uint32 GetDefaultFontSize();
 
 	/*!
 	*	\return the Default Font
 	*/
-	SuperSmartPointer<sf::Font> GetDefaultFont()
-	{
-		return DefaultFont;
-	};
+	SuperSmartPointer<sf::Font> GetDefaultFont();
 
 	/*!
 	*	Removes all elements
@@ -1304,10 +1028,7 @@ public:
 	/*!
 	*	\return the UI Skin we are currently using
 	*/
-	SuperSmartPointer<GenericConfig> GetSkin()
-	{
-		return Skin;
-	};
+	SuperSmartPointer<GenericConfig> GetSkin();
 
 	/*!
 	*	\return the current Input Blocker, if any

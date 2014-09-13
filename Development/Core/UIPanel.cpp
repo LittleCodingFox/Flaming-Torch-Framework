@@ -285,9 +285,6 @@ namespace FlamingTorch
 		OnGainFocus(this);
 	};
 
-	/*!
-	*	\note Should be called whenever the UI object is created
-	*/
 	void UIPanel::OnConstructed()
 	{
 		EnabledValue = MouseInputValue = KeyboardInputValue = VisibleValue = true;
@@ -594,6 +591,370 @@ namespace FlamingTorch
 
 		if(TooltipElement.Get())
 			TooltipElement.Dispose();
+	};
+
+	void UIPanel::SetContentPanel(SuperSmartPointer<UIPanel> Panel)
+	{
+		ContentPanelValue = Panel;
+	};
+
+	SuperSmartPointer<UIPanel> UIPanel::ContentPanel() const
+	{
+		return ContentPanelValue;
+	};
+
+	void UIPanel::SetInputBlockerBackground(bool Value)
+	{
+		InputBlockerBackgroundValue = Value;
+	};
+
+	bool UIPanel::InputBlockerBackground() const
+	{
+		return InputBlockerBackgroundValue;
+	};
+
+	f32 UIPanel::ExtraSizeScale() const
+	{
+		return ExtraSizeScaleValue;
+	};
+
+	void UIPanel::SetExtraSizeScale(f32 Scale)
+	{
+		ExtraSizeScaleValue = Scale;
+	};
+
+	void UIPanel::SetRespondsToTooltips(bool Value)
+	{
+		RespondsToTooltipsValue = Value;
+	};
+
+	Vector2 UIPanel::GetComposedSize() const
+	{
+		return GetSize() + GetScaledExtraSize();
+	};
+
+	bool UIPanel::TooltipsFixed() const
+	{
+		return TooltipFixed;
+	};
+
+	void UIPanel::SetRotation(f32 Value)
+	{
+		RotationValue = Value;
+	};
+
+	f32 UIPanel::Rotation() const
+	{
+		return RotationValue;
+	};
+
+	f32 UIPanel::GetParentRotation() const
+	{
+		f32 Rotation = RotationValue;
+
+		UIPanel *Parent = const_cast<UIPanel *>(ParentValue.Get());
+
+		while(Parent != NULL)
+		{
+			Rotation += Parent->RotationValue;
+
+			Parent = Parent->GetParent();
+		};
+
+		return Rotation;
+	};
+
+	void UIPanel::SetTooltipsFixed(bool Value)
+	{
+		TooltipFixed = Value;
+	};
+
+	const Vector2 &UIPanel::TooltipsPosition() const
+	{
+		return TooltipPosition;
+	};
+
+	const Vector2 &UIPanel::GetOffset() const
+	{
+		return OffsetValue;
+	};
+
+	void UIPanel::SetOffset(const Vector2 &Offset)
+	{
+		OffsetValue = Offset;
+	};
+
+	void UIPanel::SetTooltipsPosition(const Vector2 &Position)
+	{
+		TooltipPosition = Position;
+	};
+
+	void UIPanel::PerformLayout()
+	{
+		for(uint32 i = 0; i < Children.size(); i++)
+		{
+			Children[i]->PerformLayout();
+		};
+	};
+
+	const sf::String &UIPanel::GetTooltipText() const
+	{
+		return TooltipValue;
+	};
+
+	SuperSmartPointer<UIPanel> UIPanel::GetTooltipElement() const
+	{
+		return TooltipElement;
+	};
+
+	bool UIPanel::IsBlockingInput() const
+	{
+		return BlockingInput;
+	};
+
+	void UIPanel::SetBlockingInput(bool Value)
+	{
+		BlockingInput = Value;
+	};
+
+	void UIPanel::SetTooltipText(const sf::String &Text)
+	{
+		TooltipValue = Text;
+	};
+
+	void UIPanel::SetTooltipElement(SuperSmartPointer<UIPanel> Element)
+	{
+		TooltipElement = Element;
+	};
+
+	void UIPanel::SetDraggable(bool Value)
+	{
+		IsDraggableValue = Value;
+	};
+
+	bool UIPanel::IsDraggable() const
+	{
+		return IsDraggableValue;
+	};
+
+	void UIPanel::SetDroppable(bool Value)
+	{
+		IsDroppableValue = Value;
+	};
+
+	bool UIPanel::IsDroppable() const
+	{
+		return IsDroppableValue;
+	};
+
+	UIManager *UIPanel::GetManager() const
+	{
+		return Manager;
+	};
+
+	StringID UIPanel::GetID() const
+	{
+		return ID;
+	};
+
+	Vector2 UIPanel::GetParentPosition() const
+	{
+		if(!ParentValue)
+			return Vector2();
+
+		Vector2 Position = PositionValue + OffsetValue + TranslationValue - GetScaledExtraSize() / 2;
+		UIPanel *p = const_cast<UIPanel *>(ParentValue.Get());
+
+		while(p)
+		{
+			Position += p->GetPosition() + p->GetTranslation() + p->GetOffset() - p->GetScaledExtraSize() / 2;
+
+			p = p->GetParent();
+		};
+
+		return Position;
+	};
+
+	void UIPanel::SetVisible(bool value)
+	{
+		VisibleValue = value;
+	};
+
+	bool UIPanel::IsVisible() const
+	{
+		return VisibleValue;
+	};
+
+	void UIPanel::SetEnabled(bool value)
+	{
+		EnabledValue = value;
+	};
+
+	bool UIPanel::IsEnabled() const
+	{
+		return EnabledValue;
+	};
+
+	void UIPanel::SetMouseInputEnabled(bool value)
+	{
+		MouseInputValue = value;
+	};
+
+	bool UIPanel::IsMouseInputEnabled() const
+	{
+		return MouseInputValue;
+	};
+
+	void UIPanel::SetKeyboardInputEnabled(bool value)
+	{
+		KeyboardInputValue = value;
+	};
+
+	bool UIPanel::IsKeyboardInputEnabled() const
+	{
+		return KeyboardInputValue;
+	};
+
+	void UIPanel::RemoveChild(UIPanel *Child)
+	{
+		for(std::vector<UIPanel *>::iterator it = Children.begin(); it != Children.end(); it++)
+		{
+			if(*it == Child)
+			{
+				Child->ParentValue = SuperSmartPointer<UIPanel>();
+				Children.erase(it);
+
+				return;
+			};
+		};
+	};
+
+	uint32 UIPanel::GetChildrenCount() const
+	{
+		return Children.size();
+	};
+
+	UIPanel *UIPanel::GetChild(uint32 Index) const
+	{
+		return Children.size() > Index ? Children[Index] : NULL;
+	};
+
+	const Vector2 &UIPanel::GetTranslation() const
+	{
+		return TranslationValue;
+	};
+
+	UIPanel *UIPanel::GetParent() const
+	{
+		return (UIPanel *)ParentValue.Get();
+	};
+
+	const Vector2 &UIPanel::GetPosition() const
+	{
+		return PositionValue;
+	};
+
+	void UIPanel::SetPosition(const Vector2 &Position)
+	{
+		PositionValue = Position;
+	};
+
+	const Vector2 &UIPanel::GetSize() const
+	{
+		return SizeValue;
+	};
+
+	void UIPanel::SetSize(const Vector2 &Size)
+	{
+		SizeValue = Size;
+
+		if(SizeValue.x < 0)
+			SizeValue.x = 0;
+
+		if(SizeValue.y < 0)
+			SizeValue.y = 0;
+	};
+
+	f32 UIPanel::GetAlpha() const
+	{
+		return AlphaValue;
+	};
+
+	void UIPanel::SetAlpha(f32 Alpha)
+	{
+		AlphaValue = Alpha;
+	};
+
+	Vector2 UIPanel::GetChildrenSize() const
+	{
+		Vector2 Out, Size;
+
+		for(uint32 i = 0; i < Children.size(); i++)
+		{
+			if(!Children[i]->IsVisible())
+				continue;
+
+			Children[i]->PerformLayout();
+
+			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetComposedSize();
+
+			if(Out.x < Size.x)
+				Out.x = Size.x;
+
+			if(Out.y < Size.y)
+				Out.y = Size.y;
+		};
+
+		return Out;
+	};
+
+	Vector2 UIPanel::GetChildrenExtraSize() const
+	{
+		Vector2 Out, Size;
+
+		for(uint32 i = 0; i < Children.size(); i++)
+		{
+			if(!Children[i]->IsVisible())
+				continue;
+
+			Children[i]->PerformLayout();
+
+			Size = Children[i]->GetScaledExtraSize();
+
+			if(Out.x < Size.x)
+				Out.x = Size.x;
+
+			if(Out.y < Size.y)
+				Out.y = Size.y;
+		};
+
+		return Out;
+	};
+
+	void UIPanel::SetSkin(SuperSmartPointer<GenericConfig> Skin)
+	{
+		this->Skin = Skin;
+		OnSkinChange();
+	};
+
+	UILayout *UIPanel::GetLayout() const
+	{
+		return Layout;
+	};
+
+	const Vector2 &UIPanel::GetExtraSize() const
+	{
+		return SelectBoxExtraSize;
+	};
+
+	bool UIPanel::RespondsToTooltips() const
+	{
+		return RespondsToTooltipsValue && (TooltipValue.getSize() || TooltipElement.Get());
+	};
+
+	Vector2 UIPanel::GetScaledExtraSize() const
+	{
+		return SelectBoxExtraSize * ExtraSizeScaleValue;
 	};
 #endif
 };

@@ -99,7 +99,7 @@ namespace FlamingTorch
 
 	bool Vector2::operator!=(const Vector2 &o) const
 	{
-		return *this != o;
+		return x != o.x || y != o.y;
 	};
 
 	bool Vector2::operator<(const Vector2 &o) const
@@ -315,7 +315,7 @@ namespace FlamingTorch
 
 	bool Vector3::operator!=(const Vector3 &o) const
 	{
-		return *this != o;
+		return x != o.x || y != o.y || z == o.z;
 	};
 
 	bool Vector3::operator<(const Vector3 &o) const
@@ -564,7 +564,7 @@ namespace FlamingTorch
 
 	bool Vector4::operator!=(const Vector4 &o) const
 	{
-		return *this != o;
+		return x != o.x || y != o.y || z != o.z || w != o.w;
 	};
 
 	bool Vector4::operator<(const Vector4 &o) const
@@ -1606,7 +1606,7 @@ namespace FlamingTorch
 
 	bool Quaternion::operator!=(const Quaternion &q) const
 	{
-		return !operator==(q);
+		return x != q.x || y != q.y || z != q.z || w == q.w;
 	};
 
 	Quaternion Quaternion::FromAxis(const Vector3 &v, f32 Angle)

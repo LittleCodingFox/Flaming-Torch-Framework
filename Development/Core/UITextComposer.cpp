@@ -4,6 +4,11 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
+	UITextComposer::UITextComposer(UIManager *Manager) : UIPanel("UITextComposer", Manager), LineHeight(0), IgnoreHeightBoundsValue(false)
+	{
+		OnConstructed();
+	};
+
 	void UITextComposer::ClearText()
 	{
 		for(uint32 i = 0; i < Nodes.size(); i++)

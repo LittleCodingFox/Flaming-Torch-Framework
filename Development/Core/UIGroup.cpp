@@ -4,6 +4,11 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
+	UIGroup::UIGroup(UIManager *Manager) : UIPanel("UIGroup", Manager), LayoutMode(UIGroupLayoutMode::None)
+	{
+		OnConstructed();
+	};
+
 	void UIGroup::Update(const Vector2 &ParentPosition)
 	{
 		UIPanel::Update(ParentPosition);
