@@ -475,7 +475,7 @@ namespace FlamingTorch
 
 			if(FileName.length() == 0)
 			{
-				TheSprite->TheSprite.Options.Scale(TheSprite->GetSize()).Color(Vector4());
+				TheSprite->TheSprite.Options.Scale(TheSprite->Size()).Color(Vector4());
 			}
 			else
 			{
@@ -500,10 +500,10 @@ namespace FlamingTorch
 				else
 				{
 					TheSprite->TheSprite.SpriteTexture = SpriteTexture;
-					TheSprite->TheSprite.Options.Scale(Panel->GetSize() != Vector2() ? Panel->GetSize() / SpriteTexture->Size() : Vector2(1, 1));
+					TheSprite->TheSprite.Options.Scale(Panel->Size() != Vector2() ? Panel->Size() / SpriteTexture->Size() : Vector2(1, 1));
 					TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
 
-					if(TheSprite->GetSize() == Vector2())
+					if(TheSprite->Size() == Vector2())
 					{
 						TheSprite->SetSize(SpriteTexture->Size());
 					};
@@ -560,7 +560,7 @@ namespace FlamingTorch
 				sscanf(NinePatchString.c_str(), "%f,%f,%f,%f", &NinePatchRect.Left, &NinePatchRect.Right, &NinePatchRect.Top,
 					&NinePatchRect.Bottom);
 
-				TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Panel->GetSize());
+				TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Panel->Size());
 				TheSprite->SelectBoxExtraSize = NinePatchRect.ToFullSize();
 			};
 		}
@@ -830,7 +830,7 @@ namespace FlamingTorch
 				Panel.Reset(new UIGroup(Renderer->UI));
 			};
 
-			Panel->Layout = TheLayout;
+			Panel->LayoutValue = TheLayout;
 			Panel->LayoutName = ElementIDName;
 
 			std::stringstream BaseFunctionName;
@@ -1690,11 +1690,11 @@ namespace FlamingTorch
 				};
 
 				//We shouldn't override previous set sizes...
-				bool ResetPanelSize = Panel->GetSize() == Vector2();
+				bool ResetPanelSize = Panel->Size() == Vector2();
 
 				if(ResetPanelSize)
 				{
-					Panel->SetSize(Parent ? Parent->GetComposedSize() : Panel->GetComposedSize());
+					Panel->SetSize(Parent ? Parent->ComposedSize() : Panel->ComposedSize());
 				};
 
 				SuperSmartPointer<UILayout> NewLayout = TargetLayout->Clone(Panel, ParentElementName + "." + ElementName, true);
@@ -1712,7 +1712,7 @@ namespace FlamingTorch
 				//Should be impossible for this to happen, but still...
 				if(it != Layouts.end())
 				{
-					Log::Instance.LogWarn(TAG, "Found duplicate layout '%s', erasing old.", (Panel->GetLayout()->Name + "_" + NewLayout->Name).c_str());
+					Log::Instance.LogWarn(TAG, "Found duplicate layout '%s', erasing old.", (Panel->Layout()->Name + "_" + NewLayout->Name).c_str());
 
 					Layouts.erase(it);
 				};
@@ -1755,13 +1755,13 @@ namespace FlamingTorch
 
 									bool Found = false;
 
-									for(uint32 l = 0; l < TargetElement->GetChildrenCount(); l++)
+									for(uint32 l = 0; l < TargetElement->ChildrenCount(); l++)
 									{
-										if(TargetElement->GetChild(l)->GetID() == ActualElementID)
+										if(TargetElement->Child(l)->ID() == ActualElementID)
 										{
 											Found = true;
 
-											TargetElement = TargetElement->GetChild(l);
+											TargetElement = TargetElement->Child(l);
 
 											break;
 										};
@@ -1780,7 +1780,7 @@ namespace FlamingTorch
 							{
 								std::string ControlName = StringUtils::ToUpperCase(TargetElement->NativeType);
 								std::string Property = Parts[Parts.size() - 1];
-								std::string CurrentElementID = GetStringIDString(TargetElement->ID);
+								std::string CurrentElementID = GetStringIDString(TargetElement->ID());
 
 								std::string FinalValue;
 
@@ -1847,11 +1847,11 @@ namespace FlamingTorch
 					SuperSmartPointer<UIPanel> TooltipGroup(new UIGroup(Renderer->UI));
 					TooltipGroup->SetVisible(false);
 					Renderer->UI->AddElement(MakeStringID(ParentElementName + "." + ElementName + "_TOOLTIPELEMENT"), TooltipGroup);
-					TheLayout->Elements[TooltipGroup->GetID()] = TooltipGroup;
+					TheLayout->Elements[TooltipGroup->ID()] = TooltipGroup;
 
 					CopyElementsToLayout(TheLayout, Value, TooltipGroup, ParentElementName + "." + ElementName + "_TOOLTIPELEMENT", Panel);
 
-					TooltipGroup->SetSize(TooltipGroup->GetChildrenSize());
+					TooltipGroup->SetSize(TooltipGroup->ChildrenSize());
 
 					Panel->SetRespondsToTooltips(true);
 					Panel->SetTooltipElement(TooltipGroup);
@@ -1928,9 +1928,9 @@ namespace FlamingTorch
 
 			if(Value.isBool())
 			{
-				if(Value.asBool() && Panel->GetParent() != NULL)
+				if(Value.asBool() && Panel->Parent() != NULL)
 				{
-					Panel->GetParent()->SetContentPanel(Panel);
+					Panel->Parent()->SetContentPanel(Panel);
 				};
 			}
 			else
@@ -1974,7 +1974,7 @@ namespace FlamingTorch
 
 			CopyElementsToLayout(Layout, Elements, Parent, Layout->Name, Parent);
 
-			StringID LayoutID = MakeStringID((Parent.Get() ? Parent->GetLayout()->Name + "_" : "") + LayoutName);
+			StringID LayoutID = MakeStringID((Parent.Get() ? Parent->Layout()->Name + "_" : "") + LayoutName);
 
 			LayoutMap &TargetLayoutMap = DefaultLayout ? DefaultLayouts : Layouts;
 
@@ -2030,7 +2030,7 @@ namespace FlamingTorch
 			if(it == Elements.end())
 				break;
 
-			if(it->second->Panel->BlockingInput && it->second->Panel->IsVisible())
+			if(it->second->Panel->BlockingInput() && it->second->Panel->Visible())
 			{
 				Out = it->second->Panel;
 
@@ -2050,7 +2050,7 @@ namespace FlamingTorch
 
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				if(it->second->Panel->GetParent() == NULL)
+				if(it->second->Panel->Parent() == NULL)
 				{
 					DrawOrderCache.push_back(it->second);
 				};
@@ -2064,7 +2064,7 @@ namespace FlamingTorch
 		if(InputBlocker.Get())
 		{
 			UIPanel *p = InputBlocker;
-			RecursiveFindFocusedElement(p->GetParentPosition(), p, FoundElement);
+			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement);
 		}
 		else
 		{
@@ -2098,14 +2098,14 @@ namespace FlamingTorch
 			MouseOverElement->OnMouseOver(MouseOverElement);
 		};
 
-		if(FoundElement && Elements[FoundElement->ID].Get())
+		if(FoundElement && Elements[FoundElement->ID()].Get())
 		{
 			if(MouseOverElement != FoundElement)
 				FoundElement->OnMouseEntered(FoundElement);
 
 			MouseOverElement = FoundElement;
 
-			return Elements[FoundElement->ID]->Panel;
+			return Elements[FoundElement->ID()]->Panel;
 		};
 
 		MouseOverElement = FoundElement;
@@ -2122,7 +2122,7 @@ namespace FlamingTorch
 
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				if(it->second->Panel->GetParent() == NULL)
+				if(it->second->Panel->Parent() == NULL)
 				{
 					DrawOrderCache.push_back(it->second);
 				};
@@ -2134,7 +2134,7 @@ namespace FlamingTorch
 			if(DrawOrderCache[i]->Panel.Get() == NULL)
 				continue;
 
-			if(DrawOrderCache[i]->Panel->IsVisible())
+			if(DrawOrderCache[i]->Panel->Visible())
 			{
 				DrawOrderCache[i]->Panel->Update(Vector2());
 			};
@@ -2153,7 +2153,7 @@ namespace FlamingTorch
 
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				if(it->second->Panel->GetParent() == NULL)
+				if(it->second->Panel->Parent() == NULL)
 				{
 					DrawOrderCache.push_back(it->second);
 				};
@@ -2164,7 +2164,7 @@ namespace FlamingTorch
 
 		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
-			if(it->second->Panel->BlockingInput && it->second->Panel->IsVisible())
+			if(it->second->Panel->BlockingInput() && it->second->Panel->Visible())
 			{
 				InputBlocker = it->second->Panel;
 
@@ -2176,7 +2176,7 @@ namespace FlamingTorch
 		{
 			for(uint32 j = 0; j < DrawOrderCache.size(); j++)
 			{
-				if(DrawOrderCache[j]->Panel.Get() == NULL || DrawOrderCache[j]->DrawOrder != i || !DrawOrderCache[j]->Panel->IsVisible())
+				if(DrawOrderCache[j]->Panel.Get() == NULL || DrawOrderCache[j]->DrawOrder != i || !DrawOrderCache[j]->Panel->Visible())
 					continue;
 
 				if(DrawOrderCache[j]->Panel == InputBlocker && DrawOrderCache[j]->Panel->InputBlockerBackground())
@@ -2201,16 +2201,16 @@ namespace FlamingTorch
 
 	void UIManager::RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement)
 	{
-		if(!p->IsVisible() || !p->IsEnabled() || !p->IsMouseInputEnabled())
+		if(!p->Visible() || !p->Enabled() || !p->MouseInputEnabled())
 			return;
 
 		static AxisAlignedBoundingBox AABB;
 
 		static RotateableRect Rectangle;
 
-		Vector2 PanelSize = p->GetComposedSize();
+		Vector2 PanelSize = p->ComposedSize();
 
-		Vector2 ActualPosition = ParentPosition + p->GetPosition() + p->GetOffset();
+		Vector2 ActualPosition = ParentPosition + p->Position() + p->Offset();
 
 		AABB.min = ActualPosition;
 		AABB.max = AABB.min + PanelSize;
@@ -2223,7 +2223,7 @@ namespace FlamingTorch
 		Rectangle.Right = AABB.max.x;
 		Rectangle.Top = AABB.min.y;
 		Rectangle.Bottom = AABB.max.y;
-		Rectangle.Rotation = p->GetParentRotation();
+		Rectangle.Rotation = p->ParentRotation();
 
 		if(Rectangle.Rotation != 0)
 		{
@@ -2245,10 +2245,10 @@ namespace FlamingTorch
 
 			for(uint32 i = 0; i < p->Children.size(); i++)
 			{
-				Vector2 ChildrenSizeHalf = (p->Children[i]->GetComposedSize()) / 2;
-				Vector2 ChildrenPosition = p->Children[i]->GetPosition() - p->Children[i]->GetTranslation() + p->Children[i]->GetOffset();
+				Vector2 ChildrenSizeHalf = (p->Children[i]->ComposedSize()) / 2;
+				Vector2 ChildrenPosition = p->Children[i]->Position() - p->Children[i]->Translation() + p->Children[i]->Offset();
 
-				RecursiveFindFocusedElement(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, p->GetParentRotation()) + ParentSizeHalf -
+				RecursiveFindFocusedElement(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, p->ParentRotation()) + ParentSizeHalf -
 					ChildrenSizeHalf - ChildrenPosition, p->Children[i], FoundElement);
 			};
 		}
@@ -2270,7 +2270,7 @@ namespace FlamingTorch
 
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				if(it->second->Panel->GetParent() == NULL)
+				if(it->second->Panel->Parent() == NULL)
 				{
 					DrawOrderCache.push_back(it->second);
 				};
@@ -2286,7 +2286,7 @@ namespace FlamingTorch
 		if(InputBlocker.Get())
 		{
 			UIPanel *p = InputBlocker;
-			RecursiveFindFocusedElement(p->GetParentPosition(), p, FoundElement);
+			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement);
 		}
 		else
 		{
@@ -2312,7 +2312,7 @@ namespace FlamingTorch
 
 		if(FoundElement)
 		{
-			FocusedElementValue = Elements[FoundElement->ID]->Panel;
+			FocusedElementValue = Elements[FoundElement->ID()]->Panel;
 		};
 
 		if(PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
@@ -2459,15 +2459,15 @@ namespace FlamingTorch
 			};
 		};
 
-		FLASSERT(Element->Manager == this, "Found Element from another UI Manager!");
+		FLASSERT(Element->ManagerValue == this, "Found Element from another UI Manager!");
 
-		if(Element->Manager != this)
+		if(Element->ManagerValue != this)
 			return false;
 
 		Elements[ID].Reset(new ElementInfo());
 		Elements[ID]->Panel = Element;
 		Elements[ID]->DrawOrder = ++DrawOrderCounter;
-		Element->ID = ID;
+		Element->IDValue = ID;
 		Element->Name = GetStringIDString(ID);
 		Element->SetSkin(Skin);
 

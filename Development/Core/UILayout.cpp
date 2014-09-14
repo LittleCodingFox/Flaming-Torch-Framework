@@ -65,7 +65,7 @@ namespace FlamingTorch
 	{
 		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
-			if(it->second->GetParent() == Parent.Get())
+			if(it->second->Parent() == Parent.Get())
 			{
 				it->second->SetVisible(true);
 				Parent->SetRotation(it->second->Rotation());
@@ -77,18 +77,18 @@ namespace FlamingTorch
 	{
 		if(ParentElement)
 		{
-			for(uint32 i = 0; i < ParentElement->GetChildrenCount(); i++)
+			for(uint32 i = 0; i < ParentElement->ChildrenCount(); i++)
 			{
-				PerformStartupEvents(ParentElement->GetChild(i));
+				PerformStartupEvents(ParentElement->Child(i));
 			};
 
-			RUN_GUI_SCRIPT_EVENTS2(ParentElement->OnStartFunction, (ParentElement), ParentElement->ID);
+			RUN_GUI_SCRIPT_EVENTS2(ParentElement->OnStartFunction, (ParentElement), ParentElement->ID());
 		}
 		else
 		{
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				for(uint32 i = 0; i < it->second->GetChildrenCount(); i++)
+				for(uint32 i = 0; i < it->second->ChildrenCount(); i++)
 				{
 					PerformStartupEvents(it->second.Get());
 				};

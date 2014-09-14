@@ -18,8 +18,8 @@ namespace FlamingTorch
 
 	void UIText::SetText(const sf::String &String, bool AutoExpandHeight)
 	{
-		Text = String;
-		std::vector<sf::String> OutputStrings = RenderTextUtils::FitTextOnRect(Text, TextParameters, AutoExpandHeight ? Vector2(SizeValue.x, 9999999) : SizeValue);
+		TextValue = String;
+		std::vector<sf::String> OutputStrings = RenderTextUtils::FitTextOnRect(TextValue, TextParameters, AutoExpandHeight ? Vector2(SizeValue.x, 9999999) : SizeValue);
 
 		Strings.resize(0);
 
@@ -42,12 +42,12 @@ namespace FlamingTorch
 		};
 	};
 
-	const sf::String &UIText::GetText()
+	const sf::String &UIText::Text()
 	{
-		return Text;
+		return TextValue;
 	};
 
-	Vector2 UIText::GetTextSize()
+	Vector2 UIText::TextSize()
 	{
 		Vector2 Size;
 
@@ -71,7 +71,7 @@ namespace FlamingTorch
 	{
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
-		if(!IsVisible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
+		if(!Visible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
@@ -121,11 +121,11 @@ namespace FlamingTorch
 				ChildrenPosition = Vector2(0, (f32)TextYOffset);
 			};
 
-			Vector2 FinalPosition = ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, GetParentRotation()) + ParentSizeHalf - ChildrenSizeHalf;
+			Vector2 FinalPosition = ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, ParentRotation()) + ParentSizeHalf - ChildrenSizeHalf;
 
 			RenderTextUtils::RenderText(Renderer, Strings[i].TheString, TextParams(TextParameters).Position(FinalPosition)
-				.Color(TextParameters.TextColorValue * Vector4(1, 1, 1, GetParentAlpha())).SecondaryColor(TextParameters.SecondaryTextColorValue * Vector4(1, 1, 1, GetParentAlpha()))
-				.Rotate(GetParentRotation()));
+				.Color(TextParameters.TextColorValue * Vector4(1, 1, 1, ParentAlpha())).SecondaryColor(
+				TextParameters.SecondaryTextColorValue * Vector4(1, 1, 1, ParentAlpha())).Rotate(ParentRotation()));
 		};
 
 		DrawUIFocusZone(ParentPosition, Renderer);

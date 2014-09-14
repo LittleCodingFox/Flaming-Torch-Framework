@@ -7,7 +7,7 @@ namespace FlamingTorch
 	class UIFadeInAnimation : public UIAnimation
 	{
 	public:
-		UIFadeInAnimation(UIPanel *Target, uint64 _Duration) : UIAnimation(Target)
+		UIFadeInAnimation(UIPanel *Tar, uint64 _Duration) : UIAnimation(Tar)
 		{
 			Duration = _Duration;
 		};
@@ -16,7 +16,7 @@ namespace FlamingTorch
 		{
 			Target->SetAlpha(MathUtils::Clamp(GameClockDiffNoPause(StartTime) / (f32)Duration));
 
-			return Target->GetAlpha() == 1;
+			return Target->Alpha() == 1;
 		};
 
 		void Finish()
@@ -28,7 +28,7 @@ namespace FlamingTorch
 	class UIFadeOutAnimation : public UIAnimation
 	{
 	public:
-		UIFadeOutAnimation(UIPanel *Target, uint64 _Duration) : UIAnimation(Target)
+		UIFadeOutAnimation(UIPanel *Tar, uint64 _Duration) : UIAnimation(Tar)
 		{
 			Duration = _Duration;
 		};
@@ -37,7 +37,7 @@ namespace FlamingTorch
 		{
 			Target->SetAlpha(1 - (MathUtils::Clamp(GameClockDiffNoPause(StartTime) / (f32)Duration)));
 
-			return Target->GetAlpha() == 0;
+			return Target->Alpha() == 0;
 		};
 
 		void Finish()
@@ -76,7 +76,7 @@ namespace FlamingTorch
 
 	void UIPanel::Focus()
 	{
-		UIManager *Owner = GetManager();
+		UIManager *Owner = Manager();
 
 		for(UIManager::ElementMap::iterator it = Owner->Elements.begin(); it != Owner->Elements.end(); it++)
 		{
@@ -94,14 +94,15 @@ namespace FlamingTorch
 		};
 	};
 
-	UIPanel::UIPanel(const std::string &NativeTypeName, UIManager *_Manager) : NativeType(NativeTypeName), Manager(_Manager), VisibleValue(true),
+	UIPanel::UIPanel(const std::string &NativeTypeName, UIManager *_Manager) : NativeType(NativeTypeName),
+		ManagerValue(_Manager), VisibleValue(true),
 		EnabledValue(true), MouseInputValue(true), KeyboardInputValue(true), AlphaValue(1),
-		ClickPressed(false), BlockingInput(false), IsDraggableValue(false), IsDroppableValue(false),
-		DraggingValue(false), TooltipFixed(false), RotationValue(0), ExtraSizeScaleValue(1),
+		ClickPressed(false), BlockingInputValue(false), IsDraggableValue(false), IsDroppableValue(false),
+		DraggingValue(false), TooltipFixedValue(false), RotationValue(0), ExtraSizeScaleValue(1),
 		InputBlockerBackgroundValue(true)
 	{
-		FLASSERT(Manager != NULL, "Invalid UI Manager!");
-		FLASSERT(Manager->ScriptInstance, "Invalid UI Manager Script!");
+		FLASSERT(ManagerValue != NULL, "Invalid UI Manager!");
+		FLASSERT(ManagerValue->ScriptInstance, "Invalid UI Manager Script!");
 
 		OnMouseJustPressed.Connect(this, &UIPanel::OnMouseJustPressedDraggable);
 		OnMouseReleased.Connect(this, &UIPanel::OnMouseReleasedDraggable);
@@ -125,10 +126,10 @@ namespace FlamingTorch
 		OnDragging.Connect(this, &UIPanel::OnDraggingScript);
 		OnDrop.Connect(this, &UIPanel::OnDropScript);
 
-		Properties = luabind::newtable(Manager->ScriptInstance->State);
+		Properties = luabind::newtable(ManagerValue->ScriptInstance->State);
 	};
 
-	f32 UIPanel::GetParentAlpha() const
+	f32 UIPanel::ParentAlpha() const
 	{
 		if(!ParentValue)
 			return AlphaValue;
@@ -289,7 +290,7 @@ namespace FlamingTorch
 	{
 		EnabledValue = MouseInputValue = KeyboardInputValue = VisibleValue = true;
 		AlphaValue = 1;
-		ClickPressed = BlockingInput = RespondsToTooltipsValue = false;
+		ClickPressed = BlockingInputValue = RespondsToTooltipsValue = false;
 	};
 
 	void UIPanel::OnMouseJustPressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o)
@@ -428,12 +429,12 @@ namespace FlamingTorch
 		RUN_GUI_SCRIPT_EVENTS(OnDraggingFunction, (Self))
 	};
 
-	void UIPanel::OnDropScript(UIPanel *Self, UIPanel *Target)
+	void UIPanel::OnDropScript(UIPanel *Self, UIPanel *Tar)
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
-		RUN_GUI_SCRIPT_EVENTS(OnDropFunction, (Self, Target))
+		RUN_GUI_SCRIPT_EVENTS(OnDropFunction, (Self, Tar))
 	};
 	
 	void UIPanel::OnMouseJustPressedDraggable(UIPanel *This, const InputCenter::MouseButtonInfo &o)
@@ -459,7 +460,7 @@ namespace FlamingTorch
 
 			SuperSmartPointer<UIPanel> Drop = RendererManager::Instance.ActiveRenderer()->UI->GetMouseOverElement();
 
-			if(!Drop.Get() || !Drop->IsDroppable())
+			if(!Drop.Get() || !Drop->Droppable())
 				return;
 
 			Drop->OnDrop(Drop, this);
@@ -471,13 +472,13 @@ namespace FlamingTorch
 		if(this == PanelToStopAt || ParentValue == NULL)
 			return;
 
-		if(ParentValue->SizeValue.x < GetComposedSize().x)
-			ParentValue->SizeValue.x = GetComposedSize().x;
+		if(ParentValue->SizeValue.x < ComposedSize().x)
+			ParentValue->SizeValue.x = ComposedSize().x;
 
-		if(ParentValue->SizeValue.y < GetComposedSize().y)
-			ParentValue->SizeValue.y = GetComposedSize().y;
+		if(ParentValue->SizeValue.y < ComposedSize().y)
+			ParentValue->SizeValue.y = ComposedSize().y;
 
-		PositionFunction.Members.front()(this, ParentValue, GetManager()->GetOwner()->Size().x, GetManager()->GetOwner()->Size().y);
+		PositionFunction.Members.front()(this, ParentValue, Manager()->GetOwner()->Size().x, Manager()->GetOwner()->Size().y);
 
 		ParentValue->AdjustSizeAndPosition(PanelToStopAt);
 	};
@@ -489,21 +490,21 @@ namespace FlamingTorch
 
 	void UIPanel::DrawUIFocusZone(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		if(GetManager()->DrawUIFocusZones)
+		if(Manager()->DrawUIFocusZones)
 		{
 			static AxisAlignedBoundingBox AABB;
 
-			Vector2 PanelSize = GetComposedSize();
+			Vector2 PanelSize = ComposedSize();
 
 			Vector2 PanelOffset(3, 3);
 
-			Vector2 ActualPosition = ParentPosition + GetPosition() + GetOffset() + PanelOffset;
+			Vector2 ActualPosition = ParentPosition + Position() + Offset() + PanelOffset;
 
 			AABB.min = ActualPosition;
 			AABB.max = AABB.min + PanelSize - PanelOffset;
 
 			Sprite TheSprite;
-			TheSprite.Options.Wireframe(true).WireframePixelSize(1).Position(AABB.min.ToVector2()).Scale(PanelSize - PanelOffset * 2).Color(Vector4(0, 0, 0.5f, 1)).Rotation(GetParentRotation());
+			TheSprite.Options.Wireframe(true).WireframePixelSize(1).Position(AABB.min.ToVector2()).Scale(PanelSize - PanelOffset * 2).Color(Vector4(0, 0, 0.5f, 1)).Rotation(ParentRotation());
 			
 			TheSprite.Draw(Renderer);
 
@@ -513,11 +514,11 @@ namespace FlamingTorch
 
 			f32 IndicatorPosition = 0;
 
-			Vector2 GlobalPosition = GetParentPosition();
+			Vector2 GlobalPosition = this->ParentPosition();
 
 			while(ParentPanel != NULL)
 			{
-				if(ParentPanel->GetParentPosition() == GlobalPosition)
+				if(ParentPanel->ParentPosition() == GlobalPosition)
 					IndicatorPosition += RenderTextUtils::MeasureTextSimple(StringUtils::MakeIntString(ParentCounter), TextParams()).ToFullSize().x + 5;
 
 				ParentCounter++;
@@ -531,19 +532,19 @@ namespace FlamingTorch
 
 	void UIPanel::DrawUIRect(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
 	{
-		if(GetManager()->DrawUIRects)
+		if(Manager()->DrawUIRects)
 		{
 			static AxisAlignedBoundingBox AABB;
 
-			Vector2 PanelSize = GetComposedSize();
+			Vector2 PanelSize = ComposedSize();
 
-			Vector2 ActualPosition = ParentPosition + GetPosition() + GetOffset();
+			Vector2 ActualPosition = ParentPosition + Position() + Offset();
 
 			AABB.min = ActualPosition;
 			AABB.max = AABB.min + PanelSize;
 
 			Sprite TheSprite;
-			TheSprite.Options.Wireframe(true).WireframePixelSize(1).Position(AABB.min.ToVector2()).Scale(PanelSize).Color(Vector4(1, 0.75f, 0, 0.75f)).Rotation(GetParentRotation());
+			TheSprite.Options.Wireframe(true).WireframePixelSize(1).Position(AABB.min.ToVector2()).Scale(PanelSize).Color(Vector4(1, 0.75f, 0, 0.75f)).Rotation(ParentRotation());
 			
 			TheSprite.Draw(Renderer);
 		};
@@ -551,9 +552,9 @@ namespace FlamingTorch
 
 	void UIPanel::AddChild(UIPanel *Child)
 	{
-		FLASSERT(Child->Manager == Manager, "Combining GUI Managers is illegal!");
+		FLASSERT(Child->ManagerValue == ManagerValue, "Combining GUI Managers is illegal!");
 
-		if(Child->Manager != Manager)
+		if(Child->ManagerValue != ManagerValue)
 			return;
 
 		if(Child->ParentValue)
@@ -562,7 +563,7 @@ namespace FlamingTorch
 		};
 
 		Children.push_back(Child);
-		Child->ParentValue = GetManager()->GetElement(ID);
+		Child->ParentValue = Manager()->GetElement(IDValue);
 	};
 
 	void UIPanel::Clear()
@@ -571,7 +572,7 @@ namespace FlamingTorch
 		{
 			uint32 OldSize = Children.size();
 
-			Manager->RemoveElement(Children[0]->GetID());
+			Manager()->RemoveElement(Children[0]->ID());
 
 			uint32 NewSize = Children.size();
 
@@ -585,12 +586,12 @@ namespace FlamingTorch
 		if(ParentValue)
 			ParentValue->RemoveChild(this);
 
-		GetManager()->RemoveElement(ID);
+		Manager()->RemoveElement(IDValue);
 
 		Clear();
 
-		if(TooltipElement.Get())
-			TooltipElement.Dispose();
+		if(TooltipElementValue.Get())
+			TooltipElementValue.Dispose();
 	};
 
 	void UIPanel::SetContentPanel(SuperSmartPointer<UIPanel> Panel)
@@ -628,14 +629,14 @@ namespace FlamingTorch
 		RespondsToTooltipsValue = Value;
 	};
 
-	Vector2 UIPanel::GetComposedSize() const
+	Vector2 UIPanel::ComposedSize() const
 	{
-		return GetSize() + GetScaledExtraSize();
+		return Size() + ScaledExtraSize();
 	};
 
 	bool UIPanel::TooltipsFixed() const
 	{
-		return TooltipFixed;
+		return TooltipFixedValue;
 	};
 
 	void UIPanel::SetRotation(f32 Value)
@@ -648,7 +649,7 @@ namespace FlamingTorch
 		return RotationValue;
 	};
 
-	f32 UIPanel::GetParentRotation() const
+	f32 UIPanel::ParentRotation() const
 	{
 		f32 Rotation = RotationValue;
 
@@ -658,7 +659,7 @@ namespace FlamingTorch
 		{
 			Rotation += Parent->RotationValue;
 
-			Parent = Parent->GetParent();
+			Parent = Parent->Parent();
 		};
 
 		return Rotation;
@@ -666,7 +667,7 @@ namespace FlamingTorch
 
 	void UIPanel::SetTooltipsFixed(bool Value)
 	{
-		TooltipFixed = Value;
+		TooltipFixedValue = Value;
 	};
 
 	const Vector2 &UIPanel::TooltipsPosition() const
@@ -674,7 +675,7 @@ namespace FlamingTorch
 		return TooltipPosition;
 	};
 
-	const Vector2 &UIPanel::GetOffset() const
+	const Vector2 &UIPanel::Offset() const
 	{
 		return OffsetValue;
 	};
@@ -697,24 +698,24 @@ namespace FlamingTorch
 		};
 	};
 
-	const sf::String &UIPanel::GetTooltipText() const
+	const sf::String &UIPanel::TooltipText() const
 	{
 		return TooltipValue;
 	};
 
-	SuperSmartPointer<UIPanel> UIPanel::GetTooltipElement() const
+	SuperSmartPointer<UIPanel> UIPanel::TooltipElement() const
 	{
-		return TooltipElement;
+		return TooltipElementValue;
 	};
 
-	bool UIPanel::IsBlockingInput() const
+	bool UIPanel::BlockingInput() const
 	{
-		return BlockingInput;
+		return BlockingInputValue;
 	};
 
 	void UIPanel::SetBlockingInput(bool Value)
 	{
-		BlockingInput = Value;
+		BlockingInputValue = Value;
 	};
 
 	void UIPanel::SetTooltipText(const sf::String &Text)
@@ -724,7 +725,7 @@ namespace FlamingTorch
 
 	void UIPanel::SetTooltipElement(SuperSmartPointer<UIPanel> Element)
 	{
-		TooltipElement = Element;
+		TooltipElementValue = Element;
 	};
 
 	void UIPanel::SetDraggable(bool Value)
@@ -732,7 +733,7 @@ namespace FlamingTorch
 		IsDraggableValue = Value;
 	};
 
-	bool UIPanel::IsDraggable() const
+	bool UIPanel::Draggable() const
 	{
 		return IsDraggableValue;
 	};
@@ -742,34 +743,34 @@ namespace FlamingTorch
 		IsDroppableValue = Value;
 	};
 
-	bool UIPanel::IsDroppable() const
+	bool UIPanel::Droppable() const
 	{
 		return IsDroppableValue;
 	};
 
-	UIManager *UIPanel::GetManager() const
+	UIManager *UIPanel::Manager() const
 	{
-		return Manager;
+		return ManagerValue;
 	};
 
-	StringID UIPanel::GetID() const
+	StringID UIPanel::ID() const
 	{
-		return ID;
+		return IDValue;
 	};
 
-	Vector2 UIPanel::GetParentPosition() const
+	Vector2 UIPanel::ParentPosition() const
 	{
 		if(!ParentValue)
 			return Vector2();
 
-		Vector2 Position = PositionValue + OffsetValue + TranslationValue - GetScaledExtraSize() / 2;
+		Vector2 Position = PositionValue + OffsetValue + TranslationValue - ScaledExtraSize() / 2;
 		UIPanel *p = const_cast<UIPanel *>(ParentValue.Get());
 
 		while(p)
 		{
-			Position += p->GetPosition() + p->GetTranslation() + p->GetOffset() - p->GetScaledExtraSize() / 2;
+			Position += p->Position() + p->Translation() + p->Offset() - p->ScaledExtraSize() / 2;
 
-			p = p->GetParent();
+			p = p->Parent();
 		};
 
 		return Position;
@@ -780,7 +781,7 @@ namespace FlamingTorch
 		VisibleValue = value;
 	};
 
-	bool UIPanel::IsVisible() const
+	bool UIPanel::Visible() const
 	{
 		return VisibleValue;
 	};
@@ -790,7 +791,7 @@ namespace FlamingTorch
 		EnabledValue = value;
 	};
 
-	bool UIPanel::IsEnabled() const
+	bool UIPanel::Enabled() const
 	{
 		return EnabledValue;
 	};
@@ -800,7 +801,7 @@ namespace FlamingTorch
 		MouseInputValue = value;
 	};
 
-	bool UIPanel::IsMouseInputEnabled() const
+	bool UIPanel::MouseInputEnabled() const
 	{
 		return MouseInputValue;
 	};
@@ -810,7 +811,7 @@ namespace FlamingTorch
 		KeyboardInputValue = value;
 	};
 
-	bool UIPanel::IsKeyboardInputEnabled() const
+	bool UIPanel::KeyboardInputEnabled() const
 	{
 		return KeyboardInputValue;
 	};
@@ -829,27 +830,27 @@ namespace FlamingTorch
 		};
 	};
 
-	uint32 UIPanel::GetChildrenCount() const
+	uint32 UIPanel::ChildrenCount() const
 	{
 		return Children.size();
 	};
 
-	UIPanel *UIPanel::GetChild(uint32 Index) const
+	UIPanel *UIPanel::Child(uint32 Index) const
 	{
 		return Children.size() > Index ? Children[Index] : NULL;
 	};
 
-	const Vector2 &UIPanel::GetTranslation() const
+	const Vector2 &UIPanel::Translation() const
 	{
 		return TranslationValue;
 	};
 
-	UIPanel *UIPanel::GetParent() const
+	UIPanel *UIPanel::Parent() const
 	{
 		return (UIPanel *)ParentValue.Get();
 	};
 
-	const Vector2 &UIPanel::GetPosition() const
+	const Vector2 &UIPanel::Position() const
 	{
 		return PositionValue;
 	};
@@ -859,7 +860,7 @@ namespace FlamingTorch
 		PositionValue = Position;
 	};
 
-	const Vector2 &UIPanel::GetSize() const
+	const Vector2 &UIPanel::Size() const
 	{
 		return SizeValue;
 	};
@@ -875,7 +876,7 @@ namespace FlamingTorch
 			SizeValue.y = 0;
 	};
 
-	f32 UIPanel::GetAlpha() const
+	f32 UIPanel::Alpha() const
 	{
 		return AlphaValue;
 	};
@@ -885,18 +886,18 @@ namespace FlamingTorch
 		AlphaValue = Alpha;
 	};
 
-	Vector2 UIPanel::GetChildrenSize() const
+	Vector2 UIPanel::ChildrenSize() const
 	{
 		Vector2 Out, Size;
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
-			if(!Children[i]->IsVisible())
+			if(!Children[i]->Visible())
 				continue;
 
 			Children[i]->PerformLayout();
 
-			Size = Children[i]->GetPosition() + Children[i]->GetOffset() + Children[i]->GetComposedSize();
+			Size = Children[i]->Position() + Children[i]->Offset() + Children[i]->ComposedSize();
 
 			if(Out.x < Size.x)
 				Out.x = Size.x;
@@ -908,18 +909,18 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	Vector2 UIPanel::GetChildrenExtraSize() const
+	Vector2 UIPanel::ChildrenExtraSize() const
 	{
 		Vector2 Out, Size;
 
 		for(uint32 i = 0; i < Children.size(); i++)
 		{
-			if(!Children[i]->IsVisible())
+			if(!Children[i]->Visible())
 				continue;
 
 			Children[i]->PerformLayout();
 
-			Size = Children[i]->GetScaledExtraSize();
+			Size = Children[i]->ScaledExtraSize();
 
 			if(Out.x < Size.x)
 				Out.x = Size.x;
@@ -937,22 +938,22 @@ namespace FlamingTorch
 		OnSkinChange();
 	};
 
-	UILayout *UIPanel::GetLayout() const
+	UILayout *UIPanel::Layout() const
 	{
-		return Layout;
+		return LayoutValue;
 	};
 
-	const Vector2 &UIPanel::GetExtraSize() const
+	const Vector2 &UIPanel::ExtraSize() const
 	{
 		return SelectBoxExtraSize;
 	};
 
 	bool UIPanel::RespondsToTooltips() const
 	{
-		return RespondsToTooltipsValue && (TooltipValue.getSize() || TooltipElement.Get());
+		return RespondsToTooltipsValue && (TooltipValue.getSize() || TooltipElementValue.Get());
 	};
 
-	Vector2 UIPanel::GetScaledExtraSize() const
+	Vector2 UIPanel::ScaledExtraSize() const
 	{
 		return SelectBoxExtraSize * ExtraSizeScaleValue;
 	};

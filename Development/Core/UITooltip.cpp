@@ -16,13 +16,13 @@ namespace FlamingTorch
 
 	void UITooltip::PerformLayout()
 	{
-		if(Source.Get() && Source->GetTooltipElement())
+		if(Source.Get() && Source->TooltipElement())
 		{
-			SizeValue = Source->GetTooltipElement()->GetChildrenSize();
+			SizeValue = Source->TooltipElement()->ChildrenSize();
 		}
 		else
 		{
-			sf::String Text = (Source ? Source->GetTooltipText() : OverrideText);
+			sf::String Text = (Source ? Source->TooltipText() : OverrideText);
 
 			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Text, TextParameters).ToFullSize();
 
@@ -53,11 +53,11 @@ namespace FlamingTorch
 
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
-		bool UsingFixedPosition = Source.Get() != NULL && Source->GetTooltipElement().Get() != NULL && Source->TooltipsFixed();
+		bool UsingFixedPosition = Source.Get() != NULL && Source->TooltipElement().Get() != NULL && Source->TooltipsFixed();
 
 		if(UsingFixedPosition)
 		{
-			ActualPosition = Source->GetParentPosition() + Source->TooltipsPosition();
+			ActualPosition = Source->ParentPosition() + Source->TooltipsPosition();
 		}
 		else
 		{
@@ -72,17 +72,17 @@ namespace FlamingTorch
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
-		if(Source.Get() && Source->GetTooltipElement())
+		if(Source.Get() && Source->TooltipElement())
 		{
-			Source->GetTooltipElement()->SetVisible(true);
-			Source->GetTooltipElement()->Draw(ActualPosition, Renderer);
-			Source->GetTooltipElement()->SetVisible(false);
+			Source->TooltipElement()->SetVisible(true);
+			Source->TooltipElement()->Draw(ActualPosition, Renderer);
+			Source->TooltipElement()->SetVisible(false);
 		}
 		else
 		{
 			SpriteCache::Instance.Flush(Renderer);
 
-			sf::String Text = (Source ? Source->GetTooltipText() : OverrideText);
+			sf::String Text = (Source ? Source->TooltipText() : OverrideText);
 
 			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Text, TextParameters).ToFullSize();
 
@@ -101,7 +101,7 @@ namespace FlamingTorch
 				ActualPosition,
 			};
 
-			glColor4f(0.98f, 0.96f, 0.815f, GetParentAlpha());
+			glColor4f(0.98f, 0.96f, 0.815f, ParentAlpha());
 
 			glVertexPointer(2, GL_FLOAT, 0, Vertices);
 
@@ -110,7 +110,7 @@ namespace FlamingTorch
 			glColor4f(1, 1, 1, 1);
 
 			RenderTextUtils::RenderText(Renderer, Text,
-				TextParams(TextParameters).Color(Vector4(0, 0, 0, GetParentAlpha())).Position(ActualPosition + (SizeValue - ActualFontSize) / 2));
+				TextParams(TextParameters).Color(Vector4(0, 0, 0, ParentAlpha())).Position(ActualPosition + (SizeValue - ActualFontSize) / 2));
 		};
 
 		DrawUIFocusZone(ParentPosition, Renderer);

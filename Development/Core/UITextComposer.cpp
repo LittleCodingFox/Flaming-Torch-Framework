@@ -89,9 +89,9 @@ namespace FlamingTorch
 		TextComposerNode Out;
 		Out.Text = Text;
 		Out.Params = Params;
-		Out.Instance.Reset(new UIText(GetManager()));
+		Out.Instance.Reset(new UIText(Manager()));
 
-		GetManager()->AddElement(MakeStringID("UITEXTCOMPOSER_" + StringUtils::PointerString(this) + "_" +
+		Manager()->AddElement(MakeStringID("UITEXTCOMPOSER_" + StringUtils::PointerString(this) + "_" +
 			StringUtils::MakeIntString((uint32)Nodes.size()) + "_NODE"), Out.Instance);
 
 		Out.Instance->TextParameters = Params;
@@ -132,7 +132,7 @@ namespace FlamingTorch
 
 		if(IgnoreHeightBoundsValue)
 		{
-			Vector2 ChildrenSize = GetChildrenSize();
+			Vector2 ChildrenSize = this->ChildrenSize();
 
 			bool EnabledScissor = Renderer->IsStateEnabled(GL_SCISSOR_TEST);
 			Renderer->EnableState(GL_SCISSOR_TEST);

@@ -13,7 +13,7 @@
 			}\
 			catch(std::exception &e)\
 			{\
-				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID).c_str(), e.what());\
+				Log::Instance.LogInfo(TAG, "Scripting Exception on UI Element '%s': %s", GetStringIDString(ID()).c_str(), e.what());\
 			};\
 		};\
 	};
@@ -75,19 +75,19 @@ protected:
 	bool VisibleValue, EnabledValue, MouseInputValue, KeyboardInputValue;
 	Vector2 PositionValue, SizeValue, TranslationValue, SelectBoxExtraSize, OffsetValue;
 	f32 AlphaValue, RotationValue, ExtraSizeScaleValue;
-	UILayout *Layout;
-	UIManager *Manager;
-	bool RespondsToTooltipsValue, TooltipFixed;
+	UILayout *LayoutValue;
+	UIManager *ManagerValue;
+	bool RespondsToTooltipsValue, TooltipFixedValue;
 	sf::String TooltipValue;
-	SuperSmartPointer<UIPanel> ParentValue, TooltipElement, ContentPanelValue;
+	SuperSmartPointer<UIPanel> ParentValue, TooltipElementValue, ContentPanelValue;
 	//!<Children of this UI Panel
 	std::vector<UIPanel *> Children;
 	uint64 ClickTimer;
 	//!<Whether we are in the middle of a click
 	bool ClickPressed;
 	//!<Whether we are blocking Input
-	bool BlockingInput, InputBlockerBackgroundValue;
-	StringID ID;
+	bool BlockingInputValue, InputBlockerBackgroundValue;
+	StringID IDValue;
 	SuperSmartPointer<GenericConfig> Skin;
 	bool DraggingValue, IsDraggableValue, IsDroppableValue;
 	Vector2 TooltipPosition;
@@ -260,7 +260,7 @@ public:
 	/*!
 	*	Gets the composed size (size + scaled extrasize)
 	*/
-	Vector2 GetComposedSize() const;
+	Vector2 ComposedSize() const;
 
 	/*!
 	*	\return Whether this element's tooltips are fixed (don't move with the mouse)
@@ -281,7 +281,7 @@ public:
 	/*!
 	*	Gets the rotation of this element combined with its parents
 	*/
-	f32 GetParentRotation() const;
+	f32 ParentRotation() const;
 
 	/*!
 	*	Sets whether this element's tooltips are fixed (don't move with the mouse)
@@ -297,7 +297,7 @@ public:
 	/*!
 	*	\return this element's offset
 	*/
-	const Vector2 &GetOffset() const;
+	const Vector2 &Offset() const;
 
 	/*!
 	*	Sets this element's position offset
@@ -314,17 +314,17 @@ public:
 	/*!
 	*	\return the Tooltip Text to display
 	*/
-	const sf::String &GetTooltipText() const;
+	const sf::String &TooltipText() const;
 
 	/*!
 	*	\return the Tooltip Element to display
 	*/
-	SuperSmartPointer<UIPanel> GetTooltipElement() const;
+	SuperSmartPointer<UIPanel> TooltipElement() const;
 
 	/*
 	*	\return whether this panel is blocking input
 	*/
-	bool IsBlockingInput() const;
+	bool BlockingInput() const;
 
 	/*
 	*	Sets whether this panel is blocking input
@@ -353,7 +353,7 @@ public:
 	/*!
 	*	\return whether we can drag this element
 	*/
-	bool IsDraggable() const;
+	bool Draggable() const;
 
 	/*!
 	*	Sets whether we can drop this element on other elements
@@ -364,24 +364,24 @@ public:
 	/*!
 	*	\return whether we can drop this element
 	*/
-	bool IsDroppable() const;
+	bool Droppable() const;
 
 	/*!
 	*	\return the UIManager associated to this UI Element
 	*	\sa UIManager
 	*/
-	UIManager *GetManager() const;
+	UIManager *Manager() const;
 
 	/*!
 	*	\return the ID of this UI Element
 	*/
-	StringID GetID() const;
+	StringID ID() const;
 
 	/*!
 	*	Calculates the position of this element's parents to return the overall (absolute) position
 	*	\return the calculated absolute position of this UI Element's parents
 	*/
-	Vector2 GetParentPosition() const;
+	Vector2 ParentPosition() const;
 
 	/*!
 	*	Set this Element's Visiblity
@@ -392,7 +392,7 @@ public:
 	/*!
 	*	\return whether this element is visible
 	*/
-	bool IsVisible() const;
+	bool Visible() const;
 
 	/*!
 	*	Sets this element's Enabled status
@@ -403,7 +403,7 @@ public:
 	/*!
 	*	\return whether this element is enabled
 	*/
-	bool IsEnabled() const;
+	bool Enabled() const;
 
 	/*!
 	*	Sets whether this element receives Mouse Input
@@ -414,7 +414,7 @@ public:
 	/*!
 	*	\return whether this element receives Mouse Input
 	*/
-	bool IsMouseInputEnabled() const;
+	bool MouseInputEnabled() const;
 
 	/*!
 	*	Sets whether this element receives Keyboard Input
@@ -423,9 +423,9 @@ public:
 	void SetKeyboardInputEnabled(bool value);
 
 	/*!
-	*	\return whether this element receivews Keyboard Input
+	*	\return whether this element receives Keyboard Input
 	*/
-	bool IsKeyboardInputEnabled() const;
+	bool KeyboardInputEnabled() const;
 
 	/*!
 	*	Adds a child to this element
@@ -442,30 +442,30 @@ public:
 	/*!
 	*	\return the amount of children in this element
 	*/
-	uint32 GetChildrenCount() const;
+	uint32 ChildrenCount() const;
 
 	/*!
 	*	Gets a children at a specific index
 	*	\param Index the index of the children
 	*	\return the children or NULL
 	*/
-	UIPanel *GetChild(uint32 Index) const;
+	UIPanel *Child(uint32 Index) const;
 
 	/*!
 	*	\return the Translation of this element
 	*	\note Used by elements such as Scrollbars to indicate how much translation there is
 	*/
-	const Vector2 &GetTranslation() const;
+	const Vector2 &Translation() const;
 
 	/*!
 	*	\return the Parent of this Element (or NULL)
 	*/
-	UIPanel *GetParent() const;
+	UIPanel *Parent() const;
 
 	/*!
 	*	\return the Position of this Element
 	*/
-	const Vector2 &GetPosition() const;
+	const Vector2 &Position() const;
 
 	/*!
 	*	Sets the Position of this element
@@ -476,7 +476,7 @@ public:
 	/*!
 	*	\return the Size of this Element
 	*/
-	const Vector2 &GetSize() const;
+	const Vector2 &Size() const;
 
 	/*!
 	*	Sets the Size of this element
@@ -487,12 +487,12 @@ public:
 	/*!
 	*	\return the Alpha Transparency of this Element
 	*/
-	f32 GetAlpha() const;
+	f32 Alpha() const;
 
 	/*!
 	*	\return the Alpha Transparency of this element and all its parents
 	*/
-	f32 GetParentAlpha() const;
+	f32 ParentAlpha() const;
 
 	/*!
 	*	Sets the Alpha Transparency of this Element
@@ -503,12 +503,12 @@ public:
 	/*!
 	*	\return the Size of all children in this element
 	*/
-	Vector2 GetChildrenSize() const;
+	Vector2 ChildrenSize() const;
 
 	/*!
 	*	\return the Scaled Extra Size of all children in this element
 	*/
-	Vector2 GetChildrenExtraSize() const;
+	Vector2 ChildrenExtraSize() const;
 
 	/*!
 	*	Clears all children (and destroys them)
@@ -525,18 +525,18 @@ public:
 	*	Gets the layout this Panel belongs to
 	*	\return the Layout associated with this Panel, or NULL
 	*/
-	UILayout *GetLayout() const;
+	UILayout *Layout() const;
 
 	/*!
 	*	Gets the extra size for the element
 	*	Extra size is based on the Nine-Patch corner sizes
 	*/
-	const Vector2 &GetExtraSize() const;
+	const Vector2 &ExtraSize() const;
 
 	/*!
 	*	Gets the Scaled Extra Size
 	*/
-	Vector2 GetScaledExtraSize() const;
+	Vector2 ScaledExtraSize() const;
 
 	/*!
 	*	Focuses this element
@@ -650,7 +650,7 @@ public:
 
 private:
 	std::vector<StringInfo> Strings;
-	sf::String Text;
+	sf::String TextValue;
 public:
 
 	/*!
@@ -678,14 +678,16 @@ public:
 	*	\note Required set so we recalculate the strings
 	*/
 	void SetText(const sf::String &String, bool AutoExpandHeight = false);
+
 	/*!
 	*	\return the Text of this UIText
 	*/
-	const sf::String &GetText();
+	const sf::String &Text();
+
 	/*!
 	*	\return the Text's size
 	*/
-	Vector2 GetTextSize();
+	Vector2 TextSize();
 
 	/*!
 	*	\return the formatted text strings

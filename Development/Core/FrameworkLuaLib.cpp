@@ -646,21 +646,6 @@ namespace FlamingTorch
 		};
 	};
 
-	bool AddUIManagerElement(UIManager &Self, lua_Number ID, SuperSmartPointer<UIPanel> Element)
-	{
-		return Self.AddElement((StringID)ID, Element);
-	};
-
-	void RemoveUIManagerElement(UIManager &Self, lua_Number ID)
-	{
-		Self.RemoveElement((StringID)ID);
-	};
-
-	bool UIManagerLoadLayouts(UIManager &Self, Stream *In)
-	{
-		return Self.LoadLayouts(In);
-	};
-
 	luabind::object GetUIManagerLayouts(UIManager &Self, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
@@ -703,186 +688,21 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	UIPanel *GetUIManagerFocusedElement(UIManager &Self, lua_State *State)
-	{
-		return Self.GetFocusedElement().Get();
-	};
-
-	UIPanel *GetUIManagerMouseOverElement(UIManager &Self, lua_State *State)
-	{
-		return Self.GetMouseOverElement().Get();
-	};
-
-	UITooltip *GetUIManagerTooltip(UIManager &Self, lua_State *State)
-	{
-		return &Self.GetTooltip();
-	};
-
-	Vector4 GetUIManagerDefaultFontColor(UIManager &Self, lua_State *State)
-	{
-		return Self.GetDefaultFontColor();
-	};
-
-	Vector4 GetUIManagerDefaultSecondaryFontColor(UIManager &Self, lua_State *State)
-	{
-		return Self.GetDefaultSecondaryFontColor();
-	};
-
-	lua_Number GetUIManagerDefaultFontSize(UIManager &Self, lua_State *State)
-	{
-		return Self.GetDefaultFontSize();
-	};
-
-	bool GetUIPanelRespondsToTooltips(UIPanel &Self)
-	{
-		return Self.RespondsToTooltips();
-	};
-
-	void SetUIPanelRespondsToTooltips(UIPanel &Self, bool Value)
-	{
-		return Self.SetRespondsToTooltips(Value);
-	};
-
-	bool GetUIPanelTooltipsFixed(UIPanel &Self)
-	{
-		return Self.TooltipsFixed();
-	};
-
-	void SetUIPanelTooltipsFixed(UIPanel &Self, bool Value)
-	{
-		return Self.SetTooltipsFixed(Value);
-	};
-
-	Vector2 GetUIPanelTooltipsPosition(UIPanel &Self)
-	{
-		return Self.TooltipsPosition();
-	};
-
-	void SetUIPanelTooltipsPosition(UIPanel &Self, const Vector2 &Position)
-	{
-		return Self.SetTooltipsPosition(Position);
-	};
-
-	std::wstring GetUIPanelTooltipText(UIPanel &Self)
-	{
-		return Self.GetTooltipText().toWideString();
-	};
-
-	void SetUIPanelTooltipText(UIPanel &Self, const std::wstring &Text)
-	{
-		return Self.SetTooltipText(Text);
-	};
-
-	SuperSmartPointer<UIPanel> GetUIPanelTooltipElement(UIPanel &Self)
-	{
-		return Self.GetTooltipElement();
-	};
-
-	void SetUIPanelTooltipElement(UIPanel &Self, SuperSmartPointer<UIPanel> Panel)
-	{
-		return Self.SetTooltipElement(Panel);
-	};
-
-	bool GetUIPanelBlockingInput(UIPanel &Self)
-	{
-		return Self.IsBlockingInput();
-	};
-
-	void SetUIPanelBlockingInput(UIPanel &Self, bool Value)
-	{
-		return Self.SetBlockingInput(Value);
-	};
-
-	bool GetUIPanelDraggable(UIPanel &Self)
-	{
-		return Self.IsDraggable();
-	};
-
-	void SetUIPanelDraggable(UIPanel &Self, bool Value)
-	{
-		return Self.SetDraggable(Value);
-	};
-
-	bool GetUIPanelDroppable(UIPanel &Self)
-	{
-		return Self.IsDroppable();
-	};
-
-	void SetUIPanelDroppable(UIPanel &Self, bool Value)
-	{
-		return Self.SetDroppable(Value);
-	};
-
-	lua_Number GetUIPanelID(UIPanel &Self)
-	{
-		return (lua_Number)Self.GetID();
-	};
-
-	bool GetUIPanelVisible(UIPanel &Self)
-	{
-		return Self.IsVisible();
-	};
-
-	void SetUIPanelVisible(UIPanel &Self, bool Value)
-	{
-		return Self.SetVisible(Value);
-	};
-
-	bool GetUIPanelEnabled(UIPanel &Self)
-	{
-		return Self.IsEnabled();
-	};
-
-	void SetUIPanelEnabled(UIPanel &Self, bool Value)
-	{
-		return Self.SetEnabled(Value);
-	};
-
-	bool GetUIPanelMouseInputEnabled(UIPanel &Self)
-	{
-		return Self.IsMouseInputEnabled();
-	};
-
-	void SetUIPanelMouseInputEnabled(UIPanel &Self, bool Value)
-	{
-		return Self.SetMouseInputEnabled(Value);
-	};
-
-	bool GetUIPanelKeyboardInputEnabled(UIPanel &Self)
-	{
-		return Self.IsKeyboardInputEnabled();
-	};
-
-	void SetUIPanelKeyboardInputEnabled(UIPanel &Self, bool Value)
-	{
-		return Self.SetKeyboardInputEnabled(Value);
-	};
-
 	luabind::object GetUIPanelChildren(UIPanel &Self, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
 
-		for(uint32 i = 0; i < Self.GetChildrenCount(); i++)
+		for(uint32 i = 0; i < Self.ChildrenCount(); i++)
 		{
-			Out[i + 1] = Self.GetChild(i);
+			Out[i + 1] = Self.Child(i);
 		};
 
 		return Out;
 	};
 
-	UIPanel *FadeInUIPanel(UIPanel &Self, lua_Number Time)
-	{
-		return Self.FadeIn((uint64)Time);
-	};
-
-	UIPanel *FadeOutUIPanel(UIPanel &Self, lua_Number Time)
-	{
-		return Self.FadeOut((uint64)Time);
-	};
-
 	std::string UITextGetText(UIText &Self)
 	{
-		return Self.GetText().toAnsiString();
+		return Self.Text().toAnsiString();
 	};
 
 	void UITextSetText(UIText &Self, const std::string &Text)
@@ -2454,10 +2274,9 @@ namespace FlamingTorch
 
 			//UIManager
 			luabind::class_<UIManager>("UIManager")
-				.def("AddElement", &AddUIManagerElement)
-				.def("RemoveElement", &RemoveUIManagerElement)
+				.def("AddElement", &UIManager::AddElement)
+				.def("RemoveElement", &UIManager::RemoveElement)
 				.def("LoadLayouts", &UIManager::LoadLayouts)
-				.def("LoadLayouts", &UIManagerLoadLayouts)
 				.property("Layouts", &GetUIManagerLayouts)
 				.def("AddLayout", &AddUIManagerLayout)
 				.def("RemoveLayout", &RemoveUIManagerLayout)
@@ -2465,12 +2284,12 @@ namespace FlamingTorch
 				.def("Clear", &UIManager::Clear)
 				.def("ClearFocus", &UIManager::ClearFocus)
 				.def("GetElement", &UIManager::GetElement)
-				.property("FocusedElement", &GetUIManagerFocusedElement)
-				.property("MouseOverElement", &GetUIManagerMouseOverElement)
-				.property("Tooltip", &GetUIManagerTooltip)
-				.property("DefaultFontColor", &GetUIManagerDefaultFontColor)
-				.property("DefaultSecondaryFontColor", &GetUIManagerDefaultSecondaryFontColor)
-				.property("DefaultFontSize", &GetUIManagerDefaultFontSize)
+				.property("FocusedElement", &UIManager::GetFocusedElement)
+				.property("MouseOverElement", &UIManager::GetMouseOverElement)
+				.property("Tooltip", &UIManager::GetTooltip)
+				.property("DefaultFontColor", &UIManager::GetDefaultFontColor)
+				.property("DefaultSecondaryFontColor", &UIManager::GetDefaultSecondaryFontColor)
+				.property("DefaultFontSize", &UIManager::GetDefaultFontSize)
 				.property("Skin", &UIManager::GetSkin, &UIManager::SetSkin),
 
 			//UIPanel
@@ -2497,41 +2316,41 @@ namespace FlamingTorch
 				.def_readwrite("OnDrop", &UIPanel::OnDropFunction)
 				.def_readwrite("OnStart", &UIPanel::OnStartFunction)
 				.def_readwrite("Properties", &UIPanel::Properties)
-				.property("RespondsToTooltips", &GetUIPanelRespondsToTooltips, &SetUIPanelRespondsToTooltips)
-				.property("TooltipsFixed", &GetUIPanelTooltipsFixed, &SetUIPanelTooltipsFixed)
-				.property("TooltipsPosition", &GetUIPanelTooltipsPosition, &SetUIPanelTooltipsPosition)
+				.property("RespondsToTooltips", &UIPanel::RespondsToTooltips, &UIPanel::SetRespondsToTooltips)
+				.property("TooltipsFixed", &UIPanel::TooltipsFixed, &UIPanel::SetTooltipsFixed)
+				.property("TooltipsPosition", &UIPanel::TooltipsPosition, &UIPanel::SetTooltipsPosition)
 				.def("PerformLayout", &UIPanel::PerformLayout)
-				.property("TooltipText", &GetUIPanelTooltipText, &SetUIPanelTooltipText)
-				.property("TooltipElement", &GetUIPanelTooltipElement, &SetUIPanelTooltipElement)
-				.property("BlockingInput", &GetUIPanelBlockingInput, &SetUIPanelBlockingInput)
-				.property("Draggable", &GetUIPanelDraggable, &SetUIPanelDraggable)
-				.property("Droppable", &GetUIPanelDroppable, &SetUIPanelDroppable)
-				.property("Owner", &UIPanel::GetManager)
-				.property("ID", &GetUIPanelID)
-				.property("ParentPosition", &UIPanel::GetParentPosition)
-				.property("Visible", &GetUIPanelVisible, &SetUIPanelVisible)
-				.property("Enabled", &GetUIPanelEnabled, &SetUIPanelEnabled)
-				.property("MouseInputEnabled", &GetUIPanelMouseInputEnabled, &SetUIPanelMouseInputEnabled)
-				.property("KeyboardInputEnabled", &GetUIPanelKeyboardInputEnabled, &SetUIPanelKeyboardInputEnabled)
+				.property("TooltipText", &UIPanel::TooltipText, &UIPanel::SetTooltipText)
+				.property("TooltipElement", &UIPanel::TooltipElement, &UIPanel::SetTooltipElement)
+				.property("BlockingInput", &UIPanel::BlockingInput, &UIPanel::SetBlockingInput)
+				.property("Draggable", &UIPanel::Draggable, &UIPanel::SetDraggable)
+				.property("Droppable", &UIPanel::Droppable, &UIPanel::SetDroppable)
+				.property("Owner", &UIPanel::Manager)
+				.property("ID", &UIPanel::ID)
+				.property("ParentPosition", &UIPanel::ParentPosition)
+				.property("Visible", &UIPanel::Visible, &UIPanel::SetVisible)
+				.property("Enabled", &UIPanel::Enabled, &UIPanel::SetEnabled)
+				.property("MouseInputEnabled", &UIPanel::MouseInputEnabled, &UIPanel::SetMouseInputEnabled)
+				.property("KeyboardInputEnabled", &UIPanel::KeyboardInputEnabled, &UIPanel::SetKeyboardInputEnabled)
 				.def("AddChild", &UIPanel::AddChild)
 				.def("RemoveChild", &UIPanel::RemoveChild)
 				.def_readonly("ControlName", &UIPanel::NativeType)
 				.property("Children", &GetUIPanelChildren)
-				.def("ChildrenSize", &UIPanel::GetChildrenSize)
-				.property("Translation", &UIPanel::GetTranslation)
-				.property("Parent", &UIPanel::GetParent)
-				.property("Position", &UIPanel::GetPosition, &UIPanel::SetPosition)
-				.property("Offset", &UIPanel::GetOffset, &UIPanel::SetOffset)
-				.property("Size", &UIPanel::GetSize, &UIPanel::SetSize)
-				.property("ComposedSize", &UIPanel::GetComposedSize)
-				.property("Opacity", &UIPanel::GetAlpha, &UIPanel::SetAlpha)
-				.property("Layout", &UIPanel::GetLayout)
-				.property("ExtraSize", &UIPanel::GetScaledExtraSize)
-				.property("ScaledExtraSize", &UIPanel::GetScaledExtraSize)
+				.def("ChildrenSize", &UIPanel::ChildrenSize)
+				.property("Translation", &UIPanel::Translation)
+				.property("Parent", &UIPanel::Parent)
+				.property("Position", &UIPanel::Position, &UIPanel::SetPosition)
+				.property("Offset", &UIPanel::Offset, &UIPanel::SetOffset)
+				.property("Size", &UIPanel::Size, &UIPanel::SetSize)
+				.property("ComposedSize", &UIPanel::ComposedSize)
+				.property("Opacity", &UIPanel::Alpha, &UIPanel::SetAlpha)
+				.property("Layout", &UIPanel::Layout)
+				.property("ExtraSize", &UIPanel::ExtraSize)
+				.property("ScaledExtraSize", &UIPanel::ScaledExtraSize)
 				.property("Rotation", &UIPanel::Rotation, &UIPanel::SetRotation)
 				.def("ClearAnimations", &UIPanel::ClearAnimations)
-				.def("FadeIn", &FadeInUIPanel)
-				.def("FadeOut", &FadeOutUIPanel)
+				.def("FadeIn", &UIPanel::FadeIn)
+				.def("FadeOut", &UIPanel::FadeOut)
 				.def("Focus", &UIPanel::Focus)
 				.def("Clear", &UIPanel::Clear),
 
@@ -2554,7 +2373,8 @@ namespace FlamingTorch
 			//UISprite
 			luabind::class_<UISprite, UIPanel>("UISprite")
 				.def_readwrite("Sprite", &UISprite::TheSprite),
-			//UIText
+
+				//UIText
 			luabind::class_<UIText, UIPanel>("UIText")
 				.property("Text", &UITextGetText, &UITextSetText)
 				.def_readwrite("TextParameters", &UIText::TextParameters),
