@@ -43,21 +43,21 @@ int main(int argc, char **argv)
 	{
 		if(std::string(argv[i]) == "-dir" && i < argc - 2)
 		{
-			RequestedDirectories.push_back(argv[i + 1]);
-			TargetDirectories.push_back(argv[i + 2]);
+			RequestedDirectories.push_back(Path(argv[i + 1]).FullPath());
+			TargetDirectories.push_back(Path(argv[i + 2]).FullPath());
 			i+=2;
 		};
 
 		if(std::string(argv[i]) == "-file" && i < argc - 2)
 		{
-			RequestedFiles.push_back(argv[i + 2]);
-			TargetDirectories.push_back(argv[i + 2]);
+			RequestedFiles.push_back(Path(argv[i + 2]).FullPath());
+			TargetDirectories.push_back(Path(argv[i + 2]).FullPath());
 			i+=2;
 		};
 
 		if(std::string(argv[i]) == "-out" && i < argc - 1)
 		{
-			OutPackageName = argv[i + 1];
+			OutPackageName = Path(argv[i + 1]).FullPath();
 			i++;
 		};
 
@@ -71,11 +71,12 @@ int main(int argc, char **argv)
 	};
 
 	Log::Instance.LogInfo(TAG, "Version %s starting up", CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
+	Log::Instance.LogInfo(TAG, "Output File: %s", OutPackageName.c_str());
 	Log::Instance.LogInfo(TAG, "Searching Directories...");
 
 	for(uint32 i = 0; i < RequestedDirectories.size(); i++)
 	{
-		std::vector<std::string> ReceivedFiles = DirectoryInfo::ScanDirectory(RequestedDirectories[i], "*", true);
+		std::vector<std::string> ReceivedFiles = FileSystemUtils::ScanDirectory(RequestedDirectories[i], "*", true);
 
 		for(uint32 j = 0; j < ReceivedFiles.size(); j++)
 		{
@@ -119,7 +120,7 @@ int main(int argc, char **argv)
 			FinalFiles[i].second + std::string("/") : "") + FinalFiles[i].first.substr(FinalDirectories[i].length() + 1,
 			FinalFiles[i].first.rfind('/') - FinalDirectories[i].length());
 
-		std::string FinalName = FinalFiles[i].first.substr(FinalFiles[i].first.rfind('/') + 1);
+		std::string FinalName = Path(FinalFiles[i].first).BaseName;
 
 		if(!Package->AddFile(FinalDirectory, FinalName, Stream))
 		{

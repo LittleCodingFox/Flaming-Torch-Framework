@@ -13,6 +13,10 @@ using namespace FlamingTorch;
 #	undef CreateDirectory
 #endif
 
+#ifdef CopyFile
+#undef CopyFile
+#endif
+
 std::string FLGameName()
 {
 	return TAG;
@@ -43,7 +47,7 @@ int main(int argc, char **argv)
     
     std::vector<MapDirectoryInfo> MapDirectories;
     
-    if(!ConfigStream.Open(DirectoryInfo::ResourcesDirectory() + "/Baker.cfg", StreamFlags::Read | StreamFlags::Text) || !Configuration.DeSerialize(&ConfigStream))
+    if(!ConfigStream.Open(FileSystemUtils::ResourcesDirectory() + "/Baker.cfg", StreamFlags::Read | StreamFlags::Text) || !Configuration.DeSerialize(&ConfigStream))
     {
         Log::Instance.LogErr(TAG, "Failed to load Baker.cfg");
         
@@ -76,24 +80,24 @@ int main(int argc, char **argv)
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
 
-    DirectoryInfo::DeleteDirectory(DirectoryInfo::ResourcesDirectory() + "/PackageContent/PackageData/");
+    FileSystemUtils::DeleteDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/");
     
-    std::vector<std::string> CopyDirectories = DirectoryInfo::GetAllDirectories(DirectoryInfo::ResourcesDirectory() + "/PackageContent/");
+    std::vector<std::string> CopyDirectories = FileSystemUtils::GetAllDirectories(FileSystemUtils::ResourcesDirectory() + "/PackageContent/");
     
-    DirectoryInfo::CreateDirectory(DirectoryInfo::ResourcesDirectory() + "/PackageContent/PackageData/");
+    FileSystemUtils::CreateDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/");
     
     Log::Instance.LogInfo(TAG, "... Copying '%d' Directories", CopyDirectories.size());
     
     for(uint32 i = 0; i < CopyDirectories.size(); i++)
     {
-        std::string DirectoryName = CopyDirectories[i].substr((DirectoryInfo::ResourcesDirectory() + "/PackageContent/").length());
-        std::string TargetDirectory = DirectoryInfo::ResourcesDirectory() + "/PackageContent/PackageData/" + DirectoryName;
+        std::string DirectoryName = CopyDirectories[i].substr((FileSystemUtils::ResourcesDirectory() + "/PackageContent/").length());
+        std::string TargetDirectory = FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/" + DirectoryName;
         
         Log::Instance.LogInfo(TAG, "... %s", DirectoryName.c_str());
 
-        if(!DirectoryInfo::CopyDirectory(CopyDirectories[i], TargetDirectory, true))
+        if(!FileSystemUtils::CopyDirectory(CopyDirectories[i], TargetDirectory, true))
         {
-            DirectoryInfo::DeleteDirectory(DirectoryInfo::ResourcesDirectory() + "/PackageContent/PackageData");
+            FileSystemUtils::DeleteDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData");
             
             Log::Instance.LogErr(TAG, "Unable to copy all data to Temporary PackageData Folder");
             
@@ -106,7 +110,7 @@ int main(int argc, char **argv)
         
         for(uint32 j = 0; j < MapDirectories.size(); j++)
         {
-            std::vector<std::string> MapFiles = DirectoryInfo::ScanDirectory(TargetDirectory + "/" + MapDirectories[j].From, "tmx");
+            std::vector<std::string> MapFiles = FileSystemUtils::ScanDirectory(TargetDirectory + "/" + MapDirectories[j].From, "tmx");
             
             for(uint32 k = 0; k < MapFiles.size(); k++)
             {
@@ -114,25 +118,25 @@ int main(int argc, char **argv)
 
 				WorkingDirectory = StringUtils::Replace(WorkingDirectory, "//", "/");
 
-                DirectoryInfo::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].To);
+                FileSystemUtils::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].To);
                 
                 //TODO: Do this the "right way"
 
-				std::string ExePath = DirectoryInfo::ResourcesDirectory() + "/" + TiledConverterPath;
+				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TiledConverterPath;
 				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
                     MapFiles[k] + "\"";
 
-				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, WorkingDirectory);
+				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 				if(0 != ExitCode)
 				{
 					Log::Instance.LogErr(TAG, "Unable to run TiledMap: Exit Code '%d'", ExitCode);
 
-					std::vector<std::string> Dumps = DirectoryInfo::ScanDirectory(WorkingDirectory.c_str(), "dmp", false);
+					std::vector<std::string> Dumps = FileSystemUtils::ScanDirectory(WorkingDirectory.c_str(), "dmp", false);
 
 					for(uint32 l = 0; l < Dumps.size(); l++)
 					{
-						FileInfo::Copy(Dumps[i], DirectoryInfo::ResourcesDirectory() + "/" + StringUtils::FileName(Dumps[i]));
+						FileSystemUtils::CopyFile(Dumps[i], FileSystemUtils::ResourcesDirectory() + "/" + Path(Dumps[i]).BaseName);
 					};
 
 					Log::Instance.LogErr(TAG, "Copied '%d' Crash Files", Dumps.size());
@@ -146,10 +150,10 @@ int main(int argc, char **argv)
         
         Log::Instance.LogInfo(TAG, "...    Packing...");
 
-		std::string ExePath = DirectoryInfo::ResourcesDirectory() + "/" + PackerPath;
+		std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + PackerPath;
 		std::string Parameters = "-dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
 
-		int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, DirectoryInfo::ResourcesDirectory());
+		int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 		if(0 != ExitCode)
 		{
@@ -161,7 +165,7 @@ int main(int argc, char **argv)
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
     
-    DirectoryInfo::DeleteDirectory(DirectoryInfo::ResourcesDirectory() + "/PackageContent/PackageData/");
+    FileSystemUtils::DeleteDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/");
 
 	DeInitSubsystems();
 

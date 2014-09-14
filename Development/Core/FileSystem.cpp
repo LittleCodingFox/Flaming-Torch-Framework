@@ -9,6 +9,7 @@
 #	include <ShlObj.h>
 #	include <Commdlg.h>
 #	undef CreateDirectory
+#	undef CopyFile
 #	define GetCWD _getcwd
 #	include <windirent/dirent.h>
 #else
@@ -18,6 +19,7 @@
 #	include <unistd.h>
 #	define GetCWD getcwd
 #	define _mkdir(n) mkdir(n, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH)
+#	define _rmdir(n) rmdir(n)
 #endif
 
 namespace FlamingTorch
@@ -85,8 +87,8 @@ namespace FlamingTorch
 		{
 			Directory = PathName.substr(0, DirectorySeparator + 1);
 
-			if(DirectorySeparator + 2 < (int32)PathName.length())
-				BaseName = PathName.substr(DirectorySeparator + 2);
+			if(DirectorySeparator + 1 < (int32)PathName.length())
+				BaseName = PathName.substr(DirectorySeparator + 1);
 		};
 	};
 
@@ -229,12 +231,25 @@ namespace FlamingTorch
 	{
 		std::vector<std::string> Files;
 
+		Log::Instance.LogDebug(TAGUTILS, "Scanning directory '%s' (Recursive: %s)", Directory.c_str(), Recursive ? "YES" : "NO");
+
 		DIR *Root = opendir (Directory.c_str());
 
 		if(Root == NULL)
+		{
+			Log::Instance.LogDebug(TAGUTILS, "Unable to opendir directory '%s'", Directory.c_str());
+
 			return Files;
+		};
 
 		dirent *Entry = readdir(Root);
+
+		if(Entry == NULL)
+		{
+			Log::Instance.LogErr(TAGUTILS, "Error while reading directory: %d", errno);
+
+			return Files;
+		};
 
 		while(Entry != NULL)
 		{
@@ -246,6 +261,8 @@ namespace FlamingTorch
 				{
 					if(Recursive)
 					{
+						Log::Instance.LogDebug(TAGUTILS, "Found Directory '%s'", FileName.c_str());
+
 						std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
 							FileName, Extension, Recursive));
 
@@ -254,6 +271,8 @@ namespace FlamingTorch
 				}
 				else if(Entry->d_type == DT_REG)
 				{
+					Log::Instance.LogDebug(TAGUTILS, "Found File '%s'", FileName.c_str());
+
 					if(Extension.length() == 0 || Extension == "*" || FileName.rfind(Extension) == FileName.length() - Extension.length())
 						Files.push_back(Directory + std::string("/") + FileName);
 				};
@@ -404,7 +423,7 @@ namespace FlamingTorch
         
         closedir(Root);
         
-        return rmdir (Directory.c_str()) == 0;
+        return _rmdir (Directory.c_str()) == 0;
     };
     
     std::vector<std::string> FileSystemUtils::GetAllDirectories(const std::string &Directory)

@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 
 	SuperSmartPointer<FileStream> OutStream(new FileStream());
 
-	std::string OutFileName = StringUtils::FileName(FileName);
+	std::string OutFileName = Path(FileName).BaseName;
 
 	OutFileName = OutFileName.substr(0, OutFileName.rfind('.')) + "_out";
 
