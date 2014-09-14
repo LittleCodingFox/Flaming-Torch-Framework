@@ -5,6 +5,45 @@ class Texture;
 class UIManager;
 
 /*!
+*	Renderer Vertex Modes namespace
+*/
+namespace VertexModes
+{
+	enum
+	{
+		Triangles, //!<Triangle list
+		Lines, //!<Line list
+		Points //!<Point list
+	};
+};
+
+/*!
+*	Renderer Window Styles
+*/
+namespace RendererWindowStyle
+{
+	enum
+	{
+		Popup = FLAGVALUE(0), //!<Window is a popup with no border or title bar
+		FullScreen = FLAGVALUE(1), //!<Window is a fullscreen window
+		Default = FLAGVALUE(2) //!<Default Window with a border and title bar
+	};
+};
+
+/*!
+*	Renderer Buffers namespace
+*/
+namespace RendererBuffer
+{
+	enum
+	{
+		Color = FLAGVALUE(0), //!<Color Buffer
+		Depth = FLAGVALUE(1), //!<Depth Buffer
+		Stencil = FLAGVALUE(2) //!<Stencil Buffer
+	};
+};
+
+/*!
 *	Renderer Features namespace
 */
 namespace RendererFeature
@@ -20,6 +59,165 @@ namespace RendererFeature
 		MayUseNonPowerOfTwoTextures, //!<Whether we may use Non Power of Two Texture sizes (Bool)
 		Count //!<Unused, dont use this.
 	};
+};
+
+typedef uint32 TextureHandle;
+
+/*!
+*	Renderer Event class
+*/
+class RendererEvent
+{
+public:
+	/*!
+	*	Event Type (one of RendererEventType::*)
+	*/
+	uint8 Type;
+
+	/*!
+	*	Mouse Position
+	*/
+	Vector2 MousePosition;
+
+	/*!
+	*	Window Size
+	*/
+	Vector2 WindowSize;
+
+	/*!
+	*	Mouse Wheel Delta
+	*/
+	f32 MouseDelta;
+
+	/*!
+	*	Joystick Axis Position [-1, 1]
+	*/
+	f32 JoystickAxisPosition;
+
+	/*!
+	*	Last Typed Character
+	*/
+	wchar_t TypedCharacter;
+
+	/*!
+	*	Current Keypress Keycode
+	*/
+	uint8 KeyCode;
+
+	/*!
+	*	Current Mouse Button Index
+	*/
+	uint8 MouseButtonIndex;
+
+	/*!
+	*	Joystick Axis Index
+	*/
+	uint8 JoystickAxisIndex;
+
+	/*!
+	*	Joystick Button Index
+	*/
+	uint8 JoystickButtonIndex;
+
+	/*!
+	*	Joystick Index
+	*/
+	uint8 JoystickIndex;
+};
+
+/*!
+*	Renderer Implementation interface
+*/
+class IRendererImplementation
+{
+public:
+	virtual ~IRendererImplementation() {};
+
+	/*!
+	*	Render Window Size
+	*/
+	virtual const Vector2 &Size() const = 0;
+
+	/*!
+	*	Render vertices
+	*	\param VertexMode one of VertexModes::*
+	*	\param VertexData the vertex data as a pile of bytes
+	*	\param Start the starting vertex
+	*	\param End the ending vertex
+	*/
+	virtual void RenderVertices(uint32 VertexMode, void *VertexData, uint32 Start, uint32 End) = 0;
+
+	/*!
+	*	Clear a render buffer
+	*	\param Buffers a Bitmask of RenderBuffer::*
+	*/
+	virtual void Clear(uint32 Buffers) = 0;
+
+	/*!
+	*	Displays a frame
+	*/
+	virtual void Display() = 0;
+
+	/*!
+	*	Sets the current World Matrix
+	*	\param WorldMatrix the new World Matrix
+	*/
+	virtual void SetWorldMatrix(const Matrix4x4 &WorldMatrix) = 0;
+
+	/*!
+	*	Sets the current Projection Matrix
+	*	\param ProjectionMatrix the new World Matrix
+	*/
+	virtual void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix) = 0;
+
+	/*!
+	*	Sets the current viewport
+	*	\param x the viewport's x position
+	*	\param y the viewport's y position
+	*	\param Width the viewport's width
+	*	\param Height the viewport's height
+	*/
+	virtual void SetViewport(f32 x, f32 y, f32 Width, f32 Height) = 0;
+
+	/*!
+	*	Creates a texture
+	*	\return a texture handle, or 0xFFFFFFFF on error
+	*/
+	virtual TextureHandle CreateTexture() = 0;
+
+	/*!
+	*	Check whether a texture handle is still valid
+	*	\param Handle the texture's handle
+	*/
+	virtual bool IsTextureHandleValid(TextureHandle Handle) = 0;
+
+	/*!
+	*	Destroys a texture
+	*	\param Handle the texture handle to destroy
+	*/
+	virtual void DestroyTexture(TextureHandle Handle) = 0;
+
+	/*!
+	*	Fills in a texture's data
+	*	\param Handle the texture's handle
+	*	\param Pixels an array of RGBA pixels
+	*	\param Width the width of the texture
+	*	\param Height the height of the texture
+	*/
+	virtual void SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height) = 0;
+
+	/*!
+	*	Binds a texture for use
+	*	\param Handle the texture's handle
+	*/
+	virtual void BindTexture(TextureHandle Handle) = 0;
+
+	/*!
+	*	Polls for new renderer events
+	*	\param Out the RendererEvent we received
+	*	\return true if there's a new event, false otherwise
+	*/
+	virtual bool PollEvent(RendererEvent &Out);
 };
 
 /*!
@@ -41,7 +239,9 @@ public:
 	{
 		friend class RendererManager;
 		friend class InputCenter;
+		friend class Texture;
 	private:
+		IRendererImplementation *Impl;
 		bool AnisotropicSupported, AnisotropicEnabled;
 		f32 MaxAnisotropicLevel, CurrentAnisotropicLevel;
 		bool CanAutoGenerateMipMaps;
@@ -49,7 +249,7 @@ public:
 
 		Renderer() : AnisotropicSupported(false), AnisotropicEnabled(false),
 			MaxAnisotropicLevel(1), CurrentAnisotropicLevel(1), CanAutoGenerateMipMaps(false),
-			GlewIsAvailable(true), MayUseNonPOTTextures(false) {};
+			GlewIsAvailable(true), MayUseNonPOTTextures(false), Impl(NULL) {};
 
 		Renderer(const Renderer &o);
 		Renderer &operator=(const Renderer &o);
