@@ -128,15 +128,18 @@ public:
 		GeometryBufferIndexDataType::GeometryBufferIndexDataType IndexFormat = GeometryBufferIndexDataType::None);
 
 	void Destroy();
+
 	/*!
 	*	Maps a buffer into modifiable memory
 	*	\param Usage the way the memory will be handled
 	*/
 	void *Map(GeometryBufferMapping::GeometryBufferMapping Usage = GeometryBufferMapping::Read);
+
 	/*!
 	*	Finishes mapping a buffer of modifiable memory
 	*/
 	void Unmap();
+
 	void Bind();
 	void Unbind();
 	uint32 GetVertexSize();

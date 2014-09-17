@@ -16,7 +16,7 @@ namespace FlamingTorch
 
 	void Console::VersionCommand(const std::vector<std::string> &Parameters)
 	{
-		LogConsole(sf::String(L"> ") + (GameInterface::Instance ? GameInterface::Instance->GameName() : "(No Game)") +
+		LogConsole(std::string("> ") + (GameInterface::Instance ? GameInterface::Instance->GameName() : "(No Game)") +
 			" using core version " + CoreUtils::MakeVersionString(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR));
 	};
 
@@ -285,30 +285,18 @@ namespace FlamingTorch
 		RendererManager::Instance.RequestFrame();
 		RendererManager::Instance.RequestFrame();
 
-		RendererManager::Renderer *TargetRenderer = RendererManager::Instance.ActiveRenderer();
+		Renderer *TargetRenderer = RendererManager::Instance.ActiveRenderer();
 
 		TextureBuffer t;
 
 		t.CreateEmpty((uint32)TargetRenderer->Size().x, (uint32)TargetRenderer->Size().y);
 
-		GLCHECK();
-
-		//RGB Buffer
-		//Need to read as RGB since in RGBA it gets weird artifacts
-		std::vector<uint8> Temp((uint32)(TargetRenderer->Size().x * TargetRenderer->Size().y * 3));
-
-		glReadPixels(0, 0, (GLsizei)TargetRenderer->Size().x, (GLsizei)TargetRenderer->Size().y, GL_RGB, GL_UNSIGNED_BYTE, &Temp[0]);
-
-		//Convert from RGB to RGBA
-		for(uint32 i = 0, x = 0; i < Temp.size(); i += 3, x += 4)
+		if(!TargetRenderer->CaptureScreen(&t.Data[0], t.Data.size()))
 		{
-			t.Data[x] = Temp[i];
-			t.Data[x + 1] = Temp[i + 1];
-			t.Data[x + 2] = Temp[i + 2];
-			t.Data[x + 3] = 255;
-		};
+			LogConsole("Failed to take screenshot: Unable to capture screen");
 
-		GLCHECK();
+			return;
+		};
 
 		t.FlipY();
 
@@ -455,9 +443,9 @@ namespace FlamingTorch
 		ConsoleCommands.push_back(Command);
 	};
 
-	void Console::LogConsole(const sf::String &Message)
+	void Console::LogConsole(const std::string &Message)
 	{
-		Log::Instance.LogDebug(TAG, "%s", Message.toAnsiString().c_str());
+		Log::Instance.LogDebug(TAG, "%s", Message.c_str());
 
 		if(Message.find('\n') != std::string::npos)
 		{
@@ -474,23 +462,22 @@ namespace FlamingTorch
 		};
 	};
 
-	void Console::RunConsoleCommand(const sf::String &ConsoleText)
+	void Console::RunConsoleCommand(const std::string &ConsoleText)
 	{
 		LogConsole(ConsoleText);
 
-		std::wstring ActualConsoleText = ConsoleText.toWideString();
-		std::string ActualConsoleTextAnsi = ConsoleText.toAnsiString();
-		std::string Command = ActualConsoleTextAnsi;
+		std::string ActualConsoleText = ConsoleText;
+		std::string Command = ActualConsoleText;
 
-		int32 Index = ActualConsoleText.find(L' ');
+		int32 Index = ActualConsoleText.find(' ');
 
 		std::vector<std::string> ParameterStrings;
 
 		if(Index != std::wstring::npos)
 		{
-			Command = ActualConsoleTextAnsi.substr(0, Index);
+			Command = ActualConsoleText.substr(0, Index);
 
-			std::string Parameters = ActualConsoleTextAnsi.substr(Index + 1);
+			std::string Parameters = ActualConsoleText.substr(Index + 1);
 
 			bool InsideString = false;
 			bool Escaping = false;
@@ -585,7 +572,7 @@ namespace FlamingTorch
 						if(ParameterStrings.size())
 							sscanf(ParameterStrings[0].c_str(), "%u", &ConsoleVariables[i].UintValue);
 
-						LogConsole(sf::String(L"> ") + StringUtils::MakeIntString(ConsoleVariables[i].UintValue));
+						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].UintValue));
 
 						break;
 
@@ -593,7 +580,7 @@ namespace FlamingTorch
 						if(ParameterStrings.size())
 							sscanf(ParameterStrings[0].c_str(), "%d", &ConsoleVariables[i].IntValue);
 
-						LogConsole(sf::String(L"> ") + StringUtils::MakeIntString(ConsoleVariables[i].IntValue));
+						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].IntValue));
 
 						break;
 
@@ -601,7 +588,7 @@ namespace FlamingTorch
 						if(ParameterStrings.size())
 							sscanf(ParameterStrings[0].c_str(), "%f", &ConsoleVariables[i].FloatValue);
 
-						LogConsole(sf::String(L"> ") + StringUtils::MakeFloatString(ConsoleVariables[i].FloatValue));
+						LogConsole(std::string("> ") + StringUtils::MakeFloatString(ConsoleVariables[i].FloatValue));
 
 						break;
 
@@ -609,7 +596,7 @@ namespace FlamingTorch
 						if(ParameterStrings.size())
 							ConsoleVariables[i].StringValue = ParameterStrings[0];
 
-						LogConsole(sf::String(L"> ") + ConsoleVariables[i].StringValue);
+						LogConsole(std::string("> ") + ConsoleVariables[i].StringValue);
 
 						break;
 					};
@@ -621,7 +608,7 @@ namespace FlamingTorch
 
 		if(!Found)
 		{
-			LogConsole(L"Invalid Command or Variable");
+			LogConsole("Invalid Command or Variable");
 		};
 	};
 };

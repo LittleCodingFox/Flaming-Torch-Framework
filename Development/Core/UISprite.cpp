@@ -32,7 +32,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void UISprite::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UISprite::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 

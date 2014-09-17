@@ -1,5 +1,9 @@
 #pragma once
 
+#if USE_GRAPHICS
+class Renderer;
+#endif
+
 /*!
 *	2D/3D Camera Class
 */
@@ -41,12 +45,14 @@ public:
 #if USE_GRAPHICS
 	/*!
 	*	Begin using the Camera's Transform
+	*	\param TheRenderer the renderer upon which to apply this transform
 	*/
-	void BeginTransforms();
+	void BeginTransforms(Renderer *TheRenderer);
 
 	/*!
 	*	End using the Camera's Transform
+	*	\param TheRenderer the renderer upon which to apply this transform
 	*/
-	void EndTransforms();
+	void EndTransforms(Renderer *TheRenderer);
 #endif
 };

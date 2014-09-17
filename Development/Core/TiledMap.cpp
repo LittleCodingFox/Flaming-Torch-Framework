@@ -358,8 +358,10 @@ namespace FlamingTorch
 		return true;
 	};
 
-	void TiledMap::Draw(uint32 Layer, RendererManager::Renderer *Renderer)
+	void TiledMap::Draw(uint32 Layer, Renderer *Renderer)
 	{
+		FLASSERT(0, "Temporarily disabled");
+
 		PROFILE("TiledMap::Draw", StatTypes::Rendering);
 
 		if(!ResourcesInitedValue || Layer >= Layers.size() || Layers[Layer]->Visible == false || Layers[Layer]->Vertices.size() == 0)
@@ -367,6 +369,7 @@ namespace FlamingTorch
 
 		SpriteCache::Instance.Flush(Renderer);
 
+		/*
 		bool DoTranslation = Translation != Vector2() || Scale != Vector2(1, 1);
 
 		if(DoTranslation)
@@ -400,6 +403,7 @@ namespace FlamingTorch
 		{
 			glPopMatrix();
 		};
+		*/
 	};
 
 	bool TiledMap::ResourcesInited()

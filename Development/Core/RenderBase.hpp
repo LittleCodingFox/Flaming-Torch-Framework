@@ -1,8 +1,65 @@
 #pragma once
-typedef uint32 RendererHandle;
+#
+#ifdef CreateFont
+#	undef CreateFont
+#endif
+
 class InputCenter;
 class Texture;
 class UIManager;
+
+#define JOYSTICKDEADZONE 30
+
+/*!
+*	Vertex Element Type
+*/
+namespace VertexElementType
+{
+	enum
+	{
+		Position, //!<Position of the vertex
+		TexCoord, //!<Texture Coordinate of the vertex
+		Color, //!<Color of the vertex
+		Normal //!<Normal of the vertex
+	};
+};
+
+/*!
+*	Vertex Element Data Type
+*/
+namespace VertexElementDataType
+{
+	enum
+	{
+		Float, //!<Single Float
+		Float2, //!<Two Floats (Vector2)
+		Float3, //!<Three Floats (Vector3)
+		Float4, //!<Four Floats (Vector4)
+		Count //!<Total data types (do not use)
+	};
+};
+
+/*!
+*	Vertex Details Modes
+*/
+namespace VertexDetailsMode
+{
+	enum
+	{
+		Mixed = 0, //!<Vertices are mixed (e.g., vertices are in format (pos, tex, normal, pos, tex, normal)
+		Lists //!<Vertices are lists (e.g., vertices are in format (pos, pos, pos, tex, tex, tex, norma, normal, normal)
+	};
+};
+
+/*!
+*	Vertex Element Descriptor
+*/
+struct VertexElementDescriptor
+{
+	uint32 Offset; //!<Byte Offset
+	uint8 Type; //!<One of VertexElementType::*
+	uint8 DataType; //!<One of VertexElementDataType::*
+};
 
 /*!
 *	Renderer Vertex Modes namespace
@@ -13,7 +70,8 @@ namespace VertexModes
 	{
 		Triangles, //!<Triangle list
 		Lines, //!<Line list
-		Points //!<Point list
+		Points, //!<Point list
+		Count //!<Total Vertex Modes (do not use)
 	};
 };
 
@@ -44,24 +102,32 @@ namespace RendererBuffer
 };
 
 /*!
-*	Renderer Features namespace
+*	Renderer Event Type
 */
-namespace RendererFeature
+namespace RendererEventType
 {
 	enum
 	{
-		GlewIsAvailable = 0, //!< Whether GLEW is available (Bool)
-		AnisotropicSupported, //!<Whether Anisotropic Filtering is supported (Bool)
-		AnisotropicEnabled, //!<Whether Anisotropic Filtering is Enabled (Bool)
-		MaxAnisotropicLevel, //!<The Maximum Anisotropic Level (f32)
-		CurrentAnisotropicLevel, //!<The Current Anisotropic Level (f32)
-		CanAutoGenerateMipMaps, //!<Whether we can auto generate MipMaps (Bool)
-		MayUseNonPowerOfTwoTextures, //!<Whether we may use Non Power of Two Texture sizes (Bool)
-		Count //!<Unused, dont use this.
+		JoystickConnected,
+		JoystickDisconnected,
+		JoystickButtonPressed,
+		JoystickButtonReleased,
+		JoystickAxisMoved,
+		MouseMoved,
+		MouseButtonPressed,
+		MouseButtonReleased,
+		MouseDeltaMoved,
+		KeyPressed,
+		KeyReleased,
+		CharacterEntered,
+		WindowGotFocus,
+		WindowLostFocus,
+		WindowResized,
+		WindowClosed,
+		MouseLeft,
+		MouseEntered
 	};
 };
-
-typedef uint32 TextureHandle;
 
 /*!
 *	Renderer Event class
@@ -125,27 +191,427 @@ public:
 	uint8 JoystickIndex;
 };
 
+class IRendererImplementation;
+
+/*!
+*	Renderer is a rendering class that takes care of windowing and OpenGL Contexts
+*/
+class Renderer
+{
+	friend class RendererManager;
+	friend class InputCenter;
+	friend class Texture;
+private:
+	IRendererImplementation *Impl;
+
+	Renderer(IRendererImplementation *_Impl);
+	Renderer(const Renderer &o);
+	Renderer &operator=(const Renderer &o);
+	RendererHandle HandleValue;
+public:
+	Camera RenderCamera;
+
+	/*!
+	*	OnFrameStarted should be used to do stuff before we render the main frame such as clearing the screen
+	*	OnFrameEnded should be used to draw stuff after the frame has ended, such as our HUD
+	*	OnFrameDraw should be used for drawing the main content of the frame
+	*/
+	Signal1<Renderer *> OnFrameStarted, OnFrameEnded, OnFrameDraw;
+
+	/*!
+	*	OnResized should be used to reset your camera and projection matrix
+	*	Parameters are Renderer, Width, Height
+	*/
+	Signal3<Renderer *, uint32, uint32> OnResized;
+
+	/*!
+	*	On Resources Reloaded should be used to reset any states that are not usually saved by the renderer
+	*	Might be removed later on
+	*/
+	Signal1<Renderer *> OnResourcesReloaded;
+
+	/*!
+	*	UI Manager
+	*/
+	SuperSmartPointer<UIManager> UI;
+
+	/*!
+	*	\return the Renderer Handle
+	*/
+	RendererHandle Handle() const;
+
+	/*!
+	*	Creates a renderer from a Window Handle
+	*/
+	bool Create(void *WindowHandle);
+
+	/*!
+	*	Creates a renderer from window details
+	*	\param Title the title of the window
+	*	\param Width the width of the window
+	*	\param Height the height of the window
+	*	\param Style the style of the window (one or more of RendererWindowStyle::*)
+	*/
+	bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style);
+
+	/*!
+	*	Render Window Size
+	*/
+	Vector2 Size() const;
+	
+	/*!
+	*	Creates a Vertex Buffer
+	*	\return a vertex buffer handle, or 0 on error
+	*/
+	VertexBufferHandle CreateVertexBuffer();
+
+	/*!
+	*	Sets a Vertex Buffer's Data
+	*	\param Handle the Vertex Buffer's Handle
+	*	\param DetailsMode one of VertexDetailsMode::*
+	*	\param Elements a list of VertexElementDescriptor
+	*	\param ElementCount the amount of VertexElements in Elements
+	*	\param Data the data for the vertex buffer
+	*	\param DataByteSize the byte size of the entire data
+	*/
+	void SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize);
+
+	/*!
+	*	Checks whether a vertex buffer handle is valid
+	*	\param Handle the Vertex Buffer Handle to check
+	*/
+	bool IsVertexBufferHandleValid(VertexBufferHandle Handle);
+
+	/*!
+	*	Destroys a Vertex Buffer
+	*	\param Handle the handle of the vertex buffer to destroy
+	*/
+	void DestroyVertexBuffer(VertexBufferHandle Handle);
+
+	/*!
+	*	Render vertices
+	*	\param VertexMode one of VertexModes::*
+	*	\param Buffer is the handle of the Vertex Buffer
+	*	\param Start the starting vertex
+	*	\param End the ending vertex
+	*/
+	void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End);
+
+	/*!
+	*	Clear a render buffer
+	*	\param Buffers a Bitmask of RenderBuffer::*
+	*/
+	void Clear(uint32 Buffers);
+
+	/*!
+	*	Displays a frame
+	*/
+	void Display();
+
+	/*!
+	*	Sets the current World Matrix
+	*	\param WorldMatrix the new World Matrix
+	*/
+	void SetWorldMatrix(const Matrix4x4 &WorldMatrix);
+
+	/*!
+	*	Sets the current Projection Matrix
+	*	\param ProjectionMatrix the new World Matrix
+	*/
+	void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix);
+
+	/*!
+	*	Sets the current viewport
+	*	\param x the viewport's x position
+	*	\param y the viewport's y position
+	*	\param Width the viewport's width
+	*	\param Height the viewport's height
+	*/
+	void SetViewport(f32 x, f32 y, f32 Width, f32 Height);
+
+	/*!
+	*	Creates a texture
+	*	\return a texture handle, or 0 on error
+	*/
+	TextureHandle CreateTexture();
+
+	/*!
+	*	Check whether a texture handle is still valid
+	*	\param Handle the texture's handle
+	*/
+	bool IsTextureHandleValid(TextureHandle Handle);
+
+	/*!
+	*	Destroys a texture
+	*	\param Handle the texture handle to destroy
+	*/
+	void DestroyTexture(TextureHandle Handle);
+
+	/*!
+	*	Fills in a texture's data
+	*	\param Handle the texture's handle
+	*	\param Pixels an array of RGBA pixels
+	*	\param Width the width of the texture
+	*	\param Height the height of the texture
+	*/
+	void SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height);
+
+	/*!
+	*	Gets a texture's data to a pixel buffer
+	*	\param Handle the texture's handle
+	*	\param Pixels the pixels to store the screen to
+	*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
+	*	\return whether we were able to capture the screen
+	*/
+	bool GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount);
+
+	/*!
+	*	Sets a texture's wrap mode
+	*	\param Handle the texture's Handle
+	*	\param WrapMode one of TextureWrapMode::*
+	*/
+	void SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode);
+
+	/*!
+	*	Sets a texture's filter mode
+	*	\param Handle the texture's Handle
+	*	\param Filtering one of TextureFiltering::*
+	*/
+	void SetTextureFiltering(TextureHandle Handle, uint32 Filtering);
+
+	/*!
+	*	Sets the current blending mode
+	*	\param BlendingMode one of BlendingMode::*
+	*/
+	void SetBlendingMode(uint32 BlendingMode);
+
+	/*!
+	*	Binds a texture for use
+	*	\param Handle the texture's handle
+	*/
+	void BindTexture(TextureHandle Handle);
+
+	/*!
+	*	Binds a texture for use
+	*	\param TheTexture the texture to bind
+	*/
+	void BindTexture(Texture *TheTexture);
+
+	/*!
+	*	Captures the screen to a pixel buffer
+	*	\param Pixels the pixels to store the screen to
+	*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
+	*	\return whether we were able to capture the screen
+	*/
+	bool CaptureScreen(uint8 *Pixels, uint32 BufferByteCount);
+
+	/*!
+	*	Polls for new renderer events
+	*	\param Out the RendererEvent we received
+	*	\return true if there's a new event, false otherwise
+	*/
+	bool PollEvent(RendererEvent &Out);
+
+	/*!
+	*	Creates a Font from a Stream of Data
+	*	\param Data the data of the font
+	*	\return a FontHandle or 0xFFFFFFFF
+	*/
+	FontHandle CreateFont(Stream *Data);
+
+	/*!
+	*	Destroys a font
+	*	\param Handle the font's handle
+	*/
+	void DestroyFont(FontHandle Handle);
+
+	/*!
+	*	Measures Text
+	*	\param Handle the font's handle
+	*	\param Text the text to measure
+	*	\param Parameters the text parameters to use
+	*	\return a rectangle with the text's bounds
+	*/
+	Rect MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters);
+
+	/*!
+	*	Renders Text to the screen
+	*	\param Handle the font's handle
+	*	\param Text the text to measure
+	*	\param Parameters the text parameters to use
+	*/
+	void RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters);
+
+	/*!
+	*	Gets the Native Window Handle of this Renderer
+	*/
+	void *WindowHandle() const;
+
+	/*!
+	*	Sets the current Mouse Position
+	*	\param Position the new Mouse Position
+	*/
+	void SetMousePosition(const Vector2 &Position);
+
+	/*!
+	*	Sets the Rendering Frame Rate
+	*	\param FPS the target FPS
+	*/
+	void SetFrameRate(uint32 FPS);
+};
+
+/*!
+*	Renderer Manager is a manager for multiple Renderers
+*/
+class RendererManager : public SubSystem
+{
+	friend class RendererInputProcessor;
+public:
+#if PROFILER_ENABLED
+	Profiler::PacketMap ProfilerPackets;
+
+	void OnGetProfilerPackets(const Profiler::PacketMap &Packets);
+#endif
+private:
+	typedef std::map<RendererHandle, SuperSmartPointer<Renderer> > RendererMap;
+	
+	RendererMap Renderers;
+
+public:
+	bool ShowProfiler, ShowConsole;
+
+private:
+	std::string ConsoleText;
+	uint32 ConsoleCursorPosition, ConsoleLogOffset;
+
+	RendererManager();
+	void StartUp(uint32 Priority);
+	void Shutdown(uint32 Priority);
+	void Update(uint32 Priority);
+public:
+	/*!
+	*	The Input Processor
+	*/
+	InputCenter Input;
+
+	static RendererManager Instance;
+
+	/*!
+	*	Add a renderer whose window will be created
+	*	\param Title the Window Title
+	*	\param Width the Renderer Width
+	*	\param Height the Renderer Height
+	*	\param Style the Window Style
+	*	\return a Renderer Handle. If it is 0, we failed to create the renderer
+	*	\note After creation you must set the renderer as the active renderer if you don't have any set yet
+	*/
+	RendererHandle AddRenderer(const char *Title, uint32 Width, uint32 Height,
+		uint32 Style = RendererWindowStyle::Default);
+
+	/*!
+	*	Add a renderer to an existing window
+	*	\param Window the Window Handle
+	*	\return a Renderer Handle. If it is 0, we failed to create the renderer
+	*	\note After creation you must set the renderer as the active renderer if you don't have any set yet
+	*/
+	RendererHandle AddRenderer(void *Window);
+
+	/*!
+	*	Destroy the currently active renderer
+	*	\param Handle the Rendering Handle
+	*/
+	void DestroyRenderer(RendererHandle Handle);
+
+	/*!
+	*	Use a different renderer
+	*	\param Handle the Renderer's Handle
+	*/
+	void SetActiveRenderer(RendererHandle Handle);
+
+	/*!
+	*	Get the active renderer
+	*	\return the Active Renderer
+	*/
+	Renderer *ActiveRenderer();
+
+	/*!
+	*	Draws a frame (also checks input events)
+	*	\return whether we should stop our app
+	*/
+	bool RequestFrame();
+
+	/*!
+	*	Gets the amount of renderers we already are managing
+	*/
+	uint32 RendererCount() const;
+};
+
 /*!
 *	Renderer Implementation interface
 */
 class IRendererImplementation
 {
 public:
+	Renderer *Target;
+
 	virtual ~IRendererImplementation() {};
+
+	/*!
+	*	Creates a renderer from a Window Handle
+	*/
+	virtual bool Create(void *WindowHandle) = 0;
+
+	/*!
+	*	Creates a renderer from window details
+	*	\param Title the title of the window
+	*	\param Width the width of the window
+	*	\param Height the height of the window
+	*	\param Style the style of the window (one or more of RendererWindowStyle::*)
+	*/
+	virtual bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style) = 0;
 
 	/*!
 	*	Render Window Size
 	*/
-	virtual const Vector2 &Size() const = 0;
+	virtual Vector2 Size() const = 0;
+	
+	/*!
+	*	Creates a Vertex Buffer
+	*	\return a vertex buffer handle, or 0 on error
+	*/
+	virtual VertexBufferHandle CreateVertexBuffer() = 0;
+
+	/*!
+	*	Sets a Vertex Buffer's Data
+	*	\param Handle the Vertex Buffer's Handle
+	*	\param DetailsMode one of VertexDetailsMode::*
+	*	\param Elements a list of VertexElementDescriptor
+	*	\param ElementCount the amount of VertexElements in Elements
+	*	\param Data the data for the vertex buffer
+	*	\param DataByteSize the byte size of the entire data
+	*/
+	virtual void SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize) = 0;
+
+	/*!
+	*	Checks whether a vertex buffer handle is valid
+	*	\param Handle the Vertex Buffer Handle to check
+	*/
+	virtual bool IsVertexBufferHandleValid(VertexBufferHandle Handle) = 0;
+
+	/*!
+	*	Destroys a Vertex Buffer
+	*	\param Handle the handle of the vertex buffer to destroy
+	*/
+	virtual void DestroyVertexBuffer(VertexBufferHandle Handle) = 0;
 
 	/*!
 	*	Render vertices
 	*	\param VertexMode one of VertexModes::*
-	*	\param VertexData the vertex data as a pile of bytes
+	*	\param Buffer is the handle of the Vertex Buffer
 	*	\param Start the starting vertex
 	*	\param End the ending vertex
 	*/
-	virtual void RenderVertices(uint32 VertexMode, void *VertexData, uint32 Start, uint32 End) = 0;
+	virtual void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End) = 0;
 
 	/*!
 	*	Clear a render buffer
@@ -181,7 +647,7 @@ public:
 
 	/*!
 	*	Creates a texture
-	*	\return a texture handle, or 0xFFFFFFFF on error
+	*	\return a texture handle, or 0 on error
 	*/
 	virtual TextureHandle CreateTexture() = 0;
 
@@ -207,262 +673,364 @@ public:
 	virtual void SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height) = 0;
 
 	/*!
+	*	Gets a texture's data to a pixel buffer
+	*	\param Handle the texture's handle
+	*	\param Pixels the pixels to store the screen to
+	*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
+	*	\return whether we were able to capture the screen
+	*/
+	virtual bool GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount) = 0;
+
+	/*!
+	*	Sets a texture's wrap mode
+	*	\param Handle the texture's Handle
+	*	\param WrapMode one of TextureWrapMode::*
+	*/
+	virtual void SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode) = 0;
+
+	/*!
+	*	Sets a texture's filter mode
+	*	\param Handle the texture's Handle
+	*	\param Filtering one of TextureFiltering::*
+	*/
+	virtual void SetTextureFiltering(TextureHandle Handle, uint32 Filtering) = 0;
+
+	/*!
+	*	Sets the current blending mode
+	*	\param BlendingMode one of BlendingMode::*
+	*/
+	virtual void SetBlendingMode(uint32 BlendingMode) = 0;
+
+	/*!
 	*	Binds a texture for use
 	*	\param Handle the texture's handle
 	*/
 	virtual void BindTexture(TextureHandle Handle) = 0;
 
 	/*!
+	*	Captures the screen to a pixel buffer
+	*	\param Pixels the pixels to store the screen to
+	*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
+	*	\return whether we were able to capture the screen
+	*/
+	virtual bool CaptureScreen(uint8 *Pixels, uint32 BufferByteCount) = 0;
+
+	/*!
 	*	Polls for new renderer events
 	*	\param Out the RendererEvent we received
 	*	\return true if there's a new event, false otherwise
 	*/
-	virtual bool PollEvent(RendererEvent &Out);
+	virtual bool PollEvent(RendererEvent &Out) = 0;
+
+	/*!
+	*	Creates a Font from a Stream of Data
+	*	\param Data the data of the font
+	*	\return a FontHandle or 0xFFFFFFFF
+	*/
+	virtual FontHandle CreateFont(Stream *Data) = 0;
+
+	/*!
+	*	Destroys a font
+	*	\param Handle the font's handle
+	*/
+	virtual void DestroyFont(FontHandle Handle) = 0;
+
+	/*!
+	*	Measures Text
+	*	\param Handle the font's handle
+	*	\param Text the text to measure
+	*	\param Parameters the text parameters to use
+	*	\return a rectangle with the text's bounds
+	*/
+	virtual Rect MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters) = 0;
+
+	/*!
+	*	Renders Text to the screen
+	*	\param Handle the font's handle
+	*	\param Text the text to measure
+	*	\param Parameters the text parameters to use
+	*/
+	virtual void RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters) = 0;
+
+	/*!
+	*	Gets the Native Window Handle of this Renderer
+	*/
+	virtual void *WindowHandle() const = 0;
+
+	/*!
+	*	Sets the current Mouse Position
+	*	\param Position the new Mouse Position
+	*/
+	virtual void SetMousePosition(const Vector2 &Position) = 0;
+
+	/*!
+	*	Sets the Rendering Frame Rate
+	*	\param FPS the target FPS
+	*/
+	virtual void SetFrameRate(uint32 FPS) = 0;
 };
 
-/*!
-*	Renderer Manager is a manager for multiple Renderers
-*/
-class RendererManager : public SubSystem
-{
-	friend class RendererInputProcessor;
-public:
-#if PROFILER_ENABLED
-	Profiler::PacketMap ProfilerPackets;
-
-	void OnGetProfilerPackets(const Profiler::PacketMap &Packets);
+#if USE_SFML_RENDERER
+#	include "SFMLRenderer.hpp"
+#	undef DEFAULT_RENDERER_IMPLEMENTATION
+#	define DEFAULT_RENDERER_IMPLEMENTATION SFMLRendererImplementation
 #endif
+
+#ifndef DEFAULT_RENDERER_IMPLEMENTATION
+#	define DEFAULT_RENDERER_IMPLEMENTATION NULLRendererImplementation
+
+class NULLRendererImplementation : public IRendererImplementation
+{
+public:
 	/*!
-	*	Renderer is a rendering class that takes care of windowing and OpenGL Contexts
+	*	Creates a renderer from a Window Handle
 	*/
-	class Renderer
+	bool Create(void *WindowHandle)
 	{
-		friend class RendererManager;
-		friend class InputCenter;
-		friend class Texture;
-	private:
-		IRendererImplementation *Impl;
-		bool AnisotropicSupported, AnisotropicEnabled;
-		f32 MaxAnisotropicLevel, CurrentAnisotropicLevel;
-		bool CanAutoGenerateMipMaps;
-		bool MayUseNonPOTTextures;
-
-		Renderer() : AnisotropicSupported(false), AnisotropicEnabled(false),
-			MaxAnisotropicLevel(1), CurrentAnisotropicLevel(1), CanAutoGenerateMipMaps(false),
-			GlewIsAvailable(true), MayUseNonPOTTextures(false), Impl(NULL) {};
-
-		Renderer(const Renderer &o);
-		Renderer &operator=(const Renderer &o);
-		RendererHandle HandleValue;
-
-		/*!
-		*	OpenGL Rendering States Map
-		*	Used to prevent unnecessary State Changes
-		*/
-		typedef std::map<uint32, bool> GLStatesMap;
-		GLStatesMap GLStates;
-
-		/*!
-		*	Last Bound Texture pointer
-		*	Used to prevent unnecessary Texture Changes
-		*/
-		Texture *LastBoundTexture;
-
-		/*!
-		*	FullScreen Flag
-		*/
-		bool FullScreenFlag;
-
-		/*!
-		*	Window Title
-		*/
-		sf::String WindowTitle;
-
-		/*!
-		*	Window Style
-		*/
-		uint32 WindowStyle;
-
-		/*!
-		*	Whether the Renderer was created from a Window
-		*/
-		bool CreatedFromWindow;
-
-		/*!
-		*	Does resizing. Use with care.
-		*/
-		void HandleResize(uint32 w, uint32 h);
-	public:
-		Camera RenderCamera;
-
-		bool GlewIsAvailable;
-
-		/*!
-		*	OnFrameStarted should be used to do stuff before we render the main frame such as clearing the screen
-		*	OnFrameEnded should be used to draw stuff after the frame has ended, such as our HUD
-		*	OnFrameDraw should be used for drawing the main content of the frame
-		*/
-		Signal1<Renderer *> OnFrameStarted, OnFrameEnded, OnFrameDraw;
-		
-		/*!
-		*	OnResized should be used to reset your camera and projection matrix
-		*	Parameters are Renderer, Width, Height
-		*/
-		Signal3<Renderer *, uint32, uint32> OnResized;
-
-		/*!
-		*	On Resources Reloaded should be used to reset any states that are not usually saved by the renderer
-		*	Might be removed later on
-		*/
-		Signal1<Renderer *> OnResourcesReloaded;
-
-		/*!
-		*	Rendering window
-		*/
-		sf::RenderWindow Window;
-
-		/*!
-		*	UI Manager
-		*/
-		SuperSmartPointer<UIManager> UI;
-
-		/*!
-		*	Returns the value of a Boolean feature
-		*	\param ID one of RendererFeature::*
-		*	\sa RendererFeature
-		*/
-		bool GetBoolFeature(uint32 ID);
-		/*!
-		*	Returns the value of a Float feature
-		*	\param ID one of RendererFeature::*
-		*	\sa RendererFeature
-		*/
-		f32 GetFloatFeature(uint32 ID);
-		/*!
-		*	Returns the value of a Uint feature
-		*	\param ID one of RendererFeature::*
-		*	\sa RendererFeature
-		*/
-		uint32 GetUintFeature(uint32 ID);
-
-		/*!
-		*	\return the Renderer Handle
-		*/
-		RendererHandle Handle() const;
-
-		/*!
-		*	Clears the framebuffer in some way
-		*	\param ID the GL IDs (like GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-		*/
-		void Clear(uint32 ID);
-		
-		/*!
-		*	Sets the FullScreen Flag
-		*	\param TargetResolution the resolution we want to use
-		*	\param Value the value to set the fullscreen mode to
-		*	\return Whether we succeeded in going fullscreen
-		*	\note if it fails, it's more likely that the window is now broken.
-		*	\note You should now either recreate it again in the old resolution or quit the app
-		*/
-		bool SetFullScreen(const Vector2 &TargetResolution, bool Value);
-
-		/*!
-		*	Gets the FullScreen Flag value
-		*/
-		bool GetFullScreen() const;
-
-		/*!
-		*	Enables a GL State
-		*	\param ID one GL state enum
-		*/
-		void EnableState(uint32 ID);
-
-		/*!
-		*	Disables a GL State
-		*	\param ID one GL state enum
-		*/
-		void DisableState(uint32 ID);
-
-		/*!
-		*	Checks a GL State
-		*	\param ID one GL state enum
-		*	\return Whether the state is enabled
-		*	\note this uses the state cache so if you change states in custom OpenGL code it will be inaccurate
-		*/
-		bool IsStateEnabled(uint32 ID) const;
-
-		/*!
-		*	Binds a texture
-		*	\param t the Texture to bind
-		*	\note Pass NULL to unbind any textures
-		*/
-		void BindTexture(Texture *t);
-
-		/*!
-		*	Returns the window size
-		*/
-		Vector2 Size() const;
+		return true;
 	};
-private:
-	typedef std::map<uint32, SuperSmartPointer<Renderer> > RendererMap;
+
+	/*!
+	*	Creates a renderer from window details
+	*	\param Title the title of the window
+	*	\param Width the width of the window
+	*	\param Height the height of the window
+	*	\param Style the style of the window (one or more of RendererWindowStyle::*)
+	*/
+	bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style)
+	{
+		return true;
+	};
+
+	/*!
+	*	Render Window Size
+	*/
+	Vector2 Size() const
+	{
+		return Vector2(1, 1);
+	};
 	
-	RendererMap Renderers;
-
-public:
-	bool ShowProfiler, ShowConsole;
-
-private:
-	sf::String ConsoleText;
-	uint32 ConsoleCursorPosition, ConsoleLogOffset;
-
-	RendererManager();
-	void StartUp(uint32 Priority);
-	void Shutdown(uint32 Priority);
-	void Update(uint32 Priority);
-public:
 	/*!
-	*	The Input Processor
+	*	Creates a Vertex Buffer
+	*	\return a vertex buffer handle, or 0 on error
 	*/
-	InputCenter Input;
-
-	static RendererManager Instance;
+	VertexBufferHandle CreateVertexBuffer()
+	{
+		return 1;
+	};
 
 	/*!
-	*	Add a renderer whose window will be created
-	*	\param Title the Window Title
-	*	\param Width the Renderer Width
-	*	\param Height the Renderer Height
-	*	\param Style the Window Style
-	*	\return a Renderer Handle. If it is 0, we failed to create the renderer
-	*	\note After creation you must set the renderer as the active renderer if you don't have any set yet
+	*	Checks whether a vertex buffer handle is valid
+	*	\param Handle the Vertex Buffer Handle to check
 	*/
-	RendererHandle AddRenderer(const char *Title, uint32 Width, uint32 Height,
-		uint32 Style = sf::Style::Resize | sf::Style::Close);
+	bool IsVertexBufferHandleValid(VertexBufferHandle Handle)
+	{
+		return 1;
+	};
+
 	/*!
-	*	Add a renderer to an existing window
-	*	\param Window the Window Handle
-	*	\return a Renderer Handle. If it is 0, we failed to create the renderer
-	*	\note After creation you must set the renderer as the active renderer if you don't have any set yet
+	*	Sets a Vertex Buffer's Data
+	*	\param Handle the Vertex Buffer's Handle
+	*	\param DetailsMode one of VertexDetailsMode::*
+	*	\param Elements a list of VertexElementDescriptor
+	*	\param ElementCount the amount of VertexElements in Elements
+	*	\param Data the data for the vertex buffer
+	*	\param DataByteSize the byte size of the entire data
 	*/
-	RendererHandle AddRenderer(sf::WindowHandle Window);
+	void SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize) {};
+
 	/*!
-	*	Destroy the currently active renderer
-	*	\param Handle the Rendering Handle
+	*	Destroys a Vertex Buffer
+	*	\param Handle the handle of the vertex buffer to destroy
 	*/
-	void DestroyRenderer(RendererHandle Handle);
+	void DestroyVertexBuffer(VertexBufferHandle Handle) {};
+
 	/*!
-	*	Use a different renderer
-	*	\param Handle the Renderer's Handle
+	*	Render vertices
+	*	\param VertexMode one of VertexModes::*
+	*	\param Buffer is the handle of the Vertex Buffer
+	*	\param Start the starting vertex
+	*	\param End the ending vertex
 	*/
-	void SetActiveRenderer(RendererHandle Handle);
+	void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End) {};
+
 	/*!
-	*	Get the active renderer
-	*	\return the Active Renderer
+	*	Clear a render buffer
+	*	\param Buffers a Bitmask of RenderBuffer::*
 	*/
-	Renderer *ActiveRenderer();
+	void Clear(uint32 Buffers) {};
+
 	/*!
-	*	Draws a frame (also checks input events)
-	*	\return whether we should stop our app
+	*	Displays a frame
 	*/
-	bool RequestFrame();
+	void Display() {};
+
+	/*!
+	*	Sets the current World Matrix
+	*	\param WorldMatrix the new World Matrix
+	*/
+	void SetWorldMatrix(const Matrix4x4 &WorldMatrix) {};
+
+	/*!
+	*	Sets the current Projection Matrix
+	*	\param ProjectionMatrix the new World Matrix
+	*/
+	void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix) {};
+
+	/*!
+	*	Sets the current viewport
+	*	\param x the viewport's x position
+	*	\param y the viewport's y position
+	*	\param Width the viewport's width
+	*	\param Height the viewport's height
+	*/
+	void SetViewport(f32 x, f32 y, f32 Width, f32 Height) {};
+
+	/*!
+	*	Creates a texture
+	*	\return a texture handle, or 0 on error
+	*/
+	TextureHandle CreateTexture()
+	{
+		return 1;
+	};
+
+	/*!
+	*	Check whether a texture handle is still valid
+	*	\param Handle the texture's handle
+	*/
+	bool IsTextureHandleValid(TextureHandle Handle)
+	{
+		return true;
+	};
+
+	/*!
+	*	Destroys a texture
+	*	\param Handle the texture handle to destroy
+	*/
+	void DestroyTexture(TextureHandle Handle) {};
+
+	/*!
+	*	Fills in a texture's data
+	*	\param Handle the texture's handle
+	*	\param Pixels an array of RGBA pixels
+	*	\param Width the width of the texture
+	*	\param Height the height of the texture
+	*/
+	void SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height) {};
+
+	/*!
+	*	Gets a texture's data to a pixel buffer
+	*	\param Handle the texture's handle
+	*	\param Pixels the pixels to store the screen to
+	*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
+	*	\return whether we were able to capture the screen
+	*/
+	bool GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount) { return true; };
+
+	/*!
+	*	Sets a texture's wrap mode
+	*	\param Handle the texture's Handle
+	*	\param WrapMode one of TextureWrapMode::*
+	*/
+	void SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode) {};
+
+	/*!
+	*	Sets a texture's filter mode
+	*	\param Handle the texture's Handle
+	*	\param Filtering one of TextureFiltering::*
+	*/
+	void SetTextureFiltering(TextureHandle Handle, uint32 Filtering) {};
+
+	/*!
+	*	Sets the current blending mode
+	*	\param BlendingMode one of BlendingMode::*
+	*/
+	void SetBlendingMode(uint32 BlendingMode) {};
+
+	/*!
+	*	Binds a texture for use
+	*	\param Handle the texture's handle
+	*/
+	void BindTexture(TextureHandle Handle) {};
+
+	/*!
+	*	Captures the screen to a pixel buffer
+	*	\param Pixels the pixels to store the screen to
+	*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
+	*	\return whether we were able to capture the screen
+	*/
+	bool CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
+	{
+		return true;
+	};
+
+	/*!
+	*	Polls for new renderer events
+	*	\param Out the RendererEvent we received
+	*	\return true if there's a new event, false otherwise
+	*/
+	bool PollEvent(RendererEvent &Out)
+	{
+		return false;
+	};
+
+	/*!
+	*	Creates a Font from a Stream of Data
+	*	\param Data the data of the font
+	*	\return a FontHandle or 0xFFFFFFFF
+	*/
+	FontHandle CreateFont(Stream *Data)
+	{
+		return 1;
+	};
+
+	/*!
+	*	Destroys a font
+	*	\param Handle the font's handle
+	*/
+	void DestroyFont(FontHandle Handle) {};
+
+	/*!
+	*	Measures Text
+	*	\param Handle the font's handle
+	*	\param Text the text to measure
+	*	\param Parameters the text parameters to use
+	*	\return a rectangle with the text's bounds
+	*/
+	Rect MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
+	{
+		return Rect();
+	};
+
+	/*!
+	*	Renders Text to the screen
+	*	\param Handle the font's handle
+	*	\param Text the text to measure
+	*	\param Parameters the text parameters to use
+	*/
+	void RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters) {};
+
+	/*!
+	*	Gets the Native Window Handle of this Renderer
+	*/
+	void *WindowHandle() const
+	{
+		return NULL;
+	};
+
+	/*!
+	*	Sets the current Mouse Position
+	*	\param Position the new Mouse Position
+	*/
+	void SetMousePosition(const Vector2 &Position) {};
+
+	/*!
+	*	Sets the Rendering Frame Rate
+	*	\param FPS the target FPS
+	*/
+	void SetFrameRate(uint32 FPS) {};
 };
+
+#endif
+

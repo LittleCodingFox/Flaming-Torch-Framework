@@ -64,7 +64,7 @@ end
 
 GameFrameBegin = function(Renderer)
 	Renderer:Clear(RendererManager.Clear_Color)
-	Renderer.Camera:BeginTransforms()
+	Renderer.Camera:BeginTransforms(Renderer)
 end
 
 GameFrameDraw = function(Renderer)
@@ -72,7 +72,7 @@ GameFrameDraw = function(Renderer)
 end
 
 GameFrameEnd = function(Renderer)
-	Renderer.Camera:EndTransforms()
+	Renderer.Camera:EndTransforms(Renderer)
 end
 
 GameFrameUpdate = function()

@@ -7,9 +7,9 @@ struct RenderCreateOptions
 	uint32 Width, Height;
 	uint32 Style;
 	uint32 FrameRate;
-	sf::WindowHandle Handle;
+	void *WindowHandle;
 
-	RenderCreateOptions() : Style(sf::Style::Titlebar | sf::Style::Close), Handle(NULL), FrameRate(0) {};
+	RenderCreateOptions() : Style(RendererWindowStyle::Default), WindowHandle(NULL), FrameRate(0) {};
 };
 #endif
 
@@ -89,25 +89,25 @@ public:
 	*	\param Options the options to create the renderer
 	*	\return The Renderer that was created, or NULL
 	*/
-	RendererManager::Renderer *CreateRenderer(const RenderCreateOptions &Options);
+	Renderer *CreateRenderer(const RenderCreateOptions &Options);
 
 	/*!
 	*	Called when a frame begins
 	*	\param TheRenderer the renderer to use for rendering
 	*/
-	virtual void OnFrameBegin(RendererManager::Renderer *TheRenderer) {};
+	virtual void OnFrameBegin(Renderer *TheRenderer) {};
 
 	/*!
 	*	Called when a frame is drawn
 	*	\param TheRenderer the renderer to use for rendering
 	*/
-	virtual void OnFrameDraw(RendererManager::Renderer *TheRenderer) {};
+	virtual void OnFrameDraw(Renderer *TheRenderer) {};
 
 	/*!
 	*	Called when a frame ends
 	*	\param TheRenderer the renderer to use for rendering
 	*/
-	virtual void OnFrameEnd(RendererManager::Renderer *TheRenderer);
+	virtual void OnFrameEnd(Renderer *TheRenderer);
 
 	/*!
 	*	Called when a renderer resizes
@@ -115,13 +115,13 @@ public:
 	*	\param Width the new width
 	*	\param Height the new height
 	*/
-	virtual void OnResize(RendererManager::Renderer *TheRenderer, uint32 Width, uint32 Height) {};
+	virtual void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height) {};
 
 	/*!
 	*	Called when resources have been reloaded
 	*	\param TheRenderer the renderer to use for rendering
 	*/
-	virtual void OnResourcesReloaded(RendererManager::Renderer *TheRenderer) {};
+	virtual void OnResourcesReloaded(Renderer *TheRenderer) {};
 #endif
 
 	/*!
@@ -170,11 +170,11 @@ public:
 	};
 
 #if USE_GRAPHICS
-	void OnFrameBegin(RendererManager::Renderer *TheRenderer);
-	void OnFrameDraw(RendererManager::Renderer *TheRenderer);
-	void OnFrameEnd(RendererManager::Renderer *TheRenderer);
-	void OnResize(RendererManager::Renderer *TheRenderer, uint32 Width, uint32 Height);
-	void OnResourcesReloaded(RendererManager::Renderer *TheRenderer);
+	void OnFrameBegin(Renderer *TheRenderer);
+	void OnFrameDraw(Renderer *TheRenderer);
+	void OnFrameEnd(Renderer *TheRenderer);
+	void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height);
+	void OnResourcesReloaded(Renderer *TheRenderer);
 #endif
 
 	void OnFixedUpdate();

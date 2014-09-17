@@ -1,5 +1,21 @@
 #pragma once
 
+class Renderer;
+
+/*!
+*	Text Style
+*/
+namespace TextStyle
+{
+	enum
+	{
+		Regular = FLAGVALUE(0),
+		Bold = FLAGVALUE(1),
+		Italic = FLAGVALUE(2),
+		Underline = FLAGVALUE(3)
+	};
+};
+
 /*!
 *	Text rendering parameters
 */
@@ -9,12 +25,12 @@ public:
 	Vector4 TextColorValue, SecondaryTextColorValue, BorderColorValue;
 	Vector2 PositionValue;
 	f32 BorderSizeValue, RotationValue;
-	sf::Font *FontValue;
+	FontHandle FontValue;
 	uint32 FontSizeValue;
 	uint32 StyleValue;
 
 	TextParams() : BorderSizeValue(0), TextColorValue(1, 1, 1, 1), SecondaryTextColorValue(1, 1, 1, 1), BorderColorValue(0, 0, 0, 1),
-		FontValue(NULL), FontSizeValue(12), StyleValue(sf::Text::Regular), RotationValue(0) {}
+		FontValue(0), FontSizeValue(12), StyleValue(TextStyle::Regular), RotationValue(0) {}
 	TextParams(const TextParams &o) : BorderSizeValue(o.BorderSizeValue), TextColorValue(o.TextColorValue),
 		SecondaryTextColorValue(o.SecondaryTextColorValue), BorderColorValue(o.BorderColorValue), PositionValue(o.PositionValue),
 		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), StyleValue(o.StyleValue), RotationValue(o.RotationValue) {};
@@ -60,7 +76,7 @@ public:
 	*	Sets the text font
 	*	\param Font the text's font
 	*/
-	TextParams &Font(sf::Font *Font)
+	TextParams &Font(FontHandle Font)
 	{
 		FontValue = Font;
 
@@ -142,15 +158,15 @@ public:
 class RenderTextUtils
 {
 public:
-	static SuperSmartPointer<sf::Font> DefaultFont;
+	static FontHandle DefaultFont;
 
 	//Loads the default font
 	//Can be called several times, it'll only load it once
-	static bool LoadDefaultFont(const char *FileName);
-	static Rect MeasureTextSimple(const sf::String &String, TextParams Params);
-	static void FitTextAroundLength(const sf::String &String, TextParams Params,
+	static bool LoadDefaultFont(Renderer *TheRenderer, const std::string &FileName);
+	static Rect MeasureTextSimple(Renderer *TheRenderer, const std::string &String, TextParams Params);
+	static void FitTextAroundLength(Renderer *TheRenderer, const std::string &String, TextParams Params,
 		const f32 &LengthInPixels, int32 *OutFontSize);
-	static void RenderText(RendererManager::Renderer *TheRenderer, const sf::String &String, TextParams Params);
-	static std::vector<sf::String> FitTextOnRect(const sf::String &String, TextParams Params, const Vector2 &Size);
-	static Rect MeasureTextLines(sf::String *Lines, uint32 LineCount, TextParams Params);
+	static void RenderText(Renderer *TheRenderer, const std::string &String, TextParams Params);
+	static std::vector<std::string> FitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size);
+	static Rect MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params);
 };

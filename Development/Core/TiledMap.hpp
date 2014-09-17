@@ -51,7 +51,7 @@ public:
 
 #if USE_GRAPHICS
 		std::vector<Vector2> Vertices, TexCoords;
-		Signal3<TiledMap *, uint32, RendererManager::Renderer *> OnLayerDraw;
+		Signal3<TiledMap *, uint32, Renderer *> OnLayerDraw;
 #endif
 	};
 
@@ -96,7 +96,7 @@ public:
 #if USE_GRAPHICS
 	bool InitResources(const TiledMapInitOptions &Options = TiledMapInitOptions());
 	bool ResourcesInited();
-	void Draw(uint32 Layer, RendererManager::Renderer *Renderer);
+	void Draw(uint32 Layer, Renderer *Renderer);
 	void UpdateGeometry();
 #endif
 };

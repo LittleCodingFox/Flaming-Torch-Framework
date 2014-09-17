@@ -2,13 +2,13 @@
 #define TAG "Framework"
 
 #define REGISTER_KEY(key)\
-	luabind::value("Key_" #key, sf::Keyboard::key)
+	luabind::value("Key_" #key, InputKey::key)
 
 #define REGISTER_MOUSEBUTTON(button)\
-	luabind::value("Mouse_" #button, sf::Mouse::button)
+	luabind::value("Mouse_" #button, InputMouseButton::button)
 
 #define REGISTER_JOYSTICKAXIS(axis)\
-	luabind::value("JoyAxis_" #axis, sf::Joystick::axis)
+	luabind::value("JoyAxis_" #axis, InputJoystickAxis::axis)
 
 #define REGISTER_JOYSTICKBUTTON(button)\
 	luabind::value("JoyButton_" #button, button)
@@ -337,7 +337,7 @@ namespace FlamingTorch
 
 	std::string GetConsoleVariableString(ConsoleVariable &Self)
 	{
-		return Self.StringValue.toAnsiString();
+		return Self.StringValue;
 	};
 	
 	void SetConsoleVariableString(ConsoleVariable &Self, luabind::argument arg)
@@ -702,7 +702,7 @@ namespace FlamingTorch
 
 	std::string UITextGetText(UIText &Self)
 	{
-		return Self.Text().toAnsiString();
+		return Self.Text();
 	};
 
 	void UITextSetText(UIText &Self, const std::string &Text)
@@ -710,49 +710,50 @@ namespace FlamingTorch
 		Self.SetText(Text, Self.ExpandHeight);
 	};
 
-	luabind::object RenderTextFitTextOnRect(const std::string &String, TextParams Params, const Vector2 &Size, lua_State *State)
+	luabind::object RenderTextFitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
 
-		std::vector<sf::String> Temp = RenderTextUtils::FitTextOnRect(String, Params, Size);
+		std::vector<std::string> Temp = RenderTextUtils::FitTextOnRect(TheRenderer, String, Params, Size);
 
 		for(uint32 i = 0; i < Temp.size(); i++)
 		{
-			Out[i + 1] = Temp[i].toAnsiString();
+			Out[i + 1] = Temp[i];
 		};
 
 		return Out;
 	};
 
-	Rect RenderTextMeasureTextSimple(const std::string &String, TextParams Params)
+	Rect RenderTextMeasureTextSimple(Renderer *TheRenderer, const std::string &String, TextParams Params)
 	{
-		return RenderTextUtils::MeasureTextSimple(String, Params);
+		return RenderTextUtils::MeasureTextSimple(TheRenderer, String, Params);
 	};
 
-	int32 RenderTextFitTextAroundLength(const std::string &String, TextParams Params, f32 LengthInPixels, int32 FontSize)
+	int32 RenderTextFitTextAroundLength(Renderer *TheRenderer, const std::string &String, TextParams Params, f32 LengthInPixels, int32 FontSize)
 	{
-		RenderTextUtils::FitTextAroundLength(String, Params, LengthInPixels, &FontSize);
+		RenderTextUtils::FitTextAroundLength(TheRenderer, String, Params, LengthInPixels, &FontSize);
 
 		return FontSize;
 	};
 
-	void RenderTextRenderText(RendererManager::Renderer *Renderer, const std::string &String, TextParams Params)
+	void RenderTextRenderText(Renderer *Renderer, const std::string &String, TextParams Params)
 	{
 		RenderTextUtils::RenderText(Renderer, String, Params);
 	};
 
-	Rect RenderTextMeasureTextLines(luabind::object Lines, TextParams Params)
+	Rect RenderTextMeasureTextLines(Renderer *TheRenderer, luabind::object Lines, TextParams Params)
 	{
-		std::vector<sf::String> ActualLines;
+		std::vector<std::string> ActualLines;
 
 		for(luabind::iterator it(Lines), end; it != end; it++)
 		{
 			ActualLines.push_back(ProtectedLuaCast<const char *>(*it));
 		};
 
-		return RenderTextUtils::MeasureTextLines(&ActualLines[0], ActualLines.size(), Params);
+		return RenderTextUtils::MeasureTextLines(TheRenderer, &ActualLines[0], ActualLines.size(), Params);
 	};
 
+	/*
 	bool ShaderCompileShader(Shader &Self, uint32 Type, const std::string &Data, std::string *Log)
 	{
 		return Self.CompileShader(Type, (void *)Data.c_str(), Data.length(), Log);
@@ -894,6 +895,7 @@ namespace FlamingTorch
 
 		Self.UniformInt4Array(Uniform, Out.size(), &Out[0]);
 	};
+	*/
 
 	void AnimatedSpriteAddAnimation(AnimatedSprite &Self, const std::string &Name, luabind::object Frames)
 	{
@@ -931,11 +933,6 @@ namespace FlamingTorch
 	bool FrameworkLib::Register(lua_State *State)
 	{
 		luabind::module(State) [
-#if USE_GRAPHICS
-			//SFML Font
-			luabind::class_<sf::Font>("Font"),
-#endif
-
 			//Subsystem
 			luabind::class_<SubSystem>("SubSystem")
 				.def("Register", &SubSystem::Register),
@@ -1158,7 +1155,7 @@ namespace FlamingTorch
 				]
 				.property("TextureFilter", &Texture::FilterMode, &Texture::SetTextureFiltering)
 				.property("WrapMode", &Texture::WrapMode, &Texture::SetWrapMode)
-				.property("ID", &Texture::ID)
+				.property("Handle", &Texture::Handle)
 				.property("Width", &Texture::Width)
 				.property("Height", &Texture::Height)
 				.property("ColorType", &Texture::ColorType)
@@ -1822,12 +1819,9 @@ namespace FlamingTorch
 			//RenderCreateOptions
 			luabind::class_<RenderCreateOptions>("RenderCreateOptions")
 				.enum_("constants") [
-					luabind::value("Style_Close", sf::Style::Close),
-					luabind::value("Style_Default", sf::Style::Default),
-					luabind::value("Style_FullScreen", sf::Style::Fullscreen),
-					luabind::value("Style_None", sf::Style::None),
-					luabind::value("Style_Resize", sf::Style::Resize),
-					luabind::value("Style_TitleBar", sf::Style::Titlebar)
+					luabind::value("Style_Default", RendererWindowStyle::Default),
+					luabind::value("Style_FullScreen", RendererWindowStyle::FullScreen),
+					luabind::value("Style_Popup", RendererWindowStyle::Popup)
 				]
 				.def(luabind::constructor<>())
 				.def_readwrite("Title", &RenderCreateOptions::Title)
@@ -1918,40 +1912,27 @@ namespace FlamingTorch
 			//RendererManager
 			luabind::class_<RendererManager, SubSystem>("RendererManager")
 				.enum_("constants") [
-					luabind::value("Feature_GlewIsAvailable", RendererFeature::GlewIsAvailable),
-					luabind::value("Feature_AnisotropicSupported", RendererFeature::AnisotropicSupported),
-					luabind::value("Feature_AnisotropicEnabled", RendererFeature::AnisotropicEnabled),
-					luabind::value("Feature_MaxAnisotropicLevel", RendererFeature::MaxAnisotropicLevel),
-					luabind::value("Feature_CurrentAnisotropicLevel", RendererFeature::CurrentAnisotropicLevel),
-					luabind::value("Feature_CanAutoGenerateMipMaps", RendererFeature::CanAutoGenerateMipMaps),
-					luabind::value("Feature_MayUseNonPowerOfTwoTextures", RendererFeature::MayUseNonPowerOfTwoTextures),
-					luabind::value("Clear_Color", GL_COLOR_BUFFER_BIT),
-					luabind::value("Clear_Depth", GL_DEPTH_BUFFER_BIT)
+					luabind::value("Clear_Color", RendererBuffer::Color),
+					luabind::value("Clear_Stencil", RendererBuffer::Stencil),
+					luabind::value("Clear_Depth", RendererBuffer::Depth)
 				]
 				.def_readonly("Input", &RendererManager::Input)
 				.def("AddRenderer", (RendererHandle (RendererManager::*)(const char *, uint32, uint32, uint32)) &RendererManager::AddRenderer)
-				.def("AddRenderer", (RendererHandle (RendererManager::*)(sf::WindowHandle)) &RendererManager::AddRenderer)
+				.def("AddRenderer", (RendererHandle (RendererManager::*)(void *)) &RendererManager::AddRenderer)
 				.def("DestroyRenderer", &RendererManager::DestroyRenderer)
 				.def("SetActiveRenderer", &RendererManager::SetActiveRenderer)
 				.property("ActiveRenderer", &RendererManager::ActiveRenderer)
-				.def("RequestFrame", &RendererManager::RequestFrame)
-				.scope [
-					luabind::class_<RendererManager::Renderer>("Renderer")
-						.def_readonly("UI", &RendererManager::Renderer::UI)
-						.def("GetBoolFeature", &RendererManager::Renderer::GetBoolFeature)
-						.def("GetFloatFeature", &RendererManager::Renderer::GetFloatFeature)
-						.def("GetUintFeature", &RendererManager::Renderer::GetUintFeature)
-						.property("Handle", &RendererManager::Renderer::Handle)
-						.def("SetFullScreen", &RendererManager::Renderer::SetFullScreen)
-						.def("GetFullScreen", &RendererManager::Renderer::GetFullScreen)
-						.def("EnableState", &RendererManager::Renderer::EnableState)
-						.def("DisableState", &RendererManager::Renderer::DisableState)
-						.def("IsStateEnabled", &RendererManager::Renderer::IsStateEnabled)
-						.def("BindTexture", &RendererManager::Renderer::BindTexture)
-						.def_readwrite("Camera", &RendererManager::Renderer::RenderCamera)
-						.property("Size", &RendererManager::Renderer::Size)
-						.def("Clear", &RendererManager::Renderer::Clear)
-				],
+				.def("RequestFrame", &RendererManager::RequestFrame),
+
+			//Renderer
+			luabind::class_<Renderer>("Renderer")
+				.def_readonly("UI", &Renderer::UI)
+				.property("Handle", &Renderer::Handle)
+				.def("BindTexture", (void(Renderer::*)(Texture *))&Renderer::BindTexture)
+				.def("BindTexture", (void(Renderer::*)(TextureHandle))&Renderer::BindTexture)
+				.def_readwrite("Camera", &Renderer::RenderCamera)
+				.property("Size", &Renderer::Size)
+				.def("Clear", &Renderer::Clear),
 				
 			//RenderTextUtils
 			luabind::class_<RenderTextUtils>("RenderTextUtils")
@@ -1987,6 +1968,8 @@ namespace FlamingTorch
 				],
 
 			//Shader
+			//TODO
+			/*
 			luabind::class_<Shader>("Shader")
 				.enum_("constants") [
 					luabind::value("Type_Vertex", ShaderType::Vertex),
@@ -2019,6 +2002,7 @@ namespace FlamingTorch
 				.def("Destroy", &Shader::Destroy)
 				.def("Activate", &Shader::Activate)
 				.def("Deactivate", &Shader::Deactivate),
+			*/
 
 			//InputCenter
 			luabind::class_<InputCenter>("InputCenter")
@@ -2396,10 +2380,6 @@ namespace FlamingTorch
 		luabind::object Globals = luabind::globals(State);
 
 		Globals["ResourceManager"]["InvalidTexture"] = ResourceManager::InvalidTexture;
-
-#if USE_GRAPHICS
-		Globals["ResourceManager"]["InvalidFont"] = ResourceManager::InvalidFont;
-#endif
 
 		Globals["g_CRC"] = &CRC32::Instance;
 		Globals["g_World"] = &World::Instance;

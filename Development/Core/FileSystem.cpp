@@ -154,11 +154,11 @@ namespace FlamingTorch
 		Config.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 #if USE_GRAPHICS
-		RendererManager::Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
+		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
 
 		if(TheRenderer)
 		{
-			Config.hwndOwner = (HWND)TheRenderer->Window.getSystemHandle();
+			Config.hwndOwner = (HWND)TheRenderer->WindowHandle();
 		};
 #endif
 
@@ -200,11 +200,11 @@ namespace FlamingTorch
 		Config.Flags = OFN_OVERWRITEPROMPT;
 
 #if USE_GRAPHICS
-		RendererManager::Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
+		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
 
 		if(TheRenderer)
 		{
-			Config.hwndOwner = (HWND)TheRenderer->Window.getSystemHandle();
+			Config.hwndOwner = (HWND)TheRenderer->WindowHandle();
 		};
 #endif
 

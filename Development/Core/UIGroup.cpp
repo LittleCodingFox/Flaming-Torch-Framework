@@ -28,7 +28,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIGroup::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UIGroup::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 

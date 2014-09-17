@@ -193,9 +193,11 @@ public:
 
 	uint32 Width() const;
 	uint32 Height() const;
-	uint32 GLID() const;
+	TextureHandle Handle() const;
 	uint32 ColorType() const;
 };
+
+class Renderer;
 
 /*!
 *	Texture Class
@@ -204,7 +206,7 @@ class Texture
 {
 private:
 	Texture(const Texture &o);
-	int32 GLID;
+	TextureHandle HandleValue;
 	SuperSmartPointer<TextureBuffer> Buffer;
 
 	uint32 WidthValue, HeightValue, ColorTypeValue, TextureFilter, TextureWrap;
@@ -217,6 +219,10 @@ private:
 	std::vector<TextureState> StateStack;
 
 	TexturePackerIndex Index;
+
+#if USE_GRAPHICS
+	Renderer *Owner;
+#endif
 
 public:
 	/*!
@@ -364,9 +370,9 @@ public:
 	uint32 WrapMode() const;
 	
 	/*!
-	*	Texture ID
+	*	Texture Handle
 	*/
-	int32 ID() const;
+	TextureHandle Handle() const;
 
 	/*!
 	*	Get the Buffer associated with this texture

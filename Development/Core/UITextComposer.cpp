@@ -41,9 +41,9 @@ namespace FlamingTorch
 		IgnoreHeightBoundsValue = Value;
 	};
 
-	void UITextComposer::AddText(const sf::String &Text, const TextParams &Params)
+	void UITextComposer::AddText(const std::string &Text, const TextParams &Params)
 	{
-		std::vector<std::string> Lines = StringUtils::Split(Text.toAnsiString(), '\n');
+		std::vector<std::string> Lines = StringUtils::Split(Text, '\n');
 
 		if(Lines.size() > 1)
 		{
@@ -60,14 +60,14 @@ namespace FlamingTorch
 			return;
 		};
 
-		Vector2 TextSize = RenderTextUtils::MeasureTextSimple(Text, Params).ToFullSize();
+		Vector2 TextSize = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), Text, Params).ToFullSize();
 
 		if(!IgnoreHeightBoundsValue && LastPosition.y + Params.PositionValue.y + TextSize.y > SizeValue.y)
 			return;
 
 		if(LastPosition.x + Params.PositionValue.x + TextSize.x >= SizeValue.x)
 		{
-			std::vector<sf::String> Temp = RenderTextUtils::FitTextOnRect(Text, Params, SizeValue - Vector2(LastPosition.x, 0));
+			std::vector<std::string> Temp = RenderTextUtils::FitTextOnRect(Manager()->GetOwner(), Text, Params, SizeValue - Vector2(LastPosition.x, 0));
 			static TextParams TempParams = Params;
 
 			AddText(Temp[0], TempParams);
@@ -79,7 +79,7 @@ namespace FlamingTorch
 
 			LineHeight = 0;
 
-			AddText(Text.toWideString().substr(Temp[0].getSize()), TempParams);
+			AddText(Text.substr(Temp[0].length()), TempParams);
 
 			return;
 		};
@@ -122,7 +122,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void UITextComposer::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UITextComposer::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		PerformLayout();
 
@@ -134,6 +134,8 @@ namespace FlamingTorch
 		{
 			Vector2 ChildrenSize = this->ChildrenSize();
 
+			//TODO
+			/*
 			bool EnabledScissor = Renderer->IsStateEnabled(GL_SCISSOR_TEST);
 			Renderer->EnableState(GL_SCISSOR_TEST);
 
@@ -141,6 +143,7 @@ namespace FlamingTorch
 			glGetFloatv(GL_SCISSOR_BOX, (GLfloat *)&PreviousScissor);
 
 			glScissor((GLsizei)ActualPosition.x, (GLsizei)(Renderer->Size().y - ActualPosition.y - SizeValue.y), (GLsizei)SizeValue.x, (GLsizei)SizeValue.y);
+			*/
 
 			for(uint32 i = 0; i < Children.size(); i++)
 			{
@@ -148,6 +151,7 @@ namespace FlamingTorch
 				Children[i]->Draw(ActualPosition, Renderer);
 			};
 
+			/*
 			if(!EnabledScissor)
 			{
 				Renderer->DisableState(GL_SCISSOR_TEST);
@@ -156,6 +160,7 @@ namespace FlamingTorch
 			{
 				glScissor((GLsizei)PreviousScissor.x, (GLsizei)PreviousScissor.y, (GLsizei)PreviousScissor.z, (GLsizei)PreviousScissor.w);
 			};
+			*/
 		}
 		else
 		{

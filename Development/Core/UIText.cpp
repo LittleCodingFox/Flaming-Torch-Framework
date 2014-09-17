@@ -16,10 +16,10 @@ namespace FlamingTorch
 	{
 	};
 
-	void UIText::SetText(const sf::String &String, bool AutoExpandHeight)
+	void UIText::SetText(const std::string &String, bool AutoExpandHeight)
 	{
 		TextValue = String;
-		std::vector<sf::String> OutputStrings = RenderTextUtils::FitTextOnRect(TextValue, TextParameters, AutoExpandHeight ? Vector2(SizeValue.x, 9999999) : SizeValue);
+		std::vector<std::string> OutputStrings = RenderTextUtils::FitTextOnRect(Manager()->GetOwner(), TextValue, TextParameters, AutoExpandHeight ? Vector2(SizeValue.x, 9999999) : SizeValue);
 
 		Strings.resize(0);
 
@@ -29,7 +29,7 @@ namespace FlamingTorch
 		{
 			StringInfo Info;
 			Info.TheString = OutputStrings[i];
-			Info.Size = RenderTextUtils::MeasureTextSimple(OutputStrings[i], TextParameters);
+			Info.Size = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), OutputStrings[i], TextParameters);
 
 			y += Info.Size.Bottom;
 
@@ -42,7 +42,7 @@ namespace FlamingTorch
 		};
 	};
 
-	const sf::String &UIText::Text()
+	const std::string &UIText::Text()
 	{
 		return TextValue;
 	};
@@ -67,7 +67,7 @@ namespace FlamingTorch
 		UIPanel::Update(ParentPosition);
 	};
 
-	void UIText::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UIText::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 

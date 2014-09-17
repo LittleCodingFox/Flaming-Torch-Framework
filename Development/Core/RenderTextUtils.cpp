@@ -2,20 +2,20 @@
 namespace FlamingTorch
 {
 #if USE_GRAPHICS
-	SuperSmartPointer<sf::Font> RenderTextUtils::DefaultFont;
+	FontHandle RenderTextUtils::DefaultFont = 0;
 
-	bool RenderTextUtils::LoadDefaultFont(const char *FileName)
+	bool RenderTextUtils::LoadDefaultFont(Renderer *TheRenderer, const std::string &FileName)
 	{
 		PROFILE("RenderTextUtils LoadDefaultFont", StatTypes::Rendering);
 
-		if(DefaultFont.Get())
+		if(DefaultFont)
 			return true;
 
-		DefaultFont.Reset(new sf::Font);
+		DefaultFont = ResourceManager::Instance.GetFontFromPackage(TheRenderer, "/", FileName);
 
-		if(!DefaultFont->loadFromFile(FileName))
+		if(!DefaultFont)
 		{
-			DefaultFont = ResourceManager::Instance.GetFontFromPackage("/", FileName);
+			DefaultFont = ResourceManager::Instance.GetFont(TheRenderer, FileName);
 
 			if(!DefaultFont)
 				return false;
@@ -24,31 +24,14 @@ namespace FlamingTorch
 		return true;
 	};
 
-	Rect RenderTextUtils::MeasureTextSimple(const sf::String &Str, TextParams Params)
+	Rect RenderTextUtils::MeasureTextSimple(Renderer *TheRenderer, const std::string &Str, TextParams Params)
 	{
 		PROFILE("RenderTextUtils MeasureTextSimple", StatTypes::Rendering);
 
-		//Workaround for newline strings
-		if(Str.getSize() == 0)
-			return Rect(0, 0, 0, (f32)Params.FontSizeValue);
-
-		sf::Font *TheFont = Params.FontValue ? Params.FontValue : DefaultFont.Get();
-
-		if(!TheFont)
-			return Rect();
-
-		sf::Text Text;
-		Text.setFont(*TheFont);
-		Text.setCharacterSize(Params.FontSizeValue);
-		Text.setString(Str);
-		Text.setStyle(Params.StyleValue);
-
-		sf::FloatRect InRect = Text.getLocalBounds();
-
-		return Rect(InRect.left, InRect.width, InRect.top, InRect.height);
+		return TheRenderer->MeasureText(Params.FontValue ? Params.FontValue : DefaultFont, Str, Params);
 	};
 
-	void RenderTextUtils::FitTextAroundLength(const sf::String &Str, TextParams Params, const f32 &LengthInPixels, int32 *OutFontSize)
+	void RenderTextUtils::FitTextAroundLength(Renderer *TheRenderer, const std::string &Str, TextParams Params, const f32 &LengthInPixels, int32 *OutFontSize)
 	{
 		PROFILE("RenderTextUtils FitTextAroundLength", StatTypes::Rendering);
 
@@ -59,128 +42,20 @@ namespace FlamingTorch
 
 		Vector2 MeasuredText;
 
-		while(MeasureTextSimple(Str, Params.FontSize(*OutFontSize)).ToFullSize().x > LengthInPixels)
+		while(MeasureTextSimple(TheRenderer, Str, Params.FontSize(*OutFontSize)).ToFullSize().x > LengthInPixels)
 		{
 			(*OutFontSize)--;
 		};
 	};
 
-	void RenderTextUtils::RenderText(RendererManager::Renderer *TheRenderer, const sf::String &String, TextParams Params)
+	void RenderTextUtils::RenderText(Renderer *TheRenderer, const std::string &String, TextParams Params)
 	{
 		PROFILE("RenderTextUtils RenderText", StatTypes::Rendering);
 
-		if(String.getSize() == 0)
-			return;
-
-		SpriteCache::Instance.Flush(TheRenderer);
-
-		Vector2 ActualPosition = Params.PositionValue;
-
-		sf::Font *TheFont = Params.FontValue ? Params.FontValue : DefaultFont.Get();
-		
-		GLCHECK();
-
-		sf::Color Border((uint8)(Params.BorderColorValue.x * 255),
-			(uint8)(Params.BorderColorValue.y * 255),
-			(uint8)(Params.BorderColorValue.z * 255),
-			(uint8)(Params.BorderColorValue.w * 255));
-
-		sf::Color ActualTextColor((uint8)(Params.TextColorValue.x * 255),
-			(uint8)(Params.TextColorValue.y * 255),
-			(uint8)(Params.TextColorValue.z * 255),
-			(uint8)(Params.TextColorValue.w * 255));
-
-		sf::Color ActualTextColor2((uint8)(Params.SecondaryTextColorValue.x * 255),
-			(uint8)(Params.SecondaryTextColorValue.y * 255),
-			(uint8)(Params.SecondaryTextColorValue.z * 255),
-			(uint8)(Params.SecondaryTextColorValue.w * 255));
-
-		static sf::Text Text;
-
-		Text.setFont(*TheFont);
-		Text.setCharacterSize(Params.FontSizeValue);
-		Text.setColor(ActualTextColor);
-		Text.setColor2(ActualTextColor2);
-		Text.setBorderColor(Border);
-		Text.setBorderSize(Params.BorderSizeValue);
-		Text.setString(String);
-		Text.setStyle(Params.StyleValue);
-
-		const sf::VertexArray &Vertices = Text.getVertices();
-
-		uint32 VertexCount = Vertices.getVertexCount() / 4 * 6;
-		const sf::Texture *FontTexture = &TheFont->getTexture(Text.getCharacterSize(), Text.getColor(), Text.getColor2(), Text.getBorderSize(), Text.getBorderColor());
-		Vector2 FontTextureSize((f32)FontTexture->getSize().x, (f32)FontTexture->getSize().y);
-
-		static std::vector<Vector2> Positions(VertexCount), TexCoords(VertexCount);
-		static std::vector<Vector4> Colors(VertexCount);
-
-		Positions.resize(VertexCount);
-		TexCoords.resize(VertexCount);
-		Colors.resize(VertexCount);
-
-		for(uint32 i = 0, index = 0; i < VertexCount; i+=6, index+=4)
-		{
-			Positions[i] = Positions[i + 5] = Vector2(Vertices[index].position.x, Vertices[index].position.y);
-			Positions[i + 1] = Vector2(Vertices[index + 3].position.x, Vertices[index + 3].position.y);
-			Positions[i + 2] = Positions[i + 3] = Vector2(Vertices[index + 2].position.x, Vertices[index + 2].position.y);
-			Positions[i + 4] = Vector2(Vertices[index + 1].position.x, Vertices[index + 1].position.y);
-
-			TexCoords[i] = TexCoords[i + 5] = Vector2(Vertices[index].texCoords.x, Vertices[index].texCoords.y) / FontTextureSize;
-			TexCoords[i + 1] = Vector2(Vertices[index + 3].texCoords.x, Vertices[index + 3].texCoords.y) / FontTextureSize;
-			TexCoords[i + 2] = TexCoords[i + 3] = Vector2(Vertices[index + 2].texCoords.x, Vertices[index + 2].texCoords.y) / FontTextureSize;
-			TexCoords[i + 4] = Vector2(Vertices[index + 1].texCoords.x, Vertices[index + 1].texCoords.y) / FontTextureSize;
-
-			Colors[i] = Colors[i + 5] = Vector4(Vertices[index].color.r / 255.f, Vertices[index].color.g / 255.f, Vertices[index].color.b / 255.f,
-				Vertices[index].color.a / 255.f);
-			Colors[i + 1] = Vector4(Vertices[index + 3].color.r / 255.f, Vertices[index + 3].color.g / 255.f, Vertices[index + 3].color.b / 255.f,
-				Vertices[index + 3].color.a / 255.f);;
-			Colors[i + 2] = Colors[i + 3] = Vector4(Vertices[index + 2].color.r / 255.f, Vertices[index + 2].color.g / 255.f, Vertices[index + 2].color.b / 255.f,
-				Vertices[index + 2].color.a / 255.f);
-			Colors[i + 4] = Vector4(Vertices[index + 1].color.r / 255.f, Vertices[index + 1].color.g / 255.f, Vertices[index + 1].color.b / 255.f,
-				Vertices[index + 1].color.a / 255.f);
-		};
-
-		if(!Positions.size())
-			return;
-
-		sf::FloatRect ObjectRect = Text.getLocalBounds();
-
-		Vector2 ObjectSize = Vector2(ObjectRect.left + ObjectRect.width, ObjectRect.top + ObjectRect.height) / 2;
-
-		if(Params.RotationValue != 0)
-		{
-			for(uint32 i = 0; i < VertexCount; i++)
-			{
-				Positions[i] = Vector2::Rotate(Positions[i] - ObjectSize, Params.RotationValue) + ObjectSize + ActualPosition;
-			};
-		}
-		else
-		{
-			for(uint32 i = 0; i < VertexCount; i++)
-			{
-				Positions[i] = Positions[i] + ActualPosition;
-			};
-		};
-
-		TheRenderer->BindTexture(NULL);
-
-		sf::Texture::bind(FontTexture);
-
-		TheRenderer->EnableState(GL_VERTEX_ARRAY);
-		TheRenderer->EnableState(GL_TEXTURE_COORD_ARRAY);
-		TheRenderer->EnableState(GL_COLOR_ARRAY);
-
-		glVertexPointer(2, GL_FLOAT, 0, &Positions[0]);
-		glTexCoordPointer(2, GL_FLOAT, 0, &TexCoords[0]);
-		glColorPointer(4, GL_FLOAT, 0, &Colors[0]);
-
-		glDrawArrays(GL_TRIANGLES, 0, Positions.size());
-
-		glBindTexture(GL_TEXTURE_2D, 0);
+		TheRenderer->RenderText(Params.FontValue ? Params.FontValue : DefaultFont, String, Params);
 	};
 
-	Rect RenderTextUtils::MeasureTextLines(sf::String *Lines, uint32 LineCount, TextParams Params)
+	Rect RenderTextUtils::MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params)
 	{
 		Rect Out;
 		f32 AdditionalBottom = 0;
@@ -189,7 +64,7 @@ namespace FlamingTorch
 
 		for(uint32 i = 0, y = 0; i < LineCount; i++, y += Params.FontSizeValue)
 		{
-			Temp = MeasureTextSimple(Lines[i], Params);
+			Temp = MeasureTextSimple(TheRenderer, Lines[i], Params);
 
 			if(i == 0)
 			{
@@ -230,21 +105,21 @@ namespace FlamingTorch
 	};
 	
 	/*!
-		Formatting logic:
-		#1: Split Words and Lines
-		#2: For each word, keep adding it together until you exceed either size.x or size.y
-		#3: Check if we can recover by verifying if the old sentence works.
-			If it does, add a new line and continue if the size.y is less than the text height.
+	*	Formatting logic:
+	*	#1: Split Words and Lines
+	*	#2: For each word, keep adding it together until you exceed either size.x or size.y
+	*	#3: Check if we can recover by verifying if the old sentence works.
+	*		If it does, add a new line and continue if the size.y is less than the text height.
 	*/
-	std::vector<sf::String> RenderTextUtils::FitTextOnRect(const sf::String &String, TextParams Params, const Vector2 &Size)
+	std::vector<std::string> RenderTextUtils::FitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size)
 	{
 		PROFILE("RenderTextUtils FitTextOnRect", StatTypes::Rendering);
 
-		std::vector<sf::String> Lines;
+		std::vector<std::string> Lines;
 
-		std::wstring str = String.toWideString();
+		std::string str = String;
 
-		std::vector<std::wstring> Fragments;
+		std::vector<std::string> Fragments;
 
 		//Extract Fragments
 
@@ -255,7 +130,7 @@ namespace FlamingTorch
 			PreviousOffset = Offset;
 
 			int32 MatchSpace = str.find(L' ', PreviousOffset), MatchNewLine = str.find(L'\n', PreviousOffset);
-			int32 Match = std::wstring::npos;
+			int32 Match = std::string::npos;
 
 			if(MatchSpace != -1)
 			{
@@ -282,11 +157,11 @@ namespace FlamingTorch
 				Fragments.push_back(str.substr(PreviousOffset, Match - PreviousOffset));
 
 				if(Match == MatchNewLine)
-					Fragments.push_back(L"\n");
+					Fragments.push_back("\n");
 			}
 			else if(Match == MatchNewLine) //Add empty newlines
 			{
-				Fragments.push_back(L"\n");
+				Fragments.push_back("\n");
 			};
 
 			Offset = Match + 1;
@@ -296,7 +171,7 @@ namespace FlamingTorch
 
 		f32 CurrentY = 0;
 		f32 CurrentLineSize = Size.x;
-		std::wstringstream stream;
+		std::stringstream stream;
 
 		for(uint32 i = 0; i < Fragments.size(); i++)
 		{
@@ -304,7 +179,7 @@ namespace FlamingTorch
 			{
 				Lines.push_back(stream.str());
 
-				f32 Height = RenderTextUtils::MeasureTextSimple(stream.str(), Params).ToFullSize().y;
+				f32 Height = RenderTextUtils::MeasureTextSimple(TheRenderer, stream.str(), Params).ToFullSize().y;
 
 				if(Height < (f32)Params.FontSizeValue)
 					Height = (f32)Params.FontSizeValue;
@@ -312,12 +187,12 @@ namespace FlamingTorch
 				CurrentY += Height;
 				CurrentLineSize = Size.x;
 
-				stream.str(L"");
+				stream.str("");
 
 				continue;
 			};
 
-			Vector2 CurrentSize = RenderTextUtils::MeasureTextSimple((stream.str().length() ? L" " : L"") + Fragments[i], Params).ToFullSize();
+			Vector2 CurrentSize = RenderTextUtils::MeasureTextSimple(TheRenderer, (stream.str().length() ? " " : "") + Fragments[i], Params).ToFullSize();
 
 			//Impossible to proceed
 			if(CurrentSize.y + CurrentY > Size.y || CurrentSize.x > Size.x)
@@ -327,7 +202,7 @@ namespace FlamingTorch
 			{
 				Lines.push_back(stream.str());
 
-				f32 Height = RenderTextUtils::MeasureTextSimple(stream.str(), Params).ToFullSize().y;
+				f32 Height = RenderTextUtils::MeasureTextSimple(TheRenderer, stream.str(), Params).ToFullSize().y;
 
 				if(Height < (f32)Params.FontSizeValue)
 					Height = (f32)Params.FontSizeValue;
@@ -335,10 +210,10 @@ namespace FlamingTorch
 				CurrentY += Height;
 				CurrentLineSize = Size.x;
 
-				stream.str(L"");
+				stream.str("");
 			};
 
-			stream << (stream.str().length() ? L" " : L"") << Fragments[i];
+			stream << (stream.str().length() ? " " : "") << Fragments[i];
 
 			CurrentLineSize -= CurrentSize.x;
 		};

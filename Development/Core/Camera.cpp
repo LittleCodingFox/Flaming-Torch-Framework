@@ -13,29 +13,19 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
-	void Camera::BeginTransforms()
+	void Camera::BeginTransforms(Renderer *TheRenderer)
 	{
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadMatrixf(&ProjectionTransform.m[0][0]);
-
 		Matrix4x4 CameraTransform = WorldTransform;
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
 		CameraTransform.Inverse();
 
 		CameraTransform = CameraTransform * Matrix4x4::Translate(Vector4(DrawOffset, 1));
-		glLoadMatrixf(&CameraTransform.m[0][0]);
+
+		TheRenderer->SetProjectionMatrix(ProjectionTransform);
+		TheRenderer->SetWorldMatrix(CameraTransform);
 	};
 
-	void Camera::EndTransforms()
+	void Camera::EndTransforms(Renderer *TheRenderer)
 	{
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
 	};
 #endif
 };

@@ -4,17 +4,8 @@ class ResourceManager : public SubSystem
 {
 private:
 #if USE_GRAPHICS
-	class FontInfo
-	{
-	public:
-		SuperSmartPointer<sf::Font> ActualFont;
-		std::vector<uint8> Data;
 
-		FontInfo() : ActualFont(new sf::Font()) {};
-		~FontInfo() { ActualFont.Dispose(); };
-	};
-
-	typedef std::map<StringID, SuperSmartPointer<FontInfo> > FontMap;
+	typedef std::map<StringID, FontHandle> FontMap;
 #endif
 
 	typedef std::map<StringID, SuperSmartPointer<Texture> > TextureMap;
@@ -34,16 +25,13 @@ public:
 
 	static bool IsSameTexture(Texture *Self, Texture *Other);
 	static SuperSmartPointer<Texture> InvalidTexture;
-#if USE_GRAPHICS
-	static SuperSmartPointer<sf::Font> InvalidFont;
-#endif
 
 	SuperSmartPointer<Texture> GetTexture(const std::string &FileName);
 	SuperSmartPointer<Texture> GetTextureFromPackage(const std::string &Directory, const std::string &FileName);
 
 #if USE_GRAPHICS
-	SuperSmartPointer<sf::Font> GetFont(const std::string &FileName);
-	SuperSmartPointer<sf::Font> GetFontFromPackage(const std::string &Directory, const std::string &FileName);
+	FontHandle GetFont(Renderer *TheRenderer, const std::string &FileName);
+	FontHandle GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName);
 #endif
 
 	void PrepareResourceReload();

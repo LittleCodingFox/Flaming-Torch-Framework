@@ -456,8 +456,6 @@ namespace FlamingTorch
 
 		Data.resize(Width * Height * 4);
 
-		//memset(&Data[0], *(uint32 *)Components, Data.size());
-
 		for(uint32 i = 0; i < Data.size(); i+=4)
 		{
 			Data[i] = Components[0];
@@ -671,9 +669,18 @@ namespace FlamingTorch
 		return false;
 	};
 
-	Texture::Texture() : GLID(0), WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8),
-		TextureFilter(TextureFiltering::Nearest), TextureWrap(TextureWrapMode::Clamp)
+#if USE_GRAPHICS
+#	define GET_OWNER_IF_NOT_VALID()\
+	if(!Owner && RendererManager::Instance.RendererCount())\
+		Owner = RendererManager::Instance.ActiveRenderer();
+#else
+#	define GET_OWNER_IF_NOT_VALID()
+#endif
+
+	Texture::Texture() : HandleValue(0), WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8),
+		TextureFilter(TextureFiltering::Nearest), TextureWrap(TextureWrapMode::Clamp), Owner(NULL)
 	{
+		GET_OWNER_IF_NOT_VALID();
 	};
 
 	Texture::~Texture()
@@ -712,11 +719,12 @@ namespace FlamingTorch
 		Index.Index = -1;
 
 #if USE_GRAPHICS
-		if(GLID)
-		{
-			glDeleteTextures(1, (GLuint *)&GLID);
-			GLID = 0;
-		};
+		GET_OWNER_IF_NOT_VALID();
+
+		if(Owner)
+			Owner->DestroyTexture(HandleValue);
+
+		HandleValue = 0;
 #endif
 	};
 
@@ -744,12 +752,8 @@ namespace FlamingTorch
 
 		UpdateData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
 
-		GLCHECK();
-
 		SetTextureFiltering(TextureFilter);
 		SetWrapMode(TextureWrap);
-
-		GLCHECK();
 
 		return true;
 	};
@@ -788,28 +792,18 @@ namespace FlamingTorch
 		Destroy();
 
 #if USE_GRAPHICS
-		if(glIsTexture(GLID))
+		GET_OWNER_IF_NOT_VALID();
+
+		if(Owner)
 		{
-			glDeleteTextures(1, (const GLuint *)&GLID);
-			GLCHECK();
+			HandleValue = Owner->CreateTexture();
 		};
-
-		glGenTextures(1, (GLuint *)&GLID);
-		GLCHECK();
-
-		glBindTexture(GL_TEXTURE_2D, GLID);
-
-		GLCHECK();
 #endif
 
 		UpdateData(Pixels, Width, Height);
 
-		GLCHECK();
-
 		SetTextureFiltering(TextureFilter);
 		SetWrapMode(TextureWrap);
-
-		GLCHECK();
 
 		return true;
 	};
@@ -825,26 +819,17 @@ namespace FlamingTorch
 		ColorTypeValue = RGBA ? ColorType::RGBA8 : ColorType::RGB8;
 
 #if USE_GRAPHICS
-		glGenTextures(1, (GLuint *)&GLID);
-		glBindTexture(GL_TEXTURE_2D, GLID);
+		GET_OWNER_IF_NOT_VALID();
 
-		if(RendererManager::Instance.ActiveRenderer()->GetBoolFeature(RendererFeature::MayUseNonPowerOfTwoTextures))
+		if(Owner)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, ColorTypeValue == 1 ? GL_RGBA8 : GL_RGB8, Width, Height, 0,
-				ColorTypeValue == 1 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		}
-		else
-		{
-			gluBuild2DMipmaps(GL_TEXTURE_2D, ColorTypeValue == 1 ? GL_RGBA8 : GL_RGB8, Width, Height, 
-				ColorTypeValue == 1 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			HandleValue = Owner->CreateTexture();
+
+			Owner->SetTextureData(HandleValue, NULL, Width, Height);
 		};
-
-		GLCHECK();
 
 		SetTextureFiltering(TextureFiltering::Linear_Mipmap);
 		SetWrapMode(TextureWrap);
-
-		GLCHECK();
 #endif
 
 		return true;
@@ -861,31 +846,18 @@ namespace FlamingTorch
 		};
 
 #if USE_GRAPHICS
-		if(!glIsTexture(GLID))
-		{
-			glGenTextures(1, (GLuint *)&GLID);
-			glBindTexture(GL_TEXTURE_2D, GLID);
+		GET_OWNER_IF_NOT_VALID();
 
-			GLCHECK();
+		if(Owner)
+		{
+			if(!Owner->IsTextureHandleValid(HandleValue))
+				HandleValue = Owner->CreateTexture();
+
+			Owner->SetTextureData(HandleValue, (uint8 *)Pixels, Width, Height);
 		};
-
-		Bind();
-
-		if(RendererManager::Instance.ActiveRenderer()->GetBoolFeature(RendererFeature::MayUseNonPowerOfTwoTextures))
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
-		}
-		else
-		{
-			gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA8, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
-		};
-
-		GLCHECK();
 
 		SetTextureFiltering(TextureFilter);
 		SetWrapMode(TextureWrap);
-
-		GLCHECK();
 
 		if(!KeepData)
 		{
@@ -898,12 +870,12 @@ namespace FlamingTorch
 #endif
 	};
 
-	int32 Texture::ID() const
+	TextureHandle Texture::Handle() const
 	{
 		if(Index.Index != -1)
-			return Index.GLID();
+			return Index.Handle();
 
-		return GLID;
+		return HandleValue;
 	};
 
 	uint32 Texture::Width() const
@@ -933,14 +905,8 @@ namespace FlamingTorch
 
 	void Texture::Bind()
 	{
-#if USE_GRAPHICS
-		if(!glIsTexture(ID()))
-			return;
-
-		glBindTexture(GL_TEXTURE_2D, ID());
-
-		GLCHECK();
-#endif
+		if(Owner)
+			Owner->BindTexture(HandleValue);
 	};
 
 	void Texture::SetWrapMode(uint32 WrapMode)
@@ -953,36 +919,12 @@ namespace FlamingTorch
 		};
 
 #if USE_GRAPHICS
+		GET_OWNER_IF_NOT_VALID();
+
 		TextureWrap = WrapMode;
 
-		Bind();
-
-		switch(WrapMode)
-		{
-		case TextureWrapMode::Repeat:
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			break;
-
-		case TextureWrapMode::Clamp:
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-			break;
-
-		case TextureWrapMode::ClampToBorder:
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-			break;
-
-		case TextureWrapMode::ClampToEdge:
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-			break;
-		};
+		if(Owner)
+			Owner->SetTextureWrapMode(HandleValue, WrapMode);
 #endif
 	};
 
@@ -1023,58 +965,12 @@ namespace FlamingTorch
 		};
 
 #if USE_GRAPHICS
+		GET_OWNER_IF_NOT_VALID();
+
 		TextureFilter = Filter;
 
-		glBindTexture(GL_TEXTURE_2D, GLID);
-
-		if(Filter == TextureFiltering::Nearest || Filter == TextureFiltering::Linear)
-		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter == TextureFiltering::Nearest ?
-GL_NEAREST : GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter == TextureFiltering::Nearest ?
-GL_NEAREST : GL_LINEAR);
-		}
-		else if(Filter == TextureFiltering::Nearest_Mipmap || Filter == TextureFiltering::Linear_Mipmap)
-		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter == TextureFiltering::Nearest_Mipmap ?
-GL_NEAREST_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter == TextureFiltering::Nearest_Mipmap ?
-GL_NEAREST : GL_LINEAR);
-
-			GLCHECK();
-
-			if(RendererManager::Instance.ActiveRenderer()->GetBoolFeature(RendererFeature::CanAutoGenerateMipMaps))
-			{
-				glGenerateMipmap(GL_TEXTURE_2D);
-
-				GLCHECK();
-			}
-			else
-			{
-				if(RendererManager::Instance.ActiveRenderer()->GlewIsAvailable && glewIsSupported("GL_VERSION_1_4"))
-					glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); 
-
-				GLCHECK();
-			};
-
-			if(RendererManager::Instance.ActiveRenderer()->GetBoolFeature(RendererFeature::AnisotropicEnabled))
-			{
-				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
-					RendererManager::Instance.ActiveRenderer()->GetFloatFeature(RendererFeature::CurrentAnisotropicLevel));
-			};
-
-			GLCHECK();
-		};
-
-		//Maybe temp, not sure
-		if(RendererManager::Instance.ActiveRenderer()->GlewIsAvailable && glewIsSupported("GL_VERSION_1_2"))
-		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		};
-
-		GLCHECK();
+		if(Owner)
+			Owner->SetTextureFiltering(HandleValue, Filter);
 #endif
 	};
 
@@ -1110,20 +1006,19 @@ GL_NEAREST : GL_LINEAR);
 #if USE_GRAPHICS
 	bool Texture::FromScreen()
 	{
+		GET_OWNER_IF_NOT_VALID();
+
 		Index.Index = -1;
 
-		RendererManager::Renderer *Renderer = RendererManager::Instance.ActiveRenderer();
+		SuperSmartPointer<TextureBuffer> TempBuffer(new TextureBuffer());
 
-		if(Renderer == NULL)
-		{
-			Log::Instance.LogDebug(TAG, "@FromScreen: Invalid Renderer");
+		TempBuffer->CreateEmpty(Width(), Height());
 
-			return false;
-		};
+		if(Owner)
+			if(!Owner->CaptureScreen(&TempBuffer->Data[0], TempBuffer->Width() * TempBuffer->Height() * 4))
+				return false;
 
-		sf::Image Picture = Renderer->Window.capture();
-
-		return FromData(Picture.getPixelsPtr(), Picture.getSize().x, Picture.getSize().y);
+		return FromBuffer(TempBuffer);
 	};
 #endif
 
@@ -1145,30 +1040,20 @@ GL_NEAREST : GL_LINEAR);
 		PROFILE("Texture::Blur", StatTypes::Rendering);
 
 #if USE_GRAPHICS
+		GET_OWNER_IF_NOT_VALID();
+
 		bool RequiredBufferPlacement = false;
 
 		if(Buffer.Get() == NULL && WidthValue != 0)
 		{
 			RequiredBufferPlacement = true;
 
-			GLCHECK();
-
-			Bind();
-
-			GLCHECK();
-
 			Buffer.Reset(new TextureBuffer());
 
-			static std::vector<uint8> Data;
-			Data.resize(WidthValue * HeightValue * 4);
+			Buffer->CreateEmpty(WidthValue, HeightValue);
 
-			glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA8, GL_UNSIGNED_BYTE, &Data[0]);
-
-			GLCHECK();
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			Buffer->FromData(&Data[0], WidthValue, HeightValue);
+			if(Owner)
+				Owner->GetTextureData(HandleValue, &Buffer->Data[0], WidthValue * HeightValue * 4);
 		};
 #endif
 
@@ -1284,9 +1169,9 @@ GL_NEAREST : GL_LINEAR);
 		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Height : 0;
 	};
 
-	uint32 TexturePackerIndex::GLID() const
+	TextureHandle TexturePackerIndex::Handle() const
 	{
-		return Owner.Get() ? Owner->MainTexture->ID() : 0;
+		return Owner.Get() ? Owner->MainTexture->Handle() : 0;
 	};
 
 	uint32 TexturePackerIndex::ColorType() const

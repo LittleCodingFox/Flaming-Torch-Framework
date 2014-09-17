@@ -228,7 +228,7 @@ public:
 	SuperSmartPointer<Texture> SpriteTexture;
 	SpriteDrawOptions Options;
 
-	void Draw(RendererManager::Renderer *Renderer);
+	void Draw(Renderer *Renderer);
 };
 
 class AnimatedSprite : public Sprite
@@ -277,6 +277,6 @@ public:
 	static SpriteCache Instance;
 
 	SpriteCache() : CurrentBlendingMode(BlendingMode::None) {};
-	void Register(Vector2 *Vertices, Vector2 *TexCoords, Vector4 *Color, uint32 VertexCount, SuperSmartPointer<Texture> Texture, uint32 BlendingMode, RendererManager::Renderer *Renderer);
-	void Flush(RendererManager::Renderer *Renderer);
+	void Register(Vector2 *Vertices, Vector2 *TexCoords, Vector4 *Color, uint32 VertexCount, SuperSmartPointer<Texture> Texture, uint32 BlendingMode, Renderer *Renderer);
+	void Flush(Renderer *Renderer);
 };

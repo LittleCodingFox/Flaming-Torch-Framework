@@ -3,6 +3,7 @@ namespace FlamingTorch
 {
 #	if USE_GRAPHICS
 #	define PROFILER_FONT_SIZE 14
+#	define TAG "RendererManager"
 
 	RendererHandle Counter = 0, Active = 0;
 	RendererManager RendererManager::Instance;
@@ -21,22 +22,22 @@ namespace FlamingTorch
 				{
 					switch(Key.Name)
 					{
-					case sf::Keyboard::Left:
+					case InputKey::Left:
 						if(TheManager.ConsoleCursorPosition > 0)
 							TheManager.ConsoleCursorPosition--;
 
 						break;
 
-					case sf::Keyboard::Right:
-						if(TheManager.ConsoleCursorPosition < TheManager.ConsoleText.getSize())
+					case InputKey::Right:
+						if(TheManager.ConsoleCursorPosition < TheManager.ConsoleText.length())
 							TheManager.ConsoleCursorPosition++;
 
 						break;
 
-					case sf::Keyboard::BackSpace:
+					case InputKey::BackSpace:
 						if(TheManager.ConsoleCursorPosition > 0)
 						{
-							std::wstring ActualConsoleText = TheManager.ConsoleText.toWideString();
+							std::string ActualConsoleText = TheManager.ConsoleText;
 
 							TheManager.ConsoleText = ActualConsoleText.substr(0, TheManager.ConsoleCursorPosition - 1) + ActualConsoleText.substr(TheManager.ConsoleCursorPosition);
 
@@ -45,8 +46,8 @@ namespace FlamingTorch
 
 						break;
 
-					case sf::Keyboard::Return:
-						if(TheManager.ConsoleText.getSize())
+					case InputKey::Return:
+						if(TheManager.ConsoleText.length())
 						{
 							Console::Instance.RunConsoleCommand(TheManager.ConsoleText);
 
@@ -110,14 +111,14 @@ namespace FlamingTorch
 					)
 					return;
 
-				std::wstring ActualConsoleText = TheManager.ConsoleText.toWideString();
+				std::string ActualConsoleText = TheManager.ConsoleText;
 
-				wchar_t String[2] = {
-					Character, L'\0'
+				char String[2] = {
+					(char)Character, '\0'
 				};
 
 				TheManager.ConsoleText = ActualConsoleText.substr(0, TheManager.ConsoleCursorPosition) +
-					std::wstring(String) + ActualConsoleText.substr(TheManager.ConsoleCursorPosition);
+					std::string(String) + ActualConsoleText.substr(TheManager.ConsoleCursorPosition);
 
 				TheManager.ConsoleCursorPosition++;
 			};
@@ -144,182 +145,16 @@ namespace FlamingTorch
 		void OnLoseFocus() {};
 	};
 
-	void DumpRendererStats()
-	{
-		Log::Instance.LogInfo("RendererManager", "GL Info");
-		Log::Instance.LogInfo("RendererManager", "   Renderer: %s", glGetString(GL_RENDERER));
-		Log::Instance.LogInfo("RendererManager", "   Vendor: %s", glGetString(GL_VENDOR));
-		Log::Instance.LogInfo("RendererManager", "   Version: %s", glGetString(GL_VERSION));
-
-		int t, t2, t3;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &t);
-
-		GLCHECK();
-
-		Log::Instance.LogInfo("RendererManager", "   Max Texture Size: %d", t);
-
-		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &t);
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &t2);
-		glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &t3);
-
-		GLCHECK();
-
-		Log::Instance.LogInfo("RendererManager", "   Max Texture Units: %d (%d vs, %d ps)", t, t3, t2);
-
-		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &t);
-
-		GLCHECK();
-
-		Log::Instance.LogInfo("RendererManager", "   Max Vertex Attribs: %d", t);
-	};
-
-	bool RendererManager::Renderer::GetBoolFeature(uint32 ID)
-	{
-		switch(ID)
-		{
-		case RendererFeature::GlewIsAvailable:
-			return GlewIsAvailable;
-
-		case RendererFeature::AnisotropicSupported:
-			return AnisotropicSupported;
-
-		case RendererFeature::AnisotropicEnabled:
-			return AnisotropicEnabled;
-
-		case RendererFeature::CanAutoGenerateMipMaps:
-			return CanAutoGenerateMipMaps;
-
-		case RendererFeature::MayUseNonPowerOfTwoTextures:
-			return MayUseNonPOTTextures;
-
-		default:
-			FLASSERT(0, "Invalid ID for GetBoolFeature: '%d'", ID);
-		};
-
-		return false;
-	};
-
-	f32 RendererManager::Renderer::GetFloatFeature(uint32 ID)
-	{
-		switch(ID)
-		{
-		case RendererFeature::MaxAnisotropicLevel:
-			return MaxAnisotropicLevel;
-
-		case RendererFeature::CurrentAnisotropicLevel:
-			return CurrentAnisotropicLevel;
-
-		default:
-			FLASSERT(0, "Invalid ID for GetFloatFeature: '%d'", ID);
-		};
-
-		return 0;
-	};
-
-	uint32 RendererManager::Renderer::GetUintFeature(uint32 ID)
-	{
-		FLASSERT(0, "Unimplemented!");
-
-		return 0;
-	};
-
-	RendererHandle RendererManager::Renderer::Handle() const
+	RendererHandle Renderer::Handle() const
 	{
 		return HandleValue;
 	};
 
-	Vector2 RendererManager::Renderer::Size() const
+	Vector2 Renderer::Size() const
 	{
-		return Vector2((f32)Window.getSize().x, (f32)Window.getSize().y);
-	};
-	
-	bool RendererManager::Renderer::SetFullScreen(const Vector2 &WindowSize, bool Value)
-	{
-		if(CreatedFromWindow)
-			return false;
+		FLASSERT(Impl, "Invalid Implementation!");
 
-		Matrix4x4 Projection, World;
-
-		glGetFloatv(GL_PROJECTION_MATRIX, &Projection.m[0][0]);
-		glGetFloatv(GL_MODELVIEW_MATRIX, &World.m[0][0]);
-
-		ResourceManager::Instance.PrepareResourceReload();
-
-		Window.create(sf::VideoMode((uint32)WindowSize.x, (uint32)WindowSize.y), WindowTitle,
-			Value ? WindowStyle | sf::Style::Fullscreen : WindowStyle & ~sf::Style::Fullscreen);
-
-		if(!Window.isOpen())
-			return false;
-
-		if(GlewIsAvailable) {
-			AnisotropicSupported = !!glewIsSupported("GL_EXT_texture_filter_anisotropic");
-
-			if(AnisotropicSupported)
-			{
-				AnisotropicEnabled = true;
-				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &MaxAnisotropicLevel);
-				CurrentAnisotropicLevel = MaxAnisotropicLevel;
-			};
-
-			CanAutoGenerateMipMaps = !!glewIsSupported("GL_ARB_framebuffer_object");
-			MayUseNonPOTTextures = !!glewIsSupported("GL_ARB_texture_non_power_of_two");
-
-			GLCHECK();
-		};
-
-		for(GLStatesMap::iterator it = GLStates.begin(); it != GLStates.end(); it++)
-		{
-			switch(it->first)
-			{
-			case GL_VERTEX_ARRAY:
-			case GL_TEXTURE_COORD_ARRAY:
-			case GL_NORMAL_ARRAY:
-			case GL_COLOR_ARRAY:
-			case GL_EDGE_FLAG_ARRAY:
-			case GL_FOG_COORD_ARRAY:
-			case GL_INDEX_ARRAY:
-			case GL_SECONDARY_COLOR_ARRAY:
-				if(it->second)
-				{
-					glEnableClientState(it->first);
-				}
-				else
-				{
-					glDisableClientState(it->first);
-				};
-
-				break;
-			default:
-				if(it->second)
-				{
-					glEnable(it->first);
-				}
-				else
-				{
-					glDisable(it->first);
-				};
-
-				break;
-			};
-		};
-
-		ResourceManager::Instance.ReloadResources();
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(&Projection.m[0][0]);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(&World.m[0][0]);
-
-		FullScreenFlag = Value;
-
-		OnResourcesReloaded(this);
-
-		return true;
-	};
-
-	bool RendererManager::Renderer::GetFullScreen() const
-	{
-		return FullScreenFlag;
+		return Impl->Size();
 	};
 
 	RendererHandle RendererManager::AddRenderer(const char *Title, uint32 Width, uint32 Height, uint32 Style)
@@ -329,154 +164,34 @@ namespace FlamingTorch
 		//Add a renderer
 		RendererHandle Out = ++Counter;
 		SuperSmartPointer<Renderer> *Info = &Renderers[Out];
-		Info->Reset(new Renderer());
+		Info->Reset(new Renderer(new DEFAULT_RENDERER_IMPLEMENTATION()));
 		Info->Get()->HandleValue = Out;
 
-		Log::Instance.LogInfo("RendererManager", "Attempting to create a Renderer ('%s'; (%dx%d))", Title, Width, Height);
+		Log::Instance.LogInfo(TAG, "Attempting to create a Renderer ('%s'; (%dx%d))", Title, Width, Height);
 
-		//Create the window
-		Info->Get()->Window.create(sf::VideoMode(Width, Height), Title, Style);
-
-		GLCHECK();
-
-		//If it failed to open, return an error
-		if(!Info->Get()->Window.isOpen())
-		{
-			Log::Instance.LogInfo("RendererManager", "Unable to create the rendering window.");
-			Renderers.erase(Out);
-
+		if(!Info->Get()->Create(Title, Width, Height, Style))
 			return 0;
-		};
 
-		//If the first renderer, init glew
-		if(FirstRenderer)
-		{
-			FirstRenderer = false;
-
-			GLenum err = glewInit();
-
-			if(GLEW_OK != err)
-			{
-				Log::Instance.LogInfo("RendererManager", "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
-					glewGetErrorString(err));
-				Info->Get()->GlewIsAvailable = false;
-			};
-
-			GLCHECK();
-
-			DumpRendererStats();
-		};
-
-		//Get some specs
-		if(Info->Get()->GlewIsAvailable) {
-			Info->Get()->AnisotropicSupported = !!glewIsSupported("GL_EXT_texture_filter_anisotropic");
-
-			if(Info->Get()->AnisotropicSupported)
-			{
-				Info->Get()->AnisotropicEnabled = true;
-				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &Info->Get()->MaxAnisotropicLevel);
-				Info->Get()->CurrentAnisotropicLevel = Info->Get()->MaxAnisotropicLevel;
-			};
-
-			Info->Get()->CanAutoGenerateMipMaps = !!glewIsSupported("GL_ARB_framebuffer_object");
-			Info->Get()->MayUseNonPOTTextures = !!glewIsSupported("GL_ARB_texture_non_power_of_two");
-
-			GLCHECK();
-		};
-
-		Info->Get()->EnableState(GL_TEXTURE_2D);
-		Info->Get()->FullScreenFlag = (Style & sf::Style::Fullscreen) != 0;
-		Info->Get()->WindowStyle = Style;
-		Info->Get()->WindowTitle = Title;
-		Info->Get()->CreatedFromWindow = false;
 		Info->Get()->UI.Reset(new UIManager(Info->Get()));
-
-		GLCHECK();
 
 		return Out;
 	};
 
-	RendererHandle RendererManager::AddRenderer(sf::WindowHandle Window)
+	RendererHandle RendererManager::AddRenderer(void *Window)
 	{
 		FLASSERT(&Instance == this, "We're not our own instance!");
 
 		//Add a renderer
 		RendererHandle Out = ++Counter;
 		SuperSmartPointer<Renderer> *Info = &Renderers[Out];
-		Info->Reset(new Renderer());
+		Info->Reset(new Renderer(new DEFAULT_RENDERER_IMPLEMENTATION()));
 		Info->Get()->HandleValue = Out;
 
-		Log::Instance.LogInfo("RendererManager", "Attempting to create a Renderer (WND: 0x%08x)", Window);
+		Log::Instance.LogInfo(TAG, "Attempting to create a Renderer (WND: 0x%08x)", Window);
 
-		//Init from an existing window
-		Info->Get()->Window.create(Window);
-
-		GLCHECK();
-
-		//If failed to open, return an error
-		if(!Info->Get()->Window.isOpen())
-		{
-			Log::Instance.LogInfo("RendererManager", "Unable to create the rendering window.");
-			Renderers.erase(Out);
-
-			return 0;
-		};
-
-		//If the first renderer, init glew
-		if(FirstRenderer)
-		{
-			FirstRenderer = false;
-
-			GLenum err = glewInit();
-
-			if(GLEW_OK != err)
-			{
-				Log::Instance.LogInfo("RendererManager", "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
-					glewGetErrorString(err));
-				Info->Get()->GlewIsAvailable = false;
-			};
-
-			GLCHECK();
-
-			DumpRendererStats();
-		};
-
-		//Get some specs
-		if(Info->Get()->GlewIsAvailable) {
-			Info->Get()->AnisotropicSupported = !!glewIsSupported("GL_EXT_texture_filter_anisotropic");
-
-			if(Info->Get()->AnisotropicSupported)
-			{
-				Info->Get()->AnisotropicEnabled = true;
-				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &Info->Get()->MaxAnisotropicLevel);
-				Info->Get()->CurrentAnisotropicLevel = Info->Get()->MaxAnisotropicLevel;
-			};
-
-			Info->Get()->CanAutoGenerateMipMaps = !!glewIsSupported("GL_ARB_framebuffer_object");
-			Info->Get()->MayUseNonPOTTextures = !!glewIsSupported("GL_ARB_texture_non_power_of_two");
-
-			GLCHECK();
-		};
-
-		Info->Get()->EnableState(GL_TEXTURE_2D);
-		Info->Get()->FullScreenFlag = false;
-		Info->Get()->CreatedFromWindow = true;
 		Info->Get()->UI.Reset(new UIManager(Info->Get()));
 
-		GLCHECK();
-
 		return Out;
-	};
-
-	void RendererManager::Renderer::HandleResize(uint32 w, uint32 h)
-	{
-		sf::View TheView(sf::FloatRect(0, 0, (float)w, (float)h));
-		Window.setView(TheView);
-		glViewport(0, 0, w, h);
-		
-		OnResized(this, w, h);
-
-		GLCHECK();
 	};
 
 	void RendererManager::DestroyRenderer(RendererHandle Handle)
@@ -494,10 +209,15 @@ namespace FlamingTorch
 		Active = Handle;
 
 		SuperSmartPointer<Renderer> &In = Renderers[Handle];
-		In->Window.setActive();
+		//In->Window.setActive();
 	};
 
-	RendererManager::Renderer *RendererManager::ActiveRenderer()
+	uint32 RendererManager::RendererCount() const
+	{
+		return Renderers.size();
+	};
+
+	Renderer *RendererManager::ActiveRenderer()
 	{
 		FLASSERT(&Instance == this, "We're not our own instance!");
 		FLASSERT(Renderers.find(Active) != Renderers.end(), "Renderer not found");
@@ -569,27 +289,10 @@ namespace FlamingTorch
 			static std::stringstream str;
 			str.precision(2);
 
-			Renderer->BindTexture(NULL);
-			Renderer->EnableState(GL_VERTEX_ARRAY);
-			Renderer->DisableState(GL_COLOR_ARRAY);
-			Renderer->DisableState(GL_NORMAL_ARRAY);
+			static Sprite ProfilerBackground;
+			ProfilerBackground.Options.Scale(Renderer->Size()).Color(Vector4(0.45f, 0.45f, 0.45f, 0.5f));
 
-			Vector2 Vertices[6] = {
-				Vector2(),
-				Vector2(0, Renderer->Size().y),
-				Renderer->Size(),
-				Renderer->Size(),
-				Vector2(Renderer->Size().x, 0),
-				Vector2(),
-			};
-
-			glColor4f(0.45f, 0.45f, 0.45f, 0.5f);
-
-			glVertexPointer(2, GL_FLOAT, 0, Vertices);
-
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-
-			glColor4f(1, 1, 1, 1);
+			ProfilerBackground.Draw(Renderer);
 
 			uint32 YPos = 0;
 			uint64 TimeThisFrame = 1000;
@@ -607,44 +310,42 @@ namespace FlamingTorch
 				str << "[" << Profiler::StatTypeString(it->second.Type) << "] " << it->first << " " << it->second.ms << " (" << Average << " avg) - " <<
 					std::fixed << PercentThisFrame << "% FT (" << std::fixed << TimeThisFrame * PercentThisFrame / 100.f << "ms)";
 
-				sf::Color TextColor;
+				Vector4 TextColor;
 
 				if(PercentThisFrame < 5.f)
 				{
-					TextColor = sf::Color::Cyan;
+					TextColor = Vector4(0, 1, 1, 1);
 				}
 				else if(PercentThisFrame < 10.f)
 				{
-					TextColor = sf::Color::Yellow;
+					TextColor = Vector4(1, 1, 0, 1);
 				}
 				else
 				{
-					TextColor = sf::Color::Red;
+					TextColor = Vector4(1, 0, 0, 1);
 				};
 
 				RenderTextUtils::RenderText(Renderer, str.str(), TextParams().FontSize(PROFILER_FONT_SIZE)
-					.Color(Vector4(TextColor.r / 255.f, TextColor.g / 255.f, TextColor.b / 255.f, TextColor.a / 255.f))
-					.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
+					.Color(TextColor).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
 			};
 
 			{
-				sf::Color TextColor;
+				Vector4 TextColor;
 
 				if(PercentLeft == 0)
 				{
-					TextColor = sf::Color::Cyan;
+					TextColor = Vector4(0, 1, 1, 1);
 				}
 				else
 				{
-					TextColor = sf::Color::Yellow;
+					TextColor = Vector4(1, 1, 0, 1);
 				};
 
 				str.str("");
 				str << "UFT: " << std::fixed << PercentLeft << "% (" << std::fixed << TimeThisFrame * PercentLeft / 100.f << " ms)";
 
 				RenderTextUtils::RenderText(Renderer, str.str(), TextParams().FontSize(PROFILER_FONT_SIZE)
-					.Color(Vector4(TextColor.r / 255.f, TextColor.g / 255.f, TextColor.b / 255.f, TextColor.a / 255.f))
-					.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
+					.Color(TextColor).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
 			};
 		};
 #endif
@@ -655,8 +356,8 @@ namespace FlamingTorch
 			TheSprite.Options.Scale(Renderer->Size()).Color(Vector4(0, 0, 0, 0.9f));
 			TheSprite.Draw(Renderer);
 
-			std::wstring ActualConsoleText = ConsoleText.toWideString();
-			ActualConsoleText = ActualConsoleText.substr(0, ConsoleCursorPosition) + L"|" + ActualConsoleText.substr(ConsoleCursorPosition);
+			std::string ActualConsoleText = ConsoleText;
+			ActualConsoleText = ActualConsoleText.substr(0, ConsoleCursorPosition) + "|" + ActualConsoleText.substr(ConsoleCursorPosition);
 			TextParams Params;
 			Params.Color(Renderer->UI->GetDefaultFontColor()).SecondaryColor(Renderer->UI->GetDefaultSecondaryFontColor())
 				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, Renderer->Size().y - PROFILER_FONT_SIZE * 1.3f)).FontSize(PROFILER_FONT_SIZE);
@@ -671,100 +372,315 @@ namespace FlamingTorch
 			};
 		};
 
-		Renderer->Window.display();
+		Renderer->Impl->Display();
 
 		return ReturnValue;
 	};
 
-	void RendererManager::Renderer::Clear(uint32 ID)
+	Renderer::Renderer(IRendererImplementation *_Impl) : Impl(_Impl)
 	{
-		glClear(ID);
+		Impl->Target = this;
 	};
 
-	bool RendererManager::Renderer::IsStateEnabled(uint32 ID) const
+	bool Renderer::Create(void *WindowHandle)
 	{
-		GLStatesMap::const_iterator it = GLStates.find(ID);
+		FLASSERT(Impl, "Invalid Implementation!");
 
-		if(it == GLStates.end())
-		{
-			if(ID == GL_DITHER || ID == GL_MULTISAMPLE)
-				return true;
-
+		if(!Impl)
 			return false;
-		};
 
-		return it->second;
+		return Impl->Create(WindowHandle);
 	};
 
-	void RendererManager::Renderer::EnableState(uint32 ID)
+	bool Renderer::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style)
 	{
-		if(IsStateEnabled(ID))
-			return;
+		FLASSERT(Impl, "Invalid Implementation!");
 
-		switch(ID)
-		{
-		case GL_VERTEX_ARRAY:
-		case GL_TEXTURE_COORD_ARRAY:
-		case GL_NORMAL_ARRAY:
-		case GL_COLOR_ARRAY:
-		case GL_EDGE_FLAG_ARRAY:
-		case GL_FOG_COORD_ARRAY:
-		case GL_INDEX_ARRAY:
-		case GL_SECONDARY_COLOR_ARRAY:
-			glEnableClientState(ID);
+		if(!Impl)
+			return false;
 
-			break;
-		default:
-			glEnable(ID);
-
-			break;
-		};
-		
-		GLStates[ID] = true;
+		return Impl->Create(Title, Width, Height, Style);
 	};
 
-	void RendererManager::Renderer::DisableState(uint32 ID)
+	VertexBufferHandle Renderer::CreateVertexBuffer()
 	{
-		if(!IsStateEnabled(ID))
-			return;
+		FLASSERT(Impl, "Invalid Implementation!");
 
-		switch(ID)
-		{
-		case GL_VERTEX_ARRAY:
-		case GL_TEXTURE_COORD_ARRAY:
-		case GL_NORMAL_ARRAY:
-		case GL_COLOR_ARRAY:
-		case GL_EDGE_FLAG_ARRAY:
-		case GL_FOG_COORD_ARRAY:
-		case GL_INDEX_ARRAY:
-		case GL_SECONDARY_COLOR_ARRAY:
-			glDisableClientState(ID);
+		if(!Impl)
+			return 0;
 
-			break;
-		default:
-			glDisable(ID);
-
-			break;
-		};
-
-		GLStates[ID] = false;
+		return Impl->CreateVertexBuffer();
 	};
 
-	void RendererManager::Renderer::BindTexture(Texture *t)
+	void Renderer::SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize)
 	{
-		if(t == LastBoundTexture && t != NULL)
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
 			return;
 
-		LastBoundTexture = t;
+		Impl->SetVertexBufferData(Handle, DetailsMode, Elements, ElementCount, Data, DataByteSize);
+	};
 
-		if(t == NULL)
-		{
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-		else
-		{
-			t->Bind();
-		};
+	bool Renderer::IsVertexBufferHandleValid(VertexBufferHandle Handle)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return 0;
+
+		return Impl->IsTextureHandleValid(Handle);
+	};
+
+	void Renderer::DestroyVertexBuffer(VertexBufferHandle Handle)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->DestroyVertexBuffer(Handle);
+	};
+
+
+	void Renderer::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->RenderVertices(VertexMode, Buffer, Start, End);
+	};
+
+	void Renderer::SetMousePosition(const Vector2 &Position)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetMousePosition(Position);
+	};
+
+	void Renderer::Clear(uint32 ID)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->Clear(ID);
+	};
+
+	void Renderer::BindTexture(TextureHandle Handle)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->BindTexture(Handle);
+	};
+
+	void Renderer::BindTexture(Texture *t)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->BindTexture(t == NULL ? 0 : t->Handle());
+	};
+
+	bool Renderer::GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return false;
+
+		return Impl->GetTextureData(Handle, Pixels, BufferByteCount);
+	};
+
+	void Renderer::SetBlendingMode(uint32 BlendingMode)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetBlendingMode(BlendingMode);
+	};
+
+	void Renderer::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetWorldMatrix(WorldMatrix);
+	};
+
+	void Renderer::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetProjectionMatrix(ProjectionMatrix);
+	};
+
+	void Renderer::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetViewport(x, y, Width, Height);
+	};
+
+	TextureHandle Renderer::CreateTexture()
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return 0;
+
+		return Impl->CreateTexture();
+	};
+
+	bool Renderer::IsTextureHandleValid(TextureHandle Handle)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return false;
+
+		return Impl->IsTextureHandleValid(Handle);
+	};
+
+	void Renderer::DestroyTexture(TextureHandle Handle)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->DestroyTexture(Handle);
+	};
+
+	void Renderer::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetTextureData(Handle, Pixels, Width, Height);
+	};
+
+	void Renderer::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetTextureWrapMode(Handle, WrapMode);
+	};
+
+	void Renderer::SetTextureFiltering(TextureHandle Handle, uint32 Filtering)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetTextureFiltering(Handle, Filtering);
+	};
+
+	bool Renderer::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return false;
+
+		return Impl->CaptureScreen(Pixels, BufferByteCount);
+	};
+
+	bool Renderer::PollEvent(RendererEvent &Out)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return false;
+
+		return Impl->PollEvent(Out);
+	};
+
+	FontHandle Renderer::CreateFont(Stream *Data)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return 0;
+
+		return Impl->CreateFont(Data);
+	};
+
+	void Renderer::DestroyFont(FontHandle Handle)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->DestroyFont(Handle);
+	};
+
+	Rect Renderer::MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return Rect();
+
+		return Impl->MeasureText(Handle, Text, Parameters);
+	};
+
+	void Renderer::RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->RenderText(Handle, Text, Parameters);
+	};
+
+	void *Renderer::WindowHandle() const
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return NULL;
+
+		return Impl->WindowHandle();
+	};
+
+	void Renderer::SetFrameRate(uint32 FPS)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->SetFrameRate(FPS);
 	};
 
 	void RendererManager::StartUp(uint32 Priority)
@@ -775,7 +691,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo("RendererManager", "Initializing Renderer Manager...");
+		Log::Instance.LogInfo(TAG, "Initializing Renderer Manager...");
 
 		SuperSmartPointer<RendererInputProcessor> TheInputProcessor(new RendererInputProcessor);
 		TheInputProcessor->Name = "RENDERER INPUT";
@@ -794,7 +710,7 @@ namespace FlamingTorch
 
 		SubSystem::Shutdown(Priority);
 
-		Log::Instance.LogInfo("RendererManager", "Terminating Renderer Manager...");
+		Log::Instance.LogInfo(TAG, "Terminating Renderer Manager...");
 
 		while(Renderers.begin() != Renderers.end())
 		{

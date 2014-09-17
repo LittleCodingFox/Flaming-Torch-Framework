@@ -25,7 +25,7 @@ public:
 	static TextureCollision FromTexture(Texture *TheTexture, uint8 MinTransparency = 255);
 
 #if USE_GRAPHICS
-	void Draw(RendererManager::Renderer *Renderer);
+	void Draw(Renderer *Renderer);
 #endif
 
 	TextureCollision ApplyTransform(const Matrix4x4 &Transform);

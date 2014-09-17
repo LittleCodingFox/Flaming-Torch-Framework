@@ -5,6 +5,7 @@
 #define USE_BOX2D 0
 #define USE_AWESOMIUM 0
 #define USE_SOUND 1
+#define USE_SFML_RENDERER 1
 
 //Set this to 1 when preparing a release build
 #define FLGAME_RELEASE 0

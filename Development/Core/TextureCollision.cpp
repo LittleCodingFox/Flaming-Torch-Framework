@@ -38,23 +38,33 @@ namespace FlamingTorch
 		return Out;
 	};
 
+	struct TextureCollisionVertex
+	{
+		Vector2 Position;
+	};
+
+	VertexElementDescriptor TextureCollisionVertexDescriptor[] = {
+		{ 0, VertexElementType::Position, VertexElementDataType::Float2 }
+	};
+
 #if USE_GRAPHICS
-	void TextureCollision::Draw(RendererManager::Renderer *Renderer)
+	void TextureCollision::Draw(Renderer *Renderer)
 	{
 		if(!Polygon.size())
 			return;
 
 		SpriteCache::Instance.Flush(Renderer);
 
-		Renderer->BindTexture(NULL);
-		Renderer->EnableState(GL_VERTEX_ARRAY);
-		Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
-		Renderer->DisableState(GL_NORMAL_ARRAY);
-		Renderer->DisableState(GL_COLOR_ARRAY);
+		VertexBufferHandle Handle = Renderer->CreateVertexBuffer();
 
-		glVertexPointer(2, GL_FLOAT, 0, &Polygon[0]);
+		if(!Handle)
+			return;
 
-		glDrawArrays(GL_POINTS, 0, Polygon.size());
+		Renderer->SetVertexBufferData(Handle, VertexDetailsMode::Mixed, TextureCollisionVertexDescriptor, 1, &Polygon[0], sizeof(Vector2) * Polygon.size());
+
+		Renderer->RenderVertices(VertexModes::Points, Handle, 0, Polygon.size());
+
+		Renderer->DestroyVertexBuffer(Handle);
 	};
 #endif
 

@@ -1,5 +1,6 @@
 #include "FlamingCore.hpp"
-#if USE_GRAPHICS
+//Disabled for now
+#if USE_GRAPHICS && 0
 namespace FlamingTorch
 {
 	uint32 GBCToGL[3] = {

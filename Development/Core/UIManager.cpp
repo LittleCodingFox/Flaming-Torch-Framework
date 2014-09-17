@@ -150,7 +150,7 @@ namespace FlamingTorch
 		void OnLoseFocus() {};
 	};
 
-	UIManager::UIManager(RendererManager::Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DefaultFontColor(1, 1, 1, 1),
+	UIManager::UIManager(Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DefaultFontColor(1, 1, 1, 1),
 		DefaultSecondaryFontColor(1, 1, 1, 1), DefaultFontSize(16), MouseOverElement(NULL)
 	{
 		std::vector<LuaLib *> Libs;
@@ -226,11 +226,11 @@ namespace FlamingTorch
 			{
 				if(!!IntValue)
 				{
-					TheText->TextParameters.StyleValue |= sf::Text::Bold;
+					TheText->TextParameters.StyleValue |= TextStyle::Bold;
 				}
 				else
 				{
-					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~sf::Text::Bold;
+					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Bold;
 				};
 			};
 		}
@@ -242,11 +242,11 @@ namespace FlamingTorch
 			{
 				if(!!IntValue)
 				{
-					TheText->TextParameters.StyleValue |= sf::Text::Italic;
+					TheText->TextParameters.StyleValue |= TextStyle::Italic;
 				}
 				else
 				{
-					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~sf::Text::Italic;
+					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Italic;
 				};
 			};
 		}
@@ -258,11 +258,11 @@ namespace FlamingTorch
 			{
 				if(!!IntValue)
 				{
-					TheText->TextParameters.StyleValue |= sf::Text::Underlined;
+					TheText->TextParameters.StyleValue |= TextStyle::Underline;
 				}
 				else
 				{
-					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~sf::Text::Underlined;
+					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Underline;
 				};
 			};
 		}
@@ -768,7 +768,7 @@ namespace FlamingTorch
 		if(Elements.type() != Json::arrayValue)
 			return;
 
-		RendererManager::Renderer *Renderer = Owner;
+		Renderer *Renderer = Owner;
 
 		for(uint32 i = 0; i < Elements.size(); i+=2)
 		{
@@ -2141,7 +2141,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIManager::Draw(RendererManager::Renderer *Renderer)
+	void UIManager::Draw(Renderer *Renderer)
 	{
 		DrawUIRects = !!(Console::Instance.GetVariable("r_drawuirects") ? Console::Instance.GetVariable("r_drawuirects")->UintValue : 0);
 		DrawUIFocusZones = !!(Console::Instance.GetVariable("r_drawuifocuszones") ? Console::Instance.GetVariable("r_drawuifocuszones")->UintValue : 0);
@@ -2569,7 +2569,7 @@ namespace FlamingTorch
 		if(FontDirectory.length() == 0)
 			FontDirectory = "/";
 
-		DefaultFont = ResourceManager::Instance.GetFontFromPackage(FontDirectory, FontName);
+		DefaultFont = ResourceManager::Instance.GetFontFromPackage(GetOwner(), FontDirectory, FontName);
 
 		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
@@ -2589,7 +2589,7 @@ namespace FlamingTorch
 		ScriptInstance.Dispose();
 	};
 
-	RendererManager::Renderer *UIManager::GetOwner()
+	Renderer *UIManager::GetOwner()
 	{
 		return Owner;
 	};
@@ -2609,7 +2609,7 @@ namespace FlamingTorch
 		return DefaultFontSize;
 	};
 
-	SuperSmartPointer<sf::Font> UIManager::GetDefaultFont()
+	FontHandle UIManager::GetDefaultFont()
 	{
 		return DefaultFont;
 	};

@@ -78,7 +78,7 @@ protected:
 	UILayout *LayoutValue;
 	UIManager *ManagerValue;
 	bool RespondsToTooltipsValue, TooltipFixedValue;
-	sf::String TooltipValue;
+	std::string TooltipValue;
 	SuperSmartPointer<UIPanel> ParentValue, TooltipElementValue, ContentPanelValue;
 	//!<Children of this UI Panel
 	std::vector<UIPanel *> Children;
@@ -168,7 +168,7 @@ public:
 	*	\param Renderer the Renderer to draw to
 	*	\note Should iterate on all children
 	*/
-	virtual void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	virtual void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
 
 	/*!
 	*	Perform auto calculation of sizes here
@@ -181,7 +181,7 @@ public:
 	*	\param Renderer the renderer to render to
 	*	\note should be called by all derived classes on Draw() after drawing the element
 	*/
-	void DrawUIRect(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	void DrawUIRect(const Vector2 &ParentPosition, Renderer *Renderer);
 
 	/*!
 	*	Draws the UI Focus Zone for this element
@@ -189,7 +189,7 @@ public:
 	*	\param Renderer the renderer to render to
 	*	\note should be called by all derived classes on Draw() after drawing the element and before drawing the UI Rect
 	*/
-	void DrawUIFocusZone(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	void DrawUIFocusZone(const Vector2 &ParentPosition, Renderer *Renderer);
 
 	/*!
 	*	\return Whether this element respondes to Tooltips
@@ -314,7 +314,7 @@ public:
 	/*!
 	*	\return the Tooltip Text to display
 	*/
-	const sf::String &TooltipText() const;
+	const std::string &TooltipText() const;
 
 	/*!
 	*	\return the Tooltip Element to display
@@ -336,7 +336,7 @@ public:
 	*	Sets the tooltip text for this element
 	*	\param Text the tooltip text
 	*/
-	void SetTooltipText(const sf::String &Text);
+	void SetTooltipText(const std::string &Text);
 
 	/*!
 	*	Sets the tooltip element for this element
@@ -573,7 +573,7 @@ public:
 	UIGroup(UIManager *Manager);
 	void PerformLayout();
 	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
 };
 
 /*!
@@ -590,7 +590,7 @@ public:
 	UISprite(UIManager *Manager);
 	void PerformLayout();
 	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
 };
 
 /*!
@@ -609,13 +609,13 @@ public:
 	*	Override Text
 	*	\note Should have any content to override the Tooltip text
 	*/
-	sf::String OverrideText;
+	std::string OverrideText;
 
 	TextParams TextParameters;
 
 	void PerformLayout();
 	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
 };
 
 /*!
@@ -644,13 +644,13 @@ protected:
 public:
 	struct StringInfo
 	{
-		sf::String TheString;
+		std::string TheString;
 		Rect Size;
 	};
 
 private:
 	std::vector<StringInfo> Strings;
-	sf::String TextValue;
+	std::string TextValue;
 public:
 
 	/*!
@@ -677,12 +677,12 @@ public:
 	*	\param AutoExpandHeight whether the Height of this Element should be expanded for the text
 	*	\note Required set so we recalculate the strings
 	*/
-	void SetText(const sf::String &String, bool AutoExpandHeight = false);
+	void SetText(const std::string &String, bool AutoExpandHeight = false);
 
 	/*!
 	*	\return the Text of this UIText
 	*/
-	const sf::String &Text();
+	const std::string &Text();
 
 	/*!
 	*	\return the Text's size
@@ -698,7 +698,7 @@ public:
 	};
 
 	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
 };
 
 /*!
@@ -711,7 +711,7 @@ protected:
 	class TextComposerNode
 	{
 	public:
-		sf::String Text;
+		std::string Text;
 		TextParams Params;
 		SuperSmartPointer<UIText> Instance;
 	};
@@ -743,7 +743,7 @@ public:
 	*	\param Text the text to use
 	*	\param Params the text parameters to use
 	*/
-	void AddText(const sf::String &Text, const TextParams &Params);
+	void AddText(const std::string &Text, const TextParams &Params);
 
 	/*!
 	*	\return Whether we're ignoring the height bounds and thus can overflow text elements
@@ -757,7 +757,7 @@ public:
 	void SetIgnoreHeightBounds(bool Value);
 
 	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer);
+	void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
 };
 
 /*!
@@ -850,7 +850,7 @@ private:
 	SuperSmartPointer<UIPanel> FocusedElementValue;
 	SuperSmartPointer<UITooltip> Tooltip;
 	SuperSmartPointer<GenericConfig> Skin;
-	SuperSmartPointer<sf::Font> DefaultFont;
+	FontHandle DefaultFont;
 
 	Vector4 DefaultFontColor, DefaultSecondaryFontColor;
 	uint32 DefaultFontSize;
@@ -869,7 +869,7 @@ private:
 
 	void RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement);
 
-	RendererManager::Renderer *Owner;
+	Renderer *Owner;
 
 	UIPanel *MouseOverElement;
 
@@ -890,13 +890,13 @@ public:
 	typedef std::map<StringID, SuperSmartPointer<UILayout> > LayoutMap;
 	LayoutMap Layouts, DefaultLayouts;
 
-	UIManager(RendererManager::Renderer *TheOwner);
+	UIManager(Renderer *TheOwner);
 	~UIManager();
 
 	/*!
 	*	\return the Renderer that owns this UI Manager
 	*/
-	RendererManager::Renderer *GetOwner();
+	Renderer *GetOwner();
 
 	/*!
 	*	Updates all visible Elements
@@ -907,7 +907,7 @@ public:
 	*	Draws all visible Elements
 	*	\param Renderer the Renderer to draw to
 	*/
-	void Draw(RendererManager::Renderer *Renderer);
+	void Draw(Renderer *Renderer);
 
 	/*!
 	*	Adds an UI element to this UI Manager
@@ -1014,7 +1014,7 @@ public:
 	/*!
 	*	\return the Default Font
 	*/
-	SuperSmartPointer<sf::Font> GetDefaultFont();
+	FontHandle GetDefaultFont();
 
 	/*!
 	*	Removes all elements

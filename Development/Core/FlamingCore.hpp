@@ -17,14 +17,7 @@ extern "C"
 #	include <luabind/operator.hpp>
 #	include <luabind/out_value_policy.hpp>
 #	include <luabind/return_reference_to_policy.hpp>
-#
-#if USE_GRAPHICS
-#	include <GL/glew.h>
-#	include <SFML/Graphics.hpp>
 #	include <json/json.h>
-#else
-#	include <SFML/System.hpp>
-#endif
 #
 #if USE_NETWORK
 #	include <enet/enet.h>
@@ -35,6 +28,8 @@ extern "C"
 #endif
 namespace FlamingTorch
 {
+	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle;
+
 #	include "MiniDump.hpp"
 #	include "SubSystem.hpp"
 #	include "Log.hpp"
@@ -55,25 +50,25 @@ namespace FlamingTorch
 #	include "Future.hpp"
 #	include "Entity.hpp"
 #	include "Component.hpp"
-#	include "Texture.hpp"
 #	include "Randomizer.hpp"
-#	include "ResourceManager.hpp"
 #	include "Camera.hpp"
 #	include "DynamicLink.hpp"
 #
 #	if USE_GRAPHICS
 #		include "Shader.hpp"
 #		include "Input.hpp"
+#		include "RenderTextUtils.hpp"
 #		include "RenderBase.hpp"
 #		include "GameInterface.hpp"
 #		include "GenericConfig.hpp"
 #		include "Sprite.hpp"
-#		include "RenderTextUtils.hpp"
 #		include "GUI.hpp"
 #		include "GeometryBuffer.hpp"
 #		include "RenderTarget.hpp"
 #	endif
 #
+#	include "Texture.hpp"
+#	include "ResourceManager.hpp"
 #	include "TextureCollision.hpp"
 #	include "GameInterface.hpp"
 #	include "Console.hpp"

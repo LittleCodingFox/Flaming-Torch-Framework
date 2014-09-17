@@ -4,6 +4,32 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	SpriteCache SpriteCache::Instance;
 
+	struct SpriteWireframeVertex
+	{
+		Vector2 Position;
+		Vector4 Color;
+	};
+
+	struct SpriteVertex
+	{
+		Vector2 Position, TexCoord;
+		Vector4 Color;
+	};
+
+	VertexElementDescriptor SpriteWireframeVertexDescriptor[] = {
+		{ 0, VertexElementType::Position, VertexElementDataType::Float2 },
+		{ sizeof(Vector2), VertexElementType::Color, VertexElementDataType::Float4 }
+	};
+
+	VertexElementDescriptor SpriteVertexDescriptor[] = {
+		{ 0, VertexElementType::Position, VertexElementDataType::Float2 },
+		{ sizeof(Vector2), VertexElementType::TexCoord, VertexElementDataType::Float2 },
+		{ sizeof(Vector2[2]), VertexElementType::Color, VertexElementDataType::Float4 }
+	};
+
+
+	VertexBufferHandle SpriteVertexBuffer = 0;
+
 	//Generates a ninepatch quad
 	void GenerateNinePatchGeometry(Vector2 *Vertices, Vector2 *TexCoords, const Vector2 &TextureSize, const Vector2 &Position, const Vector2 &Size, const Vector2 &Offset,
 		const Vector2 &SizeOverride = Vector2(-1, -1))
@@ -25,7 +51,7 @@ namespace FlamingTorch
 		TexCoords[4] = Vector2(NinePatchRect.Right, NinePatchRect.Top) / TextureSize;
 	};
 
-	void Sprite::Draw(RendererManager::Renderer *Renderer)
+	void Sprite::Draw(Renderer *Renderer)
 	{
 		static Vector2 Vertices[6],	TexCoords[6];
 		static Vector4 Colors[6];
@@ -393,41 +419,41 @@ namespace FlamingTorch
 		{
 			SpriteCache::Instance.Flush(Renderer);
 
-			Renderer->EnableState(GL_VERTEX_ARRAY);
-			Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
-			Renderer->DisableState(GL_COLOR_ARRAY);
-			Renderer->DisableState(GL_NORMAL_ARRAY);
-			Renderer->BindTexture(NULL);
-
 			Vector2 ObjectSizeHalf = ObjectSize / 2;
 
-			Vector2 Vertices[8] = {
-				-ObjectSizeHalf,
-				Vector2(ObjectSizeHalf.x, -ObjectSizeHalf.y),
-				Vector2(ObjectSizeHalf.x, -ObjectSizeHalf.y),
-				ObjectSizeHalf,
-				ObjectSizeHalf,
-				Vector2(-ObjectSizeHalf.x, ObjectSizeHalf.y),
-				Vector2(-ObjectSizeHalf.x, ObjectSizeHalf.y),
-				-ObjectSizeHalf,
+			SpriteWireframeVertex Vertices[8] = {
+				{ -ObjectSizeHalf, Options.ColorValue },
+				{ Vector2(ObjectSizeHalf.x, -ObjectSizeHalf.y), Options.ColorValue },
+				{ Vector2(ObjectSizeHalf.x, -ObjectSizeHalf.y), Options.ColorValue },
+				{ ObjectSizeHalf, Options.ColorValue },
+				{ ObjectSizeHalf, Options.ColorValue },
+				{ Vector2(-ObjectSizeHalf.x, ObjectSizeHalf.y), Options.ColorValue },
+				{ Vector2(-ObjectSizeHalf.x, ObjectSizeHalf.y), Options.ColorValue },
+				{ -ObjectSizeHalf, Options.ColorValue }
 			};
 
 			for(uint32 i = 0; i < 8; i++)
 			{
-				Vertices[i] = Vector2::Rotate(Vertices[i], Options.RotationValue) + ObjectSizeHalf + Options.PositionValue;
+				Vertices[i].Position = Vector2::Rotate(Vertices[i].Position, Options.RotationValue) + ObjectSizeHalf + Options.PositionValue;
 			};
 
-			glColor4f(Options.ColorValue.x, Options.ColorValue.y, Options.ColorValue.z, Options.ColorValue.w);
+			if(!Renderer->IsVertexBufferHandleValid(SpriteVertexBuffer))
+			{
+				SpriteVertexBuffer = Renderer->CreateVertexBuffer();
+			};
 
-			glVertexPointer(2, GL_FLOAT, 0, Vertices);
+			if(!SpriteVertexBuffer)
+				return;
 
-			glLineWidth(Options.WireframePixelSizeValue);
+			Renderer->SetVertexBufferData(SpriteVertexBuffer, VertexDetailsMode::Mixed, SpriteWireframeVertexDescriptor, sizeof(SpriteWireframeVertexDescriptor) / sizeof(SpriteWireframeVertexDescriptor[0]),
+				Vertices, sizeof(Vertices));
 
-			glDrawArrays(GL_LINES, 0, 8);
+			//TODO
+			//glLineWidth(Options.WireframePixelSizeValue);
 
-			glLineWidth(1);
+			Renderer->RenderVertices(VertexModes::Lines, SpriteVertexBuffer, 0, 8);
 
-			glColor4f(1, 1, 1, 1);
+			//glLineWidth(1);
 		}
 		else
 		{
@@ -435,7 +461,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void SpriteCache::Register(Vector2 *Vertices, Vector2 *TexCoords, Vector4 *Colors, uint32 VertexCount, SuperSmartPointer<Texture> Texture, uint32 BlendingMode, RendererManager::Renderer *Renderer)
+	void SpriteCache::Register(Vector2 *Vertices, Vector2 *TexCoords, Vector4 *Colors, uint32 VertexCount, SuperSmartPointer<Texture> Texture, uint32 BlendingMode, Renderer *Renderer)
 	{
 #if !DISABLE_SPRITE_CACHE
 		if(BlendingMode != CurrentBlendingMode || (Texture != ActiveTexture && (Texture.Get() == NULL || ActiveTexture.Get() == NULL || Texture->GetIndex().Index == -1 ||
@@ -456,55 +482,38 @@ namespace FlamingTorch
 		CurrentBlendingMode = BlendingMode;
 	};
 
-	void SpriteCache::Flush(RendererManager::Renderer *Renderer)
+	void SpriteCache::Flush(Renderer *Renderer)
 	{
 		if(CachedVertices.size() == 0)
 			return;
 
-		switch(CurrentBlendingMode)
+		Renderer->BindTexture(ActiveTexture);
+
+		std::vector<SpriteVertex> Buffer;
+
+		SpriteVertex Vertex;
+
+		for(uint32 i = 0; i < CachedVertices.size(); i++)
 		{
-		case BlendingMode::None:
-			Renderer->DisableState(GL_BLEND);
+			Vertex.Position = CachedVertices[i];
+			Vertex.TexCoord = CachedTexCoords[i];
+			Vertex.Color = CachedColors[i];
 
-			break;
-		case BlendingMode::Alpha:
-			Renderer->EnableState(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			break;
-		case BlendingMode::Additive:
-			Renderer->EnableState(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);
-
-			break;
-		case BlendingMode::Subtractive:
-			Renderer->EnableState(GL_BLEND);
-			glBlendEquation(GL_FUNC_SUBTRACT);
-
-			break;
+			Buffer.push_back(Vertex);
 		};
 
-		Renderer->BindTexture(ActiveTexture.Get());
-		Renderer->EnableState(GL_VERTEX_ARRAY);
-		Renderer->DisableState(GL_NORMAL_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, &CachedVertices[0]);
-
-		if(ActiveTexture.Get() == NULL)
+		if(!Renderer->IsVertexBufferHandleValid(SpriteVertexBuffer))
 		{
-			Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
-		}
-		else
-		{
-			Renderer->EnableState(GL_TEXTURE_COORD_ARRAY);
-			glTexCoordPointer(2, GL_FLOAT, 0, &CachedTexCoords[0]);
+			SpriteVertexBuffer = Renderer->CreateVertexBuffer();
 		};
 
-		Renderer->EnableState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 0, &CachedColors[0]);
+		if(!SpriteVertexBuffer)
+			return;
 
-		glDrawArrays(GL_TRIANGLES, 0, CachedVertices.size());
+		Renderer->SetVertexBufferData(SpriteVertexBuffer, VertexDetailsMode::Mixed, SpriteVertexDescriptor, sizeof(SpriteVertexDescriptor) / sizeof(SpriteVertexDescriptor[0]), &Buffer[0], Buffer.size() * sizeof(SpriteVertex));
 
-		glColor4f(1, 1, 1, 1);
+		Renderer->SetBlendingMode(CurrentBlendingMode);
+		Renderer->RenderVertices(VertexModes::Triangles, SpriteVertexBuffer, 0, CachedVertices.size());
 
 		CachedVertices.resize(0);
 		CachedTexCoords.resize(0);

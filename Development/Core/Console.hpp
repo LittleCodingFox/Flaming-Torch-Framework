@@ -21,7 +21,7 @@ struct ConsoleVariable
 	uint32 UintValue;
 	int32 IntValue;
 	f32 FloatValue;
-	sf::String StringValue;
+	std::string StringValue;
 
 	ConsoleVariable() : Type(ConsoleVariableType::String) {};
 };
@@ -95,7 +95,7 @@ private:
 	void Update(uint32 Priority);
 	void Shutdown(uint32 Priority);
 public:
-	std::vector<sf::String> ConsoleLog;
+	std::vector<std::string> ConsoleLog;
 
 	Console() : SubSystem(CONSOLE_PRIORITY) {};
 
@@ -122,11 +122,11 @@ public:
 	*	Adds a message to the console log
 	*	\param Message the message to add
 	*/
-	void LogConsole(const sf::String &Message);
+	void LogConsole(const std::string &Message);
 
 	/*!
 	*	Runs a command on the game console
 	*	\param Command the command to run
 	*/
-	void RunConsoleCommand(const sf::String &Command);
+	void RunConsoleCommand(const std::string &Command);
 };

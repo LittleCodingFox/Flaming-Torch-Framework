@@ -61,35 +61,29 @@ namespace FlamingTorch
 		};
 	};
 
-	RendererManager::Renderer *GameInterface::CreateRenderer(const RenderCreateOptions &Options)
+	Renderer *GameInterface::CreateRenderer(const RenderCreateOptions &Options)
 	{
 		RendererHandle Handle = 0xFFFFFFFF;
 
-		if(Options.Handle != NULL)
+		if(Options.WindowHandle != NULL)
 		{
-			Log::Instance.LogInfo(TAG, "Creating renderer from window handle '0x%08x'", Options.Handle);
+			Log::Instance.LogInfo(TAG, "Creating renderer from window handle '0x%08x'", Options.WindowHandle);
 
-			Handle = RendererManager::Instance.AddRenderer(Options.Handle);
+			Handle = RendererManager::Instance.AddRenderer(Options.WindowHandle);
 		}
 		else
 		{
 			std::stringstream str;
 			str << "Creating renderer from window data ('" << Options.Title << "' " << Options.Width << "x" << Options.Height << " ";
 
-			if(Options.Style & sf::Style::Close)
-				str << "CLOSE ";
+			if(Options.Style & RendererWindowStyle::Default)
+				str << "DEFAULT ";
 
-			if(Options.Style & sf::Style::Fullscreen)
+			if(Options.Style & RendererWindowStyle::FullScreen)
 				str << "FULLSCREEN ";
 
-			if(Options.Style & sf::Style::Resize)
-				str << "RESIZE ";
-
-			if(Options.Style & sf::Style::Titlebar)
-				str << "TITLEBAR ";
-
-			if(Options.Style & sf::Style::None)
-				str << "NONE ";
+			if(Options.Style & RendererWindowStyle::Popup)
+				str << "POPUP ";
 
 			str << ")";
 
@@ -107,7 +101,7 @@ namespace FlamingTorch
 
 		RendererManager::Instance.SetActiveRenderer(Handle);
 
-		RendererManager::Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
+		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
 		TheRenderer->OnFrameStarted.Connect(this, &GameInterface::OnFrameBegin);
 		TheRenderer->OnFrameDraw.Connect(this, &GameInterface::OnFrameDraw);
 		TheRenderer->OnFrameEnded.Connect(this, &GameInterface::OnFrameEnd);
@@ -116,19 +110,16 @@ namespace FlamingTorch
 
 		if(Options.FrameRate != 0)
 		{
-			TheRenderer->Window.setFramerateLimit(Options.FrameRate);
+			TheRenderer->SetFrameRate(Options.FrameRate);
 		};
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, Options.Width, Options.Height, 0, -1, 1);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
+		TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, (f32)Options.Width, (f32)Options.Height, 0, -1, 1));
+		TheRenderer->SetViewport(0, 0, (f32)Options.Width, (f32)Options.Height);
 
 		return TheRenderer;
 	};
 
-	void GameInterface::OnFrameEnd(RendererManager::Renderer *TheRenderer)
+	void GameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
 		if(DevelopmentBuild)
 		{
@@ -560,7 +551,10 @@ namespace FlamingTorch
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 
 #if USE_GRAPHICS
-		RenderTextUtils::LoadDefaultFont("sans.ttf");
+		if(RendererManager::Instance.ActiveRenderer())
+		{
+			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "sans.ttf");
+		};
 #endif
 
 		for(;;)
@@ -620,7 +614,7 @@ namespace FlamingTorch
 		return value;
 
 #if USE_GRAPHICS
-	void ScriptedGameInterface::OnFrameBegin(RendererManager::Renderer *TheRenderer)
+	void ScriptedGameInterface::OnFrameBegin(Renderer *TheRenderer)
 	{
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameBeginFunction);
 
@@ -634,7 +628,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void ScriptedGameInterface::OnFrameDraw(RendererManager::Renderer *TheRenderer)
+	void ScriptedGameInterface::OnFrameDraw(Renderer *TheRenderer)
 	{
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameDrawFunction);
 
@@ -648,7 +642,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void ScriptedGameInterface::OnFrameEnd(RendererManager::Renderer *TheRenderer)
+	void ScriptedGameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameEndFunction);
 
@@ -664,7 +658,7 @@ namespace FlamingTorch
 		GameInterface::OnFrameEnd(TheRenderer);
 	};
 
-	void ScriptedGameInterface::OnResize(RendererManager::Renderer *TheRenderer, uint32 Width, uint32 Height)
+	void ScriptedGameInterface::OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height)
 	{
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnResizeFunction);
 
@@ -678,7 +672,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void ScriptedGameInterface::OnResourcesReloaded(RendererManager::Renderer *TheRenderer)
+	void ScriptedGameInterface::OnResourcesReloaded(Renderer *TheRenderer)
 	{
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnResourcesReloadedFunction);
 

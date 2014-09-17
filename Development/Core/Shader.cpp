@@ -1,7 +1,7 @@
 #include "FlamingCore.hpp"
 namespace FlamingTorch
 {
-#if USE_GRAPHICS
+#if USE_GRAPHICS && 0
 	Shader::Shader() : VertexHandle(0), FragmentHandle(0), GeometryHandle(0), ProgramHandle(0)
 	{
 	};

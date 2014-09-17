@@ -30,25 +30,25 @@ namespace FlamingTorch
 
 	InputCenter::InputCenter() : HasFocus(true)
 	{
-		for(wchar_t i = 0; i < sf::Keyboard::KeyCount; i++)
+		for(wchar_t i = 0; i < InputKey::Count; i++)
 		{
 			Keys[i].Name = i;
 		};
 
-		for(uint8 i = 0; i < sf::Mouse::ButtonCount; i++)
+		for(uint8 i = 0; i < InputMouseButton::Count; i++)
 		{
 			MouseButtons[i].Name = i;
 		};
 
-		for(uint32 i = 0; i < sf::Joystick::Count; i++)
+		for(uint32 i = 0; i < JoystickCount; i++)
 		{
-			for(uint8 j = 0; j < sf::Joystick::ButtonCount; j++)
+			for(uint8 j = 0; j < JoystickButtonCount; j++)
 			{
 				JoystickButtons[i][j].Name = j;
 				JoystickButtons[i][j].JoystickIndex = (uint8)i;
 			};
 
-			for(uint8 j = 0; j < sf::Joystick::AxisCount; j++)
+			for(uint8 j = 0; j < InputJoystickAxis::Count; j++)
 			{
 				JoystickAxis[i][j].Name = j;
 				JoystickAxis[i][j].JoystickIndex = (uint8)i;
@@ -58,13 +58,13 @@ namespace FlamingTorch
 		MouseWheel = 0;
 
 #define REGISTER_KEYBOARD_NAME(name)\
-	KeyInfo::Names[sf::Keyboard::name] = StringUtils::ToUpperCase(#name);
+	KeyInfo::Names[InputKey::name] = StringUtils::ToUpperCase(#name);
 
 #define REGISTER_MOUSEBUTTON_NAME(name)\
-	MouseButtonInfo::Names[sf::Mouse::name] = StringUtils::ToUpperCase(#name);
+	MouseButtonInfo::Names[InputMouseButton::name] = StringUtils::ToUpperCase(#name);
 
 #define REGISTER_JOYAXIS_NAME(name)\
-	JoystickAxisInfo::Names[sf::Joystick::name] = StringUtils::ToUpperCase(#name);
+	JoystickAxisInfo::Names[InputJoystickAxis::name] = StringUtils::ToUpperCase(#name);
 
 		REGISTER_KEYBOARD_NAME(A);
 		REGISTER_KEYBOARD_NAME(B);
@@ -184,28 +184,26 @@ namespace FlamingTorch
 		REGISTER_JOYAXIS_NAME(PovY);
 	};
 
-	bool InputCenter::Update(void *_Renderer)
+	bool InputCenter::Update(Renderer *TheRenderer)
 	{
-		RendererManager::Renderer *Renderer = (RendererManager::Renderer *)_Renderer;
+		FLASSERT(TheRenderer != NULL, "Invalid renderer passed to an InputCenter!");
 
-		FLASSERT(Renderer != NULL, "Invalid renderer passed to an InputCenter!");
-
-		if(Renderer == NULL)
+		if(TheRenderer == NULL)
 			return false;
 
-		for(uint32 i = 0; i < sf::Keyboard::KeyCount; i++)
+		for(uint32 i = 0; i < InputKey::Count; i++)
 		{
 			Keys[i].JustPressed = Keys[i].JustReleased = Keys[i].FirstPress = false;
 		};
 
-		for(uint32 i = 0; i < sf::Mouse::ButtonCount; i++)
+		for(uint32 i = 0; i < InputMouseButton::Count; i++)
 		{
 			MouseButtons[i].JustPressed = MouseButtons[i].JustReleased = MouseButtons[i].FirstPress = false;
 		};
 
-		for(uint32 i = 0; i < sf::Joystick::Count; i++)
+		for(uint32 i = 0; i < JoystickCount; i++)
 		{
-			for(uint8 j = 0; j < sf::Joystick::ButtonCount; j++)
+			for(uint8 j = 0; j < JoystickButtonCount; j++)
 			{
 				JoystickButtons[i][j].JustPressed = JoystickButtons[i][j].JustReleased = JoystickButtons[i][j].FirstPress = false;
 			};
@@ -217,20 +215,20 @@ namespace FlamingTorch
 
 		MouseWheel = 0;
 
-		static sf::Event Event;
+		static RendererEvent Event;
 
 		bool HasPendingResize = false, HadFocus = HasFocus;
-		uint32 PendingResizeWidth, PendingResizeHeight;
+		Vector2 PendingResizeSize;
 
-		while(Renderer->Window.pollEvent(Event))
+		while(TheRenderer->PollEvent(Event))
 		{
 			InputConsumedValue = false;
 
-			switch(Event.type)
+			switch(Event.Type)
 			{
-			case sf::Event::JoystickButtonPressed:
+			case RendererEventType::JoystickButtonPressed:
 				{
-					JoystickButtonInfo &Button = JoystickButtons[Event.joystickButton.joystickId][Event.joystickButton.button];
+					JoystickButtonInfo &Button = JoystickButtons[Event.JoystickIndex][Event.JoystickButtonIndex];
 
 					if(Button.Pressed == false)
 						Button.FirstPress = true;
@@ -240,9 +238,9 @@ namespace FlamingTorch
 
 				break;
 
-			case sf::Event::JoystickButtonReleased:
+			case RendererEventType::JoystickButtonReleased:
 				{
-					JoystickButtonInfo &Button = JoystickButtons[Event.joystickButton.joystickId][Event.joystickButton.button];
+					JoystickButtonInfo &Button = JoystickButtons[Event.JoystickIndex][Event.JoystickButtonIndex];
 
 					Button.Pressed = false;
 					Button.JustReleased = true;
@@ -250,62 +248,51 @@ namespace FlamingTorch
 
 				break;
 
-			case sf::Event::JoystickConnected:
+			case RendererEventType::JoystickConnected:
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
-					Contexts[EnabledContexts[i]]->OnJoystickConnected((uint8)Event.joystickConnect.joystickId);
+					Contexts[EnabledContexts[i]]->OnJoystickConnected((uint8)Event.JoystickIndex);
 				};
 
 				break;
 
-			case sf::Event::JoystickDisconnected:
+			case RendererEventType::JoystickDisconnected:
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
-					Contexts[EnabledContexts[i]]->OnJoystickDisconnected((uint8)Event.joystickConnect.joystickId);
+					Contexts[EnabledContexts[i]]->OnJoystickDisconnected((uint8)Event.JoystickIndex);
 				};
 
 				break;
 
-			case sf::Event::JoystickMoved:
+			case RendererEventType::JoystickAxisMoved:
 				{
-					JoystickAxisInfo &Axis = JoystickAxis[Event.joystickMove.joystickId][Event.joystickMove.axis];
-					
-					if(fabs(Event.joystickMove.position) > JOYSTICKDEADZONE)
-					{
-						Axis.Position = Event.joystickMove.position / 100.f;
-					}
-					else
-					{
-						Axis.Position = 0;
-					};
+					JoystickAxisInfo &Axis = JoystickAxis[Event.JoystickIndex][Event.JoystickAxisIndex];
+					Axis.Position = Event.JoystickAxisPosition;
 				};
 
 				break;
 
-			case sf::Event::MouseLeft:
-				for(uint32 i = 0; i < sf::Mouse::ButtonCount; i++)
+			case RendererEventType::MouseLeft:
+				for(uint32 i = 0; i < InputMouseButton::Count; i++)
 				{
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
 					MouseButtons[i].JustReleased = true;
 				};
 
 				break;
-			case sf::Event::MouseEntered:
-				for(uint32 i = 0; i < sf::Mouse::ButtonCount; i++)
+
+			case RendererEventType::MouseEntered:
+				for(uint32 i = 0; i < InputMouseButton::Count; i++)
 				{
-					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = sf::Mouse::isButtonPressed((sf::Mouse::Button)i);
+					//TODO: Pool for input somehow
+					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
 				};
 
 				break;
-			case sf::Event::KeyPressed:
-				{
-					if(Event.key.code == -1)
-						break;
 
-					KeyInfo &Key = Keys[Event.key.code];
-					Key.Control = Event.key.control;
-					Key.Alt = Event.key.alt;
-					Key.Shift = Event.key.shift;
+			case RendererEventType::KeyPressed:
+				{
+					KeyInfo &Key = Keys[Event.KeyCode];
 
 					if(Key.Pressed == false)
 						Key.FirstPress = true;
@@ -314,32 +301,30 @@ namespace FlamingTorch
 				};
 
 				break;
-			case sf::Event::KeyReleased:
-				{
-					if(Event.key.code == -1)
-						break;
 
-					KeyInfo &Key = Keys[Event.key.code];
-					Key.Control = Event.key.control;
-					Key.Alt = Event.key.alt;
-					Key.Shift = Event.key.shift;
+			case RendererEventType::KeyReleased:
+				{
+					KeyInfo &Key = Keys[Event.KeyCode];
+
 					Key.Pressed = Key.JustPressed = false;
 					Key.JustReleased = true;
 				};
 
 				break;
-			case sf::Event::MouseMoved:
-				MousePosition.x = (f32)Event.mouseMove.x;
-				MousePosition.y = (f32)Event.mouseMove.y;
+
+			case RendererEventType::MouseMoved:
+				MousePosition = Event.MousePosition;
 
 				break;
-			case sf::Event::MouseWheelMoved:
-				MouseWheel = Event.mouseWheel.delta;
+
+			case RendererEventType::MouseDeltaMoved:
+				MouseWheel = Event.MouseDelta;
 
 				break;
-			case sf::Event::MouseButtonPressed:
+
+			case RendererEventType::MouseButtonPressed:
 				{
-					MouseButtonInfo &Button = MouseButtons[Event.mouseButton.button];
+					MouseButtonInfo &Button = MouseButtons[Event.MouseButtonIndex];
 
 					if(Button.Pressed == false)
 						Button.FirstPress = true;
@@ -348,33 +333,38 @@ namespace FlamingTorch
 				};
 
 				break;
-			case sf::Event::MouseButtonReleased:
+
+			case RendererEventType::MouseButtonReleased:
 				{
-					MouseButtonInfo &Button = MouseButtons[Event.mouseButton.button];
+					MouseButtonInfo &Button = MouseButtons[Event.MouseButtonIndex];
 					Button.Pressed = Button.JustPressed = false;
 					Button.JustReleased = true;
 				};
 
 				break;
-			case sf::Event::Closed:
+
+			case RendererEventType::WindowClosed:
 				return false;
 
 				break;
-			case sf::Event::TextEntered:
-				Character = Event.text.unicode;
+
+			case RendererEventType::CharacterEntered:
+				Character = Event.TypedCharacter;
 
 				break;
-			case sf::Event::Resized:
+
+			case RendererEventType::WindowResized:
 				HasPendingResize = true;
-				PendingResizeWidth = Event.size.width;
-				PendingResizeHeight = Event.size.height;
+				PendingResizeSize = Event.WindowSize;
 
 				break;
-			case sf::Event::GainedFocus:
+
+			case RendererEventType::WindowGotFocus:
 				HasFocus = true;
 
 				break;
-			case sf::Event::LostFocus:
+
+			case RendererEventType::WindowLostFocus:
 				HasFocus = false;
 
 				break;
@@ -383,7 +373,7 @@ namespace FlamingTorch
 
 		if(HasPendingResize)
 		{
-			Renderer->HandleResize(PendingResizeWidth, PendingResizeHeight);
+			TheRenderer->OnResized(TheRenderer, (uint32)PendingResizeSize.x, (uint32)PendingResizeSize.y);
 		};
 
 		if(HadFocus != HasFocus)
@@ -418,7 +408,7 @@ namespace FlamingTorch
 			};
 		};
 
-		for(uint32 i = 0; i < sf::Keyboard::KeyCount; i++)
+		for(uint32 i = 0; i < InputKey::Count; i++)
 		{
 			if(Keys[i].JustPressed || Keys[i].Pressed || Keys[i].JustReleased)
 			{
@@ -439,7 +429,7 @@ namespace FlamingTorch
 			};
 		};
 
-		for(uint32 i = 0; i < sf::Mouse::ButtonCount; i++)
+		for(uint32 i = 0; i < InputMouseButton::Count; i++)
 		{
 			if(MouseButtons[i].JustPressed || MouseButtons[i].Pressed || MouseButtons[i].JustReleased)
 			{
@@ -460,9 +450,9 @@ namespace FlamingTorch
 			};
 		};
 
-		for(uint32 i = 0; i < sf::Joystick::Count; i++)
+		for(uint32 i = 0; i < JoystickCount; i++)
 		{
-			for(uint32 j = 0; j < sf::Joystick::ButtonCount; j++)
+			for(uint32 j = 0; j < JoystickButtonCount; j++)
 			{
 				JoystickButtonInfo &Button = JoystickButtons[i][j];
 
@@ -485,7 +475,7 @@ namespace FlamingTorch
 				};
 			};
 
-			for(uint32 j = 0; j < sf::Joystick::AxisCount; j++)
+			for(uint32 j = 0; j < InputJoystickAxis::Count; j++)
 			{
 				JoystickAxisInfo &Axis = JoystickAxis[i][j];
 
@@ -533,15 +523,11 @@ namespace FlamingTorch
 		return true;
 	};
 
-	void InputCenter::CenterMouse(void *RendererPtr)
+	void InputCenter::CenterMouse(Renderer *TheRenderer)
 	{
-		RendererManager::Renderer *Renderer = (RendererManager::Renderer *)RendererPtr;
+		TheRenderer->SetMousePosition(TheRenderer->Size() / 2);
 
-		sf::Vector2i HalfMousePosition((uint32)Renderer->Size().x / 2, (uint32)Renderer->Size().y / 2);
-
-		sf::Mouse::setPosition(HalfMousePosition, Renderer->Window);
-
-		RendererManager::Instance.Input.MousePosition = Vector2((f32)HalfMousePosition.x, (f32)HalfMousePosition.y);
+		RendererManager::Instance.Input.MousePosition = TheRenderer->Size() / 2;
 	};
 
 	bool InputCenter::InputConsumed()

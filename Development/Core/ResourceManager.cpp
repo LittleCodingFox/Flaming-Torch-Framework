@@ -7,10 +7,6 @@ namespace FlamingTorch
 
 	SuperSmartPointer<Texture> ResourceManager::InvalidTexture;
 
-#if USE_GRAPHICS
-	SuperSmartPointer<sf::Font> ResourceManager::InvalidFont;
-#endif
-
 	bool ResourceManager::IsSameTexture(Texture *Self, Texture *Other)
 	{
 		return Self == Other;
@@ -25,10 +21,6 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo(TAG, "Starting Resource Manager Subsystem");
-
-#if USE_GRAPHICS
-		InvalidFont.Reset(new sf::Font());
-#endif
 
 		InvalidTexture.Reset(new Texture());
 	};
@@ -48,18 +40,6 @@ namespace FlamingTorch
 
 			Textures.erase(Textures.begin());
 		};
-
-#if USE_GRAPHICS
-		while(Fonts.begin() != Fonts.end())
-		{
-			if(Fonts.begin()->second.Get())
-				Fonts.begin()->second.Dispose();
-
-			Fonts.erase(Fonts.begin());
-		};
-
-		RenderTextUtils::DefaultFont.Dispose();
-#endif
 	};
 
 	void ResourceManager::Update(uint32 Priority)
@@ -144,23 +124,21 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
-	SuperSmartPointer<sf::Font> ResourceManager::GetFont(const std::string &FileName)
+	FontHandle ResourceManager::GetFont(Renderer *TheRenderer, const std::string &FileName)
 	{
 		if(!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return SuperSmartPointer<sf::Font>();
+			return 0;
 		};
 
 		StringID RealName = MakeStringID(FileName);
 		FontMap::iterator it = Fonts.find(RealName);
 
-		if(it == Fonts.end() || it->second.Get() == NULL)
+		if(it == Fonts.end() || it->second == 0)
 		{
 			Log::Instance.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
-
-			SuperSmartPointer<FontInfo> TheFont(new FontInfo());
 
 			SuperSmartPointer<FileStream> TheStream(new FileStream());
 
@@ -168,45 +146,41 @@ namespace FlamingTorch
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
-				return SuperSmartPointer<sf::Font>();
+				return 0;
 			};
 
-			TheFont->Data.resize((uint32)TheStream->Length());
+			FontHandle Out = TheRenderer->CreateFont(TheStream);
 
-			TheStream->AsBuffer(&TheFont->Data[0], (uint32)TheStream->Length());
-
-			if(!TheFont->ActualFont->loadFromMemory(&TheFont->Data[0], TheFont->Data.size()))
+			if(Out == 0)
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
-				return SuperSmartPointer<sf::Font>();
+				return 0;
 			};
 
-			Fonts[RealName] = TheFont;
+			Fonts[RealName] = Out;
 
-			return TheFont->ActualFont;
+			return Out;
 		};
 
-		return it->second->ActualFont;
+		return it->second;
 	};
 
-	SuperSmartPointer<sf::Font> ResourceManager::GetFontFromPackage(const std::string &Directory, const std::string &FileName)
+	FontHandle ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName)
 	{
 		if(!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return SuperSmartPointer<sf::Font>();
+			return 0;
 		};
 
 		StringID RealName = MakeStringID("PACKAGE:" + Directory + "_" + FileName);
 		FontMap::iterator it = Fonts.find(RealName);
 
-		if(it == Fonts.end() || it->second.Get() == NULL)
+		if(it == Fonts.end() || it->second == 0)
 		{
 			Log::Instance.LogDebug(TAG, "Loading a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
-
-			SuperSmartPointer<FontInfo> TheFont(new FontInfo());
 
 			SuperSmartPointer<Stream> TheStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Directory), MakeStringID(FileName));
 
@@ -214,26 +188,24 @@ namespace FlamingTorch
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
-				return SuperSmartPointer<sf::Font>();
+				return 0;
 			};
 
-			TheFont->Data.resize((uint32)TheStream->Length());
+			FontHandle Out = TheRenderer->CreateFont(TheStream);
 
-			TheStream->AsBuffer(&TheFont->Data[0], (uint32)TheStream->Length());
-
-			if(!TheFont->ActualFont->loadFromMemory(&TheFont->Data[0], TheFont->Data.size()))
+			if(Out == 0)
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
-				return SuperSmartPointer<sf::Font>();
+				return 0;
 			};
 
-			Fonts[RealName] = TheFont;
+			Fonts[RealName] = Out;
 
-			return TheFont->ActualFont;
+			return Out;
 		};
 
-		return it->second->ActualFont;
+		return it->second;
 	};
 #endif
 
@@ -310,23 +282,6 @@ namespace FlamingTorch
 			if(it == Textures.end())
 				break;
 		};
-
-#if USE_GRAPHICS
-		for(FontMap::iterator it = Fonts.begin(); it != Fonts.end(); it++)
-		{
-			while(it->second.Get() == NULL || it->second->ActualFont.ObserverCount() == 1)
-			{
-				Fonts.erase(it);
-				it = Fonts.begin();
-
-				if(it == Fonts.end())
-					break;
-			};
-
-			if(it == Fonts.end())
-				break;
-		};
-#endif
 
 		uint32 CurrentObjects = Textures.size() +
 #if USE_GRAPHICS

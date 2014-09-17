@@ -22,9 +22,9 @@ namespace FlamingTorch
 		}
 		else
 		{
-			sf::String Text = (Source ? Source->TooltipText() : OverrideText);
+			std::string Text = (Source ? Source->TooltipText() : OverrideText);
 
-			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Text, TextParameters).ToFullSize();
+			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), Text, TextParameters).ToFullSize();
 
 			SizeValue = Vector2(ActualFontSize.x + 10, ActualFontSize.y + 10);
 		};
@@ -39,14 +39,14 @@ namespace FlamingTorch
 		PerformLayout();
 	};
 
-	void UITooltip::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UITooltip::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		FLASSERT(Children.size() == 0, "UITooltips can't have children!");
 
 		SuperSmartPointer<UIPanel> MouseOverElement = Renderer->UI->GetMouseOverElement();
 
-		if(((Source.Get() == NULL || MouseOverElement != Source) && OverrideText.getSize() == 0) ||
-			(OverrideText.getSize() && Source.Get() == NULL && MouseOverElement.Get()))
+		if(((Source.Get() == NULL || MouseOverElement != Source) && OverrideText.length() == 0) ||
+			(OverrideText.length() && Source.Get() == NULL && MouseOverElement.Get()))
 			return;
 
 		UIPanel::Draw(ParentPosition, Renderer);
@@ -82,10 +82,12 @@ namespace FlamingTorch
 		{
 			SpriteCache::Instance.Flush(Renderer);
 
-			sf::String Text = (Source ? Source->TooltipText() : OverrideText);
+			std::string Text = (Source ? Source->TooltipText() : OverrideText);
 
-			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Text, TextParameters).ToFullSize();
+			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Renderer, Text, TextParameters).ToFullSize();
 
+			//TODO
+			/*
 			Renderer->EnableState(GL_VERTEX_ARRAY);
 			Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
 			Renderer->DisableState(GL_COLOR_ARRAY);
@@ -108,6 +110,7 @@ namespace FlamingTorch
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			glColor4f(1, 1, 1, 1);
+			*/
 
 			RenderTextUtils::RenderText(Renderer, Text,
 				TextParams(TextParameters).Color(Vector4(0, 0, 0, ParentAlpha())).Position(ActualPosition + (SizeValue - ActualFontSize) / 2));

@@ -439,7 +439,7 @@ namespace FlamingTorch
 	
 	void UIPanel::OnMouseJustPressedDraggable(UIPanel *This, const InputCenter::MouseButtonInfo &o)
 	{
-		if(o.Name != sf::Mouse::Left || !IsDraggableValue)
+		if(o.Name != InputMouseButton::Left || !IsDraggableValue)
 			return;
 
 		DraggingValue = true;
@@ -449,7 +449,7 @@ namespace FlamingTorch
 
 	void UIPanel::OnMouseReleasedDraggable(UIPanel *This, const InputCenter::MouseButtonInfo &o)
 	{
-		if(o.Name != sf::Mouse::Left || !IsDraggableValue)
+		if(o.Name != InputMouseButton::Left || !IsDraggableValue)
 			return;
 
 		if(DraggingValue)
@@ -483,12 +483,12 @@ namespace FlamingTorch
 		ParentValue->AdjustSizeAndPosition(PanelToStopAt);
 	};
 
-	void UIPanel::Draw(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UIPanel::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		RUN_GUI_SCRIPT_EVENTS(OnDrawFunction, (this, ParentPosition))
 	};
 
-	void UIPanel::DrawUIFocusZone(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UIPanel::DrawUIFocusZone(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		if(Manager()->DrawUIFocusZones)
 		{
@@ -519,7 +519,7 @@ namespace FlamingTorch
 			while(ParentPanel != NULL)
 			{
 				if(ParentPanel->ParentPosition() == GlobalPosition)
-					IndicatorPosition += RenderTextUtils::MeasureTextSimple(StringUtils::MakeIntString(ParentCounter), TextParams()).ToFullSize().x + 5;
+					IndicatorPosition += RenderTextUtils::MeasureTextSimple(Renderer, StringUtils::MakeIntString(ParentCounter), TextParams()).ToFullSize().x + 5;
 
 				ParentCounter++;
 
@@ -530,7 +530,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIPanel::DrawUIRect(const Vector2 &ParentPosition, RendererManager::Renderer *Renderer)
+	void UIPanel::DrawUIRect(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		if(Manager()->DrawUIRects)
 		{
@@ -698,7 +698,7 @@ namespace FlamingTorch
 		};
 	};
 
-	const sf::String &UIPanel::TooltipText() const
+	const std::string &UIPanel::TooltipText() const
 	{
 		return TooltipValue;
 	};
@@ -718,7 +718,7 @@ namespace FlamingTorch
 		BlockingInputValue = Value;
 	};
 
-	void UIPanel::SetTooltipText(const sf::String &Text)
+	void UIPanel::SetTooltipText(const std::string &Text)
 	{
 		TooltipValue = Text;
 	};
@@ -950,7 +950,7 @@ namespace FlamingTorch
 
 	bool UIPanel::RespondsToTooltips() const
 	{
-		return RespondsToTooltipsValue && (TooltipValue.getSize() || TooltipElementValue.Get());
+		return RespondsToTooltipsValue && (TooltipValue.length() || TooltipElementValue.Get());
 	};
 
 	Vector2 UIPanel::ScaledExtraSize() const
