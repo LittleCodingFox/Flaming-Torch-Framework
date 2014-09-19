@@ -64,7 +64,6 @@ namespace FlamingTorch
 #		include "Sprite.hpp"
 #		include "GUI.hpp"
 #		include "GeometryBuffer.hpp"
-#		include "RenderTarget.hpp"
 #	endif
 #
 #	include "Texture.hpp"

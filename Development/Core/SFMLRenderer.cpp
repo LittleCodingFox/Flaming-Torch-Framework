@@ -2,6 +2,7 @@
 
 namespace FlamingTorch
 {
+#	if USE_SFML_RENDERER
 #	include "SFMLRenderer.hpp"
 #	define TAG "SFMLRenderer"
 
@@ -1275,4 +1276,6 @@ GL_NEAREST : GL_LINEAR);
 
 		GLStates[ID] = false;
 	};
+
+#	endif
 };

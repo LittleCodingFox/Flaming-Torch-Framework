@@ -261,8 +261,6 @@ namespace FlamingTorch
 				{
 					if(Recursive)
 					{
-						Log::Instance.LogDebug(TAGUTILS, "Found Directory '%s'", FileName.c_str());
-
 						std::vector<std::string> t(ScanDirectory(Directory + std::string("/") +
 							FileName, Extension, Recursive));
 
@@ -271,8 +269,6 @@ namespace FlamingTorch
 				}
 				else if(Entry->d_type == DT_REG)
 				{
-					Log::Instance.LogDebug(TAGUTILS, "Found File '%s'", FileName.c_str());
-
 					if(Extension.length() == 0 || Extension == "*" || FileName.rfind(Extension) == FileName.length() - Extension.length())
 						Files.push_back(Directory + std::string("/") + FileName);
 				};
@@ -286,9 +282,11 @@ namespace FlamingTorch
 		return Files;
 	};
 
-    bool FileSystemUtils::CopyDirectory(const std::string &From, const std::string &To, bool Recursive)
+    bool FileSystemUtils::CopyDirectory(const std::string &_From, const std::string &_To, bool Recursive)
     {
-        if(From == To)
+		std::string From = Path(_From).FullPath(), To = Path(_To).FullPath();
+
+		if(From == To)
             return false;
 
 		FileSystemUtils::CreateDirectory(To);
@@ -310,12 +308,12 @@ namespace FlamingTorch
         {
             if(!In.Open(Files[i], StreamFlags::Read))
             {
-                Log::Instance.LogDebug(TAGUTILS, "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
+                Log::Instance.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
                 
                 continue;
             };
             
-            std::string OutName = Files[i].substr(Files[i].find(From) + From.length());
+            std::string OutName = Files[i].substr(Files[i].find(From) + From.length() + 1);
             std::string OutFileName = To + "/" + OutName;
             
             if(!Out.Open(OutFileName, StreamFlags::Write))
@@ -335,7 +333,7 @@ namespace FlamingTorch
                 
                 if(!Out.Open(OutFileName, StreamFlags::Write))
                 {
-                    Log::Instance.LogDebug(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot open '%s' for writing",
+                    Log::Instance.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot open '%s' for writing",
                                          Files[i].c_str(), OutFileName.c_str());
                     
                     continue;
@@ -346,7 +344,7 @@ namespace FlamingTorch
             {
                 FileSystemUtils::RemoveFile(OutFileName);
                 
-                Log::Instance.LogDebug(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot copy to '%s'",
+                Log::Instance.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot copy to '%s'",
                                      Files[i].c_str(), OutFileName.c_str());
                 
                 continue;

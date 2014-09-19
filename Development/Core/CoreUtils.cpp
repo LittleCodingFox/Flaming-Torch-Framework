@@ -20,7 +20,10 @@ namespace FlamingTorch
 		if(ExePath.rfind(".exe") != ExePath.length() - 4)
 			ExePath += ".exe";
 
-		ExePath = StringUtils::Replace(ExePath, "//", "/");
+		ExePath = Path(ExePath).FullPath();
+
+		Log::Instance.LogDebug("Core", "Running Program '%s' with arguments '%s' (WD: '%s')", ExePath.c_str(), Parameters.c_str(),
+			WorkingDirectory.c_str());
 
 		SHELLEXECUTEINFOA sei;
 		memset(&sei, 0, sizeof(sei));

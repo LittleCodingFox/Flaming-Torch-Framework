@@ -17,6 +17,8 @@ using namespace FlamingTorch;
 #undef CopyFile
 #endif
 
+bool DontCleanup = false;
+
 std::string FLGameName()
 {
 	return TAG;
@@ -40,8 +42,17 @@ int main(int argc, char **argv)
 	InitSubsystems();
 
 	Log::Instance.LogInfo(TAG, "Version %s starting up", CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
+
+	for(uint32 i = 1; i < argc; i++)
+	{
+		if(std::string(argv[i]) == "-nocleanup")
+		{
+			DontCleanup = true;
+		};
+	};
+
 	Log::Instance.LogInfo(TAG, "Searching PackageData Directories...");
-    
+
     FileStream ConfigStream;
     GenericConfig Configuration;
     
@@ -131,7 +142,7 @@ int main(int argc, char **argv)
 					Parameters += " -resdir \"" + TargetDirectory + "/" + ResourceDirectories[l] + "\"";
 				};
 				
-				Parameters += "\"" + MapFiles[k] + "\"";
+				Parameters += " \"" + MapFiles[k] + "\"";
 
 				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
@@ -166,7 +177,10 @@ int main(int argc, char **argv)
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
     
-    FileSystemUtils::DeleteDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/");
+	if(!DontCleanup)
+	{
+	    FileSystemUtils::DeleteDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/");
+	};
 
 	DeInitSubsystems();
 

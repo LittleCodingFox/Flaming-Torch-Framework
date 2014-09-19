@@ -475,6 +475,8 @@ int main(int argc, char **argv)
 		{
 			if(i + 1 < argc)
 			{
+				Log::Instance.LogInfo(TAG, "Added resources directory '%s'", argv[i + 1]);
+
 				ResourceDirectories.push_back(argv[i + 1]);
 
 				i++;
@@ -574,7 +576,7 @@ int main(int argc, char **argv)
 
 		for(uint32 j = 0; j < ResourceDirectories.size(); j++)
 		{
-			if(Stream.Open(Path(FileSystemUtils::ActiveDirectory() + "/" + ResourceDirectories[j] + "/" + TileSet->FileName).FullPath(), StreamFlags::Read))
+			if(Stream.Open(Path(ResourceDirectories[j] + "/" + TileSet->FileName).FullPath(), StreamFlags::Read))
 				break;
 		};
 
@@ -599,6 +601,16 @@ int main(int argc, char **argv)
 		TileSet->Ptr = Sets[i];
 		TileSet->TileSize = Vector2((f32)Sets[i]->GetTileWidth(), (f32)Sets[i]->GetTileHeight());
 		TileSet->FrameCount = Vector2((f32)TileSet->Image->Width(), (f32)TileSet->Image->Height()) / TileSet->TileSize;
+
+		if(TileSet->TileSize.x > MapTileSize.x || TileSet->TileSize.y > MapTileSize.y)
+		{
+			Log::Instance.LogErr(TAG, "Unable to load a tileset with image '%s': Tile Size (%f, %f) is larger than the map tile size (%f, %f)!",
+				TileSet->FileName.c_str(), TileSet->TileSize.x, TileSet->TileSize.y, MapTileSize.x, MapTileSize.y);
+
+			DeInitSubsystems();
+
+			return 1;
+		};
 
 		std::string Color = Sets[i]->GetImage()->GetTransparentColor();
 
