@@ -134,16 +134,7 @@ namespace FlamingTorch
 		{
 			Vector2 ChildrenSize = this->ChildrenSize();
 
-			//TODO
-			/*
-			bool EnabledScissor = Renderer->IsStateEnabled(GL_SCISSOR_TEST);
-			Renderer->EnableState(GL_SCISSOR_TEST);
-
-			Vector4 PreviousScissor;
-			glGetFloatv(GL_SCISSOR_BOX, (GLfloat *)&PreviousScissor);
-
-			glScissor((GLsizei)ActualPosition.x, (GLsizei)(Renderer->Size().y - ActualPosition.y - SizeValue.y), (GLsizei)SizeValue.x, (GLsizei)SizeValue.y);
-			*/
+			Renderer->StartClipping(Rect(ActualPosition.x, ActualPosition.x + SizeValue.x, ActualPosition.y, ActualPosition.y + SizeValue.y));
 
 			for(uint32 i = 0; i < Children.size(); i++)
 			{
@@ -151,16 +142,7 @@ namespace FlamingTorch
 				Children[i]->Draw(ActualPosition, Renderer);
 			};
 
-			/*
-			if(!EnabledScissor)
-			{
-				Renderer->DisableState(GL_SCISSOR_TEST);
-			}
-			else
-			{
-				glScissor((GLsizei)PreviousScissor.x, (GLsizei)PreviousScissor.y, (GLsizei)PreviousScissor.z, (GLsizei)PreviousScissor.w);
-			};
-			*/
+			Renderer->FinishClipping();
 		}
 		else
 		{

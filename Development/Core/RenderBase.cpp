@@ -463,6 +463,30 @@ namespace FlamingTorch
 		Impl->SetMousePosition(Position);
 	};
 
+	void Renderer::StartClipping(const Rect &ClippingRect)
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		SpriteCache::Instance.Flush(this);
+
+		Impl->StartClipping(ClippingRect);
+	};
+
+	void Renderer::FinishClipping()
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		SpriteCache::Instance.Flush(this);
+
+		Impl->FinishClipping();
+	};
+
 	void Renderer::Clear(uint32 ID)
 	{
 		FLASSERT(Impl, "Invalid Implementation!");

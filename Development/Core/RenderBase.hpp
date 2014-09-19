@@ -298,6 +298,19 @@ public:
 	void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End);
 
 	/*!
+	*	Start clipping the rendering to a rectangle
+	*	\param ClippingRect the clipping rectangle
+	*	\note The orientation is always from bottom left and up, so e.g., to clip a 100x100 rect on the top right of a screen of 1000x1000px size, you must pass a rect of (900, 1000, 1000, 900)
+	*	Therefore to keep up with the usual orientation we use (+y is "down" in the window), we emulate that orientation by flipping the top/bottom fields of Rect. So now the previous example becomes (900, 1000, 900, 1000)
+	*/
+	void StartClipping(const Rect &ClippingRect);
+
+	/*!
+	*	Finishes clipping the rendering from a rectangle
+	*/
+	void FinishClipping();
+
+	/*!
 	*	Clear a render buffer
 	*	\param Buffers a Bitmask of RenderBuffer::*
 	*/
@@ -634,6 +647,19 @@ public:
 	virtual void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End) = 0;
 
 	/*!
+	*	Start clipping the rendering to a rectangle
+	*	\param ClippingRect the clipping rectangle
+	*	\note The orientation is always from bottom left and up, so e.g., to clip a 100x100 rect on the top right of a screen of 1000x1000px size, you must pass a rect of (900, 1000, 1000, 900)
+	*	Therefore to keep up with the usual orientation we use (+y is "down" in the window), we emulate that orientation by flipping the top/bottom fields of Rect. So now the previous example becomes (900, 1000, 900, 1000)
+	*/
+	virtual void StartClipping(const Rect &ClippingRect) = 0;
+
+	/*!
+	*	Finishes clipping the rendering from a rectangle
+	*/
+	virtual void FinishClipping() = 0;
+
+	/*!
 	*	Clear a render buffer
 	*	\param Buffers a Bitmask of RenderBuffer::*
 	*/
@@ -893,6 +919,19 @@ public:
 	*	\param End the ending vertex
 	*/
 	void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End) {};
+
+	/*!
+	*	Start clipping the rendering to a rectangle
+	*	\param ClippingRect the clipping rectangle
+	*	\note The orientation is always from bottom left and up, so e.g., to clip a 100x100 rect on the top right of a screen of 1000x1000px size, you must pass a rect of (900, 1000, 1000, 900)
+	*	Therefore to keep up with the usual orientation we use (+y is "down" in the window), we emulate that orientation by flipping the top/bottom fields of Rect. So now the previous example becomes (900, 1000, 900, 1000)
+	*/
+	void StartClipping(const Rect &ClippingRect) {};
+
+	/*!
+	*	Finishes clipping the rendering from a rectangle
+	*/
+	void FinishClipping() {};
 
 	/*!
 	*	Clear a render buffer
