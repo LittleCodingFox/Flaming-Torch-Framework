@@ -38,6 +38,7 @@ namespace FlamingTorch
 		return Out;
 	};
 
+#if USE_GRAPHICS
 	struct TextureCollisionVertex
 	{
 		Vector2 Position;
@@ -47,7 +48,6 @@ namespace FlamingTorch
 		{ 0, VertexElementType::Position, VertexElementDataType::Float2 }
 	};
 
-#if USE_GRAPHICS
 	void TextureCollision::Draw(Renderer *Renderer)
 	{
 		if(!Polygon.size())

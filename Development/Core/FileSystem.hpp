@@ -375,9 +375,12 @@ public:
 		typedef std::map<StringID, SuperSmartPointer<FileEntry> > FileMap;
 		typedef std::map<StringID, FileMap> EntryMap;
 
+		//TODO
+		/*
 #if !ANDROID //TODO
 		sf::Mutex FileAccessMutex;
 #endif
+		*/
 		bool HasBeenTampered;
 	public:
 		EntryMap Entries;

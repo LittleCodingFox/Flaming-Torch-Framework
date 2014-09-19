@@ -678,8 +678,12 @@ namespace FlamingTorch
 #endif
 
 	Texture::Texture() : HandleValue(0), WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8),
-		TextureFilter(TextureFiltering::Nearest), TextureWrap(TextureWrapMode::Clamp), Owner(NULL)
+		TextureFilter(TextureFiltering::Nearest), TextureWrap(TextureWrapMode::Clamp)
 	{
+#if USE_GRAPHICS
+		Owner = NULL;
+#endif
+
 		GET_OWNER_IF_NOT_VALID();
 	};
 
@@ -905,8 +909,10 @@ namespace FlamingTorch
 
 	void Texture::Bind()
 	{
+#if USE_GRAPHICS
 		if(Owner)
 			Owner->BindTexture(HandleValue);
+#endif
 	};
 
 	void Texture::SetWrapMode(uint32 WrapMode)

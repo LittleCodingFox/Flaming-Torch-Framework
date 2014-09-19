@@ -24,7 +24,7 @@ std::string FLGameName()
 
 struct MapDirectoryInfo
 {
-    std::string From, To, WorkingDirectory;
+    std::string From, To;
 };
 
 int main(int argc, char **argv)
@@ -46,7 +46,8 @@ int main(int argc, char **argv)
     GenericConfig Configuration;
     
     std::vector<MapDirectoryInfo> MapDirectories;
-    
+	std::vector<std::string> ResourceDirectories;
+
     if(!ConfigStream.Open(FileSystemUtils::ResourcesDirectory() + "/Baker.cfg", StreamFlags::Read | StreamFlags::Text) || !Configuration.DeSerialize(&ConfigStream))
     {
         Log::Instance.LogErr(TAG, "Failed to load Baker.cfg");
@@ -62,18 +63,24 @@ int main(int argc, char **argv)
     {
         std::vector<std::string> Pieces = StringUtils::Split(it->second.Content, '|');
         
-        if(Pieces.size() != 3)
+        if(Pieces.size() != 2)
             continue;
         
-        Log::Instance.LogInfo(TAG, "Added Map Folder '%s' => '%s' ('%s')", Pieces[0].c_str(), Pieces[1].c_str(), Pieces[2].c_str());
+        Log::Instance.LogInfo(TAG, "Added Map Folder '%s' => '%s'", Pieces[0].c_str(), Pieces[1].c_str());
         
         MapDirectoryInfo Info;
         Info.From = Pieces[0];
         Info.To = Pieces[1];
-        Info.WorkingDirectory = Pieces[2];
         
         MapDirectories.push_back(Info);
     };
+
+	GenericConfig::Section &ResourceDirectoriesSection = Configuration.Sections["ResourceDirectories"];
+
+	for(GenericConfig::Section::ValueMap::iterator it = ResourceDirectoriesSection.Values.begin(); it != ResourceDirectoriesSection.Values.end(); it++)
+    {
+		ResourceDirectories.push_back(it->second.Content);
+	};
 
 	std::string PackerPath = Configuration.GetString("Tools", "Packer", "../../Binaries/Packer/Release/Packer");
 	std::string TiledConverterPath = Configuration.GetString("Tools", "TiledConverter", "../../Binaries/TiledConverter/Release/TiledConverter");
@@ -114,17 +121,17 @@ int main(int argc, char **argv)
             
             for(uint32 k = 0; k < MapFiles.size(); k++)
             {
-				std::string WorkingDirectory = TargetDirectory + "/" + MapDirectories[j].WorkingDirectory;
-
-				WorkingDirectory = StringUtils::Replace(WorkingDirectory, "//", "/");
-
                 FileSystemUtils::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].To);
-                
-                //TODO: Do this the "right way"
 
 				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TiledConverterPath;
-				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\" \"" +
-                    MapFiles[k] + "\"";
+				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\"";
+
+				for(uint32 l = 0; l < ResourceDirectories.size(); l++)
+				{
+					Parameters += " -resdir \"" + TargetDirectory + "/" + ResourceDirectories[l] + "\"";
+				};
+				
+				Parameters += "\"" + MapFiles[k] + "\"";
 
 				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
@@ -132,21 +139,15 @@ int main(int argc, char **argv)
 				{
 					Log::Instance.LogErr(TAG, "Unable to run TiledMap: Exit Code '%d'", ExitCode);
 
-					std::vector<std::string> Dumps = FileSystemUtils::ScanDirectory(WorkingDirectory.c_str(), "dmp", false);
-
-					for(uint32 l = 0; l < Dumps.size(); l++)
-					{
-						FileSystemUtils::CopyFile(Dumps[i], FileSystemUtils::ResourcesDirectory() + "/" + Path(Dumps[i]).BaseName);
-					};
-
-					Log::Instance.LogErr(TAG, "Copied '%d' Crash Files", Dumps.size());
-
 					continue;
 				};
             };
         };
-        
-        //TODO: Do this the "right way"
+
+		for(uint32 j = 0; j < ResourceDirectories.size(); j++)
+		{
+			FileSystemUtils::DeleteDirectory(TargetDirectory + "/" + ResourceDirectories[j]);
+		};
         
         Log::Instance.LogInfo(TAG, "...    Packing...");
 

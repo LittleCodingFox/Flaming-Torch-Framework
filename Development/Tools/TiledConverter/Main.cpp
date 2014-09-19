@@ -436,7 +436,7 @@ int main(int argc, char **argv)
 
 	if(argc == 1)
 	{
-		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-imagemode] filename", argv[0]);
+		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-imagemode] filename", argv[0]);
 
 		return 1;
 	};
@@ -444,6 +444,8 @@ int main(int argc, char **argv)
 	std::string OutDirectory(".");
 
 	std::string FileName, OutFileName;
+
+	std::vector<std::string> ResourceDirectories;
 
 	for(int32 i = 1; i < argc; i++)
 	{
@@ -468,6 +470,15 @@ int main(int argc, char **argv)
 		else if(std::string(argv[i]) == "-fti")
 		{
 			SaveTexturesAsFTI = true;
+		}
+		else if(std::string(argv[i]) == "-resdir")
+		{
+			if(i + 1 < argc)
+			{
+				ResourceDirectories.push_back(argv[i + 1]);
+
+				i++;
+			};
 		}
 		else
 		{
@@ -561,7 +572,13 @@ int main(int argc, char **argv)
 
 		FileStream Stream;
 
-		if(!Stream.Open(TileSet->FileName, StreamFlags::Read))
+		for(uint32 j = 0; j < ResourceDirectories.size(); j++)
+		{
+			if(Stream.Open(Path(FileSystemUtils::ActiveDirectory() + "/" + ResourceDirectories[j] + "/" + TileSet->FileName).FullPath(), StreamFlags::Read))
+				break;
+		};
+
+		if(!Stream.Length())
 		{
 			Log::Instance.LogErr(TAG, "Unable to open a tileset '%s'!", TileSet->FileName.c_str());
 

@@ -4,6 +4,7 @@
 #	include <direct.h>
 #	undef CreateDirectory
 #endif
+#include <time.h>
 namespace FlamingTorch
 {
 	Log Log::Instance;

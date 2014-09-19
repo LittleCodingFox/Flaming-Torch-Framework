@@ -1,4 +1,5 @@
 #include "FlamingCore.hpp"
+#include <time.h>
 namespace FlamingTorch
 {
 #	define TAG "LuaScriptManager"

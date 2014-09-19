@@ -44,9 +44,12 @@ namespace FlamingTorch
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
 
+		//TODO
+		/*
 #if !ANDROID
 		sf::Lock lock(Lock);
 #endif
+		*/
 
 		if(GameClockDiffNoPause(UpdateTimer) >= 1000)
 		{
@@ -63,9 +66,12 @@ namespace FlamingTorch
 
 	void Profiler::ReportStat(const std::string &Name, uint32 Type, uint64 ms)
 	{
+		//TODO
+		/*
 #if !ANDROID
 		sf::Lock lock(Lock);
 #endif
+		*/
 
 		PacketMap::iterator it = Packets.find(Name);
 

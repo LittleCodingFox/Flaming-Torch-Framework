@@ -1048,9 +1048,12 @@ namespace FlamingTorch
 		uint64 CurrentOffset = 0;
 		uint64 StartOffset = 0;
 
+		//TODO
+		/*
 #if !ANDROID
 		sf::Lock Lock(FileAccessMutex);
 #endif
+		*/
 
 		std::vector<FileEntry *> EntryList;
 
@@ -1144,9 +1147,12 @@ namespace FlamingTorch
 
 	bool PackageFileSystemManager::Package::DeSerialize(Stream *In)
 	{
+		//TODO
+		/*
 #if !ANDROID
 		sf::Lock Lock(FileAccessMutex);
 #endif
+		*/
 
 		OriginalOffset = In->Position();
 
@@ -1237,9 +1243,12 @@ namespace FlamingTorch
 
 	bool PackageFileSystemManager::Package::AddFile(const std::string &Directory, const std::string &Name, SuperSmartPointer<FileStream> In)
 	{
+		//TODO
+		/*
 #if !ANDROID
 		sf::Lock Lock(FileAccessMutex);
 #endif
+		*/
 
 		StringID DirectoryID = MakeStringID(Directory);
 
@@ -1271,9 +1280,12 @@ namespace FlamingTorch
 
 	bool PackageFileSystemManager::Package::RemoveFile(const std::string &Directory, const std::string &Name)
 	{
+		//TODO
+		/*
 #if !ANDROID
 		sf::Lock Lock(FileAccessMutex);
 #endif
+		*/
 
 		StringID DirectoryID = MakeStringID(Directory);
 
@@ -1537,9 +1549,12 @@ namespace FlamingTorch
 		if(fit == it->second.end())
 			return SuperSmartPointer<Stream>();
 
+		//TODO
+		/*
 #if !ANDROID
 		sf::Lock Lock(fit->second.first->FileAccessMutex);
 #endif
+		*/
 
 		PackageFileSystemManager::PackageStream *PStream = new PackageFileSystemManager::PackageStream();
 
