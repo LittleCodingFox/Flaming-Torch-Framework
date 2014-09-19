@@ -80,40 +80,17 @@ namespace FlamingTorch
 		}
 		else
 		{
-			SpriteCache::Instance.Flush(Renderer);
-
 			std::string Text = (Source ? Source->TooltipText() : OverrideText);
 
 			Vector2 ActualFontSize = RenderTextUtils::MeasureTextSimple(Renderer, Text, TextParameters).ToFullSize();
 
-			//TODO
-			/*
-			Renderer->EnableState(GL_VERTEX_ARRAY);
-			Renderer->DisableState(GL_TEXTURE_COORD_ARRAY);
-			Renderer->DisableState(GL_COLOR_ARRAY);
-			Renderer->DisableState(GL_NORMAL_ARRAY);
-			Renderer->BindTexture(NULL);
+			Sprite TheSprite;
+			TheSprite.Options.Position(ActualPosition).Scale(SizeValue).Color(Vector4(0.98f, 0.96f, 0.815f, ParentAlpha()));
 
-			Vector2 Vertices[6] = {
-				ActualPosition,
-				ActualPosition + Vector2(0, SizeValue.y),
-				ActualPosition + SizeValue,
-				ActualPosition + SizeValue,
-				ActualPosition + Vector2(SizeValue.x, 0),
-				ActualPosition,
-			};
+			TheSprite.Draw(Renderer);
 
-			glColor4f(0.98f, 0.96f, 0.815f, ParentAlpha());
-
-			glVertexPointer(2, GL_FLOAT, 0, Vertices);
-
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-
-			glColor4f(1, 1, 1, 1);
-			*/
-
-			RenderTextUtils::RenderText(Renderer, Text,
-				TextParams(TextParameters).Color(Vector4(0, 0, 0, ParentAlpha())).Position(ActualPosition + (SizeValue - ActualFontSize) / 2));
+			RenderTextUtils::RenderText(Renderer, Text, TextParams(TextParameters).Color(Vector4(0, 0, 0, ParentAlpha()))
+				.Position(ActualPosition + (SizeValue - ActualFontSize) / 2));
 		};
 
 		DrawUIFocusZone(ParentPosition, Renderer);

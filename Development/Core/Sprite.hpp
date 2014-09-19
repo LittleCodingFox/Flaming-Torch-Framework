@@ -222,6 +222,18 @@ public:
 	};
 };
 
+struct SpriteVertex
+{
+	Vector2 Position, TexCoord;
+	Vector4 Color;
+};
+
+static VertexElementDescriptor SpriteVertexDescriptor[] = {
+	{ 0, VertexElementType::Position, VertexElementDataType::Float2 },
+	{ sizeof(Vector2), VertexElementType::TexCoord, VertexElementDataType::Float2 },
+	{ sizeof(Vector2[2]), VertexElementType::Color, VertexElementDataType::Float4 }
+};
+
 class Sprite
 {
 public:

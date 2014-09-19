@@ -533,6 +533,54 @@ namespace FlamingTorch
 		Impl->SetProjectionMatrix(ProjectionMatrix);
 	};
 
+	void Renderer::PushMatrices()
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->PushMatrices();
+	};
+
+	void Renderer::PopMatrices()
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
+		Impl->PopMatrices();
+	};
+
+	const Matrix4x4 &Renderer::WorldMatrix()
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+		{
+			static Matrix4x4 Dummy;
+
+			return Dummy;
+		};
+
+		return Impl->WorldMatrix();
+	};
+
+	const Matrix4x4 &Renderer::ProjectionMatrix()
+	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+		{
+			static Matrix4x4 Dummy;
+
+			return Dummy;
+		};
+
+		return Impl->ProjectionMatrix();
+	};
+
 	void Renderer::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
 		FLASSERT(Impl, "Invalid Implementation!");

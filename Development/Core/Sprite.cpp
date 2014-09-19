@@ -10,23 +10,10 @@ namespace FlamingTorch
 		Vector4 Color;
 	};
 
-	struct SpriteVertex
-	{
-		Vector2 Position, TexCoord;
-		Vector4 Color;
-	};
-
 	VertexElementDescriptor SpriteWireframeVertexDescriptor[] = {
 		{ 0, VertexElementType::Position, VertexElementDataType::Float2 },
 		{ sizeof(Vector2), VertexElementType::Color, VertexElementDataType::Float4 }
 	};
-
-	VertexElementDescriptor SpriteVertexDescriptor[] = {
-		{ 0, VertexElementType::Position, VertexElementDataType::Float2 },
-		{ sizeof(Vector2), VertexElementType::TexCoord, VertexElementDataType::Float2 },
-		{ sizeof(Vector2[2]), VertexElementType::Color, VertexElementDataType::Float4 }
-	};
-
 
 	VertexBufferHandle SpriteVertexBuffer = 0;
 

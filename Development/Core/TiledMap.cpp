@@ -32,6 +32,8 @@ namespace FlamingTorch
 		Vector2 MapTileSize, MapPixelSize;
 	};
 
+	VertexBufferHandle TiledMapVertexBuffer = 0;
+
 	TiledMap::TiledMap() : ResourcesInitedValue(false), Scale(1, 1), Color(1, 1, 1) {};
 
 	bool TiledMap::DeSerialize(Stream *In)
@@ -369,41 +371,42 @@ namespace FlamingTorch
 
 		SpriteCache::Instance.Flush(Renderer);
 
-		/*
 		bool DoTranslation = Translation != Vector2() || Scale != Vector2(1, 1);
 
 		if(DoTranslation)
 		{
-			glPushMatrix();
-			glScalef(Scale.x, Scale.y, 1);
-			glTranslatef(Translation.x, Translation.y, 0);
+			Renderer->PushMatrices();
+			Renderer->SetWorldMatrix(Renderer->WorldMatrix() * Matrix4x4::Scale(Vector4(Scale, 1, 1)) * Matrix4x4::Translate(Vector4(Translation, 0, 1)));
 		};
 
+		if(!Renderer->IsVertexBufferHandleValid(TiledMapVertexBuffer))
+		{
+			TiledMapVertexBuffer = Renderer->CreateVertexBuffer();
+		};
+
+		static std::vector<SpriteVertex> Vertices;
+
+		Vertices.resize(Layers[Layer]->Vertices.size());
+
+		for(uint32 i = 0; i < Layers[Layer]->Vertices.size(); i++)
+		{
+			Vertices[i].Position = Layers[Layer]->Vertices[i];
+			Vertices[i].Color = Vector4(Color, Layers[Layer]->Alpha);
+			Vertices[i].TexCoord = Layers[Layer]->TexCoords[i];
+		};
+
+		Renderer->SetVertexBufferData(TiledMapVertexBuffer, VertexDetailsMode::Mixed, SpriteVertexDescriptor, sizeof(SpriteVertexDescriptor) / sizeof(SpriteVertexDescriptor[0]), &Vertices[0], sizeof(SpriteVertex) * Vertices.size());
+
 		Renderer->BindTexture(TileSet.UniqueTilesetTexture);
-		Renderer->EnableState(GL_TEXTURE_2D);
-		Renderer->EnableState(GL_VERTEX_ARRAY);
-		Renderer->EnableState(GL_TEXTURE_COORD_ARRAY);
-		Renderer->DisableState(GL_COLOR_ARRAY);
-		Renderer->DisableState(GL_NORMAL_ARRAY);
 
-		glColor4f(Color.x, Color.y, Color.z, Layers[Layer]->Alpha);
-
-		glVertexPointer(2, GL_FLOAT, 0, &Layers[Layer]->Vertices[0]);
-		glTexCoordPointer(2, GL_FLOAT, 0, &Layers[Layer]->TexCoords[0]);
-
-		glDrawArrays(GL_TRIANGLES, 0, Layers[Layer]->Vertices.size());
+		Renderer->RenderVertices(VertexModes::Triangles, TiledMapVertexBuffer, 0, Vertices.size());
 
 		Layers[Layer]->OnLayerDraw(this, Layer, Renderer);
 
-		SpriteCache::Instance.Flush(Renderer);
-
-		glColor4f(1, 1, 1, 1);
-
 		if(DoTranslation)
 		{
-			glPopMatrix();
+			Renderer->PopMatrices();
 		};
-		*/
 	};
 
 	bool TiledMap::ResourcesInited()

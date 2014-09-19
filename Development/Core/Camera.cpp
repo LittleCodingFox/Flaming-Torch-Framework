@@ -20,12 +20,14 @@ namespace FlamingTorch
 
 		CameraTransform = CameraTransform * Matrix4x4::Translate(Vector4(DrawOffset, 1));
 
+		TheRenderer->PushMatrices();
 		TheRenderer->SetProjectionMatrix(ProjectionTransform);
 		TheRenderer->SetWorldMatrix(CameraTransform);
 	};
 
 	void Camera::EndTransforms(Renderer *TheRenderer)
 	{
+		TheRenderer->PopMatrices();
 	};
 #endif
 };

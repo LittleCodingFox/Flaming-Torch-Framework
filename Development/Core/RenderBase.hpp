@@ -321,6 +321,26 @@ public:
 	void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix);
 
 	/*!
+	*	Pushes (stores) the currently used world and projection matrices
+	*/
+	void PushMatrices();
+
+	/*!
+	*	Pops (restores) the last used world and projection matrices
+	*/
+	void PopMatrices();
+
+	/*!
+	*	Gets the current World Matrix
+	*/
+	const Matrix4x4 &WorldMatrix();
+
+	/*!
+	*	Gets the current projection matrix
+	*/
+	const Matrix4x4 &ProjectionMatrix();
+
+	/*!
 	*	Sets the current viewport
 	*	\param x the viewport's x position
 	*	\param y the viewport's y position
@@ -637,6 +657,26 @@ public:
 	virtual void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix) = 0;
 
 	/*!
+	*	Pushes (stores) the currently used world and projection matrices
+	*/
+	virtual void PushMatrices() = 0;
+
+	/*!
+	*	Pops (restores) the last used world and projection matrices
+	*/
+	virtual void PopMatrices() = 0;
+
+	/*!
+	*	Gets the current World Matrix
+	*/
+	virtual const Matrix4x4 &WorldMatrix() = 0;
+
+	/*!
+	*	Gets the current projection matrix
+	*/
+	virtual const Matrix4x4 &ProjectionMatrix() = 0;
+
+	/*!
 	*	Sets the current viewport
 	*	\param x the viewport's x position
 	*	\param y the viewport's y position
@@ -876,6 +916,36 @@ public:
 	*	\param ProjectionMatrix the new World Matrix
 	*/
 	void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix) {};
+
+	/*!
+	*	Pushes (stores) the currently used world and projection matrices
+	*/
+	void PushMatrices() {};
+
+	/*!
+	*	Pops (restores) the last used world and projection matrices
+	*/
+	void PopMatrices() {};
+
+	/*!
+	*	Gets the current World Matrix
+	*/
+	const Matrix4x4 &WorldMatrix()
+	{
+		static Matrix4x4 Dummy;
+
+		return Dummy;
+	};
+
+	/*!
+	*	Gets the current projection matrix
+	*/
+	const Matrix4x4 &ProjectionMatrix()
+	{
+		static Matrix4x4 Dummy;
+
+		return Dummy;
+	};
 
 	/*!
 	*	Sets the current viewport

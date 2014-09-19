@@ -75,12 +75,6 @@ namespace FlamingTorch
 
 	void Log::BaseLog(uint8 Level, const std::string &Message)
 	{
-        //TODO: Remove this? Doesn't really make sense...
-        /*
-		if(!WasStarted)
-			return;
-        */
-
 		std::string Prefix;
 
 		switch(Level)
