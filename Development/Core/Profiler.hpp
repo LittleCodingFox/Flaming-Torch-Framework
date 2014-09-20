@@ -27,13 +27,7 @@ public:
 	static const uint32 BaseTimeout = 1000 / MinFPS;
 	uint64 UpdateTimer;
 
-	//For multithreaded stuff
-	//TODO
-	/*
-#if !ANDROID //TODO
 	sf::Mutex Lock;
-#endif
-	*/
 
 private:
 	Profiler() : SubSystem(PROFILER_PRIORITY) {};

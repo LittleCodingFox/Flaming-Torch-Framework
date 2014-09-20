@@ -94,9 +94,7 @@ private:
 	typedef std::map<uint32, PacketQueueContent> PacketQueue;
 	PacketQueue OutgoingPacketQueue;
 
-#if !ANDROID //TODO
 	sf::Mutex PacketQueueMutex;
-#endif
 
 	ENetHost *Host;
 	ENetPeer *Peer;
@@ -134,9 +132,7 @@ private:
 
 	uint32 ClientCounter;
 
-#if !ANDROID //TODO
 	sf::Mutex PacketQueueMutex;
-#endif
 
 	ENetHost *Host;
 

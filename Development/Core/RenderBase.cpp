@@ -281,8 +281,6 @@ namespace FlamingTorch
 			Renderer->OnFrameEnded(Renderer);
 		};
 
-		SpriteCache::Instance.Flush(Renderer);
-
 #if PROFILER_ENABLED
 		if(ShowProfiler)
 		{
@@ -371,6 +369,8 @@ namespace FlamingTorch
 				RenderTextUtils::RenderText(Renderer, Console::Instance.ConsoleLog[i], Params);
 			};
 		};
+
+		SpriteCache::Instance.Flush(Renderer);
 
 		Renderer->Impl->Display();
 

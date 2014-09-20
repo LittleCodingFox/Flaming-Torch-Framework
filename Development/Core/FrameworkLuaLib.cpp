@@ -1046,6 +1046,20 @@ namespace FlamingTorch
 					luabind::def("RemoveFile", &FileSystemUtils::RemoveFile)
 				],
 
+			//Path
+			luabind::class_<Path>("Path")
+				.def(luabind::constructor<>())
+				.def(luabind::constructor<const std::string &>())
+				.def(luabind::constructor<const std::string &, const std::string &>())
+				.property("FullPath", &Path::FullPath)
+				.property("Extension", &Path::Extension)
+				.def_readwrite("Directory", &Path::Directory)
+				.def_readwrite("BaseName", &Path::BaseName)
+				.def("ChangeExtension", &Path::ChangeExtension)
+				.scope [
+					luabind::def("Normalize", &Path::Normalize)
+				],
+
 			//StreamProcessor
 			luabind::class_<StreamProcessor, SuperSmartPointer<StreamProcessor> >("StreamProcessor")
 				.def("Encode", &StreamProcessor::Encode)
@@ -1966,43 +1980,6 @@ namespace FlamingTorch
 					luabind::def("FitTextOnRect", &RenderTextFitTextOnRect),
 					luabind::def("MeasureTextLines", &RenderTextMeasureTextLines)
 				],
-
-			//Shader
-			//TODO
-			/*
-			luabind::class_<Shader>("Shader")
-				.enum_("constants") [
-					luabind::value("Type_Vertex", ShaderType::Vertex),
-					luabind::value("Type_Fragment", ShaderType::Fragment),
-					luabind::value("Type_Geometry", ShaderType::Geometry)
-				]
-				.def(luabind::constructor<>())
-				.def("CompileShader", &ShaderCompileShader, luabind::pure_out_value(_4))
-				.def("LinkShader", &ShaderLinkShader, luabind::pure_out_value(_2))
-				.def("GetUniform", &Shader::GetUniform)
-				.def("GetAttribute", &Shader::GetAttribute)
-				.def("UniformFloat", &Shader::UniformFloat)
-				.def("UniformVector2", &Shader::UniformVector2)
-				.def("UniformVector3", &Shader::UniformVector3)
-				.def("UniformVector4", &Shader::UniformVector4)
-				.def("UniformFloatArray", &ShaderUniformFloatArray)
-				.def("UniformVector2Array", &ShaderUniformVector2Array)
-				.def("UniformVector3Array", &ShaderUniformVector3Array)
-				.def("UniformVector4Array", &ShaderUniformVector4Array)
-				.def("UniformMat3", &ShaderUniformMat3)
-				.def("UniformMat4", &ShaderUniformMat4)
-				.def("UniformInt", &Shader::UniformInt)
-				.def("UniformInt2", &Shader::UniformInt2)
-				.def("UniformInt3", &Shader::UniformInt3)
-				.def("UniformInt4", &Shader::UniformInt4)
-				.def("UniformIntArray", &ShaderUniformIntArray)
-				.def("UniformInt2Array", &ShaderUniformInt2Array)
-				.def("UniformInt3Array", &ShaderUniformInt3Array)
-				.def("UniformInt4Array", &ShaderUniformInt4Array)
-				.def("Destroy", &Shader::Destroy)
-				.def("Activate", &Shader::Activate)
-				.def("Deactivate", &Shader::Deactivate),
-			*/
 
 			//InputCenter
 			luabind::class_<InputCenter>("InputCenter")

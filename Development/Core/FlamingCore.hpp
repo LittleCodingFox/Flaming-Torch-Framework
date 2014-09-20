@@ -23,6 +23,8 @@ extern "C"
 #	include <enet/enet.h>
 #endif
 #
+#	include <SFML/System.hpp>
+#
 #if USE_SOUND
 #	include <SFML/Audio.hpp>
 #endif
@@ -55,7 +57,6 @@ namespace FlamingTorch
 #	include "DynamicLink.hpp"
 #
 #	if USE_GRAPHICS
-#		include "Shader.hpp"
 #		include "Input.hpp"
 #		include "RenderTextUtils.hpp"
 #		include "RenderBase.hpp"

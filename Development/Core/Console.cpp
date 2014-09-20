@@ -445,7 +445,7 @@ namespace FlamingTorch
 
 	void Console::LogConsole(const std::string &Message)
 	{
-		Log::Instance.LogDebug(TAG, "%s", Message.c_str());
+		Log::Instance.LogInfo(TAG, "%s", Message.c_str());
 
 		if(Message.find('\n') != std::string::npos)
 		{

@@ -362,8 +362,6 @@ namespace FlamingTorch
 
 	void TiledMap::Draw(uint32 Layer, Renderer *Renderer)
 	{
-		FLASSERT(0, "Temporarily disabled");
-
 		PROFILE("TiledMap::Draw", StatTypes::Rendering);
 
 		if(!ResourcesInitedValue || Layer >= Layers.size() || Layers[Layer]->Visible == false || Layers[Layer]->Vertices.size() == 0)

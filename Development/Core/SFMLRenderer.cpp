@@ -489,7 +489,8 @@ namespace FlamingTorch
 
 		EnableState(GL_SCISSOR_TEST);
 
-		glScissor(ClippingRect.Left, ClippingRect.Bottom, ClippingRect.Right - ClippingRect.Left, ClippingRect.Bottom - ClippingRect.Top);
+		glScissor((GLint)ClippingRect.Left, (GLint)ClippingRect.Bottom, (GLsizei)(ClippingRect.Right - ClippingRect.Left),
+			(GLsizei)(ClippingRect.Bottom - ClippingRect.Top));
 	};
 
 	void SFMLRendererImplementation::FinishClipping()
@@ -503,7 +504,8 @@ namespace FlamingTorch
 		{
 			const Rect &ClippingRect = ClippingStack.back();
 
-			glScissor(ClippingRect.Left, ClippingRect.Bottom, ClippingRect.Right - ClippingRect.Left, ClippingRect.Bottom - ClippingRect.Top);
+			glScissor((GLint)ClippingRect.Left, (GLint)ClippingRect.Bottom, (GLsizei)(ClippingRect.Right - ClippingRect.Left),
+				(GLsizei)(ClippingRect.Bottom - ClippingRect.Top));
 		}
 		else
 		{
@@ -750,9 +752,24 @@ GL_NEAREST : GL_LINEAR);
 		if(BufferByteCount != (uint32)(Window.getSize().x * Window.getSize().y * 4))
 			return false;
 
-		sf::Image Picture = Window.capture();
+		GLCHECK();
 
-		memcpy(Pixels, Picture.getPixelsPtr(), BufferByteCount);
+		//RGB Buffer
+		//Need to read as RGB since in RGBA it gets weird artifacts
+		std::vector<uint8> Temp((uint32)(Size().x * Size().y * 3));
+
+		glReadPixels(0, 0, (GLsizei)Size().x, (GLsizei)Size().y, GL_RGB, GL_UNSIGNED_BYTE, &Temp[0]);
+
+		//Convert from RGB to RGBA
+		for(uint32 i = 0, x = 0; i < Temp.size(); i += 3, x += 4)
+		{
+			Pixels[x] = Temp[i];
+			Pixels[x + 1] = Temp[i + 1];
+			Pixels[x + 2] = Temp[i + 2];
+			Pixels[x + 3] = 255;
+		};
+
+		GLCHECK();
 
 		return true;
 	};
@@ -1071,7 +1088,7 @@ GL_NEAREST : GL_LINEAR);
 
 		Vector2 ActualPosition = Parameters.PositionValue;
 
-		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue ? Parameters.FontValue : 0);
+		FontMap::iterator FontIterator = Fonts.find(Handle);
 
 		if(FontIterator == Fonts.end())
 			return;
