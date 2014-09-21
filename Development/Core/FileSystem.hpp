@@ -19,12 +19,35 @@ public:
 	Path(const std::string &PathName);
 	Path(const std::string &Directory, const std::string &BaseName);
 
+	/*!
+	*	Gets the combined full path as a string
+	*/
 	std::string FullPath() const;
+
+	/*!
+	*	Gets the extension (if any) of the path
+	*/
 	std::string Extension() const;
+
+	/*!
+	*	Generates a Path with a modified extension based on this path
+	*	\param NewExtension the new extension
+	*/
 	Path ChangeExtension(const std::string &NewExtension) const;
 
+	/*!
+	*	Normalizes a Path by removing all path separators and replacing them with the default path separator
+	*/
 	static std::string Normalize(const std::string &PathName);
+
+	/*!
+	*	Default Path Separator
+	*/
 	static std::string PathSeparator;
+
+	/*!
+	*	Platform-specific Path Separator
+	*/
 	static std::string PlatformPathSeparator;
 };
 
@@ -114,13 +137,16 @@ public:
 	static bool CopyFile(const std::string &From, const std::string &To);
 };
 
+/*!
+*	Stream Access Flags
+*/
 namespace StreamFlags
 {
 	enum
 	{
-		Write = 2,
-		Read = 4,
-		Text = 8
+		Write = FLAGVALUE(1), //!<Write Mode
+		Read = FLAGVALUE(2), //!<Read Mode
+		Text = FLAGVALE(3) //!<Text Mode
 	};
 };
 
@@ -134,7 +160,18 @@ public:
 	StreamProcessor(const std::string &NativeType) {};
 	virtual ~StreamProcessor() {};
 
+	/*!
+	*	Encodes data
+	*	\param Data the data to encode
+	*	\param Length the data length
+	*/
 	virtual void Encode(void *Data, uint32 Length) = 0;
+
+	/*!
+	*	Decodes data
+	*	\param Data the data to decode
+	*	\param Length the data length
+	*/
 	virtual void Decode(void *Data, uint32 Length) = 0;
 };
 
@@ -198,14 +235,14 @@ public:
 	/*!
 	*	Writes data to a stream
 	*	\param Data the data to write
-	*	\param the Size of an element in the data as bytes
+	*	\param ElementSize the Size of an element in the data as bytes
 	*	\param Length the amount of elements to write
 	*/
 	virtual bool Write(const void *Data, uint32 ElementSize, uint32 Length) = 0;
 	/*!
 	*	Reads data from a stream
 	*	\param Data the data to read
-	*	\param the Size of an element in the data as bytes
+	*	\param ElementSize the Size of an element in the data as bytes
 	*	\param Length the amount of elements to read
 	*/
 	virtual bool Read(void *Data, uint32 ElementSize, uint32 Length) = 0;
@@ -245,6 +282,8 @@ public:
 
 	/*!
 	*	Template-specialized Write method
+	*	\param Data the data to write
+	*	\param Length how many data elements to write
 	*	\sa Stream::Write
 	*/
 	template<typename type> bool Write2(const type *Data, uint32 Length = 1)
@@ -254,6 +293,8 @@ public:
 
 	/*!
 	*	Template-specialized Read method
+	*	\param Data the data to read
+	*	\param Length how many data elements to read
 	*	\sa Stream::Read
 	*/
 	template<typename type> bool Read2(type *Data, uint32 Length = 1)
@@ -267,6 +308,7 @@ public:
 	*	\param Length the amount to read from in bytes
 	*/
 	bool ReadFromStream(Stream *Target, uint32 Length);
+
 	/*!
 	*	Writes data from this stream into another stream
 	*	\param Target the stream to write to
@@ -455,8 +497,8 @@ public:
 
 	/*!
 	*	Gets a file stream
-	*	\param Directory as a StringID
-	*	\param FileName as the StringID
+	*	\param Directory the directory as a StringID
+	*	\param Name the filename as the StringID
 	*	\sa MakeStringID
 	*/
 	SuperSmartPointer<Stream> GetFile(StringID Directory, StringID Name);

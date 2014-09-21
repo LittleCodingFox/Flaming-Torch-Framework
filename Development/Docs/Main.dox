@@ -1,0 +1,27 @@
+/*!
+*	\mainpage Introduction
+*	
+*	Flaming Torch Framework is an open-source game engine/framework that allows you to develop games in either C++ or [Lua](http://www.lua.org/)
+*
+*	# Tutorials
+*
+*	## Lua
+*
+*	\ref luasample1 "Starting Up"
+*
+*	\ref luasample2 "Creating a Renderer"
+*
+*	\ref luasample3 "Drawing a Sprite"
+*	
+*	## C++
+*
+*	\ref cppsample1 "Starting Up"
+*
+*	\ref cppsample2 "Creating a Renderer"
+*
+*	\ref cppsample3 "Drawing a Sprite"
+*	
+*	## C++ and Lua
+*
+*	# Lua API
+*/
