@@ -1,0 +1,26 @@
+var class_flaming_torch_1_1_super_smart_pointer =
+[
+    [ "SuperSmartPointer", "class_flaming_torch_1_1_super_smart_pointer.html#abdfe4f6450f4182ce6bbf08474cc03bd", null ],
+    [ "SuperSmartPointer", "class_flaming_torch_1_1_super_smart_pointer.html#ae643e57cff1501c2de3f01300718ab8d", null ],
+    [ "SuperSmartPointer", "class_flaming_torch_1_1_super_smart_pointer.html#a2492f7fce8ed40e3c6485565352ce545", null ],
+    [ "~SuperSmartPointer", "class_flaming_torch_1_1_super_smart_pointer.html#a6898d609d2da1acb76730070e7ff39bc", null ],
+    [ "AsDerived", "class_flaming_torch_1_1_super_smart_pointer.html#a1dfb3340634395c19a018dd1eb026b15", null ],
+    [ "Dispose", "class_flaming_torch_1_1_super_smart_pointer.html#ab9fdafbe6badff30a5b0672fb4f56947", null ],
+    [ "Get", "class_flaming_torch_1_1_super_smart_pointer.html#a4515dc674a417fab170af5787c859f35", null ],
+    [ "Get", "class_flaming_torch_1_1_super_smart_pointer.html#a12c3aa0269163cea9b71666f3808075d", null ],
+    [ "ObserverCount", "class_flaming_torch_1_1_super_smart_pointer.html#a6b3f54256c700de0374a5eec667a52b7", null ],
+    [ "operator bool", "class_flaming_torch_1_1_super_smart_pointer.html#a12d11bb4cbca9ed01dc02e03f4bb03c0", null ],
+    [ "operator bool", "class_flaming_torch_1_1_super_smart_pointer.html#a78d3e8d426312bacc30f567c68d00fc6", null ],
+    [ "operator SuperSmartPointer< OutType >", "class_flaming_torch_1_1_super_smart_pointer.html#a76dd4648897bc614d75291b26fdd682e", null ],
+    [ "operator type *", "class_flaming_torch_1_1_super_smart_pointer.html#a966728cece01f55347c8c07d74307eff", null ],
+    [ "operator!=", "class_flaming_torch_1_1_super_smart_pointer.html#aafa5c9a78b9d05704bc02854a77cd1cd", null ],
+    [ "operator*", "class_flaming_torch_1_1_super_smart_pointer.html#a93d2f42a1757da203005536eb911677c", null ],
+    [ "operator*", "class_flaming_torch_1_1_super_smart_pointer.html#af6e2b7b32249c19c2c9d03747b545106", null ],
+    [ "operator->", "class_flaming_torch_1_1_super_smart_pointer.html#a6aca2b90e2408024a086fc9e99407a84", null ],
+    [ "operator->", "class_flaming_torch_1_1_super_smart_pointer.html#ab3acdaa76ae23f01418e9d55bbb2227a", null ],
+    [ "operator=", "class_flaming_torch_1_1_super_smart_pointer.html#ab042d487d17eee4f4e485bf86a1f0325", null ],
+    [ "operator==", "class_flaming_torch_1_1_super_smart_pointer.html#aceee29763101a4cba55a18c8392b63e7", null ],
+    [ "Replace", "class_flaming_torch_1_1_super_smart_pointer.html#a9030b26b78c027ca020c3e7768d27f75", null ],
+    [ "Reset", "class_flaming_torch_1_1_super_smart_pointer.html#a4d2120387124c2072db613590457adb5", null ],
+    [ "SuperSmartPointer", "class_flaming_torch_1_1_super_smart_pointer.html#a41c1104e6a3802d2aa4b6e034331fdb3", null ]
+];

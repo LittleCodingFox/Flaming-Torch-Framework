@@ -1,0 +1,26 @@
+var class_super_smart_pointer =
+[
+    [ "SuperSmartPointer", "class_super_smart_pointer.html#abe476b2d5d03c9fccfc75f4e48af4505", null ],
+    [ "SuperSmartPointer", "class_super_smart_pointer.html#a6e569c244136b1a108f021a0e170c910", null ],
+    [ "SuperSmartPointer", "class_super_smart_pointer.html#a437543df8692cebb8e109143576d2043", null ],
+    [ "~SuperSmartPointer", "class_super_smart_pointer.html#a155392364567e261e19d645b6c92a25b", null ],
+    [ "AsDerived", "class_super_smart_pointer.html#a64a87316b9970d899f800845bac1f668", null ],
+    [ "Dispose", "class_super_smart_pointer.html#a4d54447946ecc9fd3207df87838238f3", null ],
+    [ "Get", "class_super_smart_pointer.html#af37ca7bac0de47bb62009c2c15e33013", null ],
+    [ "Get", "class_super_smart_pointer.html#a83d027fe43c72e5dc30a033e0aed164d", null ],
+    [ "ObserverCount", "class_super_smart_pointer.html#a24da5a00c0028538f03ff056302ef90f", null ],
+    [ "operator bool", "class_super_smart_pointer.html#a62b7279af1d015da6c4a927dab8c00f2", null ],
+    [ "operator bool", "class_super_smart_pointer.html#a70a76a2becf3520258baa1b0854030b2", null ],
+    [ "operator SuperSmartPointer< OutType >", "class_super_smart_pointer.html#ac39ceaacdf0027efa0a90d53c9bb56a0", null ],
+    [ "operator type *", "class_super_smart_pointer.html#ae1b36998f2c1beef9b3bda09feb52b0f", null ],
+    [ "operator!=", "class_super_smart_pointer.html#add842d6ef09b1cc4103e9ba765f5056f", null ],
+    [ "operator*", "class_super_smart_pointer.html#af3df8c01ed9390e9bbda7c6d5bd33d2d", null ],
+    [ "operator*", "class_super_smart_pointer.html#a10ca2938b7008a0bdf047354ad4265bb", null ],
+    [ "operator->", "class_super_smart_pointer.html#acc49b4c45a2d1223018905d641dd87b0", null ],
+    [ "operator->", "class_super_smart_pointer.html#a697ffdcddbc682e54ec6c86ac46fca6e", null ],
+    [ "operator=", "class_super_smart_pointer.html#afae7ba8c708d0c86e738e040296c41e1", null ],
+    [ "operator==", "class_super_smart_pointer.html#ae207f24db2db6593e0f990eb3fe4fd7a", null ],
+    [ "Replace", "class_super_smart_pointer.html#a6c177c5a81f95b6d825f24add0f2e13d", null ],
+    [ "Reset", "class_super_smart_pointer.html#acb84c176ac0c33800ad9bf0d9916a8dd", null ],
+    [ "SuperSmartPointer", "class_super_smart_pointer.html#a41c1104e6a3802d2aa4b6e034331fdb3", null ]
+];

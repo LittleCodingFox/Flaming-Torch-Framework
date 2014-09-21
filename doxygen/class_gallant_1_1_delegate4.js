@@ -1,0 +1,27 @@
+var class_gallant_1_1_delegate4 =
+[
+    [ "type", "class_gallant_1_1_delegate4.html#aa97ecae000ad89e388bde152a9f9cba0", null ],
+    [ "Delegate4", "class_gallant_1_1_delegate4.html#a9ec51c71511c6bb97231ec0030ec3c45", null ],
+    [ "Delegate4", "class_gallant_1_1_delegate4.html#a983a1cb60adfdeb44c0ea0b38bd576b1", null ],
+    [ "Delegate4", "class_gallant_1_1_delegate4.html#ad3d9e66ea6b0d6863f45026dc9af923c", null ],
+    [ "Delegate4", "class_gallant_1_1_delegate4.html#a15553a583bca2cd7a1ba569848f384de", null ],
+    [ "Delegate4", "class_gallant_1_1_delegate4.html#ad49492340723e3e77db095fb93cf4562", null ],
+    [ "Bind", "class_gallant_1_1_delegate4.html#a34a1d2e1983bde56156c90cf5a61c134", null ],
+    [ "Bind", "class_gallant_1_1_delegate4.html#a43629861a174b905e1608f0e24e34397", null ],
+    [ "Bind", "class_gallant_1_1_delegate4.html#a8decd31506681832db26b0da7f51b8b9", null ],
+    [ "clear", "class_gallant_1_1_delegate4.html#a5c49c7b9092646d3ea8feaa458e8793c", null ],
+    [ "empty", "class_gallant_1_1_delegate4.html#aa953931330fc906a33f2d1638e8e1683", null ],
+    [ "GetMemento", "class_gallant_1_1_delegate4.html#a9db236dbdab0994bc5494b156d726f55", null ],
+    [ "operator unspecified_bool_type", "class_gallant_1_1_delegate4.html#a6115f61a120c72d1b9d1f95083f0c542", null ],
+    [ "operator!", "class_gallant_1_1_delegate4.html#a0018c7bb17a8b25b806c64a36540753f", null ],
+    [ "operator!=", "class_gallant_1_1_delegate4.html#a39bd5bbd4c087931fef3b865fa4ae8c3", null ],
+    [ "operator!=", "class_gallant_1_1_delegate4.html#a13bfbaedfa80379efc36543943277ea6", null ],
+    [ "operator()", "class_gallant_1_1_delegate4.html#a720a701475b1113068c95ba400a78922", null ],
+    [ "operator<", "class_gallant_1_1_delegate4.html#abfa1dc6cb56b512ffde1b06002ae6376", null ],
+    [ "operator=", "class_gallant_1_1_delegate4.html#a9caddebdae73eb37d71bb15d120330c5", null ],
+    [ "operator=", "class_gallant_1_1_delegate4.html#acde92a4a3deb74e00a4bf66c1ab2c19e", null ],
+    [ "operator==", "class_gallant_1_1_delegate4.html#a46f5c79f4bf3c7c301196fb58576194d", null ],
+    [ "operator==", "class_gallant_1_1_delegate4.html#a83e166f308edc60fb71d4efe950cd09c", null ],
+    [ "operator>", "class_gallant_1_1_delegate4.html#acb9cc461c14cc83954196ea977d0d7d5", null ],
+    [ "SetMemento", "class_gallant_1_1_delegate4.html#ad7ec8b26d5caab9094267219acb641db", null ]
+];
