@@ -19,7 +19,7 @@ namespace FlamingTorch
 
 	//Generates a ninepatch quad
 	void GenerateNinePatchGeometry(Vector2 *Vertices, Vector2 *TexCoords, const Vector2 &TextureSize, const Vector2 &Position, const Vector2 &Size, const Vector2 &Offset,
-		const Vector2 &SizeOverride = Vector2(-1, -1))
+		const Vector2 &SizeOverride, f32 Scale)
 	{
 		static Rect NinePatchRect;
 
@@ -27,10 +27,10 @@ namespace FlamingTorch
 
 		Vector2 ActualSize = SizeOverride.x != -1 ? SizeOverride : Size;
 
-		Vertices[0] = Vertices[5] = Offset;
-		Vertices[1] = Offset + Vector2(0, ActualSize.y);
-		Vertices[2] = Vertices[3] = Offset + ActualSize;
-		Vertices[4] = Offset + Vector2(ActualSize.x, 0);
+		Vertices[0] = Vertices[5] = Offset * Scale;
+		Vertices[1] = (Offset + Vector2(0, ActualSize.y)) * Scale;
+		Vertices[2] = Vertices[3] = (Offset + ActualSize) * Scale;
+		Vertices[4] = (Offset + Vector2(ActualSize.x, 0)) * Scale;
 
 		TexCoords[0] = TexCoords[5] = NinePatchRect.Position() / TextureSize;
 		TexCoords[1] = Vector2(NinePatchRect.Left, NinePatchRect.Bottom) / TextureSize;
@@ -242,8 +242,8 @@ namespace FlamingTorch
 
 			for(uint32 i = 0, index = 0; i < 9; i++, index += 6)
 			{
-				GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, SpriteTexture->Size(), FragmentPositions[i], FragmentSizes[i] * Options.NinePatchScaleValue, FragmentOffsets[i] * Options.NinePatchScaleValue,
-					FragmentSizeOverrides[i] * Options.NinePatchScaleValue);
+				GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, SpriteTexture->Size(), FragmentPositions[i], FragmentSizes[i], FragmentOffsets[i],
+					FragmentSizeOverrides[i], Options.NinePatchScaleValue);
 			};
 		};
 
