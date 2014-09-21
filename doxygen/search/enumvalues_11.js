@@ -1,18 +1,5 @@
 var searchData=
 [
-  ['r',['R',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892aa3adcda18632ade71cc99435641c0302',1,'InputKey::R()'],['../namespace_input_joystick_axis.html#a10ff7b787160dd98ba64049839274838aa7646e26ae7577073eb80a094db83459',1,'InputJoystickAxis::R()']]],
-  ['ralt',['RAlt',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892adde92b0f06d03f76c64c1b7007820093',1,'InputKey']]],
-  ['rbracket',['RBracket',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892abbcb3b8a1d66e549bae41bce37d87eba',1,'InputKey']]],
-  ['rcontrol',['RControl',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a085dbcb458e6c5fdf83dd98e78b9fb8a',1,'InputKey']]],
-  ['read',['Read',['../namespace_stream_flags.html#a0dd2c8f3d297eb47351b9644e9dd0c6ca0aaecef3cf384ae2fa7cd1563c75c38a',1,'StreamFlags::Read()'],['../namespace_flaming_torch_1_1_stream_flags.html#a48f32f2ac6291104611f53a46dcafa64a7b486a85c01a30e26f4fc97dd67dadda',1,'FlamingTorch::StreamFlags::Read()'],['../namespace_geometry_buffer_mapping.html#ac38d38a79fc180609d3fd5f6c9f2c9eba7477a99eb9a5981d4aa086b4d4af7a07',1,'GeometryBufferMapping::Read()']]],
-  ['readandwrite',['ReadAndWrite',['../namespace_geometry_buffer_mapping.html#ac38d38a79fc180609d3fd5f6c9f2c9ebaeae76186951ff4f4d82cf715e5e01134',1,'GeometryBufferMapping']]],
-  ['regular',['Regular',['../namespace_text_style.html#a8ab3be831d9aa792d37a920e1ae2ede9a63e913b7a202ea0f19bd9c629f1b2af1',1,'TextStyle']]],
-  ['rendering',['Rendering',['../namespace_flaming_torch_1_1_stat_types.html#a287ee1f57a6d7d1917ddb9e203b7f9f8ada596321dfdcc85fbf7376e76f2ae3c1',1,'FlamingTorch::StatTypes::Rendering()'],['../namespace_stat_types.html#ae2e385cc50633a25b7877d7dfeb43fc7af73b57fb618e55adfceaa455cacfeea8',1,'StatTypes::Rendering()']]],
-  ['repeat',['Repeat',['../namespace_flaming_torch_1_1_texture_wrap_mode.html#af0e604a77a6ed7ebe72eef5c4f48bfc6ab5cb1248ad0c379637c4637a5d682912',1,'FlamingTorch::TextureWrapMode::Repeat()'],['../namespace_texture_wrap_mode.html#a33f960e4615b4eb699a702e9847c0e41a9e7a1c2dd03650ca305e98d2abe41043',1,'TextureWrapMode::Repeat()']]],
-  ['return',['Return',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a65e0cb27f8ca7f59208367373d5cec75',1,'InputKey']]],
-  ['rgb8',['RGB8',['../namespace_flaming_torch_1_1_color_type.html#aae01d4a7d6bc44e8b9044500a7110e46a0e92b009e3a7a23911b0fc698de083eb',1,'FlamingTorch::ColorType::RGB8()'],['../namespace_color_type.html#a54e6e5d1e15b6ded50a013cd2eb166ffa0a713080dd0bc4d8be9af25568cad706',1,'ColorType::RGB8()']]],
-  ['rgba8',['RGBA8',['../namespace_flaming_torch_1_1_color_type.html#aae01d4a7d6bc44e8b9044500a7110e46ae0828a642519f26f4bbed3bf65767571',1,'FlamingTorch::ColorType::RGBA8()'],['../namespace_color_type.html#a54e6e5d1e15b6ded50a013cd2eb166ffa37fb4829c73d6f47695b77dd84eb3348',1,'ColorType::RGBA8()']]],
-  ['right',['Right',['../namespace_u_i_text_alignment.html#a91126189248b63589edc25d675954314af766f8df82357a3711529568962375c0',1,'UITextAlignment::Right()'],['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a6883c27eb8fa93d25788d45998a97410',1,'InputKey::Right()'],['../namespace_input_mouse_button.html#aac89f7bbfbd8a57bd74d37c32af18a65a629b0986a7ea33414bfaf36e7332380f',1,'InputMouseButton::Right()'],['../namespace_pinning_mode.html#a05aabca3ffc3b4f976a40dd8699be994a5557df7eae105e7c1ce06d3db3ebaf68',1,'PinningMode::Right()']]],
-  ['rshift',['RShift',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a5d1ba850180d93029be203e652385376',1,'InputKey']]],
-  ['rsystem',['RSystem',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a9480ea4320931e8038152010ffefea3c',1,'InputKey']]]
+  ['webp',['WebP',['../namespace_flaming_torch_1_1_texture_encoder_type.html#a1dac87ae07f742b219ae7ba476d13cb9aeeae7fc70af638e9831ebb66d598aa80',1,'FlamingTorch::TextureEncoderType']]],
+  ['write',['Write',['../namespace_flaming_torch_1_1_stream_flags.html#a310dbdff1124605f4d4cc48577ebd70ba450ee496633e03a151436c4b2fc269c5',1,'FlamingTorch::StreamFlags']]]
 ];

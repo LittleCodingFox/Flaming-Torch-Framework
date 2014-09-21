@@ -1,27 +1,4 @@
 var searchData=
 [
-  ['f',['F',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892acb27fe7ac7e205cb56b801a1583036dc',1,'InputKey']]],
-  ['f1',['F1',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892abfc3b83d6de74a20f2eadf5e815cdbde',1,'InputKey']]],
-  ['f10',['F10',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a5eb30b12585a57afd024dda26a42ab13',1,'InputKey']]],
-  ['f11',['F11',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a6df5a5a249b30bc29e4ecae5739da7bc',1,'InputKey']]],
-  ['f12',['F12',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a79003d5e35c1b4691d2e8a0c066d9711',1,'InputKey']]],
-  ['f13',['F13',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a934f224f7eaf13dda6708353e39a8086',1,'InputKey']]],
-  ['f14',['F14',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892ae6321a3e15159638491d04e6854502ef',1,'InputKey']]],
-  ['f15',['F15',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892aeb08a19d1de44bd90eeba67cbb4d5233',1,'InputKey']]],
-  ['f2',['F2',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892ae719668e55e1961659d60f297afff900',1,'InputKey']]],
-  ['f3',['F3',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a1de0544ba53c1c25f9914aea9e9d49b2',1,'InputKey']]],
-  ['f32',['F32',['../namespace_flaming_torch_1_1_value_types.html#a07b239fb14fe0b68497a3fc6d52b36faa98087c2ee01dec435da564b87ade06f0',1,'FlamingTorch::ValueTypes::F32()'],['../namespace_value_types.html#aaa36d7190de28ab732a00a84689a18adaab4b6d696c1e71a187ff6a9aad8a938a',1,'ValueTypes::F32()']]],
-  ['f4',['F4',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a6a48aad17e12ae44ea840ba2fedbd2ab',1,'InputKey']]],
-  ['f5',['F5',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892ab863946ba3ed5606beaf18705cf86cb0',1,'InputKey']]],
-  ['f6',['F6',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a63afb9318cc7b128c964eb36a5543022',1,'InputKey']]],
-  ['f7',['F7',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a87854a79db087c37118b9345496035cf',1,'InputKey']]],
-  ['f8',['F8',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a3d7a5f241ba5cdf3542a83ab3493d2d8',1,'InputKey']]],
-  ['f9',['F9',['../namespace_input_key.html#a4ce7d73d5aeda0a94c369b21858b9892a096bedc6e6811205fce9c130aaa2a5bb',1,'InputKey']]],
-  ['float',['Float',['../namespace_console_variable_type.html#a857c8e5a068482e3de26dc81083f55f8aac120de8297d10a5225ef239415392c4',1,'ConsoleVariableType::Float()'],['../namespace_flaming_torch_1_1_console_variable_type.html#a3a162db6b3ab9a411eed59cf04d7c329aa9a88992c9e4f1400e73a463c65c8e8a',1,'FlamingTorch::ConsoleVariableType::Float()'],['../namespace_flaming_torch_1_1_state_variable_type.html#a02dab8505f9aafff1918aa0f876ffb2aa59a44390ca431377e7bc6e77668a7bf5',1,'FlamingTorch::StateVariableType::Float()'],['../namespace_geometry_element_data_type.html#ac00cc1faa0894ae5ccaff09909f0ef09ad8d3063d36278c2375efe2884a03617f',1,'GeometryElementDataType::Float()'],['../namespace_vertex_element_data_type.html#a1ae99c61725d5a6fb8b7bcc6e6d1e89ba841d7237ae41ae21234bb6d745c191d7',1,'VertexElementDataType::Float()'],['../namespace_state_variable_type.html#a6ff7529b5433f282c7fb414c28a14ae1a18d577ac18f411b76da7248048d72fe4',1,'StateVariableType::Float()']]],
-  ['float2',['Float2',['../namespace_geometry_element_data_type.html#ac00cc1faa0894ae5ccaff09909f0ef09a468742aaf864f0da87d588b4fd29d446',1,'GeometryElementDataType::Float2()'],['../namespace_vertex_element_data_type.html#a1ae99c61725d5a6fb8b7bcc6e6d1e89bad474dec7773b4ec21dcd515fd69fab9c',1,'VertexElementDataType::Float2()']]],
-  ['float3',['Float3',['../namespace_geometry_element_data_type.html#ac00cc1faa0894ae5ccaff09909f0ef09a51616341bc83a6e66bce04e69dec1571',1,'GeometryElementDataType::Float3()'],['../namespace_vertex_element_data_type.html#a1ae99c61725d5a6fb8b7bcc6e6d1e89ba72419d65b13cbea34cbe8c264e8437fa',1,'VertexElementDataType::Float3()']]],
-  ['float4',['Float4',['../namespace_geometry_element_data_type.html#ac00cc1faa0894ae5ccaff09909f0ef09ad53066a4e7ed7e716b72e8be40d330cb',1,'GeometryElementDataType::Float4()'],['../namespace_vertex_element_data_type.html#a1ae99c61725d5a6fb8b7bcc6e6d1e89ba2c6a8b326f3646b893f1ffffee47e081',1,'VertexElementDataType::Float4()']]],
-  ['front',['Front',['../namespace_flaming_torch_1_1_plane_point_classifications.html#a10f5101e11e424b81217c52231691e4fa65db20af65f72209bc6550e286f24dd9',1,'FlamingTorch::PlanePointClassifications::Front()'],['../namespace_plane_point_classifications.html#a238d17b62955f5784019d60f55875f2fafa54ef8bbdb21ce5d4bf58c31aff285b',1,'PlanePointClassifications::Front()']]],
-  ['fti',['FTI',['../namespace_flaming_torch_1_1_texture_encoder_type.html#acd462232f3699a69c6ad00c3dce45c6da40df6d3cf60ff9e7ed08ecfa2c88ebf3',1,'FlamingTorch::TextureEncoderType::FTI()'],['../namespace_texture_encoder_type.html#a32e07190d078c99949e0087c8c28d3f8add4b9f3c058938d3287b1de27bed0aef',1,'TextureEncoderType::FTI()']]],
-  ['fullscreen',['FullScreen',['../namespace_renderer_window_style.html#aa3c16e372f867b4574da48b7998671cca5d71c838ec928a275f27c6495287d821',1,'RendererWindowStyle']]]
+  ['game',['Game',['../namespace_flaming_torch_1_1_stat_types.html#a81e6c8aaccd462c8a3eee59cee6dbcc4a3c8bd8226eb03f76b5332d8010b58d5c',1,'FlamingTorch::StatTypes']]]
 ];

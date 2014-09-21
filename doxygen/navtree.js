@@ -17,12 +17,11 @@ var NAVTREE =
     [ "Namespaces", null, [
       [ "Namespace List", "namespaces.html", "namespaces" ],
       [ "Namespace Members", "namespacemembers.html", [
-        [ "All", "namespacemembers.html", "namespacemembers_dup" ],
+        [ "All", "namespacemembers.html", null ],
         [ "Functions", "namespacemembers_func.html", null ],
-        [ "Variables", "namespacemembers_vars.html", null ],
         [ "Typedefs", "namespacemembers_type.html", null ],
         [ "Enumerations", "namespacemembers_enum.html", null ],
-        [ "Enumerator", "namespacemembers_eval.html", "namespacemembers_eval" ]
+        [ "Enumerator", "namespacemembers_eval.html", null ]
       ] ]
     ] ],
     [ "Classes", null, [
@@ -43,19 +42,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"class_flaming_torch_1_1_dijkstra_node.html#a589ec39205a332b53f3032da345e6d28",
-"class_flaming_torch_1_1_memory_stream.html#a26bbb0a60a872ec15038eaad97819f3a",
-"class_flaming_torch_1_1_scripted_world_streamer_callback.html#a9d1637bab1692b3db82880d8ef759dd6",
-"class_flaming_torch_1_1_tiled_map_init_options.html",
-"class_gallant_1_1_delegate0.html#acb6b36b460f185df70f8fc0423d17732",
-"class_gallant_1_1_signal3.html",
-"class_input_center_1_1_action.html#a92930ab2c7faeb31df07cc385f64e433",
-"class_path.html#ad281afc3a8ba66b00387cd5e86678cd5",
-"class_sound_manager.html#ab06446a8ea6b248f14d74ac4b61c411e",
-"class_texture_buffer.html#a017ce8b288a58bb7d2118896123d0c13",
-"class_u_i_panel.html#aad1a7e4fb0ee99b5d87d96c6337c2f5b",
-"class_vector4.html#aafd6c12bc7eca7edd0162179864536c5",
-"namespacemembers_eval_t.html"
+"class_flaming_torch_1_1_generic_config_1_1_float_value.html#a41d81ba4ec6c048a69826c1dcf139713",
+"class_flaming_torch_1_1_randomizer.html#ad703e3f5ff062ce17eccf48e25da6b71",
+"class_flaming_torch_1_1_texture.html#ac4a66d4d2cfe2c367a6643d7b307beb7",
+"class_flaming_torch_1_1_world.html#a86bf1a98780f8bf518b52b8b836056c8"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

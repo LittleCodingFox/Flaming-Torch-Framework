@@ -22,5 +22,5 @@ var class_flaming_torch_1_1_package_file_system_manager =
     [ "Update", "class_flaming_torch_1_1_package_file_system_manager.html#ae6bbafbf913653d64dbdd090ec05f1cb", null ],
     [ "Update", "class_flaming_torch_1_1_package_file_system_manager.html#ae6bbafbf913653d64dbdd090ec05f1cb", null ],
     [ "Package", "class_flaming_torch_1_1_package_file_system_manager.html#a1f6d1842edeebd449a74173c8c83f8ca", null ],
-    [ "Instance", "class_flaming_torch_1_1_package_file_system_manager.html#a4455f2d4c2d6a95a832352714e7b864f", null ]
+    [ "Instance", "class_flaming_torch_1_1_package_file_system_manager.html#a49b55a59ebc81780504e7c436758dd9b", null ]
 ];

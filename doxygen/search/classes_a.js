@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['keyinfo',['KeyInfo',['../class_input_center_1_1_key_info.html',1,'InputCenter']]]
+  ['nativegameinterface',['NativeGameInterface',['../class_flaming_torch_1_1_native_game_interface.html',1,'FlamingTorch']]]
 ];

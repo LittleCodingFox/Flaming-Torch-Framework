@@ -14,8 +14,8 @@ var class_flaming_torch_1_1_path =
     [ "FullPath", "class_flaming_torch_1_1_path.html#a89e0fdb072331d1caa6865f9da431889", null ],
     [ "Normalize", "class_flaming_torch_1_1_path.html#a8ef39217e390a71a4d3d2a4d6ea39552", null ],
     [ "Normalize", "class_flaming_torch_1_1_path.html#a8ef39217e390a71a4d3d2a4d6ea39552", null ],
-    [ "BaseName", "class_flaming_torch_1_1_path.html#aeebcbfce0f9c14cb765adf62e1884248", null ],
-    [ "Directory", "class_flaming_torch_1_1_path.html#ac27695d4b5422a6ddacb0bc26b468430", null ],
-    [ "PathSeparator", "class_flaming_torch_1_1_path.html#ac0bd80ddaf72768e9795bf278f1dc0f6", null ],
-    [ "PlatformPathSeparator", "class_flaming_torch_1_1_path.html#a3a4905ebfe4915fc117f0f3bb1e48261", null ]
+    [ "BaseName", "class_flaming_torch_1_1_path.html#a9f7beae45744cb0938bb1a7753b5d55a", null ],
+    [ "Directory", "class_flaming_torch_1_1_path.html#a643526982b3135e68c6b5c9544e1ad45", null ],
+    [ "PathSeparator", "class_flaming_torch_1_1_path.html#a036333949cd1e5f3701bc2bc41ab06f2", null ],
+    [ "PlatformPathSeparator", "class_flaming_torch_1_1_path.html#af0ea4100230aa1dee57e2b006a378129", null ]
 ];

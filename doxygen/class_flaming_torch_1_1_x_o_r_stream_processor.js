@@ -6,5 +6,5 @@ var class_flaming_torch_1_1_x_o_r_stream_processor =
     [ "Decode", "class_flaming_torch_1_1_x_o_r_stream_processor.html#adfcc64765b070e6fbef22142d9090560", null ],
     [ "Encode", "class_flaming_torch_1_1_x_o_r_stream_processor.html#a798d3f375b4e1c78d027777d574cce99", null ],
     [ "Encode", "class_flaming_torch_1_1_x_o_r_stream_processor.html#a798d3f375b4e1c78d027777d574cce99", null ],
-    [ "Key", "class_flaming_torch_1_1_x_o_r_stream_processor.html#a7e710191b1cf7f59e570f891238e0b7c", null ]
+    [ "Key", "class_flaming_torch_1_1_x_o_r_stream_processor.html#a389c906a062e3ed323e1d1c371c502c5", null ]
 ];

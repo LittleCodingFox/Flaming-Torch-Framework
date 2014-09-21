@@ -30,5 +30,5 @@ var class_flaming_torch_1_1_stream =
     [ "Write2", "class_flaming_torch_1_1_stream.html#ad767b21ed53743cf941e8cb201453fb9", null ],
     [ "WriteToStream", "class_flaming_torch_1_1_stream.html#a7c75ee73fe1ace50be078301a667df3d", null ],
     [ "WriteToStream", "class_flaming_torch_1_1_stream.html#a7c75ee73fe1ace50be078301a667df3d", null ],
-    [ "Processor", "class_flaming_torch_1_1_stream.html#a375b09bcf296791b78a5c66a1f138e36", null ]
+    [ "Processor", "class_flaming_torch_1_1_stream.html#a5532ecea1d292f932a1da5c96b5612ae", null ]
 ];
