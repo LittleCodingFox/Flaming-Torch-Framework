@@ -76,7 +76,7 @@ namespace FlamingTorch
 		*	\param a the first byte
 		*	\param b the second byte
 		*	\param c the third byte
-		*	\param b the fourth byte
+		*	\param d the fourth byte
 		*/
 		static inline int32 MakeIntFromBytes(uint8 a, uint8 b, uint8 c, uint8 d)
 		{

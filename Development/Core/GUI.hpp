@@ -950,7 +950,7 @@ public:
 	*
 	*	\param In the stream
 	*	\param Parent the parent element if there is one
-	*	\param DefaultLayout whether these layouts are Default Layouts
+	*	\param DefaultLayouts whether these layouts are Default Layouts
 	*/
 	bool LoadLayouts(Stream *In, SuperSmartPointer<UIPanel> Parent = SuperSmartPointer<UIPanel>(), bool DefaultLayouts = false);
 

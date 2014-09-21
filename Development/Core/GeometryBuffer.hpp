@@ -114,7 +114,7 @@ public:
 
 	/*!
 	*	Initializes this geometry buffer
-	*	\param Geometry Data as collection of bytes
+	*	\param GeometryData Data as collection of bytes
 	*	\param Length the length of the buffer
 	*	\param Type the type of geometry buffer
 	*	\param Elements the format elements

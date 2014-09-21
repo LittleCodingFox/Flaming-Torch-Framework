@@ -515,7 +515,7 @@ public:
 
 	/*!
 	*	Center the mouse cursor
-	*	\param Renderer the Renderer that should be centered
+	*	\param TheRenderer the Renderer that should be centered
 	*/
 	void CenterMouse(Renderer *TheRenderer);
 
