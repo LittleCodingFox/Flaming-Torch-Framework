@@ -78,14 +78,25 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
+			if(Button.JustPressed)
+			{
+				TheGUIManager.OnJoystickButtonJustPressedPriv(Button);
+			}
+			else if(Button.Pressed)
+			{
+				TheGUIManager.OnJoystickButtonPressedPriv(Button);
+			}
+			else if(Button.JustReleased)
+			{
+				TheGUIManager.OnJoystickButtonReleasedPriv(Button);
+			};
+
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
 			};
 
-			//TODO
-
-			return false;
+			return TheManager.Input.InputConsumed();
 		};
 		
 		bool OnJoystickAxis(const InputCenter::JoystickAxisInfo &Axis)
@@ -93,19 +104,41 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
+			TheGUIManager.OnJoystickAxisMovedPriv(Axis);
+
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
 			};
 
-			//TODO
-
-			return false;
+			return TheManager.Input.InputConsumed();
 		};
 
-		void OnJoystickConnected(uint8 Index) {};
+		void OnJoystickConnected(uint8 Index)
+		{
+			RendererManager &TheManager = RendererManager::Instance;
+			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-		void OnJoystickDisconnected(uint8 Index) {};
+			TheGUIManager.OnJoystickConnectedPriv(Index);
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
+		};
+
+		void OnJoystickDisconnected(uint8 Index)
+		{
+			RendererManager &TheManager = RendererManager::Instance;
+			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
+
+			TheGUIManager.OnJoystickDisconnectedPriv(Index);
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
+		};
 
 		void OnMouseMove(const Vector3 &Position)
 		{
@@ -763,6 +796,188 @@ namespace FlamingTorch
 		};
 	};
 
+	std::string JsonToLuaString(const Json::Value &Value)
+	{
+		static std::stringstream Out;
+		Out.str("");
+
+		switch(Value.type())
+		{
+		case Json::arrayValue:
+			Out << "{ ";
+
+			for(uint32 i = 0; i < Value.size(); i++)
+			{
+				if(i > 0)
+					Out << ", ";
+
+				switch(Value[i].type())
+				{
+				case Json::arrayValue:
+				case Json::objectValue:
+				case Json::nullValue:
+					Out << JsonToLuaString(Value[i]);
+
+					break;
+
+				case Json::booleanValue:
+					Out << Value[i].asBool();
+
+					break;
+
+				case Json::intValue:
+					Out << Value[i].asInt();
+
+					break;
+
+				case Json::realValue:
+					Out << Value[i].asDouble();
+
+					break;
+
+				case Json::stringValue:
+					Out << "\"" << Value[i].asString() << "\"";
+
+					break;
+
+				case Json::uintValue:
+					Out << Value[i].asUInt();
+
+					break;
+				};
+			};
+
+			Out << " }";
+
+			break;
+
+		case Json::nullValue:
+			return "nil";
+
+			break;
+
+		case Json::objectValue:
+			Out << "{ ";
+
+			for(uint32 i = 0; i < Value.size(); i++)
+			{
+				if(i > 0)
+					Out << ", ";
+
+				switch(Value[Value.getMemberNames()[i]].type())
+				{
+				case Json::arrayValue:
+				case Json::objectValue:
+				case Json::nullValue:
+					Out << "\"" << Value.getMemberNames()[i] << "\" = " << JsonToLuaString(Value[Value.getMemberNames()[i]]);
+
+					break;
+
+				case Json::booleanValue:
+					Out << "\"" << Value.getMemberNames()[i] << "\" = " << Value[Value.getMemberNames()[i]].asBool();
+
+					break;
+
+				case Json::intValue:
+					Out << "\"" << Value.getMemberNames()[i] << "\" = " << Value[Value.getMemberNames()[i]].asInt();
+
+					break;
+
+				case Json::realValue:
+					Out << "\"" << Value.getMemberNames()[i] << "\" = " << Value[Value.getMemberNames()[i]].asDouble();
+
+					break;
+
+				case Json::stringValue:
+					Out << "\"" << Value.getMemberNames()[i] << "\" = \"" << Value[Value.getMemberNames()[i]].asString() << "\"";
+
+					break;
+
+				case Json::uintValue:
+					Out << "\"" << Value.getMemberNames()[i] << "\" = " << Value[Value.getMemberNames()[i]].asUInt();
+
+					break;
+				};
+			};
+
+			Out << "}";
+
+			break;
+		};
+
+		return Out.str();
+	};
+
+	void UIManager::ProcessCustomProperty(UIPanel *Panel, const std::string &Property, const Json::Value &Value, const std::string &ElementName,
+		const std::string &LayoutName)
+	{
+		UIPanel::PropertyMap::iterator it = Panel->Properties.find(Property);
+
+		if(it == Panel->Properties.end())
+			return;
+
+		if(it->second.SetFunction)
+		{
+			Panel->PropertySetFunctionCode << "Self.Properties[\"" << Property << "\"].Set(Self, \"" << Property << "\", ";
+
+			try
+			{
+				switch(Value.type())
+				{
+				case Json::arrayValue:
+				case Json::objectValue:
+				case Json::nullValue:
+					Panel->PropertySetFunctionCode << JsonToLuaString(Value);
+
+					break;
+
+				case Json::booleanValue:
+					Panel->PropertySetFunctionCode << Value.asBool();
+
+					break;
+
+				case Json::intValue:
+					Panel->PropertySetFunctionCode << Value.asInt();
+
+					break;
+
+				case Json::realValue:
+					Panel->PropertySetFunctionCode << Value.asDouble();
+
+					break;
+
+				case Json::stringValue:
+					Panel->PropertySetFunctionCode << Value.asString();
+
+					break;
+
+				case Json::uintValue:
+					Panel->PropertySetFunctionCode << Value.asUInt();
+
+					break;
+				};
+			}
+			catch(std::exception &e)
+			{
+				Log::Instance.LogWarn(TAG, "Error while setting property '%s' of Panel '%s': '%s'", Property.c_str(), Panel->Name.c_str(),
+					ElementName.c_str(), e.what());
+
+				Panel->PropertySetFunctionCode << "nil";
+			};
+
+			Panel->PropertySetFunctionCode << ")\n";
+		};
+	};
+
+	void UIManager::ProcessCustomPropertyJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	{
+		for(uint32 i = 0; i < Data.size(); i++)
+		{
+			ProcessCustomProperty(Panel, Data.getMemberNames()[i], Data.type() == Json::objectValue ? Data[Data.getMemberNames()[i]] : Data[i],
+				ElementName, LayoutName);
+		};
+	};
+
 	void UIManager::CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName, UIPanel *ParentLimit)
 	{
 		if(Elements.type() != Json::arrayValue)
@@ -839,6 +1054,7 @@ namespace FlamingTorch
 
 			Json::Value EnabledValue = Data.get("Enabled", Json::Value(true)),
 				KeyboardInputEnabledValue = Data.get("KeyboardInput", Json::Value(true)),
+				JoystickInputEnabledValue = Data.get("JoystickInput", Json::Value(true)),
 				MouseInputEnabledValue = Data.get("MouseInput", Json::Value(true)),
 				AlphaValue = Data.get("Opacity", Json::Value(1.0)),
 				VisibleValue = Data.get("Visible", Json::Value(true)),
@@ -863,6 +1079,15 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(KeyboardInputEnabledValue, "KeyboardInput", bool);
+			};
+
+			if(JoystickInputEnabledValue.isBool())
+			{
+				Panel->SetJoystickInputEnabled(JoystickInputEnabledValue.asBool());
+			}
+			else
+			{
+				CHECKJSONVALUE(JoystickInputEnabledValue, "JoystickInput", bool);
 			};
 
 			if(MouseInputEnabledValue.isBool())
@@ -957,6 +1182,12 @@ namespace FlamingTorch
 			REGISTER_LUA_EVENT(OnMouseJustPressed, ", Button");
 			REGISTER_LUA_EVENT(OnMousePressed, ", Button");
 			REGISTER_LUA_EVENT(OnMouseReleased, ", Button");
+			REGISTER_LUA_EVENT(OnJoystickButtonJustPressed, ", Button");
+			REGISTER_LUA_EVENT(OnJoystickButtonPressed, ", Button");
+			REGISTER_LUA_EVENT(OnJoystickButtonReleased, ", Button");
+			REGISTER_LUA_EVENT(OnJoystickAxisMoved, ", Axis");
+			REGISTER_LUA_EVENT(OnJoystickConnected, ", Index");
+			REGISTER_LUA_EVENT(OnJoystickDisconnected, ", Index");
 			REGISTER_LUA_EVENT(OnKeyJustPressed, ", Key");
 			REGISTER_LUA_EVENT(OnKeyPressed, ", Key");
 			REGISTER_LUA_EVENT(OnKeyReleased, ", Key");
@@ -1642,6 +1873,129 @@ namespace FlamingTorch
 				continue;
 			};
 
+			Value = Data.get("Properties", Json::Value());
+
+			if(Value.type() == Json::objectValue)
+			{
+				static std::stringstream PropertiesStream;
+				PropertiesStream.str("");
+
+				std::string PropertiesStreamFunctionName = "PropertyStartupDefault_" + StringUtils::PointerString(Panel.Get());
+
+				PropertiesStream << "function " << PropertiesStreamFunctionName << "(Self)\n";
+
+				for(uint32 j = 0; j < Value.size(); j++)
+				{
+					std::string PropertyName = Value.getMemberNames()[j];
+
+					if(Panel->Properties.find(PropertyName) != Panel->Properties.end())
+					{
+						Log::Instance.LogWarn(TAG, "Unable to add function '%s' to Panel '%s': Function already exists!", PropertyName.c_str(), ElementName.c_str());
+
+						continue;
+					};
+
+					if(Value[PropertyName].type() != Json::objectValue)
+					{
+						CHECKJSONVALUE(Value[j], ("Property '" + PropertyName + "'").c_str(), object);
+
+						continue;
+					};
+
+					UIPanel::PropertyInfo PInfo;
+
+					luabind::object LuaPropertyInfo = luabind::newtable(ScriptInstance->State);
+
+					if(Value[PropertyName]["Get"].type() == Json::stringValue)
+					{
+						static std::stringstream str;
+						str.str("");
+
+						std::string FunctionName = "PropertyGet_" + StringUtils::PointerString(Panel.Get()) + "_" +
+							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
+
+						str << "function " << FunctionName << "(Self, PropertyName)\n";
+
+						str << Value[PropertyName]["Get"].asString();
+
+						str << "\nend\n";
+
+						luaL_dostring(ScriptInstance->State, str.str().c_str());
+
+						PInfo.GetFunction = luabind::globals(ScriptInstance->State)[FunctionName];
+
+						LuaPropertyInfo["Get"] = PInfo.GetFunction;
+					};
+
+					if(Value[PropertyName]["Set"].type() == Json::stringValue)
+					{
+						static std::stringstream str;
+						str.str("");
+
+						std::string FunctionName = "PropertySet_" + StringUtils::PointerString(Panel.Get()) + "_" +
+							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
+
+						str << "function " << FunctionName << "(Self, PropertyName, Value)\n";
+
+						str << Value[PropertyName]["Set"].asString();
+
+						str << "\nend\n";
+
+						luaL_dostring(ScriptInstance->State, str.str().c_str());
+
+						PInfo.SetFunction = luabind::globals(ScriptInstance->State)[FunctionName];
+
+						LuaPropertyInfo["Set"] = PInfo.SetFunction;
+					};
+
+					if(Value[PropertyName]["Default"].type() == Json::stringValue)
+					{
+						static std::stringstream str;
+						str.str("");
+
+						std::string FunctionName = "PropertyDefault_" + StringUtils::PointerString(Panel.Get()) + "_" +
+							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
+
+						str << "function " << FunctionName << "(Self, PropertyName)\n";
+
+						str << Value[PropertyName]["Default"].asString();
+
+						str << "\nend\n";
+
+						luaL_dostring(ScriptInstance->State, str.str().c_str());
+
+						PInfo.DefaultFunction = luabind::globals(ScriptInstance->State)[FunctionName];
+
+						PropertiesStream << FunctionName << "(Self, \"" << PropertyName << "\")\n";
+
+						LuaPropertyInfo["Default"] = PInfo.DefaultFunction;
+					};
+
+					if(!PInfo.GetFunction && !PInfo.SetFunction)
+						continue;
+
+					Panel->Properties[PropertyName] = PInfo;
+					Panel->PropertyValues[PropertyName] = LuaPropertyInfo;
+				};
+				
+				PropertiesStream << "\nend\n";
+
+				luaL_dostring(ScriptInstance->State, PropertiesStream.str().c_str());
+
+				Panel->PropertiesStartupDefaultFunction.Add(luabind::globals(ScriptInstance->State)[PropertiesStreamFunctionName]);
+			}
+			else if(Value.type() != Json::nullValue)
+			{
+				CHECKJSONVALUE(Value, "Properties", object);
+			};
+
+			std::string PropertyStartupSetFunctionName = "PropertyStartupSet_" + StringUtils::PointerString(Panel.Get());
+
+			Panel->PropertySetFunctionCode.str("");
+			Panel->PropertySetFunctionCode << "function " << PropertyStartupSetFunctionName << "(Self)\n";
+
+			ProcessCustomPropertyJSON(Panel, Data, ElementName, TheLayout->Name);
+
 			if(Control == "SPRITE")
 			{
 				ProcessSpriteJSON(Panel, Data, ElementName, TheLayout->Name);
@@ -1806,6 +2160,8 @@ namespace FlamingTorch
 								}
 								else
 								{
+									ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
+
 									continue;
 								};
 
@@ -1821,6 +2177,8 @@ namespace FlamingTorch
 								{
 									ProcessTextProperty(TargetElement, Property, FinalValue, ElementName, NewLayout->Name);
 								};
+
+								ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
 
 								break;
 							};
@@ -2422,6 +2780,72 @@ namespace FlamingTorch
 		if(FocusedElementValue)
 		{
 			FocusedElementValue->OnCharacterEnteredPriv();
+		};
+	};
+
+	void UIManager::OnJoystickButtonPressedPriv(const InputCenter::JoystickButtonInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnJoystickButtonPressedPriv(o);
+		};
+	};
+
+	void UIManager::OnJoystickButtonJustPressedPriv(const InputCenter::JoystickButtonInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnJoystickButtonJustPressedPriv(o);
+		};
+	};
+
+	void UIManager::OnJoystickButtonReleasedPriv(const InputCenter::JoystickButtonInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnJoystickButtonReleasedPriv(o);
+		};
+	};
+
+	void UIManager::OnJoystickAxisMovedPriv(const InputCenter::JoystickAxisInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnJoystickAxisMovedPriv(o);
+		};
+	};
+
+	void UIManager::OnJoystickConnectedPriv(uint8 Index)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnJoystickConnectedPriv(Index);
+		};
+	};
+
+	void UIManager::OnJoystickDisconnectedPriv(uint8 Index)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnJoystickDisconnectedPriv(Index);
 		};
 	};
 

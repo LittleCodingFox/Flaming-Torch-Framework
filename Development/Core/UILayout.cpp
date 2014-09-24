@@ -82,16 +82,25 @@ namespace FlamingTorch
 				PerformStartupEvents(ParentElement->Child(i));
 			};
 
+			//Need to init properties here and finish up the property set function code since we might need to add further
+			//property sets before we are finished initing
+
+			ParentElement->PropertySetFunctionCode << "\nend\n";
+
+			luaL_dostring(ParentElement->Manager()->ScriptInstance->State, ParentElement->PropertySetFunctionCode.str().c_str());
+
+			ParentElement->PropertiesStartupSetFunction.Add(luabind::globals(ParentElement->Manager()->ScriptInstance->State)
+				["PropertyStartupSet_" + StringUtils::PointerString(ParentElement)]);
+
+			RUN_GUI_SCRIPT_EVENTS2(ParentElement->PropertiesStartupDefaultFunction, (ParentElement), ParentElement->ID());
+			RUN_GUI_SCRIPT_EVENTS2(ParentElement->PropertiesStartupSetFunction, (ParentElement), ParentElement->ID());
 			RUN_GUI_SCRIPT_EVENTS2(ParentElement->OnStartFunction, (ParentElement), ParentElement->ID());
 		}
 		else
 		{
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				for(uint32 i = 0; i < it->second->ChildrenCount(); i++)
-				{
-					PerformStartupEvents(it->second.Get());
-				};
+				PerformStartupEvents(it->second.Get());
 			};
 		};
 	};

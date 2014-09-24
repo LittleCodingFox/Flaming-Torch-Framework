@@ -7,6 +7,13 @@ namespace FlamingTorch
 
 	void LuaEventGroup::Add(luabind::object Member)
 	{
+		if(!Member)
+		{
+			Log::Instance.LogWarn(TAG, "Unable to add a Member to a Lua Event Group: Invalid Member");
+
+			return;
+		};
+
 		for(std::list<luabind::object>::iterator it = Members.begin(); it != Members.end(); it++)
 		{
 			if(*it == Member)

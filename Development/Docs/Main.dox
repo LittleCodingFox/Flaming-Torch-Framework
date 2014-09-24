@@ -54,9 +54,13 @@
 *	    [MapDirectories]
 *	    Map=Maps|WorldChunks
 *
-*	
-*	
-*	\section architecture Architecture
+*	\subsection repackagingfiles Repackaging Files
+*
+*	You use MakePackages to compile those packages. You might have some problems creating them, so the log files for each used program will be created in the main folder
+*	under a folder with that program's name. You can remove those folders later on if you wish to repackage the game for release.
+*
+*	After you are sure the packages have been generated, you can run your .exe to run the game you created. The DLL files in Dependencies/Binaries
+*	should be in the main folder as well
 *
 *	\section tutorials Tutorials
 *

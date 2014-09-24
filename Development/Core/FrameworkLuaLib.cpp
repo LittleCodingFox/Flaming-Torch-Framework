@@ -2263,6 +2263,12 @@ namespace FlamingTorch
 				.def_readwrite("OnKeyJustPressed", &UIPanel::OnKeyJustPressedFunction)
 				.def_readwrite("OnKeyPressed", &UIPanel::OnKeyPressedFunction)
 				.def_readwrite("OnKeyReleased", &UIPanel::OnKeyReleasedFunction)
+				.def_readwrite("OnJoystickButtonJustPressed", &UIPanel::OnJoystickButtonJustPressedFunction)
+				.def_readwrite("OnJoystickButtonPressed", &UIPanel::OnJoystickButtonPressedFunction)
+				.def_readwrite("OnJoystickButtonReleased", &UIPanel::OnJoystickButtonReleasedFunction)
+				.def_readwrite("OnJoystickAxisMoved", &UIPanel::OnJoystickAxisMovedFunction)
+				.def_readwrite("OnJoystickConnected", &UIPanel::OnJoystickConnectedFunction)
+				.def_readwrite("OnJoystickDisconnected", &UIPanel::OnJoystickDisconnectedFunction)
 				.def_readwrite("OnMouseMoved", &UIPanel::OnMouseMovedFunction)
 				.def_readwrite("OnCharacterEntered", &UIPanel::OnCharacterEnteredFunction)
 				.def_readwrite("OnGainFocus", &UIPanel::OnGainFocusFunction)
@@ -2278,7 +2284,7 @@ namespace FlamingTorch
 				.def_readwrite("OnDragging", &UIPanel::OnDraggingFunction)
 				.def_readwrite("OnDrop", &UIPanel::OnDropFunction)
 				.def_readwrite("OnStart", &UIPanel::OnStartFunction)
-				.def_readwrite("Properties", &UIPanel::Properties)
+				.def_readwrite("Properties", &UIPanel::PropertyValues)
 				.property("RespondsToTooltips", &UIPanel::RespondsToTooltips, &UIPanel::SetRespondsToTooltips)
 				.property("TooltipsFixed", &UIPanel::TooltipsFixed, &UIPanel::SetTooltipsFixed)
 				.property("TooltipsPosition", &UIPanel::TooltipsPosition, &UIPanel::SetTooltipsPosition)
@@ -2295,6 +2301,7 @@ namespace FlamingTorch
 				.property("Enabled", &UIPanel::Enabled, &UIPanel::SetEnabled)
 				.property("MouseInputEnabled", &UIPanel::MouseInputEnabled, &UIPanel::SetMouseInputEnabled)
 				.property("KeyboardInputEnabled", &UIPanel::KeyboardInputEnabled, &UIPanel::SetKeyboardInputEnabled)
+				.property("JoystickInputEnabled", &UIPanel::JoystickInputEnabled, &UIPanel::SetJoystickInputEnabled)
 				.def("AddChild", &UIPanel::AddChild)
 				.def("RemoveChild", &UIPanel::RemoveChild)
 				.def_readonly("ControlName", &UIPanel::NativeType)
@@ -2337,7 +2344,7 @@ namespace FlamingTorch
 			luabind::class_<UISprite, UIPanel>("UISprite")
 				.def_readwrite("Sprite", &UISprite::TheSprite),
 
-				//UIText
+			//UIText
 			luabind::class_<UIText, UIPanel>("UIText")
 				.property("Text", &UITextGetText, &UITextSetText)
 				.def_readwrite("TextParameters", &UIText::TextParameters),

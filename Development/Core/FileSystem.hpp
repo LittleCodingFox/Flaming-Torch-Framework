@@ -146,7 +146,7 @@ namespace StreamFlags
 	{
 		Write = FLAGVALUE(1), //!<Write Mode
 		Read = FLAGVALUE(2), //!<Read Mode
-		Text = FLAGVALE(3) //!<Text Mode
+		Text = FLAGVALUE(3) //!<Text Mode
 	};
 };
 

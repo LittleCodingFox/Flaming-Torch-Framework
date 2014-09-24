@@ -125,8 +125,12 @@ namespace FlamingTorch
 		OnDragEnd.Connect(this, &UIPanel::OnDragEndScript);
 		OnDragging.Connect(this, &UIPanel::OnDraggingScript);
 		OnDrop.Connect(this, &UIPanel::OnDropScript);
-
-		Properties = luabind::newtable(ManagerValue->ScriptInstance->State);
+		OnJoystickConnected.Connect(this, &UIPanel::OnJoystickConnectedScript);
+		OnJoystickDisconnected.Connect(this, &UIPanel::OnJoystickDisconnectedScript);
+		OnJoystickButtonJustPressed.Connect(this, &UIPanel::OnJoystickButtonJustPressedScript);
+		OnJoystickButtonPressed.Connect(this, &UIPanel::OnJoystickButtonPressedScript);
+		OnJoystickButtonReleased.Connect(this, &UIPanel::OnJoystickButtonReleasedScript);
+		OnJoystickAxisMoved.Connect(this, &UIPanel::OnJoystickAxisMovedScript);
 	};
 
 	f32 UIPanel::ParentAlpha() const
@@ -276,6 +280,84 @@ namespace FlamingTorch
 		};
 	};
 
+	void UIPanel::OnJoystickButtonPressedPriv(const InputCenter::JoystickButtonInfo &o)
+	{
+		if(!JoystickInputValue || !EnabledValue)
+			return;
+
+		OnJoystickButtonPressed(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnJoystickButtonPressedPriv(o);
+		};
+	};
+
+	void UIPanel::OnJoystickButtonJustPressedPriv(const InputCenter::JoystickButtonInfo &o)
+	{
+		if(!JoystickInputValue || !EnabledValue)
+			return;
+
+		OnJoystickButtonJustPressed(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnJoystickButtonJustPressedPriv(o);
+		};
+	};
+
+	void UIPanel::OnJoystickButtonReleasedPriv(const InputCenter::JoystickButtonInfo &o)
+	{
+		if(!JoystickInputValue || !EnabledValue)
+			return;
+
+		OnJoystickButtonReleased(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnJoystickButtonReleasedPriv(o);
+		};
+	};
+
+	void UIPanel::OnJoystickAxisMovedPriv(const InputCenter::JoystickAxisInfo &o)
+	{
+		if(!JoystickInputValue || !EnabledValue)
+			return;
+
+		OnJoystickAxisMoved(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnJoystickAxisMovedPriv(o);
+		};
+	};
+
+	void UIPanel::OnJoystickConnectedPriv(uint32 JoystickIndex)
+	{
+		if(!JoystickInputValue || !EnabledValue)
+			return;
+
+		OnJoystickConnected(this, JoystickIndex);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnJoystickConnectedPriv(JoystickIndex);
+		};
+	};
+
+	void UIPanel::OnJoystickDisconnectedPriv(uint32 JoystickIndex)
+	{
+		if(!JoystickInputValue || !EnabledValue)
+			return;
+
+		OnJoystickDisconnected(this, JoystickIndex);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnJoystickDisconnectedPriv(JoystickIndex);
+		};
+	};
+
 	void UIPanel::OnLoseFocusPriv()
 	{
 		OnLoseFocus(this);
@@ -291,6 +373,8 @@ namespace FlamingTorch
 		EnabledValue = MouseInputValue = KeyboardInputValue = VisibleValue = true;
 		AlphaValue = 1;
 		ClickPressed = BlockingInputValue = RespondsToTooltipsValue = false;
+
+		PropertyValues = luabind::newtable(Manager()->ScriptInstance->State);
 	};
 
 	void UIPanel::OnMouseJustPressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o)
@@ -467,6 +551,54 @@ namespace FlamingTorch
 		};
 	};
 
+	void UIPanel::OnJoystickButtonPressedScript(UIPanel *Self, const InputCenter::JoystickButtonInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		RUN_GUI_SCRIPT_EVENTS(OnJoystickButtonPressedFunction, (this, o))
+	};
+
+	void UIPanel::OnJoystickButtonJustPressedScript(UIPanel *Self, const InputCenter::JoystickButtonInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		RUN_GUI_SCRIPT_EVENTS(OnJoystickButtonJustPressedFunction, (Self, o))
+	};
+
+	void UIPanel::OnJoystickButtonReleasedScript(UIPanel *Self, const InputCenter::JoystickButtonInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		RUN_GUI_SCRIPT_EVENTS(OnJoystickButtonReleasedFunction, (Self, o))
+	};
+
+	void UIPanel::OnJoystickAxisMovedScript(UIPanel *Self, const InputCenter::JoystickAxisInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		RUN_GUI_SCRIPT_EVENTS(OnJoystickAxisMovedFunction, (Self, o))
+	};
+
+	void UIPanel::OnJoystickConnectedScript(UIPanel *Self, uint32 JoystickIndex)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		RUN_GUI_SCRIPT_EVENTS(OnJoystickConnectedFunction, (Self, JoystickIndex))
+	};
+
+	void UIPanel::OnJoystickDisconnectedScript(UIPanel *Self, uint32 JoystickIndex)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		RUN_GUI_SCRIPT_EVENTS(OnJoystickDisconnectedFunction, (Self, JoystickIndex))
+	};
+
 	void UIPanel::AdjustSizeAndPosition(UIPanel *PanelToStopAt)
 	{
 		if(this == PanelToStopAt || ParentValue == NULL)
@@ -592,6 +724,8 @@ namespace FlamingTorch
 
 		if(TooltipElementValue.Get())
 			TooltipElementValue.Dispose();
+
+		Properties.clear();
 	};
 
 	void UIPanel::SetContentPanel(SuperSmartPointer<UIPanel> Panel)
@@ -814,6 +948,16 @@ namespace FlamingTorch
 	bool UIPanel::KeyboardInputEnabled() const
 	{
 		return KeyboardInputValue;
+	};
+
+	void UIPanel::SetJoystickInputEnabled(bool value)
+	{
+		JoystickInputValue = value;
+	};
+
+	bool UIPanel::JoystickInputEnabled() const
+	{
+		return JoystickInputValue;
 	};
 
 	void UIPanel::RemoveChild(UIPanel *Child)

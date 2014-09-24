@@ -72,7 +72,7 @@ class UIPanel
 	friend class UIScrollableFrame;
 	friend class UILayout;
 protected:
-	bool VisibleValue, EnabledValue, MouseInputValue, KeyboardInputValue;
+	bool VisibleValue, EnabledValue, MouseInputValue, KeyboardInputValue, JoystickInputValue;
 	Vector2 PositionValue, SizeValue, TranslationValue, SelectBoxExtraSize, OffsetValue;
 	f32 AlphaValue, RotationValue, ExtraSizeScaleValue;
 	UILayout *LayoutValue;
@@ -99,6 +99,8 @@ protected:
 	*/
 	virtual void OnSkinChange() {};
 
+	std::stringstream PropertySetFunctionCode;
+
 	void OnMouseJustPressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
 	void OnMousePressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
 	void OnMouseReleasedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
@@ -117,6 +119,12 @@ protected:
 	void OnDragEndScript(UIPanel *Self);
 	void OnDraggingScript(UIPanel *Self);
 	void OnDropScript(UIPanel *Self, UIPanel *Target);
+	void OnJoystickButtonPressedScript(UIPanel *Self, const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickButtonJustPressedScript(UIPanel *Self, const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickButtonReleasedScript(UIPanel *Self, const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickAxisMovedScript(UIPanel *Self, const InputCenter::JoystickAxisInfo &o);
+	void OnJoystickConnectedScript(UIPanel *Self, uint32 JoystickIndex);
+	void OnJoystickDisconnectedScript(UIPanel *Self, uint32 JoystickIndex);
 	void OnMouseJustPressedPriv(const InputCenter::MouseButtonInfo &o);
 	void OnMousePressedPriv(const InputCenter::MouseButtonInfo &o);
 	void OnMouseReleasedPriv(const InputCenter::MouseButtonInfo &o);
@@ -124,6 +132,12 @@ protected:
 	void OnKeyPressedPriv(const InputCenter::KeyInfo &o);
 	void OnKeyJustPressedPriv(const InputCenter::KeyInfo &o);
 	void OnKeyReleasedPriv(const InputCenter::KeyInfo &o);
+	void OnJoystickButtonPressedPriv(const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickButtonJustPressedPriv(const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickButtonReleasedPriv(const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickAxisMovedPriv(const InputCenter::JoystickAxisInfo &o);
+	void OnJoystickConnectedPriv(uint32 JoystickIndex);
+	void OnJoystickDisconnectedPriv(uint32 JoystickIndex);
 	void OnCharacterEnteredPriv();
 	void OnLoseFocusPriv();
 	void OnGainFocusPriv();
@@ -139,9 +153,10 @@ public:
 		OnKeyJustPressedFunction, OnKeyPressedFunction, OnKeyReleasedFunction, OnMouseMovedFunction,
 		OnCharacterEnteredFunction, OnGainFocusFunction, OnLoseFocusFunction, OnUpdateFunction, OnDrawFunction,
 		OnMouseEnteredFunction, OnMouseOverFunction, OnMouseLeftFunction, OnClickFunction, OnDragBeginFunction, OnDragEndFunction,
-		OnDraggingFunction, OnDropFunction, PositionFunction, SizeFunction, OnStartFunction;
+		OnDraggingFunction, OnDropFunction, OnJoystickConnectedFunction, OnJoystickDisconnectedFunction, OnJoystickAxisMovedFunction,
+		OnJoystickButtonJustPressedFunction, OnJoystickButtonPressedFunction, OnJoystickButtonReleasedFunction, PositionFunction,
+		SizeFunction, OnStartFunction, PropertiesStartupDefaultFunction, PropertiesStartupSetFunction;
 
-	luabind::object Properties;
 	std::string Name, LayoutName, NativeType;
 
 	Signal1<UIPanel *> OnLoseFocus, OnGainFocus, OnCharacterEntered, OnMouseMove, OnMouseEntered, OnMouseOver, OnMouseLeft;
@@ -150,6 +165,25 @@ public:
 	Signal1<UIPanel *> OnDragBegin, OnDragging, OnDragEnd;
 	//[Self, Target]
 	Signal2<UIPanel *, UIPanel *> OnDrop;
+
+	Signal2<UIPanel *, uint32> OnJoystickConnected, OnJoystickDisconnected;
+	Signal2<UIPanel *, const InputCenter::JoystickButtonInfo &> OnJoystickButtonJustPressed, OnJoystickButtonPressed,
+		OnJoystickButtonReleased;
+	Signal2<UIPanel *, const InputCenter::JoystickAxisInfo &> OnJoystickAxisMoved;
+
+	struct PropertyInfo
+	{
+		luabind::object GetFunction, SetFunction, DefaultFunction;
+	};
+
+	typedef std::map<std::string, PropertyInfo> PropertyMap;
+
+	/*!
+	*	A map of custom Panel Properties
+	*/
+	PropertyMap Properties;
+
+	luabind::object PropertyValues;
 
 	UIPanel(const std::string &NativeTypeName, UIManager *_Manager);
 
@@ -426,6 +460,17 @@ public:
 	*	\return whether this element receives Keyboard Input
 	*/
 	bool KeyboardInputEnabled() const;
+
+	/*!
+	*	Sets whether this element receives Joystick Input
+	*	\param value whether this element receives Joystick Input
+	*/
+	void SetJoystickInputEnabled(bool value);
+
+	/*!
+	*	\return whether this element receives Joystick Input
+	*/
+	bool JoystickInputEnabled() const;
 
 	/*!
 	*	Adds a child to this element
@@ -863,6 +908,12 @@ private:
 	void OnKeyJustPressedPriv(const InputCenter::KeyInfo &o);
 	void OnKeyReleasedPriv(const InputCenter::KeyInfo &o);
 	void OnCharacterEnteredPriv();
+	void OnJoystickButtonPressedPriv(const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickButtonJustPressedPriv(const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickButtonReleasedPriv(const InputCenter::JoystickButtonInfo &o);
+	void OnJoystickAxisMovedPriv(const InputCenter::JoystickAxisInfo &o);
+	void OnJoystickConnectedPriv(uint8 Index);
+	void OnJoystickDisconnectedPriv(uint8 Index);
 
 	void RegisterInput();
 	void UnRegisterInput();
@@ -886,6 +937,8 @@ private:
 	void ProcessSpriteJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessGroupProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessGroupJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessCustomProperty(UIPanel *Panel, const std::string &Property, const Json::Value &Value, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessCustomPropertyJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 public:
 	typedef std::map<StringID, SuperSmartPointer<UILayout> > LayoutMap;
 	LayoutMap Layouts, DefaultLayouts;
