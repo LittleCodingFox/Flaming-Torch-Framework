@@ -142,7 +142,7 @@ namespace FlamingTorch
 				Match = MatchNewLine;
 			};
 
-			if(Match == std::wstring::npos)
+			if(Match == std::string::npos)
 			{
 				if(Offset < str.length())
 				{

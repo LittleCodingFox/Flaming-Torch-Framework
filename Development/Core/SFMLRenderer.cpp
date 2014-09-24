@@ -1078,7 +1078,9 @@ GL_NEAREST : GL_LINEAR);
 		sf::FloatRect InRect = Text.getLocalBounds();
 
 		//Width/Height are considering the left/top position, we have to consider that too
-		return Rect(InRect.left, InRect.width, InRect.top + InRect.left, InRect.height + InRect.top);
+		//We multiply by two because we not only need to add the width/height to top and bottom, but also
+		//the width and height already have that reduced as well, and we're working with LRTB, not LRWH
+		return Rect(InRect.left, InRect.width + InRect.left * 2, InRect.top, InRect.height + InRect.top * 2);
 	};
 
 	void SFMLRendererImplementation::RenderText(FontHandle Handle, const std::string &TheText, const TextParams &Parameters)
