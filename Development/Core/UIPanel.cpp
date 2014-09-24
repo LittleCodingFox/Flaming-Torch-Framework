@@ -176,6 +176,8 @@ namespace FlamingTorch
 		if(!MouseInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		ClickTimer = GameClockTimeNoPause();
 		ClickPressed = true;
 
@@ -192,6 +194,8 @@ namespace FlamingTorch
 		if(!MouseInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnMousePressed(this, o);
 
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
@@ -204,6 +208,8 @@ namespace FlamingTorch
 	{
 		if(!MouseInputValue || !EnabledValue)
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
 
 		if(ClickPressed && GameClockDiffNoPause(ClickTimer) < 500)
 		{
@@ -233,6 +239,8 @@ namespace FlamingTorch
 		if(!KeyboardInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnKeyPressed(this, o);
 
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
@@ -245,6 +253,8 @@ namespace FlamingTorch
 	{
 		if(!KeyboardInputValue || !EnabledValue)
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
 
 		OnKeyJustPressed(this, o);
 
@@ -259,6 +269,8 @@ namespace FlamingTorch
 		if(!KeyboardInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnKeyReleased(this, o);
 
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
@@ -271,6 +283,8 @@ namespace FlamingTorch
 	{
 		if(!KeyboardInputValue || !EnabledValue)
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
 
 		OnCharacterEntered(this);
 
@@ -285,6 +299,8 @@ namespace FlamingTorch
 		if(!JoystickInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnJoystickButtonPressed(this, o);
 
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
@@ -298,6 +314,8 @@ namespace FlamingTorch
 		if(!JoystickInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnJoystickButtonJustPressed(this, o);
 
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
@@ -310,6 +328,8 @@ namespace FlamingTorch
 	{
 		if(!JoystickInputValue || !EnabledValue)
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
 
 		OnJoystickButtonReleased(this, o);
 
@@ -337,6 +357,8 @@ namespace FlamingTorch
 		if(!JoystickInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnJoystickConnected(this, JoystickIndex);
 
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
@@ -350,6 +372,8 @@ namespace FlamingTorch
 		if(!JoystickInputValue || !EnabledValue)
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnJoystickDisconnected(this, JoystickIndex);
 
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
@@ -360,11 +384,15 @@ namespace FlamingTorch
 
 	void UIPanel::OnLoseFocusPriv()
 	{
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnLoseFocus(this);
 	};
 
 	void UIPanel::OnGainFocusPriv()
 	{
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
 		OnGainFocus(this);
 	};
 
@@ -382,6 +410,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnMouseJustPressedFunction, (Self, o));
 	};
 
@@ -389,6 +419,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnMousePressedFunction, (Self, o));
 	};
@@ -398,6 +430,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnMouseReleasedFunction, (Self, o))
 	};
 
@@ -405,6 +439,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnKeyJustPressedFunction, (Self, o))
 	};
@@ -414,6 +450,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnKeyPressedFunction, (Self, o))
 	};
 
@@ -421,6 +459,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnKeyReleasedFunction, (Self, o))
 	};
@@ -430,6 +470,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnMouseMovedFunction, (Self))
 	};
 
@@ -437,6 +479,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnCharacterEnteredFunction, (Self, RendererManager::Instance.Input.Character))
 	};
@@ -446,6 +490,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnGainFocusFunction, (Self))
 	};
 
@@ -454,6 +500,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnLoseFocusFunction, (Self))
 	};
 
@@ -461,6 +509,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnMouseEnteredFunction, (Self))
 	};
@@ -478,6 +528,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnMouseLeftFunction, (Self))
 	};
 
@@ -485,6 +537,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnClickFunction, (Self, o))
 	};
@@ -494,6 +548,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnDragBeginFunction, (Self))
 	};
 
@@ -501,6 +557,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnDragEndFunction, (Self))
 	};
@@ -518,6 +576,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnDropFunction, (Self, Tar))
 	};
 	
@@ -525,6 +585,8 @@ namespace FlamingTorch
 	{
 		if(o.Name != InputMouseButton::Left || !IsDraggableValue)
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
 
 		DraggingValue = true;
 
@@ -535,6 +597,8 @@ namespace FlamingTorch
 	{
 		if(o.Name != InputMouseButton::Left || !IsDraggableValue)
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
 
 		if(DraggingValue)
 		{
@@ -556,6 +620,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnJoystickButtonPressedFunction, (this, o))
 	};
 
@@ -564,6 +630,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnJoystickButtonJustPressedFunction, (Self, o))
 	};
 
@@ -571,6 +639,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnJoystickButtonReleasedFunction, (Self, o))
 	};
@@ -588,6 +658,8 @@ namespace FlamingTorch
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
 
+		REPORT_UIPANEL_INPUT_EVENT();
+
 		RUN_GUI_SCRIPT_EVENTS(OnJoystickConnectedFunction, (Self, JoystickIndex))
 	};
 
@@ -595,6 +667,8 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnJoystickDisconnectedFunction, (Self, JoystickIndex))
 	};

@@ -2253,6 +2253,7 @@ namespace FlamingTorch
 				.property("DefaultFontColor", &UIManager::GetDefaultFontColor)
 				.property("DefaultSecondaryFontColor", &UIManager::GetDefaultSecondaryFontColor)
 				.property("DefaultFontSize", &UIManager::GetDefaultFontSize)
+				.property("Renderer", &UIManager::GetOwner)
 				.property("Skin", &UIManager::GetSkin, &UIManager::SetSkin),
 
 			//UIPanel
@@ -2294,8 +2295,9 @@ namespace FlamingTorch
 				.property("BlockingInput", &UIPanel::BlockingInput, &UIPanel::SetBlockingInput)
 				.property("Draggable", &UIPanel::Draggable, &UIPanel::SetDraggable)
 				.property("Droppable", &UIPanel::Droppable, &UIPanel::SetDroppable)
-				.property("Owner", &UIPanel::Manager)
+				.property("Manager", &UIPanel::Manager)
 				.property("ID", &UIPanel::ID)
+				.property("Name", &UIPanel::Name)
 				.property("ParentPosition", &UIPanel::ParentPosition)
 				.property("Visible", &UIPanel::Visible, &UIPanel::SetVisible)
 				.property("Enabled", &UIPanel::Enabled, &UIPanel::SetEnabled)

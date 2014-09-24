@@ -9,7 +9,7 @@
 		{\
 			try\
 			{\
-				(*mit) (Parameters);\
+				(*mit) Parameters;\
 			}\
 			catch(std::exception &e)\
 			{\
@@ -25,7 +25,7 @@
 		{\
 			try\
 			{\
-				(*mit) (Parameters);\
+				(*mit) Parameters;\
 			}\
 			catch(std::exception &e)\
 			{\
@@ -33,6 +33,14 @@
 			};\
 		};\
 	};
+
+#if DEBUGGING_UI_INPUT
+#	define REPORT_UIPANEL_INPUT_EVENT() Log::Instance.LogInfo("UIInputDebug", "@%s for Panel '%s'!", __FUNCTION__, Self->Name.c_str());
+#	define REPORT_UIPANEL_INPUT_EVENTPRIV() Log::Instance.LogInfo("UIInputDebug", "@%s for Panel '%s'!", __FUNCTION__, Name.c_str());
+#else
+#	define REPORT_UIPANEL_INPUT_EVENT()
+#	define REPORT_UIPANEL_INPUT_EVENTPRIV()
+#endif
 
 class UIManager;
 class UILayout;

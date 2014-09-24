@@ -947,7 +947,7 @@ namespace FlamingTorch
 					break;
 
 				case Json::stringValue:
-					Panel->PropertySetFunctionCode << Value.asString();
+					Panel->PropertySetFunctionCode << "\"" << Value.asString() << "\"";
 
 					break;
 
@@ -1956,17 +1956,25 @@ namespace FlamingTorch
 						std::string FunctionName = "PropertyDefault_" + StringUtils::PointerString(Panel.Get()) + "_" +
 							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
 
-						str << "function " << FunctionName << "(Self, PropertyName)\n";
-
-						str << Value[PropertyName]["Default"].asString();
-
-						str << "\nend\n";
+						str << "function " << FunctionName << "(Self, PropertyName)\n"
+							"	local Value = " << Value[PropertyName]["Default"].asString() << "\n"
+							"	if type(Value) == type(nil) then\n"
+							"		g_Log:Warn(\"While setting a Panel '\" .. Self.Name .. \"'s Value for Property '\" .. PropertyName .. \"': Value is nil!\")\n"
+							"	end\n"
+							"\n"
+							"	if Self.Properties[PropertyName].Set ~= nil then\n"
+							"		Self.Properties[PropertyName].Set(Self, PropertyName, Value)\n"
+							"	else\n"
+							"		Self.Properties[PropertyName].Value = Value\n"
+							"	end\n"
+							"end\n";
 
 						luaL_dostring(ScriptInstance->State, str.str().c_str());
 
 						PInfo.DefaultFunction = luabind::globals(ScriptInstance->State)[FunctionName];
 
-						PropertiesStream << FunctionName << "(Self, \"" << PropertyName << "\")\n";
+						if(PInfo.DefaultFunction)
+							PropertiesStream << FunctionName << "(Self, \"" << PropertyName << "\")\n";
 
 						LuaPropertyInfo["Default"] = PInfo.DefaultFunction;
 					};
@@ -2072,6 +2080,11 @@ namespace FlamingTorch
 				};
 
 				Layouts[LayoutID] = NewLayout;
+
+				for(uint32 j = 0; j < Panel->ChildrenCount(); j++)
+				{
+					ProcessCustomPropertyJSON(Panel->Child(j), Data, Panel->Child(j)->Name, NewLayout->Name);
+				};
 
 				for(uint32 j = 0; j < Data.size(); j++)
 				{
