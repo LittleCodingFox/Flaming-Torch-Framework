@@ -36,6 +36,33 @@ namespace FlamingTorch
 		};
 	};
 
+	LuaGlobalsTracker::LuaGlobalsTracker(SuperSmartPointer<LuaScript> Script) : ScriptInstance(Script) {};
+
+	void LuaGlobalsTracker::Add(const std::string &Name)
+	{
+		for(uint32 i = 0; i < Names.size(); i++)
+		{
+			if(Names[i] == Name)
+				return;
+		};
+
+		Names.push_back(Name);
+	};
+
+	void LuaGlobalsTracker::Clear()
+	{
+		if(!ScriptInstance.Get())
+			return;
+
+		while(Names.size())
+		{
+			//Best to use dostring to be sure the globals are set to nil
+			luaL_dostring(ScriptInstance->State, (*Names.begin() + " = nil").c_str());
+
+			Names.erase(Names.begin());
+		};
+	};
+
 	int LuabindPCall(lua_State* State)
 	{
 		lua_Debug d;

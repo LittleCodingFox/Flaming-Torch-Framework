@@ -5,6 +5,7 @@ namespace FlamingTorch
 #	if USE_SFML_RENDERER
 #	include "SFMLRenderer.hpp"
 #	define TAG "SFMLRenderer"
+#	define GLCHECK() { int32 error = glGetError(); if(error != GL_NO_ERROR) { FLASSERT(0, "GL Error %08x!", error); } }
 
 	bool SFMLRendererImplementation::FirstRenderer = true;
 	uint64 SFMLRendererImplementation::TextureCounter = 0;
@@ -111,6 +112,8 @@ namespace FlamingTorch
 			DumpRendererStats();
 		};
 
+		glDisable(GL_DEPTH_TEST);
+
 		return true;
 	};
 
@@ -146,6 +149,8 @@ namespace FlamingTorch
 
 			DumpRendererStats();
 		};
+
+		glDisable(GL_DEPTH_TEST);
 
 		return true;
 	};
@@ -475,18 +480,12 @@ namespace FlamingTorch
 		};
 
 		glDrawArrays(VertexBufferVertexMode[VertexMode], Start, End - Start);
+
+		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::StartClipping(const Rect &ClippingRect)
 	{
-		FLASSERT(ClippingRect.Bottom > ClippingRect.Top, "Expected a larger Bottom coordinate on ClippingRect");
-		FLASSERT(ClippingRect.Right > ClippingRect.Left, "Expected a larger Right coordinate on ClippingRect");
-
-		if(ClippingRect.Bottom <= ClippingRect.Top || ClippingRect.Right <= ClippingRect.Left)
-			return;
-
-		ClippingStack.push_back(ClippingRect);
-
 		EnableState(GL_SCISSOR_TEST);
 
 		glScissor((GLint)ClippingRect.Left, (GLint)ClippingRect.Bottom, (GLsizei)(ClippingRect.Right - ClippingRect.Left),
@@ -495,22 +494,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::FinishClipping()
 	{
-		if(!ClippingStack.size())
-			return;
+		DisableState(GL_SCISSOR_TEST);
 
-		ClippingStack.pop_back();
-
-		if(ClippingStack.size())
-		{
-			const Rect &ClippingRect = ClippingStack.back();
-
-			glScissor((GLint)ClippingRect.Left, (GLint)ClippingRect.Bottom, (GLsizei)(ClippingRect.Right - ClippingRect.Left),
-				(GLsizei)(ClippingRect.Bottom - ClippingRect.Top));
-		}
-		else
-		{
-			DisableState(GL_SCISSOR_TEST);
-		};
+		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::Clear(uint32 Buffers)
@@ -528,6 +514,8 @@ namespace FlamingTorch
 
 		if(Mask != 0)
 			glClear(Mask);
+
+		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::Display()
@@ -537,56 +525,26 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
-		LastWorldMatrix = WorldMatrix;
-
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(&WorldMatrix.m[0][0]);
+
+		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
-		LastProjectionMatrix = ProjectionMatrix;
-
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(&ProjectionMatrix.m[0][0]);
 		glMatrixMode(GL_MODELVIEW);
-	};
 
-	void SFMLRendererImplementation::PushMatrices()
-	{
-		MatrixStackElement Element;
-		Element.World = LastWorldMatrix;
-		Element.Projection = LastProjectionMatrix;
-
-		MatrixStack.push_back(Element);
-	};
-
-	void SFMLRendererImplementation::PopMatrices()
-	{
-		if(MatrixStack.size() == 0)
-			return;
-
-		const MatrixStackElement &Element = MatrixStack.back();
-
-		SetWorldMatrix(Element.World);
-		SetProjectionMatrix(Element.Projection);
-
-		MatrixStack.pop_back();
-	};
-
-	const Matrix4x4 &SFMLRendererImplementation::WorldMatrix()
-	{
-		return LastWorldMatrix;
-	};
-
-	const Matrix4x4 &SFMLRendererImplementation::ProjectionMatrix()
-	{
-		return LastProjectionMatrix;
+		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
 		glViewport((GLint)x, (GLint)y, (GLsizei)Width, (GLsizei)Height);
+
+		GLCHECK();
 	};
 
 	TextureHandle SFMLRendererImplementation::CreateTexture()
@@ -631,8 +589,6 @@ namespace FlamingTorch
 
 		BindTexture(Handle);
 
-		GLCHECK();
-
 		if(!IsTextureHandleValid(Handle))
 		{
 			if(Last)
@@ -651,8 +607,6 @@ namespace FlamingTorch
 		Info.Height = Height;
 
 		BindTexture(Last);
-
-		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
@@ -660,8 +614,6 @@ namespace FlamingTorch
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
-
-		GLCHECK();
 		
 		if(!IsTextureHandleValid(Handle))
 		{
@@ -677,11 +629,15 @@ namespace FlamingTorch
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
+			GLCHECK();
+
 			break;
 
 		case TextureWrapMode::Clamp:
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+			GLCHECK();
 
 			break;
 
@@ -689,20 +645,20 @@ namespace FlamingTorch
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
+			GLCHECK();
+
 			break;
 
 		case TextureWrapMode::ClampToEdge:
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+			GLCHECK();
+
 			break;
 		};
 
-		GLCHECK();
-
 		BindTexture(Last);
-
-		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::SetTextureFiltering(TextureHandle Handle, uint32 Filter)
@@ -710,8 +666,6 @@ namespace FlamingTorch
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
-
-		GLCHECK();
 
 		if(!IsTextureHandleValid(Handle))
 		{
@@ -723,17 +677,15 @@ namespace FlamingTorch
 
 		if(Filter == TextureFiltering::Nearest || Filter == TextureFiltering::Linear)
 		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter == TextureFiltering::Nearest ?
-GL_NEAREST : GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter == TextureFiltering::Nearest ?
-GL_NEAREST : GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter == TextureFiltering::Nearest ? GL_NEAREST : GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter == TextureFiltering::Nearest ? GL_NEAREST : GL_LINEAR);
+
+			GLCHECK();
 		}
 		else if(Filter == TextureFiltering::Nearest_Mipmap || Filter == TextureFiltering::Linear_Mipmap)
 		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter == TextureFiltering::Nearest_Mipmap ?
-GL_NEAREST_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter == TextureFiltering::Nearest_Mipmap ?
-GL_NEAREST : GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter == TextureFiltering::Nearest_Mipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter == TextureFiltering::Nearest_Mipmap ? GL_NEAREST : GL_LINEAR);
 
 			GLCHECK();
 
@@ -743,8 +695,6 @@ GL_NEAREST : GL_LINEAR);
 		};
 
 		BindTexture(Last);
-
-		GLCHECK();
 	};
 
 	bool SFMLRendererImplementation::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
@@ -838,10 +788,15 @@ GL_NEAREST : GL_LINEAR);
 
 			break;
 		};
+
+		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::BindTexture(TextureHandle Handle)
 	{
+		if(Handle == LastBoundTexture)
+			return;
+
 		LastBoundTexture = Handle;
 
 		TextureMap::iterator it = Textures.find(Handle);
@@ -1265,6 +1220,8 @@ GL_NEAREST : GL_LINEAR);
 
 			break;
 		};
+
+		GLCHECK();
 
 		GLStates[ID] = true;
 	};

@@ -1171,6 +1171,7 @@ namespace FlamingTorch
 						ScriptInstance->DoString(ComposedCode.str().c_str());\
 						\
 						Panel->name##Function.Add(luabind::globals(ScriptInstance->State)[ComposedFunctionName.str().c_str()]);\
+						Panel->GlobalsTracker.Add(ComposedFunctionName.str());\
 					}\
 				}\
 				else\
@@ -1835,6 +1836,9 @@ namespace FlamingTorch
 
 			luaL_dostring(ScriptInstance->State, ComposedSizeFunction.str().c_str());
 
+			Panel->GlobalsTracker.Add(BaseFunctionName.str() + "Position");
+			Panel->GlobalsTracker.Add(BaseFunctionName.str() + "Size");
+
 			Panel->PositionFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Position"]);
 			Panel->SizeFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Size"]);
 
@@ -1882,6 +1886,8 @@ namespace FlamingTorch
 
 				std::string PropertiesStreamFunctionName = "PropertyStartupDefault_" + StringUtils::PointerString(Panel.Get());
 
+				Panel->GlobalsTracker.Add(PropertiesStreamFunctionName);
+
 				PropertiesStream << "function " << PropertiesStreamFunctionName << "(Self)\n";
 
 				for(uint32 j = 0; j < Value.size(); j++)
@@ -1914,7 +1920,10 @@ namespace FlamingTorch
 						std::string FunctionName = "PropertyGet_" + StringUtils::PointerString(Panel.Get()) + "_" +
 							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
 
-						str << "function " << FunctionName << "(Self, PropertyName)\n";
+						Panel->GlobalsTracker.Add(FunctionName);
+
+						str << "function " << FunctionName << "(Self, PropertyName)\n"
+							"	local Value = Self.Properties[PropertyName].Value\n	";
 
 						str << Value[PropertyName]["Get"].asString();
 
@@ -1935,6 +1944,8 @@ namespace FlamingTorch
 						std::string FunctionName = "PropertySet_" + StringUtils::PointerString(Panel.Get()) + "_" +
 							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
 
+						Panel->GlobalsTracker.Add(FunctionName);
+
 						str << "function " << FunctionName << "(Self, PropertyName, Value)\n";
 
 						str << Value[PropertyName]["Set"].asString();
@@ -1948,13 +1959,35 @@ namespace FlamingTorch
 						LuaPropertyInfo["Set"] = PInfo.SetFunction;
 					};
 
-					if(Value[PropertyName]["Default"].type() == Json::stringValue)
+					//We need to account for the JSON Data Types... Strings like "false" become bool, so we must convert to lua strings anyway.
+					std::string DefaultString;
+
+					switch(Value[PropertyName]["Default"].type())
+					{
+					case Json::stringValue:
+						DefaultString = Value[PropertyName]["Default"].asString();
+
+						break;
+
+					case Json::nullValue:
+
+						break;
+
+					default:
+						DefaultString = JsonToLuaString(Value[PropertyName]["Default"]);
+
+						break;
+					};
+
+					if(DefaultString.length())
 					{
 						static std::stringstream str;
 						str.str("");
 
 						std::string FunctionName = "PropertyDefault_" + StringUtils::PointerString(Panel.Get()) + "_" +
 							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
+
+						Panel->GlobalsTracker.Add(FunctionName);
 
 						str << "function " << FunctionName << "(Self, PropertyName)\n"
 							"	local Value = " << Value[PropertyName]["Default"].asString() << "\n"
@@ -1998,6 +2031,8 @@ namespace FlamingTorch
 			};
 
 			std::string PropertyStartupSetFunctionName = "PropertyStartupSet_" + StringUtils::PointerString(Panel.Get());
+
+			Panel->GlobalsTracker.Add(PropertyStartupSetFunctionName);
 
 			Panel->PropertySetFunctionCode.str("");
 			Panel->PropertySetFunctionCode << "function " << PropertyStartupSetFunctionName << "(Self)\n";

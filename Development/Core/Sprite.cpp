@@ -432,6 +432,8 @@ namespace FlamingTorch
 			if(!SpriteVertexBuffer)
 				return;
 
+			Renderer->BindTexture((TextureHandle)0);
+
 			Renderer->SetVertexBufferData(SpriteVertexBuffer, VertexDetailsMode::Mixed, SpriteWireframeVertexDescriptor, sizeof(SpriteWireframeVertexDescriptor) / sizeof(SpriteWireframeVertexDescriptor[0]),
 				Vertices, sizeof(Vertices));
 

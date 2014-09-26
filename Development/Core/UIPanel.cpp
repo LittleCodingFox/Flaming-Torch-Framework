@@ -99,7 +99,7 @@ namespace FlamingTorch
 		EnabledValue(true), MouseInputValue(true), KeyboardInputValue(true), AlphaValue(1),
 		ClickPressed(false), BlockingInputValue(false), IsDraggableValue(false), IsDroppableValue(false),
 		DraggingValue(false), TooltipFixedValue(false), RotationValue(0), ExtraSizeScaleValue(1),
-		InputBlockerBackgroundValue(true)
+		InputBlockerBackgroundValue(true), GlobalsTracker(_Manager->ScriptInstance)
 	{
 		FLASSERT(ManagerValue != NULL, "Invalid UI Manager!");
 		FLASSERT(ManagerValue->ScriptInstance, "Invalid UI Manager Script!");
@@ -800,6 +800,8 @@ namespace FlamingTorch
 			TooltipElementValue.Dispose();
 
 		Properties.clear();
+
+		GlobalsTracker.Clear();
 	};
 
 	void UIPanel::SetContentPanel(SuperSmartPointer<UIPanel> Panel)

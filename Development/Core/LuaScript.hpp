@@ -47,6 +47,30 @@ public:
 };
 
 /*!
+*	Lua Globals Tracker
+*	Tracks any Globals you want to clean up later on
+*/
+class LuaGlobalsTracker
+{
+private:
+	SuperSmartPointer<LuaScript> ScriptInstance;
+public:
+	std::vector<std::string> Names;
+
+	LuaGlobalsTracker(SuperSmartPointer<LuaScript> Script);
+
+	/*!
+	*	Adds a Name to the Names list
+	*/
+	void Add(const std::string &Name);
+
+	/*!
+	*	Sets all globals to nil and clears the Names array
+	*/
+	void Clear();
+};
+
+/*!
 *	Base Scriptable Instance class
 *	Same as Type, except adds a Script Instance
 */

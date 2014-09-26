@@ -33,9 +33,3 @@
 #define AWESOMIUM_SOUND_ENABLED 0
 
 #define PROFILER_ENABLED !FLGAME_RELEASE
-
-#if !USE_GRAPHICS
-#	define GLCHECK()
-#else
-#	define GLCHECK() { int32 error = glGetError(); if(error != GL_NO_ERROR) { FLASSERT(0, "GL Error %08x!", error); } }
-#endif

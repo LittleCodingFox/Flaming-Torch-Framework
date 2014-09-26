@@ -152,8 +152,6 @@ namespace FlamingTorch
 
 	Vector2 Renderer::Size() const
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
 		return Impl->Size();
 	};
 
@@ -379,96 +377,83 @@ namespace FlamingTorch
 
 	Renderer::Renderer(IRendererImplementation *_Impl) : Impl(_Impl)
 	{
+		FLASSERT(Impl, "Invalid Implementation!");
+
+		if(!Impl)
+			return;
+
 		Impl->Target = this;
 	};
 
 	bool Renderer::Create(void *WindowHandle)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return false;
-
 		return Impl->Create(WindowHandle);
 	};
 
 	bool Renderer::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return false;
-
 		return Impl->Create(Title, Width, Height, Style);
 	};
 
 	VertexBufferHandle Renderer::CreateVertexBuffer()
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return 0;
-
 		return Impl->CreateVertexBuffer();
 	};
 
 	void Renderer::SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetVertexBufferData(Handle, DetailsMode, Elements, ElementCount, Data, DataByteSize);
 	};
 
 	bool Renderer::IsVertexBufferHandleValid(VertexBufferHandle Handle)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return 0;
-
 		return Impl->IsTextureHandleValid(Handle);
 	};
 
 	void Renderer::DestroyVertexBuffer(VertexBufferHandle Handle)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->DestroyVertexBuffer(Handle);
 	};
 
-
 	void Renderer::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->RenderVertices(VertexMode, Buffer, Start, End);
 	};
 
 	void Renderer::SetMousePosition(const Vector2 &Position)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetMousePosition(Position);
 	};
 
-	void Renderer::StartClipping(const Rect &ClippingRect)
+	void Renderer::StartClipping(const Rect &_ClippingRect)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
+		FLASSERT(_ClippingRect.Bottom > _ClippingRect.Top, "Expected a larger Bottom coordinate on ClippingRect");
+		FLASSERT(_ClippingRect.Right > _ClippingRect.Left, "Expected a larger Right coordinate on ClippingRect");
 
-		if(!Impl)
+		if(_ClippingRect.Bottom <= _ClippingRect.Top || _ClippingRect.Right <= _ClippingRect.Left)
 			return;
+
+		Rect ClippingRect = _ClippingRect;
+
+		//Clip this rect with the previous rect so that we don't actually clip things that don't make sense
+		if(ClippingStack.size())
+		{
+			const Rect &Parent = ClippingStack.back();
+
+			if(ClippingRect.Left < Parent.Left)
+				ClippingRect.Left = Parent.Left;
+
+			if(ClippingRect.Top < Parent.Top)
+				ClippingRect.Top = Parent.Top;
+
+			if(ClippingRect.Right > Parent.Right)
+				ClippingRect.Right = Parent.Right;
+
+			if(ClippingRect.Bottom > Parent.Bottom)
+				ClippingRect.Bottom = Parent.Bottom;
+		};
+
+		ClippingStack.push_back(ClippingRect);
 
 		SpriteCache::Instance.Flush(this);
 
@@ -477,281 +462,168 @@ namespace FlamingTorch
 
 	void Renderer::FinishClipping()
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		SpriteCache::Instance.Flush(this);
 
-		Impl->FinishClipping();
+		if(!ClippingStack.size())
+			return;
+
+		ClippingStack.pop_back();
+
+		if(ClippingStack.size())
+		{
+			const Rect &ClippingRect = ClippingStack.back();
+
+			Impl->StartClipping(ClippingRect);
+		}
+		else
+		{
+			Impl->FinishClipping();
+		};
 	};
 
 	void Renderer::Clear(uint32 ID)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->Clear(ID);
 	};
 
 	void Renderer::BindTexture(TextureHandle Handle)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->BindTexture(Handle);
 	};
 
 	void Renderer::BindTexture(Texture *t)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->BindTexture(t == NULL ? 0 : t->Handle());
 	};
 
 	bool Renderer::GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return false;
-
 		return Impl->GetTextureData(Handle, Pixels, BufferByteCount);
 	};
 
 	void Renderer::SetBlendingMode(uint32 BlendingMode)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetBlendingMode(BlendingMode);
 	};
 
 	void Renderer::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
+		LastWorldMatrix = WorldMatrix;
 
 		Impl->SetWorldMatrix(WorldMatrix);
 	};
 
 	void Renderer::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
+		LastProjectionMatrix = ProjectionMatrix;
 
 		Impl->SetProjectionMatrix(ProjectionMatrix);
 	};
 
 	void Renderer::PushMatrices()
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
+		MatrixStackElement Element;
+		Element.World = LastWorldMatrix;
+		Element.Projection = LastProjectionMatrix;
 
-		if(!Impl)
-			return;
-
-		Impl->PushMatrices();
+		MatrixStack.push_back(Element);
 	};
 
 	void Renderer::PopMatrices()
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
+		if(MatrixStack.size() == 0)
 			return;
 
-		Impl->PopMatrices();
+		const MatrixStackElement &Element = MatrixStack.back();
+
+		SetWorldMatrix(Element.World);
+		SetProjectionMatrix(Element.Projection);
+
+		MatrixStack.pop_back();
 	};
 
 	const Matrix4x4 &Renderer::WorldMatrix()
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-		{
-			static Matrix4x4 Dummy;
-
-			return Dummy;
-		};
-
-		return Impl->WorldMatrix();
+		return LastWorldMatrix;
 	};
 
 	const Matrix4x4 &Renderer::ProjectionMatrix()
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-		{
-			static Matrix4x4 Dummy;
-
-			return Dummy;
-		};
-
-		return Impl->ProjectionMatrix();
+		return LastProjectionMatrix;
 	};
 
 	void Renderer::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetViewport(x, y, Width, Height);
 	};
 
 	TextureHandle Renderer::CreateTexture()
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return 0;
-
 		return Impl->CreateTexture();
 	};
 
 	bool Renderer::IsTextureHandleValid(TextureHandle Handle)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return false;
-
 		return Impl->IsTextureHandleValid(Handle);
 	};
 
 	void Renderer::DestroyTexture(TextureHandle Handle)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->DestroyTexture(Handle);
 	};
 
 	void Renderer::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetTextureData(Handle, Pixels, Width, Height);
 	};
 
 	void Renderer::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetTextureWrapMode(Handle, WrapMode);
 	};
 
 	void Renderer::SetTextureFiltering(TextureHandle Handle, uint32 Filtering)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetTextureFiltering(Handle, Filtering);
 	};
 
 	bool Renderer::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return false;
-
 		return Impl->CaptureScreen(Pixels, BufferByteCount);
 	};
 
 	bool Renderer::PollEvent(RendererEvent &Out)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return false;
-
 		return Impl->PollEvent(Out);
 	};
 
 	FontHandle Renderer::CreateFont(Stream *Data)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return 0;
-
 		return Impl->CreateFont(Data);
 	};
 
 	void Renderer::DestroyFont(FontHandle Handle)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->DestroyFont(Handle);
 	};
 
 	Rect Renderer::MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return Rect();
-
 		return Impl->MeasureText(Handle, Text, Parameters);
 	};
 
 	void Renderer::RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->RenderText(Handle, Text, Parameters);
 	};
 
 	void *Renderer::WindowHandle() const
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return NULL;
-
 		return Impl->WindowHandle();
 	};
 
 	void Renderer::SetFrameRate(uint32 FPS)
 	{
-		FLASSERT(Impl, "Invalid Implementation!");
-
-		if(!Impl)
-			return;
-
 		Impl->SetFrameRate(FPS);
 	};
 

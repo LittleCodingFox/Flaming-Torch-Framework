@@ -109,6 +109,8 @@ protected:
 
 	std::stringstream PropertySetFunctionCode;
 
+	LuaGlobalsTracker GlobalsTracker;
+
 	void OnMouseJustPressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
 	void OnMousePressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
 	void OnMouseReleasedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);

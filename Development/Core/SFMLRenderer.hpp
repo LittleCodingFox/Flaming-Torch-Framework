@@ -40,13 +40,6 @@ namespace FlamingTorch
 			uint32 VertexCount;
 		};
 
-		struct MatrixStackElement
-		{
-			Matrix4x4 World, Projection;
-		};
-
-		std::vector<MatrixStackElement> MatrixStack;
-
 		sf::RenderWindow Window;
 		TextureHandle LastBoundTexture;
 
@@ -61,10 +54,6 @@ namespace FlamingTorch
 
 		typedef std::map<uint32, bool> GLStatesMap;
 		GLStatesMap GLStates;
-
-		Matrix4x4 LastWorldMatrix, LastProjectionMatrix;
-
-		std::vector<Rect> ClippingStack;
 
 		SFMLRendererImplementation();
 		~SFMLRendererImplementation();
