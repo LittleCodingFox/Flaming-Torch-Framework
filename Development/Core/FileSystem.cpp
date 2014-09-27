@@ -28,6 +28,7 @@ namespace FlamingTorch
 #	define TAGPATH "Path"
 #	define TAGUTILS "FileSystemUtils"
 #	define TAGWATCHER "FileSystemWatcher"
+#	define STREAM_COPY_BUFFER_SIZE 1048576 //1MB
 
 	FW::FileWatcher GlobalFileWatcher;
 	FileSystemWatcher FileSystemWatcher::Instance;
@@ -120,11 +121,7 @@ namespace FlamingTorch
 
 	bool FileSystemUtils::RemoveFile(const std::string Name)
 	{
-#ifdef FLPLATFORM_WINDOWS
-		return _unlink(Name.c_str()) != -1;
-#else
 		return unlink(Name.c_str()) != -1;
-#endif
 	};
 
 	bool FileSystemUtils::CopyFile(const std::string &From, const std::string &To)
@@ -280,6 +277,20 @@ namespace FlamingTorch
 		closedir(Root);
 
 		return Files;
+	};
+
+	bool FileSystemUtils::DirectoryExists(const std::string &Directory)
+	{
+		DIR *Root = opendir(Path(Directory).FullPath().c_str());
+
+		if(Root)
+		{
+			closedir(Root);
+
+			return true;
+		};
+
+		return false;
 	};
 
     bool FileSystemUtils::CopyDirectory(const std::string &_From, const std::string &_To, bool Recursive)
@@ -982,11 +993,11 @@ namespace FlamingTorch
 		if(!Out)
 			return false;
 
-		std::vector<uint8> Buffer(16384);
+		std::vector<uint8> Buffer(STREAM_COPY_BUFFER_SIZE);
 
 		for(uint64 Offset = Position(); Offset < Length();)
 		{
-			if(Length() - Position() < 16384)
+			if(Length() - Position() < STREAM_COPY_BUFFER_SIZE)
 				Buffer.resize((uint32)(Length() - Position()));
 
 			SFLASSERT(Read2<uint8>(&Buffer[0], Buffer.size()));

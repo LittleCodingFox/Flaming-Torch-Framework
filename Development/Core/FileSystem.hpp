@@ -85,6 +85,12 @@ public:
     *   \param Recursive whether to copy all subdirectories too
     */
     static bool CopyDirectory(const std::string &From, const std::string &To, bool Recursive = false);
+
+	/*!
+	*	Checks whether a directory exists
+	*	\param Directory the directory to check
+	*/
+	static bool DirectoryExists(const std::string &Directory);
     
     /*!
     *   Deletes a directory

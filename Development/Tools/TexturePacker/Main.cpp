@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 
 	if(argc == 1)
 	{
-		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-maxwidth width] [-maxheight height] filename", argv[0]);
+		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-maxwidth width] [-maxheight height] [-out outfilename] filename", argv[0]);
 		Log::Instance.LogInfo(TAG, "Default Max Width and Height: 4096x4096");
 
 		DeInitSubsystems();
@@ -55,8 +55,8 @@ int main(int argc, char **argv)
 	};
 
 	std::string OutDirectory(".");
-
-	std::string FileName;
+	std::vector<std::string> ResourceDirectories;
+	std::string FileName, OutFileName;
 
 	for(int32 i = 1; i < argc; i++)
 	{
@@ -65,6 +65,15 @@ int main(int argc, char **argv)
 			if(i + 1 < argc)
 			{
 				OutDirectory = argv[i + 1];
+
+				i++;
+			};
+		}
+		else if(std::string(argv[i]) == "-resdir")
+		{
+			if(i + 1 < argc)
+			{
+				ResourceDirectories.push_back(argv[i + 1]);
 
 				i++;
 			};
@@ -91,9 +100,18 @@ int main(int argc, char **argv)
 				i++;
 			};
 		}
+		else if(std::string(argv[i]) == "-out")
+		{
+			if(i + 1 < argc)
+			{
+				OutFileName = argv[i + 1];
+
+				i++;
+			};
+		}
 		else
 		{
-			FileName = StringUtils::Replace(argv[i], "\\", "/");
+			FileName = Path(argv[i]).FullPath();
 		};
 	};
 
@@ -131,6 +149,17 @@ int main(int argc, char **argv)
 		for(uint32 i = 0; i < AnimationFrames.size(); i++)
 		{
 			SuperSmartPointer<Texture> Frame = ResourceManager::Instance.GetTexture(AnimationFrames[i]);
+			
+			if(!Frame)
+			{
+				for(uint32 j = 0; j < ResourceDirectories.size(); j++)
+				{
+					Frame = ResourceManager::Instance.GetTexture(Path(ResourceDirectories[j] + "/" + AnimationFrames[i]).FullPath());
+
+					if(Frame)
+						break;
+				};
+			};
 
 			if(!Frame.Get())
 			{
@@ -187,9 +216,12 @@ int main(int argc, char **argv)
 
 	SuperSmartPointer<FileStream> OutStream(new FileStream());
 
-	std::string OutFileName = Path(FileName).BaseName;
+	if(!OutFileName.length())
+	{
+		std::string OutFileName = Path(FileName).BaseName;
 
-	OutFileName = OutFileName.substr(0, OutFileName.rfind('.')) + "_out";
+		OutFileName = OutFileName.substr(0, OutFileName.rfind('.')) + "_out";
+	};
 
 	std::string OutFileNamePNG = OutDirectory + "/" + OutFileName.c_str() + ".png", OutFileNameCFG = OutDirectory + "/" + OutFileName.c_str() + ".cfg";
 

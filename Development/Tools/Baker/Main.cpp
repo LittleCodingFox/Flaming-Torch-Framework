@@ -24,11 +24,6 @@ std::string FLGameName()
 	return TAG;
 };
 
-struct MapDirectoryInfo
-{
-    std::string From, To;
-};
-
 int main(int argc, char **argv)
 {
 #if FLPLATFORM_WINDOWS
@@ -56,8 +51,11 @@ int main(int argc, char **argv)
     FileStream ConfigStream;
     GenericConfig Configuration;
     
-    std::vector<MapDirectoryInfo> MapDirectories;
+    std::vector<std::pair<std::string, std::string> > MapDirectories, TexturePackDirectories;
 	std::vector<std::string> ResourceDirectories;
+
+	//Package Name => Directory List
+	std::map<std::string, std::vector<std::string> > ValidResourceDirectories;
 
     if(!ConfigStream.Open(FileSystemUtils::ResourcesDirectory() + "/Baker.cfg", StreamFlags::Read | StreamFlags::Text) || !Configuration.DeSerialize(&ConfigStream))
     {
@@ -79,11 +77,21 @@ int main(int argc, char **argv)
         
         Log::Instance.LogInfo(TAG, "Added Map Folder '%s' => '%s'", Pieces[0].c_str(), Pieces[1].c_str());
         
-        MapDirectoryInfo Info;
-        Info.From = Pieces[0];
-        Info.To = Pieces[1];
+        MapDirectories.push_back(std::pair<std::string, std::string>(Pieces[0], Pieces[1]));
+    };
+    
+    GenericConfig::Section &TexturePackingDirectoriesSection = Configuration.Sections["TexturePackingDirectories"];
+    
+    for(GenericConfig::Section::ValueMap::iterator it = TexturePackingDirectoriesSection.Values.begin(); it != TexturePackingDirectoriesSection.Values.end(); it++)
+    {
+        std::vector<std::string> Pieces = StringUtils::Split(it->second.Content, '|');
         
-        MapDirectories.push_back(Info);
+        if(Pieces.size() != 2)
+            continue;
+        
+        Log::Instance.LogInfo(TAG, "Added Texture Packing Folder '%s' => '%s'", Pieces[0].c_str(), Pieces[1].c_str());
+        
+        TexturePackDirectories.push_back(std::pair<std::string, std::string>(Pieces[0], Pieces[1]));
     };
 
 	GenericConfig::Section &ResourceDirectoriesSection = Configuration.Sections["ResourceDirectories"];
@@ -95,6 +103,7 @@ int main(int argc, char **argv)
 
 	std::string PackerPath = Configuration.GetString("Tools", "Packer", "../../Binaries/Packer/Release/Packer");
 	std::string TiledConverterPath = Configuration.GetString("Tools", "TiledConverter", "../../Binaries/TiledConverter/Release/TiledConverter");
+	std::string TexturePackerPath = Configuration.GetString("Tools", "TexturePacker", "../../Binaries/TexturePacker/Release/TexturePacker");
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
 
@@ -123,23 +132,63 @@ int main(int argc, char **argv)
 
             return 1;
         };
+
+		for(uint32 j = 0; j < ResourceDirectories.size(); j++)
+		{
+			std::string ResourceDirectoryName = Path(TargetDirectory + "/" + ResourceDirectories[j]).FullPath();
+
+			if(FileSystemUtils::DirectoryExists(ResourceDirectoryName))
+			{
+				ValidResourceDirectories[DirectoryName].push_back(ResourceDirectoryName);
+			};
+		};
+    };
+
+	for(uint32 i = 0; i < CopyDirectories.size(); i++)
+	{
+        std::string DirectoryName = CopyDirectories[i].substr((FileSystemUtils::ResourcesDirectory() + "/PackageContent/").length());
+        std::string TargetDirectory = FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/" + DirectoryName;
+
+		std::vector<std::string> PrioritizedResourceDirectories;
+
+		{
+			std::map<std::string, std::vector<std::string> >::iterator it = ValidResourceDirectories.find(DirectoryName);
+
+			if(it != ValidResourceDirectories.end())
+			{
+				for(uint32 l = 0; l < it->second.size(); l++)
+				{
+					PrioritizedResourceDirectories.push_back(it->second[l]);
+				};
+			};
+
+			for(it = ValidResourceDirectories.begin(); it != ValidResourceDirectories.end(); it++)
+			{
+				if(it->first == DirectoryName)
+					continue;
+
+				for(uint32 l = 0; l < it->second.size(); l++)
+				{
+					PrioritizedResourceDirectories.push_back(it->second[l]);
+				};
+			};
+		};
         
         Log::Instance.LogInfo(TAG, "...    Compiling Maps (if any)");
         
         for(uint32 j = 0; j < MapDirectories.size(); j++)
         {
-            std::vector<std::string> MapFiles = FileSystemUtils::ScanDirectory(TargetDirectory + "/" + MapDirectories[j].From, "tmx");
+            std::vector<std::string> MapFiles = FileSystemUtils::ScanDirectory(TargetDirectory + "/" + MapDirectories[j].first, "tmx");
+			FileSystemUtils::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].second);
             
             for(uint32 k = 0; k < MapFiles.size(); k++)
             {
-                FileSystemUtils::CreateDirectory(TargetDirectory + "/" + MapDirectories[j].To);
-
 				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TiledConverterPath;
-				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].To + "\"";
+				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].second + "\"";
 
-				for(uint32 l = 0; l < ResourceDirectories.size(); l++)
+				for(uint32 l = 0; l < PrioritizedResourceDirectories.size(); l++)
 				{
-					Parameters += " -resdir \"" + TargetDirectory + "/" + ResourceDirectories[l] + "\"";
+					Parameters += " -resdir \"" + PrioritizedResourceDirectories[l] + "\"";
 				};
 				
 				Parameters += " \"" + MapFiles[k] + "\"";
@@ -155,9 +204,37 @@ int main(int argc, char **argv)
             };
         };
 
-		for(uint32 j = 0; j < ResourceDirectories.size(); j++)
+		for(uint32 j = 0; j < TexturePackDirectories.size(); j++)
 		{
-			FileSystemUtils::DeleteDirectory(TargetDirectory + "/" + ResourceDirectories[j]);
+            std::vector<std::string> TexturePackFiles = FileSystemUtils::ScanDirectory(TargetDirectory + "/" + TexturePackDirectories[j].first, "cfg");
+			FileSystemUtils::CreateDirectory(TargetDirectory + "/" + TexturePackDirectories[j].second);
+            
+			for(uint32 k = 0; k < TexturePackDirectories.size(); k++)
+            {
+				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TexturePackerPath;
+				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  TexturePackDirectories[j].second + "\"";
+
+				for(uint32 l = 0; l < PrioritizedResourceDirectories.size(); l++)
+				{
+					Parameters += " -resdir \"" + PrioritizedResourceDirectories[l] + "\"";
+				};
+				
+				Parameters += " \"" + TexturePackFiles[k] + "\"";
+
+				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
+
+				if(0 != ExitCode)
+				{
+					Log::Instance.LogErr(TAG, "Unable to run TexturePacker: Exit Code '%d'", ExitCode);
+
+					continue;
+				};
+			};
+		};
+
+		for(uint32 j = 0; j < ValidResourceDirectories[DirectoryName].size(); j++)
+		{
+			FileSystemUtils::DeleteDirectory(TargetDirectory + "/" + ValidResourceDirectories[DirectoryName][j]);
 		};
         
         Log::Instance.LogInfo(TAG, "...    Packing...");
@@ -173,7 +250,7 @@ int main(int argc, char **argv)
 
 			continue;
 		};
-    };
+	};
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
     
