@@ -488,8 +488,13 @@ namespace FlamingTorch
 	{
 		EnableState(GL_SCISSOR_TEST);
 
-		glScissor((GLint)ClippingRect.Left, (GLint)ClippingRect.Bottom, (GLsizei)(ClippingRect.Right - ClippingRect.Left),
-			(GLsizei)(ClippingRect.Bottom - ClippingRect.Top));
+		GLint x = (GLint)ClippingRect.Left, y = (GLint)(Size().y - ClippingRect.Bottom);
+
+		GLsizei Width = (GLsizei)(ClippingRect.Right - ClippingRect.Left), Height = (GLsizei)(ClippingRect.Bottom - ClippingRect.Top);
+
+		glScissor(x, y, Width, Height);
+
+		GLCHECK();
 	};
 
 	void SFMLRendererImplementation::FinishClipping()

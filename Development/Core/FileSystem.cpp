@@ -70,8 +70,23 @@ namespace FlamingTorch
 	{
 	};
 
-	Path::Path(const std::string &Directory, const std::string &BaseName) : Path(Normalize(Directory + "/" + BaseName))
+	Path::Path(const std::string &_Directory, const std::string &_BaseName)
 	{
+		std::string PathName = Normalize(_Directory + PathSeparator + _BaseName);
+
+		int32 DirectorySeparator = PathName.rfind(Path::PathSeparator);
+
+		if(DirectorySeparator == -1)
+		{
+			BaseName = PathName;
+		}
+		else
+		{
+			Directory = PathName.substr(0, DirectorySeparator + 1);
+
+			if(DirectorySeparator + 1 < (int32)PathName.length())
+				BaseName = PathName.substr(DirectorySeparator + 1);
+		};
 	};
 
 	Path::Path(const std::string &_PathName)

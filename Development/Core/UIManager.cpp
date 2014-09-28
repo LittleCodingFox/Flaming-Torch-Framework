@@ -1006,6 +1006,17 @@ namespace FlamingTorch
 
 			const Json::Value &Data = Elements[i + 1];
 
+			if(!Data.isObject())
+			{
+				static std::stringstream str;
+				str.str("");
+				str << ElementIDName;
+
+				CHECKJSONVALUE(Value, str.str().c_str(), object);
+
+				continue;
+			};
+
 			Value = Data.get("Control", Json::Value());
 
 			if(!Value.isString())

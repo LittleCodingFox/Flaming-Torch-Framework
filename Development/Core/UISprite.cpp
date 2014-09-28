@@ -41,6 +41,8 @@ namespace FlamingTorch
 			ActualPosition.y + ComposedSize().y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
+		Renderer->StartClipping(Rect(ActualPosition.x, ActualPosition.x + ComposedSize().x, ActualPosition.y, ActualPosition.y + ComposedSize().y));
+
 		UIPanel::Draw(ParentPosition, Renderer);
 
 		Sprite TempSprite = TheSprite;
@@ -52,8 +54,16 @@ namespace FlamingTorch
 			TempSprite.Draw(Renderer);
 		};
 
-		DrawUIFocusZone(ParentPosition, Renderer);
-		DrawUIRect(ParentPosition, Renderer);
+		//We want Debug Rects to show up on top of the element... but we don't want to show it after drawing children...
+		if(Manager()->DrawUIRects || Manager()->DrawUIFocusZones)
+		{
+			Renderer->FinishClipping();
+
+			DrawUIFocusZone(ParentPosition, Renderer);
+			DrawUIRect(ParentPosition, Renderer);
+
+			Renderer->StartClipping(Rect(ActualPosition.x, ActualPosition.x + ComposedSize().x, ActualPosition.y, ActualPosition.y + ComposedSize().y));
+		};
 
 		Vector2 ParentSizeHalf = ComposedSize() / 2;
 
@@ -65,6 +75,8 @@ namespace FlamingTorch
 			Children[i]->Draw(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, ParentRotation()) + ParentSizeHalf -
 				ChildrenSizeHalf - ChildrenPosition, Renderer);
 		};
+
+		Renderer->FinishClipping();
 	};
 #endif
 };

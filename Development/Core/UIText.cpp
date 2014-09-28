@@ -76,6 +76,8 @@ namespace FlamingTorch
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
+		Renderer->StartClipping(Rect(ActualPosition.x, ActualPosition.x + ComposedSize().x, ActualPosition.y, ActualPosition.y + ComposedSize().y));
+
 		UIPanel::Draw(ParentPosition, Renderer);
 
 		f32 YOffset = 0;
@@ -127,6 +129,8 @@ namespace FlamingTorch
 				.Color(TextParameters.TextColorValue * Vector4(1, 1, 1, ParentAlpha())).SecondaryColor(
 				TextParameters.SecondaryTextColorValue * Vector4(1, 1, 1, ParentAlpha())).Rotate(ParentRotation()));
 		};
+
+		Renderer->FinishClipping();
 
 		DrawUIFocusZone(ParentPosition, Renderer);
 		DrawUIRect(ParentPosition, Renderer);

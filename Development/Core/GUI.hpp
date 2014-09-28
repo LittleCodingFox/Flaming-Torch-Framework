@@ -882,6 +882,9 @@ public:
 class UIManager : public BaseScriptableInstance
 {
 	friend class UIPanel;
+	friend class UIText;
+	friend class UIGroup;
+	friend class UISprite;
 	friend class UILayout;
 	friend class UIInputProcessor;
 private:
