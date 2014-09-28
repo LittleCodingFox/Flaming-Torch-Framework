@@ -395,7 +395,7 @@ namespace FlamingTorch
 
 		Renderer->SetVertexBufferData(TiledMapVertexBuffer, VertexDetailsMode::Mixed, SpriteVertexDescriptor, sizeof(SpriteVertexDescriptor) / sizeof(SpriteVertexDescriptor[0]), &Vertices[0], sizeof(SpriteVertex) * Vertices.size());
 
-		Renderer->BindTexture(TileSet.UniqueTilesetTexture);
+		Renderer->BindTexture(TileSet.UniqueTilesetTexture.Get());
 
 		Renderer->RenderVertices(VertexModes::Triangles, TiledMapVertexBuffer, 0, Vertices.size());
 

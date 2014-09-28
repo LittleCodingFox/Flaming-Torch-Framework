@@ -13,7 +13,7 @@ namespace TextureFiltering
 
 namespace ColorType
 {
-	enum
+	enum ColorType
 	{
 		RGB8 = 0,
 		RGBA8
@@ -22,7 +22,7 @@ namespace ColorType
 
 namespace TextureEncoderType
 {
-	enum
+	enum TextureEncoderType
 	{
 		PNG,
 		WebP,
@@ -69,7 +69,7 @@ struct TextureEncoderInfo
 
 namespace TextureWrapMode
 {
-	enum
+	enum TextureWrapMode
 	{
 		Clamp,
 		ClampToBorder,

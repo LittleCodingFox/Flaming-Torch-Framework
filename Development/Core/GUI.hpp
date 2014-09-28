@@ -601,7 +601,7 @@ public:
 
 namespace UIGroupLayoutMode
 {
-	enum
+	enum UIGroupLayoutMode
 	{
 		None = 0,
 		Horizontal = FLAGVALUE(1),
@@ -678,7 +678,7 @@ public:
 */
 namespace UITextAlignment
 {
-	enum
+	enum UITextAlignment
 	{
 		Left = FLAGVALUE(0), //!<Align Left
 		Right = FLAGVALUE(1), //!<Align Right

@@ -17,6 +17,7 @@
 #	include <sys/types.h>
 #	include <dirent.h>
 #	include <unistd.h>
+#	include <cerrno>
 #	define GetCWD getcwd
 #	define _mkdir(n) mkdir(n, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH)
 #	define _rmdir(n) rmdir(n)
@@ -69,9 +70,8 @@ namespace FlamingTorch
 	{
 	};
 
-	Path::Path(const std::string &Directory, const std::string &BaseName)
+	Path::Path(const std::string &Directory, const std::string &BaseName) : Path(Normalize(Directory + "/" + BaseName))
 	{
-		Path::Path(Normalize(Directory + "/" + BaseName));
 	};
 
 	Path::Path(const std::string &_PathName)

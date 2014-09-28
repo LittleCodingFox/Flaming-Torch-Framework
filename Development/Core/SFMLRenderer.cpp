@@ -957,7 +957,7 @@ namespace FlamingTorch
 
 	void *SFMLRendererImplementation::WindowHandle() const
 	{
-		return Window.getSystemHandle();
+		return (void *)Window.getSystemHandle();
 	};
 
 	void SFMLRendererImplementation::SetFrameRate(uint32 FPS)
@@ -978,7 +978,7 @@ namespace FlamingTorch
 
 		if(!TheFont.ActualFont->loadFromMemory(&TheFont.Data[0], TheFont.Data.size()))
 		{
-			Log::Instance.LogErr(TAG, "Failed to create a font from a stream '%s' of size '%d'", StringUtils::PointerString(Data), Data->Length());
+			Log::Instance.LogErr(TAG, "Failed to create a font from a stream '%s' of size '%d'", StringUtils::PointerString(Data).c_str(), Data->Length());
 
 			Fonts.erase(FontCounter);
 

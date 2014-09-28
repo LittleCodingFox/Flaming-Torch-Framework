@@ -7,7 +7,7 @@ class Renderer;
 */
 namespace TextStyle
 {
-	enum
+	enum TextStyle
 	{
 		Regular = FLAGVALUE(0),
 		Bold = FLAGVALUE(1),

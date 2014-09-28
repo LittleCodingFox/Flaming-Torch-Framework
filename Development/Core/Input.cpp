@@ -30,6 +30,10 @@ namespace FlamingTorch
 
 	InputCenter::InputCenter() : HasFocus(true)
 	{
+	};
+
+	void InputCenter::Initialize()
+	{
 		for(wchar_t i = 0; i < InputKey::Count; i++)
 		{
 			Keys[i].Name = i;

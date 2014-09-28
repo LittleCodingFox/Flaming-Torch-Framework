@@ -476,7 +476,7 @@ namespace FlamingTorch
 		if(CachedVertices.size() == 0)
 			return;
 
-		Renderer->BindTexture(ActiveTexture);
+		Renderer->BindTexture(ActiveTexture.Get());
 
 		std::vector<SpriteVertex> Buffer;
 

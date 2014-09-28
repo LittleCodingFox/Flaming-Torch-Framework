@@ -133,7 +133,7 @@ namespace FlamingTorch
 
 	uint64 GameClock::CurrentTime()
 	{
-#if FLPLATFORM_WINDOWS
+#if 1
 		static sf::Clock clock;
 		
 		return clock.getElapsedTime().asMilliseconds();

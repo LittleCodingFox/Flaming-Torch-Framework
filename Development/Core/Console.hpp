@@ -2,7 +2,7 @@
 
 namespace ConsoleVariableType
 {
-	enum
+	enum ConsoleVariableType
 	{
 		UInt, //!<Unsigned integer
 		Int, //!<Integer

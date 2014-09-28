@@ -48,7 +48,11 @@ namespace FlamingTorch
 
 		return ExitCode;
 #else
-		std::string CommandString = "\"" + ExePath + "\"" + Parameters;
+
+		Log::Instance.LogDebug("Core", "Running Program '%s' with arguments '%s' (WD: '%s')", ExePath.c_str(), Parameters.c_str(),
+			WorkingDirectory.c_str());
+
+		std::string CommandString = "\"" + ExePath + "\" " + Parameters;
 
 		system(CommandString.c_str());
 

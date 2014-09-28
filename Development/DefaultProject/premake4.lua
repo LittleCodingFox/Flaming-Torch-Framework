@@ -2,7 +2,7 @@
 -- A solution contains projects, and defines the available configurations
 solution "DefaultProject"
 	configurations { "Debug", "Release" }
-	platforms { "native" }
+	platforms { "x32", "x64" }
 	
 	-- A project defines one build target
 	project "DefaultProject"
@@ -78,7 +78,7 @@ solution "DefaultProject"
 		
 			if os.get() == "linux" then
 				defines({ "__LINUX__" })
-				links { "GL", "GLU", "glew", "FlamingDependenciesd" }
+				links { "GL", "GLU", "GLEW", "FlamingDependenciesd", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile" }
 			end
 		
 			if os.get() == "macosx" then
@@ -111,7 +111,7 @@ solution "DefaultProject"
 		
 			if os.get() == "linux" then
 				defines({ "__LINUX__" })
-				links { "GL", "GLU", "glew", "FlamingDependencies"}
+				links { "GL", "GLU", "GLEW", "FlamingDependencies", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile" }
 			end
 		
 			if os.get() == "macosx" then

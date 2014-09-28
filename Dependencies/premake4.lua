@@ -1,7 +1,7 @@
 -- A solution contains projects, and defines the available configurations
 solution "Dependencies"
 	configurations { "Debug", "Release" }
-	platforms { "native" }
+	platforms { "x32", "x64" }
 	
 	-- A project defines one build target
 	project "FlamingDependencies"
@@ -149,6 +149,10 @@ solution "Dependencies"
 			if os.get() == "linux" then
 				excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
 				defines({ "__LINUX__" })
+
+				includedirs {
+					"Source/SFML/Headers/libsndfile/osx/"
+				}
 		
 				buildoptions { "-std=c++11" }
 			end
@@ -176,6 +180,10 @@ solution "Dependencies"
 			if os.get() == "linux" then
 				excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
 				defines({ "__LINUX__" })
+
+				includedirs {
+					"Source/SFML/Headers/libsndfile/osx/"
+				}
 		
 				buildoptions { "-std=c++11" }
 			end

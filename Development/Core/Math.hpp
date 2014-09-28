@@ -280,7 +280,7 @@ public:
 
 namespace PlanePointClassifications
 {
-	enum
+	enum PlanePointClassifications
 	{
 		On_Plane = 0,
 		Back,

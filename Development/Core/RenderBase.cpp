@@ -637,6 +637,8 @@ namespace FlamingTorch
 
 		Log::Instance.LogInfo(TAG, "Initializing Renderer Manager...");
 
+		Input.Initialize();
+
 		SuperSmartPointer<RendererInputProcessor> TheInputProcessor(new RendererInputProcessor);
 		TheInputProcessor->Name = "RENDERER INPUT";
 

@@ -5,7 +5,7 @@
 */
 namespace InputActionType
 {
-	enum
+	enum InputActionType
 	{
 		Keyboard, //!<Keyboard Action
 		MouseButton, //!<Mouse Button Action
@@ -22,7 +22,7 @@ namespace InputActionType
 */
 namespace InputKey
 {
-	enum
+	enum InputKey
 	{
         A = 0, //!< The A key
         B, //!< The B key
@@ -135,7 +135,7 @@ namespace InputKey
 */
 namespace InputMouseButton
 {
-	enum
+	enum InputMouseButton
 	{
         Left, //!< The left mouse button
         Right, //!< The right mouse button
@@ -152,7 +152,7 @@ namespace InputMouseButton
 */
 namespace InputJoystickAxis
 {
-	enum
+	enum InputJoystickAxis
 	{
         X, //!< The X axis
         Y, //!< The Y axis
@@ -594,6 +594,7 @@ private:
 	bool InputConsumedValue;
 
 	InputCenter();
+	void Initialize();
 	bool Update(Renderer *TheRenderer);
 	void FireAction(const JoystickAxisInfo &Axis);
 	void FireAction(const JoystickButtonInfo &Button);

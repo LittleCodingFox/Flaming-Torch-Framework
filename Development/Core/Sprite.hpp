@@ -1,7 +1,7 @@
 #pragma once
 namespace PinningMode
 {
-	enum
+	enum PinningMode
 	{
 		TopLeft = 0, //Default
 		TopCenter,
@@ -17,7 +17,7 @@ namespace PinningMode
 
 namespace CropMode
 {
-	enum
+	enum CropMode
 	{
 		None = 0, //Default
 		Crop,
@@ -28,7 +28,7 @@ namespace CropMode
 
 namespace BlendingMode
 {
-	enum
+	enum BlendingMode
 	{
 		None = 0,
 		Alpha,

@@ -9,7 +9,7 @@ class DijkstraField;
 */
 namespace DijkstraEdgeMode
 {
-	enum
+	enum DijkstraEdgeMode
 	{
 		Cross = 0, //!<Cross mode (up-down-left-right)
 		Adjacent //!<Adjacent mode (all nodes around a certain node

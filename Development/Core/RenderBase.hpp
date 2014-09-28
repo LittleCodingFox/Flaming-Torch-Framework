@@ -15,7 +15,7 @@ class UIManager;
 */
 namespace VertexElementType
 {
-	enum
+	enum VertexElementType
 	{
 		Position, //!<Position of the vertex
 		TexCoord, //!<Texture Coordinate of the vertex
@@ -29,7 +29,7 @@ namespace VertexElementType
 */
 namespace VertexElementDataType
 {
-	enum
+	enum VertexElementDataType
 	{
 		Float, //!<Single Float
 		Float2, //!<Two Floats (Vector2)
@@ -44,7 +44,7 @@ namespace VertexElementDataType
 */
 namespace VertexDetailsMode
 {
-	enum
+	enum VertexDetailsMode
 	{
 		Mixed = 0, //!<Vertices are mixed (e.g., vertices are in format (pos, tex, normal, pos, tex, normal)
 		Lists //!<Vertices are lists (e.g., vertices are in format (pos, pos, pos, tex, tex, tex, norma, normal, normal)
@@ -66,7 +66,7 @@ struct VertexElementDescriptor
 */
 namespace VertexModes
 {
-	enum
+	enum VertexModes
 	{
 		Triangles, //!<Triangle list
 		Lines, //!<Line list
@@ -80,7 +80,7 @@ namespace VertexModes
 */
 namespace RendererWindowStyle
 {
-	enum
+	enum RendererWindowStyle
 	{
 		Popup = FLAGVALUE(0), //!<Window is a popup with no border or title bar
 		FullScreen = FLAGVALUE(1), //!<Window is a fullscreen window
@@ -93,7 +93,7 @@ namespace RendererWindowStyle
 */
 namespace RendererBuffer
 {
-	enum
+	enum RendererBuffer
 	{
 		Color = FLAGVALUE(0), //!<Color Buffer
 		Depth = FLAGVALUE(1), //!<Depth Buffer
@@ -106,7 +106,7 @@ namespace RendererBuffer
 */
 namespace RendererEventType
 {
-	enum
+	enum RendererEventType
 	{
 		JoystickConnected,
 		JoystickDisconnected,

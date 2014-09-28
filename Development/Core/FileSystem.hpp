@@ -148,7 +148,7 @@ public:
 */
 namespace StreamFlags
 {
-	enum
+	enum StreamFlags
 	{
 		Write = FLAGVALUE(1), //!<Write Mode
 		Read = FLAGVALUE(2), //!<Read Mode
@@ -531,7 +531,7 @@ public:
 
 namespace FileSystemWatcherAction
 {
-	enum
+	enum FileSystemWatcherAction
 	{
 		Added, //!<File was added
 		Deleted, //!<File was deleted

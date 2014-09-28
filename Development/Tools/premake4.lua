@@ -2,7 +2,7 @@
 -- A solution contains projects, and defines the available configurations
 solution "Tools"
 	configurations { "Debug", "Release" }
-	platforms { "native" }
+	platforms { "x32", "x64" }
 	
 	-- A project defines one build target
 	project "Packer"
