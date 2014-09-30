@@ -597,6 +597,18 @@ namespace FlamingTorch
 				TheSprite->SelectBoxExtraSize = NinePatchRect.ToFullSize();
 			};
 		}
+		else if(Property == "NinePatchScale")
+		{
+			if(TheSprite->TheSprite.SpriteTexture.Get() == NULL)
+				return;
+
+			f32 Scale = 0;
+
+			if(1 == sscanf(Value.c_str(), "%f", &Scale))
+			{
+				TheSprite->SetExtraSizeScale(Scale);
+			};
+		}
 		else if(Property == "Color")
 		{
 			std::string ColorString = Value;
@@ -685,6 +697,17 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "NinePatch", string)
+		};
+
+		Value = Data.get("NinePatchScale", Json::Value(1.0));
+
+		if(Value.isDouble())
+		{
+			ProcessSpriteProperty(Panel, "NinePatchScale", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "NinePatchScale", double);
 		};
 
 		Value = Data.get("Colors", Json::Value("1,1,1,1"));

@@ -191,6 +191,48 @@ public:
 	uint8 JoystickIndex;
 };
 
+/*!
+*	Renderer Frame Statistics
+*/
+class RendererFrameStats
+{
+public:
+	//!Total amount of draw calls this frame
+	uint32 DrawCalls;
+	
+	//!Total amount of vertices drawn this frame
+	uint32 VertexCount;
+	
+	//!Total amount of texture changes this frame
+	uint32 TextureChanges;
+
+	//!Total amount of matrix changes this frame
+	uint32 MatrixChanges;
+
+	//!Total amount of clipping changes this frame
+	uint32 ClippingChanges;
+
+	//!Total amount of state changes this frame
+	uint32 StateChanges;
+
+	//!Total amount of resources loaded
+	uint32 TotalResources;
+
+	//!Total amount of RAM used by resources (MB)
+	f32 TotalResourceUsage;
+
+	/*!
+	*	Clears the statistics
+	*/
+	void Clear()
+	{
+		DrawCalls = VertexCount = TextureChanges = MatrixChanges = ClippingChanges =
+			StateChanges = TotalResources = 0;
+
+		TotalResourceUsage = 0.0f;
+	};
+};
+
 class IRendererImplementation;
 
 /*!
@@ -331,6 +373,11 @@ public:
 	*	Displays a frame
 	*/
 	void Display();
+
+	/*!
+	*	Gets the last Frame Statistics
+	*/
+	const RendererFrameStats &FrameStats() const;
 
 	/*!
 	*	Sets the current World Matrix
@@ -680,6 +727,11 @@ public:
 	*	Displays a frame
 	*/
 	virtual void Display() = 0;
+
+	/*!
+	*	Gets the last Frame Statistics
+	*/
+	virtual const RendererFrameStats &FrameStats() const = 0;
 
 	/*!
 	*	Sets the current World Matrix

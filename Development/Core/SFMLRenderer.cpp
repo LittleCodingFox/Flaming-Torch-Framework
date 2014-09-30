@@ -6,6 +6,7 @@ namespace FlamingTorch
 #	include "SFMLRenderer.hpp"
 #	define TAG "SFMLRenderer"
 #	define GLCHECK() { int32 error = glGetError(); if(error != GL_NO_ERROR) { FLASSERT(0, "GL Error %08x!", error); } }
+#	define ONE_MB_FLOAT 1048576.f
 
 	bool SFMLRendererImplementation::FirstRenderer = true;
 	uint64 SFMLRendererImplementation::TextureCounter = 0;
@@ -162,6 +163,8 @@ namespace FlamingTorch
 
 	VertexBufferHandle SFMLRendererImplementation::CreateVertexBuffer()
 	{
+		FrameStatsValue.StateChanges++;
+
 		VertexBufferCounter++;
 
 		VertexBufferInfo &Info = VertexBuffers[VertexBufferCounter];
@@ -173,6 +176,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize)
 	{
+		FrameStatsValue.StateChanges++;
+
 		VertexBufferMap::iterator it = VertexBuffers.find(Handle);
 
 		if(it == VertexBuffers.end())
@@ -287,60 +292,61 @@ namespace FlamingTorch
 
 		uint32 VertexCount = DataByteSize / VertexSize;
 
-		it->second.VertexCount = VertexCount;
-		it->second.VertexSize = VertexSize;
-		it->second.PositionDataType = PositionDataType;
-		it->second.TexCoordDataType = TexCoordDataType;
-		it->second.NormalsDataType = NormalDataType;
-		it->second.ColorDataType = ColorDataType;
+		VertexBufferInfo &Info = it->second;
+		Info.VertexCount = VertexCount;
+		Info.VertexSize = VertexSize;
+		Info.PositionDataType = PositionDataType;
+		Info.TexCoordDataType = TexCoordDataType;
+		Info.NormalsDataType = NormalDataType;
+		Info.ColorDataType = ColorDataType;
 
-		it->second.PositionData.resize(VertexCount * PositionDataSize);
+		Info.PositionData.resize(VertexCount * PositionDataSize);
 
 		if(TexCoordDataSize)
 		{
-			it->second.TexCoordData.resize(VertexCount * TexCoordDataSize);
+			Info.TexCoordData.resize(VertexCount * TexCoordDataSize);
 		}
 		else
 		{
-			it->second.TexCoordData.resize(0);
+			Info.TexCoordData.resize(0);
 		};
 
 		if(ColorDataSize)
 		{
-			it->second.ColorData.resize(VertexCount * ColorDataSize);
+			Info.ColorData.resize(VertexCount * ColorDataSize);
 		}
 		else
 		{
-			it->second.ColorData.resize(0);
+			Info.ColorData.resize(0);
 		};
 
 		if(NormalDataSize)
 		{
-			it->second.NormalsData.resize(VertexCount * NormalDataSize);
+			Info.NormalsData.resize(VertexCount * NormalDataSize);
 		}
 		else
 		{
-			it->second.NormalsData.resize(0);
+			Info.NormalsData.resize(0);
 		};
 
 		switch(DetailsMode)
 		{
 		case VertexDetailsMode::Lists:
-			memcpy(&it->second.PositionData[0], &((uint8 *)Data)[PositionOffset], PositionDataSize * VertexCount);
+			memcpy(&Info.PositionData[0], &((uint8 *)Data)[PositionOffset], PositionDataSize * VertexCount);
 
 			if(TexCoordDataSize)
 			{
-				memcpy(&it->second.TexCoordData[0], &((uint8 *)Data)[TexCoordOffset], TexCoordDataSize * VertexCount);
+				memcpy(&Info.TexCoordData[0], &((uint8 *)Data)[TexCoordOffset], TexCoordDataSize * VertexCount);
 			};
 
 			if(ColorDataSize)
 			{
-				memcpy(&it->second.ColorData[0], &((uint8 *)Data)[ColorOffset], ColorDataSize * VertexCount);
+				memcpy(&Info.ColorData[0], &((uint8 *)Data)[ColorOffset], ColorDataSize * VertexCount);
 			};
 
 			if(NormalDataSize)
 			{
-				memcpy(&it->second.NormalsData[0], &((uint8 *)Data)[NormalOffset], NormalDataSize * VertexCount);
+				memcpy(&Info.NormalsData[0], &((uint8 *)Data)[NormalOffset], NormalDataSize * VertexCount);
 			};
 
 			break;
@@ -349,44 +355,34 @@ namespace FlamingTorch
 			{
 				uint32 PositionByteOffset = 0, TexCoordByteOffset = 0, NormalByteOffset = 0, ColorByteOffset = 0;
 
-				for(uint32 i = 0; i < DataByteSize;)
+				for(uint32 i = 0; i < DataByteSize; i += VertexSize)
 				{
-					for(uint32 j = 0; j < ElementCount; j++)
+					if(PositionDataSize > 0)
 					{
-						switch(Elements[j].Type)
-						{
-						case VertexElementType::Position:
-							memcpy(&it->second.PositionData[PositionByteOffset], &((uint8 *)Data)[i], PositionDataSize);
+						memcpy(&Info.PositionData[PositionByteOffset], &((uint8 *)Data)[i + PositionOffset], PositionDataSize);
 
-							i += PositionDataSize;
-							PositionByteOffset += PositionDataSize;
+						PositionByteOffset += PositionDataSize;
+					};
 
-							break;
+					if(ColorDataSize > 0)
+					{
+						memcpy(&Info.ColorData[ColorByteOffset], &((uint8 *)Data)[i + ColorOffset], ColorDataSize);
 
-						case VertexElementType::Color:
-							memcpy(&it->second.ColorData[ColorByteOffset], &((uint8 *)Data)[i], ColorDataSize);
+						ColorByteOffset += ColorDataSize;
+					};
 
-							i += ColorDataSize;
-							ColorByteOffset += ColorDataSize;
+					if(TexCoordDataSize > 0)
+					{
+						memcpy(&Info.TexCoordData[TexCoordByteOffset], &((uint8 *)Data)[i + TexCoordOffset], TexCoordDataSize);
 
-							break;
+						TexCoordByteOffset += TexCoordDataSize;
+					};
 
-						case VertexElementType::TexCoord:
-							memcpy(&it->second.TexCoordData[TexCoordByteOffset], &((uint8 *)Data)[i], TexCoordDataSize);
+					if(NormalDataSize > 0)
+					{
+						memcpy(&Info.NormalsData[NormalByteOffset], &((uint8 *)Data)[i + NormalOffset], NormalDataSize);
 
-							i += TexCoordDataSize;
-							TexCoordByteOffset += TexCoordDataSize;
-
-							break;
-
-						case VertexElementType::Normal:
-							memcpy(&it->second.NormalsData[NormalByteOffset], &((uint8 *)Data)[i], NormalDataSize);
-
-							i += NormalDataSize;
-							NormalByteOffset += NormalDataSize;
-
-							break;
-						};
+						NormalByteOffset += NormalDataSize;
 					};
 				};
 			};
@@ -402,6 +398,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyVertexBuffer(VertexBufferHandle Handle)
 	{
+		FrameStatsValue.StateChanges++;
+
 		VertexBufferMap::iterator it = VertexBuffers.find(Handle);
 
 		if(it == VertexBuffers.end())
@@ -412,6 +410,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
+		FrameStatsValue.StateChanges++;
+
 		VertexBufferMap::iterator it = VertexBuffers.find(Buffer);
 
 		if(it == VertexBuffers.end())
@@ -434,6 +434,9 @@ namespace FlamingTorch
 
 			return;
 		};
+
+		FrameStatsValue.DrawCalls++;
+		FrameStatsValue.VertexCount += End - Start;
 
 		if(LastBoundTexture != 0)
 		{
@@ -486,6 +489,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::StartClipping(const Rect &ClippingRect)
 	{
+		FrameStatsValue.StateChanges++;
+		FrameStatsValue.ClippingChanges++;
+
 		EnableState(GL_SCISSOR_TEST);
 
 		GLint x = (GLint)ClippingRect.Left, y = (GLint)(Size().y - ClippingRect.Bottom);
@@ -499,6 +505,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::FinishClipping()
 	{
+		FrameStatsValue.StateChanges++;
+		FrameStatsValue.ClippingChanges++;
+
 		DisableState(GL_SCISSOR_TEST);
 
 		GLCHECK();
@@ -506,6 +515,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::Clear(uint32 Buffers)
 	{
+		FrameStatsValue.StateChanges++;
+
 		uint32 Mask = 0;
 
 		if(Buffers & RendererBuffer::Color)
@@ -525,11 +536,41 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::Display()
 	{
+		FrameStatsValue.Clear();
+
+		FrameStatsValue.TotalResources = Fonts.size() + VertexBuffers.size();
+		FrameStatsValue.TotalResourceUsage = 0;
+
+		for(FontMap::iterator it = Fonts.begin(); it != Fonts.end(); it++)
+		{
+			//We cannot verify all textures so we'll only report the client usage...
+			FrameStatsValue.TotalResourceUsage += it->second.ResourceSize / ONE_MB_FLOAT;
+		};
+
+		for(VertexBufferMap::iterator it = VertexBuffers.begin(); it != VertexBuffers.end(); it++)
+		{
+			FrameStatsValue.TotalResourceUsage += (it->second.PositionData.size() + it->second.TexCoordData.size() + it->second.NormalsData.size() + it->second.ColorData.size()) / ONE_MB_FLOAT;
+		};
+
+		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
+		{
+			//Multiplied by 8 instead of 4 due to double RAM usage
+			FrameStatsValue.TotalResourceUsage += (it->second.Width * it->second.Height * 8) / ONE_MB_FLOAT;
+		};
+
 		Window.display();
+	};
+
+	const RendererFrameStats &SFMLRendererImplementation::FrameStats() const
+	{
+		return FrameStatsValue;
 	};
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
+		FrameStatsValue.StateChanges++;
+		FrameStatsValue.MatrixChanges++;
+
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(&WorldMatrix.m[0][0]);
 
@@ -538,6 +579,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
+		FrameStatsValue.StateChanges++;
+		FrameStatsValue.MatrixChanges++;
+
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(&ProjectionMatrix.m[0][0]);
 		glMatrixMode(GL_MODELVIEW);
@@ -547,6 +591,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
+		FrameStatsValue.StateChanges++;
+
 		glViewport((GLint)x, (GLint)y, (GLsizei)Width, (GLsizei)Height);
 
 		GLCHECK();
@@ -554,6 +600,8 @@ namespace FlamingTorch
 
 	TextureHandle SFMLRendererImplementation::CreateTexture()
 	{
+		FrameStatsValue.StateChanges++;
+
 		uint32 GLID = 0;
 
 		glGenTextures(1, (GLuint *)&GLID);
@@ -573,6 +621,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyTexture(TextureHandle Handle)
 	{
+		FrameStatsValue.StateChanges++;
+
 		if(Handle == 0)
 			return;
 
@@ -590,6 +640,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
 	{
+		FrameStatsValue.StateChanges++;
+
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
@@ -616,6 +668,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
 	{
+		FrameStatsValue.StateChanges++;
+
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
@@ -668,6 +722,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureFiltering(TextureHandle Handle, uint32 Filter)
 	{
+		FrameStatsValue.StateChanges++;
+
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
@@ -704,6 +760,8 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
 	{
+		FrameStatsValue.StateChanges++;
+
 		if(BufferByteCount != (uint32)(Window.getSize().x * Window.getSize().y * 4))
 			return false;
 
@@ -731,6 +789,8 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount)
 	{
+		FrameStatsValue.StateChanges++;
+
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
@@ -768,6 +828,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetBlendingMode(uint32 BlendingMode)
 	{
+		FrameStatsValue.StateChanges++;
+
 		switch(BlendingMode)
 		{
 		case BlendingMode::None:
@@ -801,6 +863,8 @@ namespace FlamingTorch
 	{
 		if(Handle == LastBoundTexture)
 			return;
+
+		FrameStatsValue.TextureChanges++;
 
 		LastBoundTexture = Handle;
 
@@ -972,6 +1036,8 @@ namespace FlamingTorch
 
 	FontHandle SFMLRendererImplementation::CreateFont(Stream *Data)
 	{
+		FrameStatsValue.StateChanges++;
+
 		FontCounter++;
 
 		FontInfo &TheFont = Fonts[FontCounter];
@@ -990,11 +1056,15 @@ namespace FlamingTorch
 			return 0;
 		};
 
+		TheFont.ResourceSize = (uint32)Data->Length();
+
 		return FontCounter;
 	};
 
 	void SFMLRendererImplementation::DestroyFont(FontHandle Handle)
 	{
+		FrameStatsValue.StateChanges++;
+
 		FontMap::iterator it = Fonts.find(Handle);
 
 		if(it != Fonts.end())
@@ -1003,6 +1073,8 @@ namespace FlamingTorch
 
 	Rect SFMLRendererImplementation::MeasureText(FontHandle Handle, const std::string &TheText, const TextParams &Parameters)
 	{
+		FrameStatsValue.StateChanges++;
+
 		//Workaround for newline strings
 		if(TheText.length() == 0)
 			return Rect(0, 0, 0, (f32)Parameters.FontSizeValue);
@@ -1045,6 +1117,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::RenderText(FontHandle Handle, const std::string &TheText, const TextParams &Parameters)
 	{
+		FrameStatsValue.StateChanges++;
+		FrameStatsValue.TextureChanges++;
+
 		if(TheText.length() == 0)
 			return;
 
@@ -1206,6 +1281,8 @@ namespace FlamingTorch
 		if(IsStateEnabled(ID))
 			return;
 
+		FrameStatsValue.StateChanges++;
+
 		switch(ID)
 		{
 		case GL_VERTEX_ARRAY:
@@ -1235,6 +1312,8 @@ namespace FlamingTorch
 	{
 		if(!IsStateEnabled(ID))
 			return;
+
+		FrameStatsValue.StateChanges++;
 
 		switch(ID)
 		{

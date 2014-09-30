@@ -1,4 +1,6 @@
 #pragma once
+#define MAX_SPRITE_CACHE_SIZE 20000000
+
 namespace PinningMode
 {
 	enum PinningMode
@@ -57,11 +59,12 @@ public:
 	f32 WireframePixelSizeValue;
 	Vector4 ColorsValue[4];
 	bool UsingColorsArray;
+	bool IsDirty;
 
 	SpriteDrawOptions() : ColorValue(1, 1, 1, 1), ScaleValue(1, 1), RotationValue(0), BlendingModeValue(BlendingMode::Alpha),
 		PinningModeValue(PinningMode::TopLeft), CropModeValue(CropMode::None), NinePatchValue(false), FlipX(false), FlipY(false),
 		TexCoordRotation(0), TexCoordBorderMax(1, 1), NinePatchScaleValue(1), WireframeValue(false), WireframePixelSizeValue(1),
-		UsingColorsArray(false) {
+		UsingColorsArray(false), IsDirty(true) {
 
 		ColorsValue[0] = ColorsValue[1] = ColorsValue[2] = ColorsValue[3] = ColorValue;
 	};
@@ -72,7 +75,7 @@ public:
 		NinePatchValue(o.NinePatchValue), NinePatchRectValue(o.NinePatchRectValue), FlipX(o.FlipX), FlipY(o.FlipY),
 		TexCoordRotation(o.TexCoordRotation), TexCoordBorderMin(o.TexCoordBorderMin), TexCoordBorderMax(o.TexCoordBorderMax),
 		OffsetValue(o.OffsetValue), TexCoordPosition(o.TexCoordPosition), NinePatchScaleValue(o.NinePatchScaleValue), WireframeValue(o.WireframeValue),
-		WireframePixelSizeValue(o.WireframePixelSizeValue), UsingColorsArray(o.UsingColorsArray) {
+		WireframePixelSizeValue(o.WireframePixelSizeValue), UsingColorsArray(o.UsingColorsArray), IsDirty(true) {
 
 		ColorsValue[0] = o.ColorsValue[0];
 		ColorsValue[1] = o.ColorsValue[1];
@@ -80,15 +83,39 @@ public:
 		ColorsValue[3] = o.ColorsValue[3];
 	};
 
-	SpriteDrawOptions &Position(const Vector2 &Pos) { PositionValue = Pos; return *this; };
+	/*!
+	*	Sets the position of this sprite
+	*	\param Pos the new position
+	*/
+	SpriteDrawOptions &Position(const Vector2 &Pos)
+	{
+		IsDirty = true;
+		PositionValue = Pos;
+
+		return *this;
+	};
 
 	/*!
+	*	Sets the object's scale
+	*	\param Scale the new Scale
+	*	\note Scale is based on the texture size if available. Otherwise, it's the size in pixels
 	*	Scaling specifies the object's size when NinePatching
 	*/
-	SpriteDrawOptions &Scale(const Vector2 &Scale) { ScaleValue = Scale; return *this; };
+	SpriteDrawOptions &Scale(const Vector2 &Scale)
+	{
+		IsDirty = true;
+		ScaleValue = Scale;
+
+		return *this;
+	};
 	
+	/*!
+	*	Sets the object's color
+	*	\param Color the color of the object
+	*/
 	SpriteDrawOptions &Color(const Vector4 &Color)
 	{
+		IsDirty = true;
 		UsingColorsArray = false;
 
 		ColorValue = Color;
@@ -96,10 +123,52 @@ public:
 		return *this;
 	};
 
-	SpriteDrawOptions &BlendingMode(uint32 Blending) { BlendingModeValue = Blending; return *this; };
-	SpriteDrawOptions &Rotation(f32 Rotation) { RotationValue = Rotation; return *this; };
-	SpriteDrawOptions &Pin(uint32 PinningMode) { PinningModeValue = PinningMode; return *this; };
-	SpriteDrawOptions &Offset(const Vector2 &Offset) { OffsetValue = Offset; return *this; };
+	/*!
+	*	Sets the object's blending mode
+	*	\param Blending one of BlendingMode::*
+	*/
+	SpriteDrawOptions &BlendingMode(uint32 Blending)
+	{
+		IsDirty = true;
+		BlendingModeValue = Blending;
+		
+		return *this;
+	};
+
+	/*!
+	*	Sets the object's rotation
+	*	\param Rotation the rotation angle, in radians
+	*/
+	SpriteDrawOptions &Rotation(f32 Rotation)
+	{
+		IsDirty = true;
+		RotationValue = Rotation;
+		
+		return *this;
+	};
+
+	/*!
+	*	Sets the origin (Pin) of the object when rendering
+	*	\param PinningMode one of PinningMode::*
+	*/
+	SpriteDrawOptions &Pin(uint32 PinningMode)
+	{
+		IsDirty = true;
+		PinningModeValue = PinningMode;
+
+		return *this;
+	};
+
+	/*!
+	*	Sets an additional move (Offset) in the object
+	*	\param Offset the extra movement of the object
+	*/
+	SpriteDrawOptions &Offset(const Vector2 &Offset)
+	{
+		IsDirty = true;
+		OffsetValue = Offset;
+		return *this;
+	};
 
 	/*!
 	*	Sets whether this sprite should be wireframe (lines covering the sprite)
@@ -108,6 +177,7 @@ public:
 	*/
 	SpriteDrawOptions &Wireframe(bool Value)
 	{
+		IsDirty = true;
 		WireframeValue = Value;
 
 		return *this;
@@ -120,13 +190,22 @@ public:
 	*/
 	SpriteDrawOptions &WireframePixelSize(f32 Value)
 	{
+		IsDirty = true;
 		WireframePixelSizeValue = Value;
 
 		return *this;
 	};
 
+	/*!
+	*	Sets the object's colors for the four corners of the square rendered
+	*	\param A the top left corner color
+	*	\param B the top right corner color
+	*	\param C the bottom left corner color
+	*	\param D the bottom right corner color
+	*/
 	SpriteDrawOptions &Colors(const Vector4 &A, const Vector4 &B, const Vector4 &C, const Vector4 &D)
 	{
+		IsDirty = true;
 		UsingColorsArray = true;
 
 		ColorsValue[0] = A;
@@ -142,7 +221,13 @@ public:
 	*	\param Rotation rotation in Radians
 	*	\note only works for non-ninepatch
 	*/
-	SpriteDrawOptions &TextureRotation(f32 Rotation) { TexCoordRotation = Rotation; return *this; };
+	SpriteDrawOptions &TextureRotation(f32 Rotation)
+	{
+		IsDirty = true;
+		TexCoordRotation = Rotation;
+		
+		return *this;
+	};
 
 	/*!
 	*	Set up texture borders
@@ -152,6 +237,7 @@ public:
 	*/
 	SpriteDrawOptions &TextureBorders(const Vector2 &Min, const Vector2 &Max)
 	{
+		IsDirty = true;
 		TexCoordBorderMin = Min;
 		TexCoordBorderMax = Max;
 
@@ -165,6 +251,7 @@ public:
 	*/
 	SpriteDrawOptions &TexturePosition(const Vector2 &Position)
 	{
+		IsDirty = true;
 		TexCoordPosition = Position;
 
 		return *this;
@@ -177,6 +264,7 @@ public:
 	*/
 	SpriteDrawOptions &Flip(bool X, bool Y)
 	{
+		IsDirty = true;
 		FlipX = X;
 		FlipY = Y;
 		
@@ -191,6 +279,7 @@ public:
 	*/
 	SpriteDrawOptions &Crop(uint32 CropMode, const Rect &CropRect)
 	{
+		IsDirty = true;
 		CropModeValue = CropMode;
 		CropRectValue = CropRect;
 	
@@ -204,6 +293,7 @@ public:
 	*/
 	SpriteDrawOptions &NinePatch(bool NinePatch, const Rect &NinePatchRect)
 	{
+		IsDirty = true;
 		NinePatchValue = NinePatch;
 		NinePatchRectValue = NinePatchRect;
 
@@ -236,10 +326,14 @@ static VertexElementDescriptor SpriteVertexDescriptor[] = {
 
 class Sprite
 {
+private:
+	SpriteVertex GeneratedGeometry[54];
+	uint32 VertexCount;
 public:
 	SuperSmartPointer<Texture> SpriteTexture;
 	SpriteDrawOptions Options;
 
+	Sprite();
 	void Draw(Renderer *Renderer);
 };
 
@@ -280,15 +374,15 @@ class SpriteCache
 	friend class Sprite;
 	friend class RendererManager;
 private:
-	std::vector<Vector4> CachedColors;
-	std::vector<Vector2> CachedVertices, CachedTexCoords;
-	SuperSmartPointer<Texture> ActiveTexture;
+	SpriteVertex CachedGeometry[MAX_SPRITE_CACHE_SIZE];
+	uint32 CurrentCachePosition;
+	Texture *ActiveTexture;
 	uint32 CurrentBlendingMode;
 public:
 
 	static SpriteCache Instance;
 
-	SpriteCache() : CurrentBlendingMode(BlendingMode::None) {};
-	void Register(Vector2 *Vertices, Vector2 *TexCoords, Vector4 *Color, uint32 VertexCount, SuperSmartPointer<Texture> Texture, uint32 BlendingMode, Renderer *Renderer);
+	SpriteCache() : CurrentBlendingMode(BlendingMode::None), ActiveTexture(NULL), CurrentCachePosition(0) {};
+	void Register(SpriteVertex *Vertices, uint32 VertexCount, Texture *TheTexture, uint32 BlendingMode, Renderer *Renderer);
 	void Flush(Renderer *Renderer);
 };

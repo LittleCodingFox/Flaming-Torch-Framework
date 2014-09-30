@@ -137,6 +137,15 @@ namespace FlamingTorch
 			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().Font(TheRenderer->UI->GetDefaultFont()).FontSize(TheRenderer->UI->GetDefaultFontSize())
 				.Color(Vector4(1, 1, 1, 1)).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, TheRenderer->Size().y - 20.0f)));
 
+			str.str("");
+
+			const RendererFrameStats &Stats = TheRenderer->FrameStats();
+			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges << 
+				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)";
+
+			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().Font(TheRenderer->UI->GetDefaultFont()).FontSize(TheRenderer->UI->GetDefaultFontSize())
+				.Color(Vector4(1, 1, 1, 1)).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
+
 			static SuperSmartPointer<Texture> Logo;
 			static bool TriedLoadLogo = false;
 
@@ -553,7 +562,7 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 		if(RendererManager::Instance.ActiveRenderer())
 		{
-			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "sans.ttf");
+			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "DefaultFont.ttf");
 		};
 #endif
 

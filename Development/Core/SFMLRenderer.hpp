@@ -13,13 +13,17 @@ namespace FlamingTorch
 
 		static uint64 TextureCounter, FontCounter, VertexBufferCounter;
 	public:
+		RendererFrameStats FrameStatsValue;
+
 		class FontInfo
 		{
 		public:
 			SuperSmartPointer<sf::Font> ActualFont;
 			std::vector<uint8> Data;
 
-			FontInfo() : ActualFont(0) {};
+			uint32 ResourceSize;
+
+			FontInfo() : ActualFont(0), ResourceSize(0) {};
 			~FontInfo() { ActualFont.Dispose(); };
 		};
 
@@ -137,6 +141,11 @@ namespace FlamingTorch
 		*	Displays a frame
 		*/
 		void Display();
+
+		/*!
+		*	Gets the last Frame Statistics
+		*/
+		const RendererFrameStats &FrameStats() const;
 
 		/*!
 		*	Sets the current World Matrix

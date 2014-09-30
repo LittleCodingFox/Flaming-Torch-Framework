@@ -370,7 +370,7 @@ namespace FlamingTorch
 
 		SpriteCache::Instance.Flush(Renderer);
 
-		Renderer->Impl->Display();
+		Renderer->Display();
 
 		return ReturnValue;
 	};
@@ -418,6 +418,16 @@ namespace FlamingTorch
 	void Renderer::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
 		Impl->RenderVertices(VertexMode, Buffer, Start, End);
+	};
+
+	void Renderer::Display()
+	{
+		Impl->Display();
+	};
+
+	const RendererFrameStats &Renderer::FrameStats() const
+	{
+		return Impl->FrameStats();
 	};
 
 	void Renderer::SetMousePosition(const Vector2 &Position)
