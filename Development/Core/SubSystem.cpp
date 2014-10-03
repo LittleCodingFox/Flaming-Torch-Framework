@@ -1,9 +1,6 @@
 #include "FlamingCore.hpp"
 namespace FlamingTorch
 {
-	//TODO: Maybe move this somewhere else?
-	SuperSmartPointerOperationCounter SuperSmartPointerOperationCounter::Instance;
-
 	Signal1<uint32> SubSystem::OnSubsystemStartUp;
 	Signal1<uint32> SubSystem::OnSubsystemShutdown;
 	Signal1<uint32> SubSystem::OnSubsystemUpdate;

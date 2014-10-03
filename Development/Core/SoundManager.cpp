@@ -360,7 +360,7 @@ namespace FlamingTorch
 
 		for(SoundMap::iterator it = Sounds.begin(); it != Sounds.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.ObserverCount() == 1)
+			while(it->second.Get() == NULL || it->second.use_count() == 1)
 			{
 				Sounds.erase(it);
 				it = Sounds.begin();
@@ -375,7 +375,7 @@ namespace FlamingTorch
 
 		for(MusicMap::iterator it = Musics.begin(); it != Musics.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.ObserverCount() == 1)
+			while(it->second.Get() == NULL || it->second.use_count() == 1)
 			{
 				Musics.erase(it);
 				it = Musics.begin();

@@ -48,7 +48,7 @@ public:
 
 		try
 		{
-			luabind::object ActualParameters = luabind::newtable(GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance->State);
+			luabind::object ActualParameters = luabind::newtable(GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance.Get()->State);
 
 			for(uint32 i = 0; i < Parameters.size(); i++)
 			{

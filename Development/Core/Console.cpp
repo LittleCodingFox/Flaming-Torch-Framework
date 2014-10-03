@@ -570,7 +570,18 @@ namespace FlamingTorch
 					{
 					case ConsoleVariableType::UInt:
 						if(ParameterStrings.size())
-							sscanf(ParameterStrings[0].c_str(), "%u", &ConsoleVariables[i].UintValue);
+						{
+							uint32 Value = 0;
+
+							if(1 != sscanf(ParameterStrings[0].c_str(), "%u", &Value))
+							{
+								ConsoleVariables[i].UintValue = 0;
+							}
+							else
+							{
+								ConsoleVariables[i].UintValue = Value;
+							};
+						};
 
 						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].UintValue));
 
@@ -578,7 +589,18 @@ namespace FlamingTorch
 
 					case ConsoleVariableType::Int:
 						if(ParameterStrings.size())
-							sscanf(ParameterStrings[0].c_str(), "%d", &ConsoleVariables[i].IntValue);
+						{
+							int32 Value = 0;
+
+							if(1 != sscanf(ParameterStrings[0].c_str(), "%d", &Value))
+							{
+								ConsoleVariables[i].IntValue = 0;
+							}
+							else
+							{
+								ConsoleVariables[i].IntValue = Value;
+							};
+						};
 
 						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].IntValue));
 
@@ -586,7 +608,18 @@ namespace FlamingTorch
 
 					case ConsoleVariableType::Float:
 						if(ParameterStrings.size())
-							sscanf(ParameterStrings[0].c_str(), "%f", &ConsoleVariables[i].FloatValue);
+						{
+							f32 Value = 0;
+
+							if(1 != sscanf(ParameterStrings[0].c_str(), "%f", &Value))
+							{
+								ConsoleVariables[i].FloatValue = 0;
+							}
+							else
+							{
+								ConsoleVariables[i].FloatValue = Value;
+							};
+						};
 
 						LogConsole(std::string("> ") + StringUtils::MakeFloatString(ConsoleVariables[i].FloatValue));
 

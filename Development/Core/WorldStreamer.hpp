@@ -82,7 +82,7 @@ public:
 	{
 		if(ScriptInstance.Get())
 		{
-			luabind::object Globals = luabind::globals(ScriptInstance->State);
+			luabind::object Globals = luabind::globals(ScriptInstance.Get()->State);
 
 			ChunkLoadFunction = Globals["WorldStreamerChunkLoad"];
 			ChunkUnloadFunction = Globals["WorldStreamerChunkUnload"];

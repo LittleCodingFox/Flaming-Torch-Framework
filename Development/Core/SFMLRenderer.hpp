@@ -23,7 +23,7 @@ namespace FlamingTorch
 
 			uint32 ResourceSize;
 
-			FontInfo() : ActualFont(0), ResourceSize(0) {};
+			FontInfo() : ResourceSize(0) {};
 			~FontInfo() { ActualFont.Dispose(); };
 		};
 

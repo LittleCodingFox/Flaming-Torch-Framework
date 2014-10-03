@@ -4,6 +4,7 @@
 #include "Common.hpp"
 #include <string.h>
 #include <string>
+#include <memory>
 #include <map>
 #include <math.h>
 #include "Signal.h"
@@ -32,6 +33,152 @@ using namespace Gallant;
 namespace FlamingTorch
 {
 	typedef uint32 VersionType;
+
+	template<typename type>
+	class DisposableResource
+	{
+		template<typename type>
+		friend class SuperSmartPointer;
+	private:
+		type *ContainedObject;
+
+		DisposableResource<type>(const DisposableResource<type> &);
+		DisposableResource<type> &operator=(const DisposableResource<type> &);
+	public:
+
+		DisposableResource<type>() : ContainedObject(NULL)
+		{
+		};
+
+		explicit DisposableResource<type>(type *Object) : ContainedObject(Object)
+		{
+		};
+
+		type *Get()
+		{
+			return ContainedObject;
+		};
+
+		const type *Get() const
+		{
+			return ContainedObject;
+		};
+
+		inline type *operator->()
+		{
+			return ContainedObject;
+		};
+
+		inline void Dispose()
+		{
+			if(ContainedObject)
+			{
+				delete ContainedObject;
+
+				ContainedObject = NULL;
+			};
+		};
+	};
+
+	template<typename type>
+	class SuperSmartPointer : public std::shared_ptr<DisposableResource<type> >
+	{
+	public:
+		SuperSmartPointer()
+		{
+		};
+
+		explicit SuperSmartPointer(type *In)
+		{
+			reset(new DisposableResource<type>(In));
+		};
+
+		inline type *Get()
+		{
+			return get() != NULL ? get()->Get() : NULL;
+		};
+
+		inline const type *Get() const
+		{
+			return get() != NULL ? get()->Get() : NULL;
+		};
+
+		inline type *operator->()
+		{
+			return Get();
+		};
+
+		inline const type *operator->() const
+		{
+			return Get();
+		};
+
+		inline operator type*()
+		{
+			return Get();
+		};
+
+		inline operator const type*() const
+		{
+			return Get();
+		};
+
+		inline const type& operator*() const
+		{
+			return *Get();
+		};
+
+		inline type& operator*()
+		{
+			return *Get();
+		};
+
+		inline operator bool() const
+		{
+			return Get() != NULL;
+		};
+
+		inline operator bool()
+		{
+			return Get() != NULL;
+		};
+
+		inline void Dispose()
+		{
+			if(get())
+			{
+				get()->Dispose();
+			};
+		};
+
+		inline void Reset(type *New)
+		{
+			Dispose();
+
+			reset(new DisposableResource<type>(New));
+		};
+
+		template<typename OutType>
+		operator SuperSmartPointer<OutType>()
+		{
+			SuperSmartPointer<OutType> Out;
+
+			if(!Get())
+				return Out;
+
+			return *(SuperSmartPointer<OutType> *)this;
+		};
+
+		template<typename OutType>
+		inline OutType *AsDerived()
+		{
+#if CHECK_SSP_CONVERSIONS
+			return dynamic_cast<OutType *>(Get());
+#else
+			return static_cast<OutType *>(Get());
+#endif
+		};
+	};
 
 	/*!
 	*	Core Utilities

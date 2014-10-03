@@ -213,7 +213,7 @@ namespace FlamingTorch
 	{
 		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.ObserverCount() == 1)
+			while(it->second.Get() == NULL || it->second.use_count() == 1)
 			{
 				Textures.erase(it);
 				it = Textures.begin();
@@ -230,7 +230,7 @@ namespace FlamingTorch
 	{
 		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.ObserverCount() == 1)
+			while(it->second.Get() == NULL || it->second.use_count() == 1)
 			{
 				Textures.erase(it);
 				it = Textures.begin();
@@ -270,7 +270,7 @@ namespace FlamingTorch
 
 		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.ObserverCount() == 1)
+			while(it->second.Get() == NULL || it->second.use_count() == 1)
 			{
 				Textures.erase(it);
 				it = Textures.begin();

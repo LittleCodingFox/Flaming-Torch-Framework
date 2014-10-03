@@ -61,7 +61,8 @@ namespace FlamingTorch
 	{
 		uint32 Temp = 0;
 
-		sscanf(str.c_str(), "%x", &Temp);
+		if(1 != sscanf(str.c_str(), "%x", &Temp))
+			return 0;
 
 		return Temp;
 	};
@@ -70,7 +71,8 @@ namespace FlamingTorch
 	{
 		uint32 Temp = 0;
 
-		sscanf(str.c_str(), "%x", &Temp);
+		if(1 != sscanf(str.c_str(), "%x", &Temp))
+			return 0;
 
 		return Temp / 255.f;
 	};

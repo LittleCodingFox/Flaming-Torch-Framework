@@ -338,23 +338,40 @@ namespace FlamingTorch
 		}
 		else if(Property == "TextColor")
 		{
-			sscanf(Value.c_str(), "%f,%f,%f,%f", &TheText->TextParameters.TextColorValue.x, &TheText->TextParameters.TextColorValue.y,
-				&TheText->TextParameters.TextColorValue.z, &TheText->TextParameters.TextColorValue.w);
+			Vector4 Color;
+
+			if(4 != sscanf(Value.c_str(), "%f,%f,%f,%f", &Color.x, &Color.y, &Color.z, &Color.w))
+				return;
+
+			TheText->TextParameters.TextColorValue = Color;
 			TheText->TextParameters.SecondaryTextColorValue = TheText->TextParameters.TextColorValue;
 		}
 		else if(Property == "SecondaryTextColor")
 		{
-			sscanf(Value.c_str(), "%f,%f,%f,%f", &TheText->TextParameters.SecondaryTextColorValue.x, &TheText->TextParameters.SecondaryTextColorValue.y,
-				&TheText->TextParameters.SecondaryTextColorValue.z, &TheText->TextParameters.SecondaryTextColorValue.w);
+			Vector4 Color;
+
+			if(4 != sscanf(Value.c_str(), "%f,%f,%f,%f", &Color.x, &Color.y, &Color.z, &Color.w))
+				return;
+
+			TheText->TextParameters.SecondaryTextColorValue = Color;
 		}
 		else if(Property == "Border")
 		{
-			sscanf(Value.c_str(), "%f", &TheText->TextParameters.BorderSizeValue);
+			f32 Size = 0;
+
+			if(1 != sscanf(Value.c_str(), "%f", &Size))
+				return;
+
+			TheText->TextParameters.BorderSizeValue = Size;
 		}
-		else if(Property == "BorderSize")
+		else if(Property == "BorderColor")
 		{
-			sscanf(Value.c_str(), "%f,%f,%f,%f", &TheText->TextParameters.BorderColorValue.x, &TheText->TextParameters.BorderColorValue.y,
-				&TheText->TextParameters.BorderColorValue.z, &TheText->TextParameters.BorderColorValue.w);
+			Vector4 Color;
+
+			if(4 != sscanf(Value.c_str(), "%f,%f,%f,%f", &Color.x, &Color.y, &Color.z, &Color.w))
+				return;
+
+			TheText->TextParameters.BorderColorValue = Color;
 		};
 	};
 

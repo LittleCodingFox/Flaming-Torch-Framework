@@ -39,7 +39,6 @@ namespace FlamingTorch
 #	include "StringID.hpp"
 #	include "CRC32.hpp"
 #	include "Profiler.hpp"
-#	include "SuperSmartPointer.hpp"
 #	include "FileSystem.hpp"
 #	include "Math.hpp"
 #	include "FrustumCuller.hpp"

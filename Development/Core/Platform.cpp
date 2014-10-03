@@ -12,8 +12,6 @@
 #include <stdarg.h>
 namespace FlamingTorch
 {
-	SuperSmartPointerCollisionManager SuperSmartPointerCollisionManager::Instance;
-
 #if FLPLATFORM_WINDOWS
 	void PrintStack()
 	{
