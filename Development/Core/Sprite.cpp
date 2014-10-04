@@ -19,7 +19,7 @@ namespace FlamingTorch
 
 	//Generates a ninepatch quad
 	void GenerateNinePatchGeometry(Vector2 *Vertices, Vector2 *TexCoords, const Vector2 &TextureSize, const Vector2 &Position, const Vector2 &Size, const Vector2 &Offset,
-		const Vector2 &SizeOverride, f32 Scale)
+		const Vector2 &SizeOverride)
 	{
 		static Rect NinePatchRect;
 
@@ -27,10 +27,10 @@ namespace FlamingTorch
 
 		Vector2 ActualSize = SizeOverride.x != -1 ? SizeOverride : Size;
 
-		Vertices[0] = Vertices[5] = Offset * Scale;
-		Vertices[1] = (Offset + Vector2(0, ActualSize.y)) * Scale;
-		Vertices[2] = Vertices[3] = (Offset + ActualSize) * Scale;
-		Vertices[4] = (Offset + Vector2(ActualSize.x, 0)) * Scale;
+		Vertices[0] = Vertices[5] = Offset;
+		Vertices[1] = (Offset + Vector2(0, ActualSize.y));
+		Vertices[2] = Vertices[3] = (Offset + ActualSize);
+		Vertices[4] = (Offset + Vector2(ActualSize.x, 0));
 
 		TexCoords[0] = TexCoords[5] = NinePatchRect.Position() / TextureSize;
 		TexCoords[1] = Vector2(NinePatchRect.Left, NinePatchRect.Bottom) / TextureSize;
@@ -272,33 +272,33 @@ namespace FlamingTorch
 					};
 
 					Vector2 FragmentOffsets[9] = {
-						Vector2(-TextureRect.Left, -TextureRect.Top),
-						Vector2(MathUtils::Round(Options.ScaleValue.x), -TextureRect.Top),
-						Vector2(-TextureRect.Left, MathUtils::Round(Options.ScaleValue.y)),
+						Vector2(-TextureRect.Left, -TextureRect.Top) * Options.NinePatchScaleValue,
+						Vector2(MathUtils::Round(Options.ScaleValue.x), -TextureRect.Top * Options.NinePatchScaleValue),
+						Vector2(-TextureRect.Left * Options.NinePatchScaleValue, MathUtils::Round(Options.ScaleValue.y)),
 						Vector2(MathUtils::Round(Options.ScaleValue.x), MathUtils::Round(Options.ScaleValue.y)),
 						Vector2(),
-						Vector2(0, -TextureRect.Top),
+						Vector2(0, -TextureRect.Top * Options.NinePatchScaleValue),
 						Vector2(0, MathUtils::Round(Options.ScaleValue.y)),
-						Vector2(-TextureRect.Left, 0),
+						Vector2(-TextureRect.Left * Options.NinePatchScaleValue, 0),
 						Vector2(MathUtils::Round(Options.ScaleValue.x), 0),
 					};
 
 					Vector2 FragmentSizeOverrides[9] = {
-						Vector2(-1, -1),
-						Vector2(-1, -1),
-						Vector2(-1, -1),
-						Vector2(-1, -1),
+						Vector2(TextureRect.Left, TextureRect.Top) * Options.NinePatchScaleValue,
+						Vector2(TextureRect.Right, TextureRect.Top) * Options.NinePatchScaleValue,
+						Vector2(TextureRect.Left, TextureRect.Bottom) * Options.NinePatchScaleValue,
+						Vector2(TextureRect.Right, TextureRect.Bottom) * Options.NinePatchScaleValue,
 						Vector2(MathUtils::Round(Options.ScaleValue.x), MathUtils::Round(Options.ScaleValue.y)),
-						Vector2(MathUtils::Round(Options.ScaleValue.x), TextureRect.Top),
-						Vector2(MathUtils::Round(Options.ScaleValue.x), TextureRect.Bottom),
-						Vector2(TextureRect.Left, MathUtils::Round(Options.ScaleValue.y)),
-						Vector2(TextureRect.Right, MathUtils::Round(Options.ScaleValue.y)),
+						Vector2(MathUtils::Round(Options.ScaleValue.x), TextureRect.Top * Options.NinePatchScaleValue),
+						Vector2(MathUtils::Round(Options.ScaleValue.x), TextureRect.Bottom * Options.NinePatchScaleValue),
+						Vector2(TextureRect.Left * Options.NinePatchScaleValue, MathUtils::Round(Options.ScaleValue.y)),
+						Vector2(TextureRect.Right * Options.NinePatchScaleValue, MathUtils::Round(Options.ScaleValue.y)),
 					};
 
 					for(uint32 i = 0, index = 0; i < 9; i++, index += 6)
 					{
 						GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, SpriteTexture->Size(), FragmentPositions[i], FragmentSizes[i], FragmentOffsets[i],
-							FragmentSizeOverrides[i], Options.NinePatchScaleValue);
+							FragmentSizeOverrides[i]);
 					};
 				};
 
@@ -386,7 +386,7 @@ namespace FlamingTorch
 
 				if(Options.RotationValue != 0 && !Options.WireframeValue)
 				{
-					Vector2 ExtraSize = Options.NinePatchValue ? -ObjectSize / 2 + Options.NinePatchRectValue.ToFullSize() / 4 : -ObjectSize / 2;
+					Vector2 ExtraSize = Options.NinePatchValue ? -ObjectSize / 2 + Options.NinePatchRectValue.ToFullSize() / 4 * Options.NinePatchScaleValue : -ObjectSize / 2;
 
 					for(uint32 i = 0; i < VertexCount; i++)
 					{
