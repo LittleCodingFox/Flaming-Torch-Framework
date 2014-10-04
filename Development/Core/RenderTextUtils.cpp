@@ -110,6 +110,7 @@ namespace FlamingTorch
 	*	#2: For each word, keep adding it together until you exceed either size.x or size.y
 	*	#3: Check if we can recover by verifying if the old sentence works.
 	*		If it does, add a new line and continue if the size.y is less than the text height.
+	*	\note: Cannot use FullSize due to it adding top and left
 	*/
 	std::vector<std::string> RenderTextUtils::FitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size)
 	{
@@ -179,7 +180,7 @@ namespace FlamingTorch
 			{
 				Lines.push_back(stream.str());
 
-				f32 Height = RenderTextUtils::MeasureTextSimple(TheRenderer, stream.str(), Params).ToFullSize().y;
+				f32 Height = RenderTextUtils::MeasureTextSimple(TheRenderer, stream.str(), Params).Size().y;
 
 				if(Height < (f32)Params.FontSizeValue)
 					Height = (f32)Params.FontSizeValue;
@@ -192,7 +193,7 @@ namespace FlamingTorch
 				continue;
 			};
 
-			Vector2 CurrentSize = RenderTextUtils::MeasureTextSimple(TheRenderer, (stream.str().length() ? " " : "") + Fragments[i], Params).ToFullSize();
+			Vector2 CurrentSize = RenderTextUtils::MeasureTextSimple(TheRenderer, Fragments[i], Params).Size();
 
 			//Impossible to proceed
 			if(CurrentSize.y + CurrentY > Size.y || CurrentSize.x > Size.x)
@@ -202,7 +203,7 @@ namespace FlamingTorch
 			{
 				Lines.push_back(stream.str());
 
-				f32 Height = RenderTextUtils::MeasureTextSimple(TheRenderer, stream.str(), Params).ToFullSize().y;
+				f32 Height = RenderTextUtils::MeasureTextSimple(TheRenderer, stream.str(), Params).Size().y;
 
 				if(Height < (f32)Params.FontSizeValue)
 					Height = (f32)Params.FontSizeValue;

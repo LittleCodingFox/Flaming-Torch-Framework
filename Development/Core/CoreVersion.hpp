@@ -54,12 +54,17 @@ namespace FlamingTorch
 		{
 		};
 
-		type *Get()
+		~DisposableResource<type>()
+		{
+			Dispose();
+		};
+
+		inline type *Get()
 		{
 			return ContainedObject;
 		};
 
-		const type *Get() const
+		inline const type *Get() const
 		{
 			return ContainedObject;
 		};

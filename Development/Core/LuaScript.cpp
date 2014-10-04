@@ -316,7 +316,9 @@ namespace FlamingTorch
 
 		while(InstancedScripts.begin() != InstancedScripts.end())
 		{
-			InstancedScripts.begin()->Dispose();
+			if(InstancedScripts.begin()->Get())
+				InstancedScripts.begin()->Dispose();
+
 			InstancedScripts.erase(InstancedScripts.begin());
 		};
 
