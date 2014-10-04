@@ -78,9 +78,11 @@ namespace FlamingTorch
 		{
 			if(ContainedObject)
 			{
-				delete ContainedObject;
+				type *ActualContainedObject = ContainedObject;
 
 				ContainedObject = NULL;
+
+				delete ActualContainedObject;
 			};
 		};
 	};
@@ -166,10 +168,8 @@ namespace FlamingTorch
 		template<typename OutType>
 		operator SuperSmartPointer<OutType>()
 		{
-			SuperSmartPointer<OutType> Out;
-
 			if(!Get())
-				return Out;
+				return SuperSmartPointer<OutType>();
 
 			return *(SuperSmartPointer<OutType> *)this;
 		};
