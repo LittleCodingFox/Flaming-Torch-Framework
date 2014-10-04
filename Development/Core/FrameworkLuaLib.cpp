@@ -1732,11 +1732,15 @@ namespace FlamingTorch
 			//ResourceManager
 			luabind::class_<ResourceManager, SubSystem>("ResourceManager")
 #if USE_GRAPHICS
-				.def("GetFont", &ResourceManager::GetFont)
-				.def("GetFontFromPackage", &ResourceManager::GetFontFromPackage)
+				.def("GetFont", (FontHandle (ResourceManager::*)(Renderer *, const std::string &))&ResourceManager::GetFont)
+				.def("GetFont", (FontHandle (ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFont)
+				.def("GetFontFromPackage", (FontHandle (ResourceManager::*)(Renderer *, const std::string &, const std::string &))&ResourceManager::GetFontFromPackage)
+				.def("GetFontFromPackage", (FontHandle (ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFontFromPackage)
 #endif
-				.def("GetTexture", &ResourceManager::GetTexture)
-				.def("GetTextureFromPackage", &ResourceManager::GetTextureFromPackage)
+				.def("GetTexture", (SuperSmartPointer<Texture> (ResourceManager::*)(const std::string &))&ResourceManager::GetTexture)
+				.def("GetTexture", (SuperSmartPointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTexture)
+				.def("GetTextureFromPackage", (SuperSmartPointer<Texture> (ResourceManager::*)(const std::string &, const std::string &))&ResourceManager::GetTextureFromPackage)
+				.def("GetTextureFromPackage", (SuperSmartPointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTextureFromPackage)
 				.def("PrepareResourcesReload", &ResourceManager::PrepareResourceReload)
 				.def("ReloadResources", &ResourceManager::ReloadResources)
 				.def("Cleanup", &ResourceManager::Cleanup)

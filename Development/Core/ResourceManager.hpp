@@ -27,11 +27,15 @@ public:
 	static SuperSmartPointer<Texture> InvalidTexture;
 
 	SuperSmartPointer<Texture> GetTexture(const std::string &FileName);
+	SuperSmartPointer<Texture> GetTexture(const Path &ThePath);
 	SuperSmartPointer<Texture> GetTextureFromPackage(const std::string &Directory, const std::string &FileName);
+	SuperSmartPointer<Texture> GetTextureFromPackage(const Path &ThePath);
 
 #if USE_GRAPHICS
 	FontHandle GetFont(Renderer *TheRenderer, const std::string &FileName);
+	FontHandle GetFont(Renderer *TheRenderer, const Path &ThePath);
 	FontHandle GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName);
+	FontHandle GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath);
 #endif
 
 	void PrepareResourceReload();

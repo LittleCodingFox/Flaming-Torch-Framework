@@ -87,6 +87,11 @@ namespace FlamingTorch
 		return it->second;
 	};
 
+	SuperSmartPointer<Texture> ResourceManager::GetTexture(const Path &ThePath)
+	{
+		return GetTexture(ThePath.FullPath());
+	};
+
 	SuperSmartPointer<Texture> ResourceManager::GetTextureFromPackage(const std::string &Directory, const std::string &FileName)
 	{
 		if(!WasStarted)
@@ -121,6 +126,11 @@ namespace FlamingTorch
 		};
 
 		return it->second;
+	};
+
+	SuperSmartPointer<Texture> ResourceManager::GetTextureFromPackage(const Path &ThePath)
+	{
+		return GetTextureFromPackage(ThePath.Directory, ThePath.BaseName);
 	};
 
 #if USE_GRAPHICS
@@ -166,6 +176,11 @@ namespace FlamingTorch
 		return it->second;
 	};
 
+	FontHandle ResourceManager::GetFont(Renderer *TheRenderer, const Path &ThePath)
+	{
+		return GetFont(TheRenderer, ThePath.FullPath());
+	};
+
 	FontHandle ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName)
 	{
 		if(!WasStarted)
@@ -207,6 +222,12 @@ namespace FlamingTorch
 
 		return it->second;
 	};
+
+	FontHandle ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath)
+	{
+		return GetFontFromPackage(TheRenderer, ThePath.Directory, ThePath.BaseName);
+	};
+
 #endif
 
 	void ResourceManager::PrepareResourceReload()
