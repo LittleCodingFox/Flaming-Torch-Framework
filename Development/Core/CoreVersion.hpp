@@ -160,8 +160,6 @@ namespace FlamingTorch
 
 		inline void Reset(type *New)
 		{
-			Dispose();
-
 			reset(new DisposableResource<type>(New));
 		};
 

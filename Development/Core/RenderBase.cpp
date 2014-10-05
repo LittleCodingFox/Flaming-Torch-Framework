@@ -463,7 +463,12 @@ namespace FlamingTorch
 				ClippingRect.Bottom = Parent.Bottom;
 		};
 
+		//Add this even if invalid, since this way we will be able to FinishClipping with no issues of a missing clipping stack frame
 		ClippingStack.push_back(ClippingRect);
+
+		//Might be entirely out of the parent area, so check again and skip if necessary
+		if(ClippingRect.Bottom <= ClippingRect.Top || ClippingRect.Right <= ClippingRect.Left)
+			return;
 
 		SpriteCache::Instance.Flush(this);
 
