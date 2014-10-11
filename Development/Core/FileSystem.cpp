@@ -117,7 +117,7 @@ namespace FlamingTorch
 	{
 		int32 ExtensionIndex = BaseName.rfind('.');
 
-		if(ExtensionIndex == -1)
+		if(ExtensionIndex == std::string::npos)
 			return "";
 
 		return BaseName.substr(ExtensionIndex + 1);
@@ -125,7 +125,26 @@ namespace FlamingTorch
 
 	Path Path::ChangeExtension(const std::string &NewExtension) const
 	{
-		return Path(Directory, StringUtils::Replace(BaseName, Extension(), NewExtension));
+		int32 Index = BaseName.rfind('.');
+
+		if(Index != std::string::npos)
+		{
+			return Path(Directory, BaseName.substr(0, Index + 1) + NewExtension);
+		};
+
+		return *this;
+	};
+
+	Path Path::StripExtension() const
+	{
+		int32 Index = BaseName.rfind('.');
+
+		if(Index != std::string::npos)
+		{
+			return Path(Directory, BaseName.substr(0, Index));
+		};
+
+		return *this;
 	};
 
 	std::string Path::Normalize(const std::string &PathName)
@@ -382,7 +401,7 @@ namespace FlamingTorch
 
 	bool FileSystemUtils::CreateDirectory(const std::string &_Directory)
 	{
-		std::string Directory = StringUtils::Replace(_Directory, "//", "/");
+		std::string Directory = Path(_Directory).FullPath();
 
 #if FLPLATFORM_WINDOWS
         bool result = _mkdir(Directory.c_str()) == 0;
@@ -405,7 +424,7 @@ namespace FlamingTorch
     
     bool FileSystemUtils::DeleteDirectory(const std::string &Directory)
     {
-        DIR *Root = opendir (Directory.c_str());
+		DIR *Root = opendir (Path(Directory).FullPath().c_str());
         
         if(Root == NULL)
         {
@@ -424,7 +443,7 @@ namespace FlamingTorch
             {
                 if(Entry->d_type == DT_DIR)
                 {
-                    if(!DeleteDirectory(Directory + "/" + FileName))
+					if(!DeleteDirectory(Path(Directory + "/" + FileName).FullPath()))
                     {
                         Log::Instance.LogDebug(TAGUTILS, "Failed to remove subdirectory %s/%s", Directory.c_str(), FileName.c_str());
 
@@ -433,7 +452,7 @@ namespace FlamingTorch
                 }
                 else if(Entry->d_type == DT_REG)
                 {
-                    if(!FileSystemUtils::RemoveFile(Directory + "/" + FileName))
+					if(!FileSystemUtils::RemoveFile(Path(Directory + "/" + FileName).FullPath()))
                     {
                         Log::Instance.LogDebug(TAGUTILS, "Failed to remove file %s/%s", Directory.c_str(), FileName.c_str());
                         

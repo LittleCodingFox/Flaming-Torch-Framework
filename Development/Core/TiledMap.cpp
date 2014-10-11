@@ -28,13 +28,13 @@ namespace FlamingTorch
 	{
 		uint32 ID; //'F' 'T' 'T' 'M'
 		VersionType Version;
-		uint32 LayerCount, ObjectCount;
+		uint32 LayerCount, ObjectCount, Orientation;
 		Vector2 MapTileSize, MapPixelSize;
 	};
 
 	VertexBufferHandle TiledMapVertexBuffer = 0;
 
-	TiledMap::TiledMap() : ResourcesInitedValue(false), Scale(1, 1), Color(1, 1, 1) {};
+	TiledMap::TiledMap() : ResourcesInitedValue(false), Scale(1, 1), Color(1, 1, 1), Orientation(0), TileRatio(0) {};
 
 	bool TiledMap::DeSerialize(Stream *In)
 	{
@@ -69,6 +69,8 @@ namespace FlamingTorch
 		MapTileSize = Header.MapTileSize;
 		MapPixelSize = Header.MapPixelSize;
 		MapTileCount = MapPixelSize / MapTileSize;
+		Orientation = Header.Orientation;
+		TileRatio = MapTileSize.x / MapTileSize.y;
 
 		SFLASSERT(In->Read2<uint16>(&Length));
 
@@ -224,9 +226,6 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	void TiledMap::UpdateGeometry()
 	{
-		uint32 TileSetFrameWidth = (uint32)(TileSet.UniqueTilesetTexture->Width() / MapTileSize.x);
-		Vector2 OneFrame = MapTileSize / TileSet.UniqueTilesetTexture->Size();
-
 		for(uint32 i = 0; i < Layers.size(); i++)
 		{
 			if(Layers[i]->Vertices.size() != Layers[i]->Tiles.size() * 6)
@@ -235,50 +234,75 @@ namespace FlamingTorch
 			if(Layers[i]->TexCoords.size() != Layers[i]->Tiles.size() * 6)
 				Layers[i]->TexCoords.resize(Layers[i]->Tiles.size() * 6);
 
-			for(uint32 j = 0, index = 0; j < Layers[i]->Tiles.size(); j++, index += 6)
+			Vector2 OnePixel = Vector2(1, 1) / TileSet.UniqueTilesetTexture->Size();
+			Vector2 DrawingOffset = Orientation == TiledMapOrientationMode::Isometric ? Vector2(MapTileCount.x * MapTileSize.x / 2, 0) : Vector2();
+
+			for(f32 y = 0, index = 0; y < MapTileCount.y; y++)
 			{
-				Vector2 ActualPosition = Layers[i]->Tiles[j].Position * MapTileSize;
-
-				Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = ActualPosition;
-				Layers[i]->Vertices[index + 1] = ActualPosition + Vector2(0, MapTileSize.y);
-				Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = ActualPosition + MapTileSize;
-				Layers[i]->Vertices[index + 4] = ActualPosition + Vector2(MapTileSize.x, 0);
-
-				Vector2 FramePosition = Vector2((f32)(Layers[i]->Tiles[j].ID % TileSetFrameWidth), (f32)(Layers[i]->Tiles[j].ID / TileSetFrameWidth));
-				Vector2 BaseTexCoord = OneFrame * FramePosition;
-
-				Layers[i]->TexCoords[index] = Layers[i]->TexCoords[index + 5] = BaseTexCoord;
-				Layers[i]->TexCoords[index + 1] = BaseTexCoord + Vector2(0, OneFrame.y);
-				Layers[i]->TexCoords[index + 2] = Layers[i]->TexCoords[index + 3] = BaseTexCoord + OneFrame;
-				Layers[i]->TexCoords[index + 4] = BaseTexCoord + Vector2(OneFrame.x, 0);
-
-				static Vector2 TempVertices[6];
-
-				if(Layers[i]->Tiles[j].FlipFlag & TileFlipFlags::Diagonal)
+				for(f32 x = 0; x < MapTileCount.x; x++)
 				{
-					memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
-					Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[4];
-					Layers[i]->Vertices[index + 1] = TempVertices[0];
-					Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
-					Layers[i]->Vertices[index + 4] = TempVertices[2];
-				};
+					int32 FoundLayerIndex = -1;
 
-				if(Layers[i]->Tiles[j].FlipFlag & TileFlipFlags::Vertical)
-				{
-					memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
-					Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[2];
-					Layers[i]->Vertices[index + 1] = TempVertices[4];
-					Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[0];
-					Layers[i]->Vertices[index + 4] = TempVertices[1];
-				};
+					for(uint32 j = 0; j < Layers[i]->Tiles.size(); j++)
+					{
+						if(Layers[i]->Tiles[j].Position.x == x && Layers[i]->Tiles[j].Position.y == y)
+						{
+							FoundLayerIndex = j;
 
-				if(Layers[i]->Tiles[j].FlipFlag & TileFlipFlags::Horizontal)
-				{
-					memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
-					Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[4];
-					Layers[i]->Vertices[index + 1] = TempVertices[2];
-					Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
-					Layers[i]->Vertices[index + 4] = TempVertices[0];
+							break;
+						};
+					};
+
+					if(FoundLayerIndex == -1)
+						continue;
+
+					TexturePacker::SortedTexture &TextureInfo = TileSet.UniqueTilesetTexturePacker->Indices[TileSet.UniqueTilesetTexturePacker->GetTexture(Layers[i]->Tiles[FoundLayerIndex].ID)->GetIndex().Index];
+
+					Vector2 FramePosition = Vector2((f32)TextureInfo.x, (f32)TextureInfo.y) / TileSet.UniqueTilesetTexture->Size();
+					Vector2 FrameSize = Vector2((f32)TextureInfo.Width, (f32)TextureInfo.Height) / TileSet.UniqueTilesetTexture->Size();
+
+					Vector2 ActualPosition = DrawingOffset + Vector2((x - y) * MapTileSize.x / 2, (x + y) * MapTileSize.y / 2);
+
+					Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = ActualPosition;
+					Layers[i]->Vertices[index + 1] = ActualPosition + Vector2(0, (f32)TextureInfo.Height);
+					Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = ActualPosition + Vector2((f32)TextureInfo.Width, (f32)TextureInfo.Height);
+					Layers[i]->Vertices[index + 4] = ActualPosition + Vector2((f32)TextureInfo.Width, 0);
+
+					Layers[i]->TexCoords[index] = Layers[i]->TexCoords[index + 5] = FramePosition + OnePixel;
+					Layers[i]->TexCoords[index + 1] = FramePosition + Vector2(OnePixel.x, FrameSize.y - OnePixel.y);
+					Layers[i]->TexCoords[index + 2] = Layers[i]->TexCoords[index + 3] = FramePosition + FrameSize - OnePixel;
+					Layers[i]->TexCoords[index + 4] = FramePosition + Vector2(FrameSize.x - OnePixel.x, OnePixel.y);
+
+					static Vector2 TempVertices[6];
+
+					if(Layers[i]->Tiles[FoundLayerIndex].FlipFlag & TileFlipFlags::Diagonal)
+					{
+						memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
+						Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[4];
+						Layers[i]->Vertices[index + 1] = TempVertices[0];
+						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
+						Layers[i]->Vertices[index + 4] = TempVertices[2];
+					};
+
+					if(Layers[i]->Tiles[FoundLayerIndex].FlipFlag & TileFlipFlags::Vertical)
+					{
+						memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
+						Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[2];
+						Layers[i]->Vertices[index + 1] = TempVertices[4];
+						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[0];
+						Layers[i]->Vertices[index + 4] = TempVertices[1];
+					};
+
+					if(Layers[i]->Tiles[FoundLayerIndex].FlipFlag & TileFlipFlags::Horizontal)
+					{
+						memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
+						Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[4];
+						Layers[i]->Vertices[index + 1] = TempVertices[2];
+						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
+						Layers[i]->Vertices[index + 4] = TempVertices[0];
+					};
+
+					index += 6;
 				};
 			};
 		};
@@ -304,13 +328,24 @@ namespace FlamingTorch
 
 			for(uint32 i = 0; i < Options.PackageDirectoriesValue.size(); i++)
 			{
-				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTextureFromPackage(Options.PackageDirectoriesValue[i], TileSet.UniqueTilesetTextureName);
+				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTextureFromPackage(Options.PackageDirectoriesValue[i], TileSet.UniqueTilesetTextureName + ".png");
 
 				if(TileSet.UniqueTilesetTexture.Get())
 				{
-					Found = true;
-
 					TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
+
+					SuperSmartPointer<Stream> ConfigurationStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Options.PackageDirectoriesValue[i]), MakeStringID(TileSet.UniqueTilesetTextureName + ".cfg"));
+
+					if(!ConfigurationStream.Get() || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
+					{
+						Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+
+						TileSet.UniqueTilesetTexture.Dispose();
+
+						continue;
+					};
+
+					Found = true;
 
 					break;
 				};
@@ -318,11 +353,11 @@ namespace FlamingTorch
 
 			if(!Found)
 			{
-				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(TileSet.UniqueTilesetTextureName);
+				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(TileSet.UniqueTilesetTextureName + ".png");
 
 				if(!TileSet.UniqueTilesetTexture.Get())
 				{
-					Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Texture '%s'", TileSet.UniqueTilesetTextureName.c_str());
+					Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Texture '%s.png'", TileSet.UniqueTilesetTextureName.c_str());
 
 					Texture::KeepData = KeepData;
 
@@ -330,23 +365,55 @@ namespace FlamingTorch
 				};
 
 				TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
+
+				SuperSmartPointer<Stream> ConfigurationStream(new FileStream());
+
+				if(!ConfigurationStream.AsDerived<FileStream>()->Open((TileSet.UniqueTilesetTextureName + ".cfg").c_str(), StreamFlags::Read | StreamFlags::Text) || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
+				{
+					Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+
+					TileSet.UniqueTilesetTexture.Dispose();
+
+					return false;
+				};
 			};
 		}
 		else
 		{
-			TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(TileSet.UniqueTilesetTextureName);
+			TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(TileSet.UniqueTilesetTextureName + ".png");
 
 			if(!TileSet.UniqueTilesetTexture.Get())
 			{
-				Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Texture '%s'", TileSet.UniqueTilesetTextureName.c_str());
+				Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Texture '%s.png'", TileSet.UniqueTilesetTextureName.c_str());
 
 				Texture::KeepData = KeepData;
 
 				return false;
 			};
 
-
 			TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
+
+			SuperSmartPointer<Stream> ConfigurationStream(new FileStream());
+
+			if(!ConfigurationStream.AsDerived<FileStream>()->Open((TileSet.UniqueTilesetTextureName + ".cfg").c_str(), StreamFlags::Read | StreamFlags::Text) || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
+			{
+				Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+
+				TileSet.UniqueTilesetTexture.Dispose();
+
+				return false;
+			};
+		};
+
+		TileSet.UniqueTilesetTexturePacker = TexturePacker::FromConfig(TileSet.UniqueTilesetTexture, TileSet.UniqueTilesetConfig);
+
+		if(!TileSet.UniqueTilesetTexturePacker.Get())
+		{
+			Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+
+			TileSet.UniqueTilesetTexture.Dispose();
+
+			return false;
 		};
 
 		Texture::KeepData = KeepData;
@@ -382,6 +449,7 @@ namespace FlamingTorch
 			TiledMapVertexBuffer = Renderer->CreateVertexBuffer();
 		};
 
+		//TODO: Optimize this
 		static std::vector<SpriteVertex> Vertices;
 
 		Vertices.resize(Layers[Layer]->Vertices.size());
@@ -393,6 +461,7 @@ namespace FlamingTorch
 			Vertices[i].TexCoord = Layers[Layer]->TexCoords[i];
 		};
 
+		Renderer->SetBlendingMode(BlendingMode::Alpha);
 		Renderer->SetVertexBufferData(TiledMapVertexBuffer, VertexDetailsMode::Mixed, SpriteVertexDescriptor, sizeof(SpriteVertexDescriptor) / sizeof(SpriteVertexDescriptor[0]), &Vertices[0], sizeof(SpriteVertex) * Vertices.size());
 
 		Renderer->BindTexture(TileSet.UniqueTilesetTexture.Get());
@@ -412,4 +481,20 @@ namespace FlamingTorch
 		return ResourcesInitedValue;
 	};
 #endif
+
+	Vector2 TiledMap::ToIsometric(const Vector2 &Point)
+	{
+		if(Orientation == TiledMapOrientationMode::Isometric)
+			return Point;
+
+		return Vector2(Point.x - Point.y, Point.x / TileRatio + Point.y / TileRatio);
+	};
+
+	Vector2 TiledMap::ToOrthogonal(const Vector2 &Point)
+	{
+		if(Orientation == TiledMapOrientationMode::Orthogonal)
+			return Point;
+
+		return Vector2(Point.x / TileRatio + Point.y, Point.y - Point.x / TileRatio);
+	};
 };

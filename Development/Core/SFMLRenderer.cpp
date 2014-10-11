@@ -120,8 +120,28 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style)
 	{
+		uint32 ActualStyle = sf::Style::None;
+
+		switch(Style)
+		{
+		case RendererWindowStyle::FullScreen:
+			ActualStyle = sf::Style::Fullscreen;
+
+			break;
+
+		case RendererWindowStyle::Popup:
+			ActualStyle = sf::Style::None;
+
+			break;
+
+		default:
+			ActualStyle = sf::Style::Close;
+
+			break;
+		};
+
 		//Create the window
-		Window.create(sf::VideoMode(Width, Height), Title, Style);
+		Window.create(sf::VideoMode(Width, Height), Title, ActualStyle);
 
 		GLCHECK();
 
@@ -152,6 +172,8 @@ namespace FlamingTorch
 		};
 
 		glDisable(GL_DEPTH_TEST);
+
+		glClearColor(1,1,1,1);
 
 		return true;
 	};

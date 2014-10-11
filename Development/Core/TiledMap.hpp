@@ -1,6 +1,18 @@
 #pragma once
 
 /*!
+*	Tiled Map Orientation Modes
+*/
+namespace TiledMapOrientationMode
+{
+	enum TiledMapOrientationMode
+	{
+		Orthogonal, //!<Orthogonal Orientation
+		Isometric //!<Isometric Orientation
+	};
+};
+
+/*!
 *	Tiled Map Init Options class
 */
 class TiledMapInitOptions
@@ -66,6 +78,8 @@ public:
 #if USE_GRAPHICS
 		std::string UniqueTilesetTextureName;
 		SuperSmartPointer<Texture> UniqueTilesetTexture;
+		SuperSmartPointer<TexturePacker> UniqueTilesetTexturePacker;
+		GenericConfig UniqueTilesetConfig;
 #endif
 	}TileSet;
 
@@ -90,6 +104,16 @@ public:
 	*/
 	Vector2 Scale;
 
+	/*!
+	*	One of TiledMapOrientationMode::*
+	*/
+	uint32 Orientation;
+
+	/*!
+	*	Isometric Tile Ratio
+	*/
+	f32 TileRatio;
+
 	TiledMap();
 
 	bool DeSerialize(Stream *In);
@@ -99,4 +123,18 @@ public:
 	void Draw(uint32 Layer, Renderer *Renderer);
 	void UpdateGeometry();
 #endif
+
+	/*!
+	*	Converts an Ortho point to Iso
+	*	\param Point the Ortho point
+	*	\return the Iso point
+	*/
+	Vector2 ToIsometric(const Vector2 &Point);
+
+	/*!
+	*	Converts an Iso point to Ortho
+	*	\param Point the Iso point
+	*	\return the Ortho point
+	*/
+	Vector2 ToOrthogonal(const Vector2 &Point);
 };

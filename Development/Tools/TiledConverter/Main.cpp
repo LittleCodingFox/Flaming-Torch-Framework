@@ -42,12 +42,15 @@ public:
 		Vector2 TileSize;
 		Vector2 FrameCount;
 		void *Ptr;
+		uint32 Margin, Spacing;
 
 		typedef std::map<uint32, std::map<std::string, std::string> > TilePropertyMap;
 		TilePropertyMap Properties;
 	};
 
 	std::map<uint32, SuperSmartPointer<TileData> > TileSets;
+
+	uint32 Orientation;
 
 	struct TileInfo
 	{
@@ -83,7 +86,7 @@ public:
 	{
 		uint32 ID; //'F' 'T' 'T' 'M'
 		VersionType Version;
-		uint32 LayerCount, ObjectCount;
+		uint32 LayerCount, ObjectCount, Orientation;
 		Vector2 MapTileSize;
 		Vector2 MapPixelSize;
 	};
@@ -140,6 +143,7 @@ public:
 		Header.MapPixelSize = MapPixelSize * MapTileSize;
 		Header.MapTileSize = MapTileSize;
 		Header.ObjectCount = MapObjects.size();
+		Header.Orientation = Orientation;
 
 		SVOIDFLASSERT(Stream.Write2<MapHeader>(&Header));
 
@@ -201,7 +205,22 @@ public:
 
             if(UniqueTiles.size() != 0)
             {
-                Vector2 MaxImageSize((f32)MapSplitSize, (f32)MapSplitSize);
+				std::vector<SuperSmartPointer<Texture> > UniqueTextures(UniqueTiles.size());
+				Vector2 MaximumTileSize;
+
+				for(uint32 i = 0; i < UniqueTextures.size(); i++)
+				{
+					UniqueTextures[i].Reset(new Texture());
+					UniqueTextures[i]->FromData(&UniqueTiles[i].Data.Data[0], UniqueTiles[i].Data.Width(), UniqueTiles[i].Data.Height());
+
+					if(UniqueTiles[i].Data.Width() > MaximumTileSize.x)
+						MaximumTileSize.x = (f32)UniqueTiles[i].Data.Width();
+
+					if(UniqueTiles[i].Data.Height() > MaximumTileSize.y)
+						MaximumTileSize.y = (f32)UniqueTiles[i].Data.Height();
+				};
+
+				Vector2 MaxImageSize((f32)MapSplitSize, (f32)MapSplitSize);
                 bool Done = false;
                 
                 TextureBuffer UniqueTilesBuffer;
@@ -212,62 +231,72 @@ public:
                     UniqueTileSideCount++;
                 };
                 
-                Vector2 ImageSize(MapTileSize * (f32)UniqueTileSideCount);
+                Vector2 ImageSize(MaximumTileSize * (f32)UniqueTileSideCount);
                 
                 if(ImageSize.x > MaxImageSize.x || ImageSize.y > MaxImageSize.y)
                 {
                     Log::Instance.LogErr(TAG, "Unable to handle Unique Tiles Textures bigger than %dx%d, quitting...", MapSplitSize, MapSplitSize);
+
+					DeInitSubsystems();
                     
                     return;
                 };
-                
-                UniqueTilesBuffer.CreateEmpty((uint32)ImageSize.x, (uint32)ImageSize.y);
+
+				//Expect 2-px offset between tiles
+				SuperSmartPointer<TexturePacker> PackedUniqueTiles = TexturePacker::FromTextures(UniqueTextures, (uint32)ImageSize.x + 2 * (UniqueTileSideCount + 1), (uint32)ImageSize.y + 2 * (UniqueTileSideCount + 1));
+
+				if(!PackedUniqueTiles.Get() || PackedUniqueTiles->IndexCount() != UniqueTextures.size())
+				{
+					Log::Instance.LogErr(TAG, "Unable to pack unique tiles: %s (IC: %d/%d)", PackedUniqueTiles.Get() == NULL ? "Unable to generate the final atlas" : "Unable to pack all textures",
+						PackedUniqueTiles.Get() ? PackedUniqueTiles->IndexCount() : 0, UniqueTextures.size());
+
+					DeInitSubsystems();
+                    
+                    return;
+				};
                 
                 TextureEncoderInfo TInfo;
                 TInfo.Encoder = TextureEncoderType::PNG;
                 TInfo.Quality = 100;
                 TInfo.Lossless = true;
                 
-                for(uint32 i = 0; i < UniqueTiles.size(); i++)
-                {
-                    uint32 UniqueTilesRowWidth = UniqueTiles[i].Data.Width() * 4;
-                    uint32 UniqueTilesBufferRowWidth = UniqueTilesBuffer.Width() * 4;
-                    Vector2 StartXY = MapTileSize * Vector2((f32)(i % UniqueTileSideCount), (f32)(i / UniqueTileSideCount));
-                    uint32 Start = (uint32)(StartXY.x * 4 + StartXY.y * UniqueTilesBufferRowWidth);
-                    
-                    for(uint32 y = 0, SourceIndex = 0; y < MapTileSize.y; y++, SourceIndex += UniqueTilesRowWidth, Start += UniqueTilesBufferRowWidth)
-                    {
-                        memcpy(&UniqueTilesBuffer.Data[Start], &UniqueTiles[i].Data.Data[SourceIndex], sizeof(uint8) * UniqueTilesRowWidth);
-                    };
-                };
-                
                 FileStream Out;
                 
                 std::stringstream str;
                 str << OutFileName << "_UniqueTiles.png";
                 
-                if(!Out.Open(str.str(), StreamFlags::Write) || !UniqueTilesBuffer.Save(&Out, TInfo))
+				if(!Out.Open(str.str(), StreamFlags::Write) || !PackedUniqueTiles->MainTexture->GetData()->Save(&Out, TInfo))
                 {
                     Log::Instance.LogErr(TAG, "Unable to save Unique Tiles Texture");
                     
                     return;
                 };
+
+				Out.Close();
+
+				GenericConfig OutConfig;
+
+				std::stringstream OutStr;
+				for(uint32 i = 0; i < UniqueTiles.size(); i++)
+				{
+					TexturePacker::SortedTexture &Index = PackedUniqueTiles->Indices[i];
+
+					OutStr << (i > 0 ? "|" : "") << Index.x << "," << Index.y << "," << Index.Width << "," << Index.Height << "," << Index.Index;
+
+					OutConfig.SetValue("TileSpecs", ("Tile" + StringUtils::MakeIntString(Index.Index)).c_str(), (StringUtils::MakeIntString(TileSets[(uint32)UniqueTiles[i].ID.x]->Margin) + ", " +
+						StringUtils::MakeIntString(TileSets[(uint32)UniqueTiles[i].ID.x]->Spacing)).c_str());
+				};
+
+				OutConfig.SetValue("Animations", "UNIQUETILES", OutStr.str().c_str());
+
+				if(!Out.Open(Path(str.str()).ChangeExtension("cfg").FullPath().c_str(), StreamFlags::Write|StreamFlags::Text) || !OutConfig.Serialize(&Out))
+				{
+                    Log::Instance.LogErr(TAG, "Unable to save Unique Tiles Texture config");
+                    
+                    return;
+				};
                 
-                std::string ActualFileName = str.str();
-                
-                int32 Index = ActualFileName.rfind('/');
-                
-                if(Index != std::string::npos)
-                {
-                    ActualFileName = ActualFileName.substr(Index + 1);
-                };
-                
-                Index = ActualFileName.rfind('\\');
-                
-                if(Index != std::string::npos)
-                {
-                    ActualFileName = ActualFileName.substr(Index + 1);
-                };
+                std::string ActualFileName = Path(str.str()).StripExtension().BaseName;
                 
                 uint16 Length = ActualFileName.length();
                 
@@ -545,6 +574,26 @@ int main(int argc, char **argv)
 	MapData.MapTileSize = MapTileSize;
 	MapData.MapPixelSize = MapPixelSize;
 
+	switch(Map->GetOrientation())
+	{
+	case Tmx::MapOrientation::TMX_MO_ISOMETRIC:
+		MapData.Orientation = TiledMapOrientationMode::Isometric;
+
+		break;
+
+	case Tmx::MapOrientation::TMX_MO_ORTHOGONAL:
+		MapData.Orientation = TiledMapOrientationMode::Orthogonal;
+
+		break;
+
+	case Tmx::MapOrientation::TMX_MO_STAGGERED:
+		Log::Instance.LogInfo(TAG, "Error parsing '%s': Staggered maps not supported.", argv[1]);
+
+		DeInitSubsystems();
+
+		return 1;
+	};
+
 	const std::vector<Tmx::Tileset *> &Sets = Map->GetTilesets();
 
 	Log::Instance.LogInfo(TAG, "Parsing %d Tilesets", Sets.size());
@@ -601,16 +650,8 @@ int main(int argc, char **argv)
 		TileSet->Ptr = Sets[i];
 		TileSet->TileSize = Vector2((f32)Sets[i]->GetTileWidth(), (f32)Sets[i]->GetTileHeight());
 		TileSet->FrameCount = Vector2((f32)TileSet->Image->Width(), (f32)TileSet->Image->Height()) / TileSet->TileSize;
-
-		if(TileSet->TileSize.x > MapTileSize.x || TileSet->TileSize.y > MapTileSize.y)
-		{
-			Log::Instance.LogErr(TAG, "Unable to load a tileset with image '%s': Tile Size (%f, %f) is larger than the map tile size (%f, %f)!",
-				TileSet->FileName.c_str(), TileSet->TileSize.x, TileSet->TileSize.y, MapTileSize.x, MapTileSize.y);
-
-			DeInitSubsystems();
-
-			return 1;
-		};
+		TileSet->Margin = Sets[i]->GetMargin();
+		TileSet->Spacing = Sets[i]->GetSpacing();
 
 		std::string Color = Sets[i]->GetImage()->GetTransparentColor();
 

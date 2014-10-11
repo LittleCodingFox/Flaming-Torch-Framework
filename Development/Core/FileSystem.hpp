@@ -36,6 +36,11 @@ public:
 	Path ChangeExtension(const std::string &NewExtension) const;
 
 	/*!
+	*	Generates a Path without an extension
+	*/
+	Path StripExtension() const;
+
+	/*!
 	*	Normalizes a Path by removing all path separators and replacing them with the default path separator
 	*/
 	static std::string Normalize(const std::string &PathName);
@@ -444,9 +449,6 @@ public:
 		bool AddFile(const std::string &Directory, const std::string &Name, SuperSmartPointer<FileStream> In);
 		bool RemoveFile(const std::string &Directory, const std::string &Name);
 	};
-private:
-	friend class Package;
-	PackageFileSystemManager() : SubSystem(PACKAGE_FILESYSTEM_PRIORITY) {};
 
 	class PackageStream : public Stream
 	{
@@ -463,6 +465,9 @@ private:
 		bool Read(void *Data, uint32 ElementSize, uint32 Length);
 		void AsBuffer(void *Data, uint32 Length);
 	};
+private:
+	friend class Package;
+	PackageFileSystemManager() : SubSystem(PACKAGE_FILESYSTEM_PRIORITY) {};
 
 	typedef std::map<StringID, std::pair<Package *, Package::FileEntry *> > FileMap;
 	typedef std::map<StringID, FileMap> EntryMap;

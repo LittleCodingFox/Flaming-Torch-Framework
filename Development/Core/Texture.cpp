@@ -1307,8 +1307,6 @@ namespace FlamingTorch
 		TextureBuffer Temp;
 		Temp.CreateEmpty(Width, Height);
 
-		memset(&Temp.Data[0], 255, Temp.Data.size());
-
 		uint32 RowSize = Width * 4;
 
 		for(uint32 i = 0; i < Out->Indices.size(); i++)
