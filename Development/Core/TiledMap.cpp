@@ -264,7 +264,7 @@ namespace FlamingTorch
 					Vector2 FramePosition = Vector2((f32)TextureInfo.x, (f32)TextureInfo.y) / TileSet.UniqueTilesetTexture->Size();
 					Vector2 FrameSize = Vector2((f32)TextureInfo.Width, (f32)TextureInfo.Height) / TileSet.UniqueTilesetTexture->Size();
 
-					Vector2 ActualPosition = DrawingOffset + Vector2((x - y) * HalfTileSize.x, (x + y) * HalfTileSize.y);
+					Vector2 ActualPosition = DrawingOffset + (Orientation == TiledMapOrientationMode::Isometric ? Vector2((x - y) * HalfTileSize.x, (x + y) * HalfTileSize.y) : Vector2(x, y) * MapTileSize);
 
 					Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = ActualPosition;
 					Layers[i]->Vertices[index + 1] = ActualPosition + Vector2(0, (f32)TextureInfo.Height);
