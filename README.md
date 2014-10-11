@@ -2,7 +2,6 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/3228/badge.svg"/>
 </a>
-
 Flaming-Torch-Framework
 =======================
 
