@@ -226,6 +226,8 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	void TiledMap::UpdateGeometry()
 	{
+		Vector2 HalfTileSize = (MapTileSize / 2).Round();
+
 		for(uint32 i = 0; i < Layers.size(); i++)
 		{
 			if(Layers[i]->Vertices.size() != Layers[i]->Tiles.size() * 6)
@@ -235,9 +237,10 @@ namespace FlamingTorch
 				Layers[i]->TexCoords.resize(Layers[i]->Tiles.size() * 6);
 
 			Vector2 OnePixel = Vector2(1, 1) / TileSet.UniqueTilesetTexture->Size();
-			Vector2 DrawingOffset = Orientation == TiledMapOrientationMode::Isometric ? Vector2(MapTileCount.x * MapTileSize.x / 2, 0) : Vector2();
+			Vector2 DrawingOffset = Orientation == TiledMapOrientationMode::Isometric ? Vector2(MapTileCount.x * HalfTileSize.x, 0) : Vector2();
+			uint32 index = 0;
 
-			for(f32 y = 0, index = 0; y < MapTileCount.y; y++)
+			for(f32 y = 0; y < MapTileCount.y; y++)
 			{
 				for(f32 x = 0; x < MapTileCount.x; x++)
 				{
@@ -261,17 +264,17 @@ namespace FlamingTorch
 					Vector2 FramePosition = Vector2((f32)TextureInfo.x, (f32)TextureInfo.y) / TileSet.UniqueTilesetTexture->Size();
 					Vector2 FrameSize = Vector2((f32)TextureInfo.Width, (f32)TextureInfo.Height) / TileSet.UniqueTilesetTexture->Size();
 
-					Vector2 ActualPosition = DrawingOffset + Vector2((x - y) * MapTileSize.x / 2, (x + y) * MapTileSize.y / 2);
+					Vector2 ActualPosition = DrawingOffset + Vector2((x - y) * HalfTileSize.x, (x + y) * HalfTileSize.y);
 
 					Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = ActualPosition;
 					Layers[i]->Vertices[index + 1] = ActualPosition + Vector2(0, (f32)TextureInfo.Height);
 					Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = ActualPosition + Vector2((f32)TextureInfo.Width, (f32)TextureInfo.Height);
 					Layers[i]->Vertices[index + 4] = ActualPosition + Vector2((f32)TextureInfo.Width, 0);
 
-					Layers[i]->TexCoords[index] = Layers[i]->TexCoords[index + 5] = FramePosition + OnePixel;
-					Layers[i]->TexCoords[index + 1] = FramePosition + Vector2(OnePixel.x, FrameSize.y - OnePixel.y);
-					Layers[i]->TexCoords[index + 2] = Layers[i]->TexCoords[index + 3] = FramePosition + FrameSize - OnePixel;
-					Layers[i]->TexCoords[index + 4] = FramePosition + Vector2(FrameSize.x - OnePixel.x, OnePixel.y);
+					Layers[i]->TexCoords[index] = Layers[i]->TexCoords[index + 5] = FramePosition;
+					Layers[i]->TexCoords[index + 1] = FramePosition + Vector2(0, FrameSize.y);
+					Layers[i]->TexCoords[index + 2] = Layers[i]->TexCoords[index + 3] = FramePosition + FrameSize;
+					Layers[i]->TexCoords[index + 4] = FramePosition + Vector2(FrameSize.x, 0);
 
 					static Vector2 TempVertices[6];
 
