@@ -7,6 +7,7 @@ namespace FlamingTorch
 #	define TAG "SFMLRenderer"
 #	define GLCHECK() { int32 error = glGetError(); if(error != GL_NO_ERROR) { FLASSERT(0, "GL Error %08x!", error); } }
 #	define ONE_MB_FLOAT 1048576.f
+#	define BUFFER_OFFSET(x) ((char *)NULL + x)
 
 	bool SFMLRendererImplementation::FirstRenderer = true;
 	uint64 SFMLRendererImplementation::TextureCounter = 0;
@@ -62,7 +63,7 @@ namespace FlamingTorch
 		Log::Instance.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
 	};
 
-	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0)
+	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), SupportsVBOs(false), ExtensionsAvailable(false), LastBoundVBO(0)
 	{
 	};
 
@@ -106,6 +107,14 @@ namespace FlamingTorch
 			{
 				Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
 					glewGetErrorString(err));
+
+				ExtensionsAvailable = false;
+			}
+			else
+			{
+				ExtensionsAvailable = true;
+				//Disabled for now
+				//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
 			};
 
 			GLCHECK();
@@ -164,6 +173,14 @@ namespace FlamingTorch
 			{
 				Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
 					glewGetErrorString(err));
+
+				ExtensionsAvailable = false;
+			}
+			else
+			{
+				ExtensionsAvailable = true;
+				//Disabled for now
+				//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
 			};
 
 			GLCHECK();
@@ -172,8 +189,6 @@ namespace FlamingTorch
 		};
 
 		glDisable(GL_DEPTH_TEST);
-
-		glClearColor(1,1,1,1);
 
 		return true;
 	};
@@ -192,6 +207,11 @@ namespace FlamingTorch
 		VertexBufferInfo &Info = VertexBuffers[VertexBufferCounter];
 		Info.VertexCount = 0;
 		Info.VertexSize = 0;
+
+		if(SupportsVBOs)
+		{
+			glGenBuffers(1, &Info.VBOID);
+		};
 
 		return VertexBufferCounter;
 	};
@@ -315,6 +335,9 @@ namespace FlamingTorch
 		uint32 VertexCount = DataByteSize / VertexSize;
 
 		VertexBufferInfo &Info = it->second;
+
+		bool NeedsFullRealloc = Info.VertexCount * Info.VertexSize < VertexCount * VertexSize;
+
 		Info.VertexCount = VertexCount;
 		Info.VertexSize = VertexSize;
 		Info.PositionDataType = PositionDataType;
@@ -411,6 +434,105 @@ namespace FlamingTorch
 
 			break;
 		};
+
+		if(SupportsVBOs)
+		{
+			Info.CombinedData.resize(Info.PositionData.size() + Info.TexCoordData.size() + Info.ColorData.size() + Info.NormalsData.size());
+
+			uint32 Offset = 0;
+
+			if(PositionDataSize)
+			{
+				Info.PositionOffset = 0;
+
+				Offset += PositionDataSize;
+			}
+			else
+			{
+				Info.PositionOffset = -1;
+			};
+
+			if(TexCoordDataSize)
+			{
+				Info.TexCoordOffset = Offset;
+
+				Offset += TexCoordDataSize;
+			}
+			else
+			{
+				Info.TexCoordOffset = -1;
+			};
+
+			if(ColorDataSize)
+			{
+				Info.ColorOffset = Offset;
+
+				Offset += ColorDataSize;
+			}
+			else
+			{
+				Info.ColorOffset = -1;
+			};
+
+			if(NormalDataSize)
+			{
+				Info.NormalsOffset = Offset;
+
+				Offset += NormalDataSize;
+			}
+			else
+			{
+				Info.NormalsOffset = -1;
+			};
+
+			for(uint32 i = 0, index = 0; i < DataByteSize; i += VertexSize, index++)
+			{
+				if(Info.PositionOffset != -1)
+				{
+					memcpy(&Info.CombinedData[i + Info.PositionOffset], &Info.PositionData[index * PositionDataSize], PositionDataSize);
+				};
+
+				if(Info.ColorOffset != -1)
+				{
+					memcpy(&Info.CombinedData[i + Info.ColorOffset], &Info.ColorData[index * ColorDataSize], ColorDataSize);
+				};
+
+				if(Info.TexCoordOffset != -1)
+				{
+					memcpy(&Info.CombinedData[i + Info.TexCoordOffset], &Info.TexCoordData[index * TexCoordDataSize], TexCoordDataSize);
+				};
+
+				if(Info.NormalsOffset != -1)
+				{
+					memcpy(&Info.CombinedData[i + Info.NormalsOffset], &Info.NormalsData[index * NormalDataSize], NormalDataSize);
+				};
+			};
+
+			GLCHECK();
+
+			glBindBuffer(GL_ARRAY_BUFFER, Info.VBOID);
+
+			GLCHECK();
+
+			if(NeedsFullRealloc)
+			{
+				glBufferData(GL_ARRAY_BUFFER, DataByteSize, &Info.CombinedData[0], GL_DYNAMIC_DRAW);
+
+				GLCHECK();
+			}
+			else
+			{
+				glBufferSubData(GL_ARRAY_BUFFER, 0, DataByteSize, &Info.CombinedData[0]);
+
+				GLCHECK();
+			};
+
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			GLCHECK();
+
+			LastBoundVBO = 0;
+		};
 	};
 
 	bool SFMLRendererImplementation::IsVertexBufferHandleValid(VertexBufferHandle Handle)
@@ -426,6 +548,13 @@ namespace FlamingTorch
 
 		if(it == VertexBuffers.end())
 			return;
+
+		if(SupportsVBOs)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDeleteBuffers(1, &it->second.VBOID);
+			LastBoundVBO = 0;
+		};
 
 		VertexBuffers.erase(it);
 	};
@@ -471,9 +600,40 @@ namespace FlamingTorch
 
 		EnableState(GL_VERTEX_ARRAY);
 
-		glVertexPointer(VertexBufferDataElementCount[it->second.PositionDataType], GL_FLOAT, 0, &it->second.PositionData[0]);
+		if(SupportsVBOs)
+		{
+			if(glIsBuffer(it->second.VBOID))
+			{
+				if(it->second.VBOID != LastBoundVBO)
+				{
+					glBindBuffer(GL_ARRAY_BUFFER, it->second.VBOID);
+					GLCHECK();
+					LastBoundVBO = it->second.VBOID;
+				};
+			}
+			else
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				GLCHECK();
+				LastBoundVBO = 0;
+			};
+		};
 
-		if(it->second.TexCoordData.size())
+		if(SupportsVBOs && glIsBuffer(it->second.VBOID))
+		{
+			glVertexPointer(VertexBufferDataElementCount[it->second.PositionDataType], GL_FLOAT, it->second.VertexSize, BUFFER_OFFSET(it->second.PositionOffset));
+		}
+		else
+		{
+			glVertexPointer(VertexBufferDataElementCount[it->second.PositionDataType], GL_FLOAT, 0, &it->second.PositionData[0]);
+		};
+
+		if(SupportsVBOs && glIsBuffer(it->second.VBOID) && it->second.TexCoordOffset != -1)
+		{
+			EnableState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(VertexBufferDataElementCount[it->second.TexCoordDataType], GL_FLOAT, it->second.VertexSize, BUFFER_OFFSET(it->second.TexCoordOffset));
+		}
+		else if(it->second.TexCoordData.size())
 		{
 			EnableState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(VertexBufferDataElementCount[it->second.TexCoordDataType], GL_FLOAT, 0, &it->second.TexCoordData[0]);
@@ -483,7 +643,12 @@ namespace FlamingTorch
 			DisableState(GL_TEXTURE_COORD_ARRAY);
 		};
 
-		if(it->second.ColorData.size())
+		if(SupportsVBOs && glIsBuffer(it->second.VBOID) && it->second.ColorOffset != -1)
+		{
+			EnableState(GL_COLOR_ARRAY);
+			glColorPointer(VertexBufferDataElementCount[it->second.ColorDataType], GL_FLOAT, it->second.VertexSize, BUFFER_OFFSET(it->second.ColorOffset));
+		}
+		else if(it->second.ColorData.size())
 		{
 			EnableState(GL_COLOR_ARRAY);
 			glColorPointer(VertexBufferDataElementCount[it->second.ColorDataType], GL_FLOAT, 0, &it->second.ColorData[0]);
@@ -494,7 +659,12 @@ namespace FlamingTorch
 			glColor4f(1, 1, 1, 1);
 		};
 
-		if(it->second.NormalsData.size())
+		if(SupportsVBOs && glIsBuffer(it->second.VBOID) && it->second.NormalsOffset != -1)
+		{
+			EnableState(GL_NORMAL_ARRAY);
+			glNormalPointer(GL_FLOAT, it->second.VertexSize, BUFFER_OFFSET(it->second.NormalsOffset));
+		}
+		else if(it->second.NormalsData.size())
 		{
 			EnableState(GL_NORMAL_ARRAY);
 			glNormalPointer(GL_FLOAT, 0, &it->second.NormalsData[0]);
@@ -1255,6 +1425,13 @@ namespace FlamingTorch
 		};
 
 		SpriteCache::Instance.Flush(Target);
+
+		LastBoundVBO = 0;
+
+		if(SupportsVBOs)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		};
 
 		BindTexture((TextureHandle)0);
 

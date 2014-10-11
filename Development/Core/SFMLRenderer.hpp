@@ -37,15 +37,19 @@ namespace FlamingTorch
 		class VertexBufferInfo
 		{
 		public:
-			std::vector<uint8> PositionData, TexCoordData, NormalsData, ColorData;
+			std::vector<uint8> PositionData, TexCoordData, NormalsData, ColorData, CombinedData;
 			uint8 PositionDataType, TexCoordDataType, NormalsDataType, ColorDataType;
+			int32 PositionOffset, TexCoordOffset, NormalsOffset, ColorOffset;
 
 			uint32 VertexSize;
 			uint32 VertexCount;
+			uint32 VBOID;
 		};
 
 		sf::RenderWindow Window;
 		TextureHandle LastBoundTexture;
+		bool SupportsVBOs, ExtensionsAvailable;
+		uint32 LastBoundVBO;
 
 		typedef std::map<FontHandle, FontInfo> FontMap;
 		FontMap Fonts;
