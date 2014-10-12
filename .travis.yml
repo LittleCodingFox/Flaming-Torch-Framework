@@ -5,14 +5,14 @@ compiler:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install premake5
+  - sudo apt-get install premake4
   - cd Dependencies && premake5 gmake
-  - cd Development/Tools && premake5 gmake
-  - cd Development/DefaultProject && premake5 gmake
+  - cd ../Development/Tools && premake5 gmake
+  - cd ../DefaultProject && premake5 gmake
 
 install: true
 
 script:
   - cd Dependencies && make config=release32
-  - cd Development/Tools && make config=release32
-  - cd Development/DefaultProject && make config=release32
+  - cd ../Development/Tools && make config=release32
+  - cd ../DefaultProject && make config=release32

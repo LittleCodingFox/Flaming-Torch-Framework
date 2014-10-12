@@ -1,5 +1,6 @@
 LogoTexture = nil
 Entity = nil
+Map = TiledMap()
 
 GamePreInitialize = function()
 	g_Log:Register()
@@ -28,7 +29,7 @@ GameInitialize = function(Arguments)
 	local Options = RenderCreateOptions()
 	Options.Title = Game.GameName
 	Options.Width = 960
-	Options.Height = 600
+	Options.Height = 720
 	Options.FrameRate = Game.FrameRate
 	
 	local Renderer = Game:CreateRenderer(Options)
@@ -39,7 +40,7 @@ GameInitialize = function(Arguments)
 		return false
 	end
 
-	g_RendererManager.ActiveRenderer.Camera:SetOrtho(Rect(0, 960, 600, 0), -1, 1)
+	g_RendererManager.ActiveRenderer.Camera:SetOrtho(Rect(0, Options.Width, Options.Height, 0), -1, 1)
 	
 	g_World:LoadComponent("/Scripts/Base/Components/Transform.lua")
 	g_World:LoadComponent("/Scripts/Base/Components/Renderable.lua")
