@@ -8,10 +8,11 @@ before_install:
   - echo Current Directory is $PWD 
   - wget http://ghostdev.gamedev-pt.net/Downloads/premake-4.4-beta5-linux.tar.gz
   - tar -zxvf premake-4.4-beta5-linux.tar.gz
-  - ls
   - chmod +x premake4
   - echo Current Directory is $PWD
-  - cd Dependencies && ../premake4 gmake
+  - cd Dependencies
+  - ls ../*premake*
+  - ../premake4 gmake
   - cd ../Development/Tools && ../../premake4 gmake
   - cd ../DefaultProject && ../../premake4 gmake
 
