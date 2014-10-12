@@ -6,12 +6,10 @@ compiler:
 before_install:
   - sudo apt-get clean
   - sudo apt-get update -qq
-  - sudo apt-get install -y ia32-libs
   - echo Getting Premake4
   - echo Current Directory is $PWD 
-  - wget http://ghostdev.gamedev-pt.net/Downloads/premake-4.4-beta5-linux.tar.gz
-  - tar -zxvf premake-4.4-beta5-linux.tar.gz
-  - chmod +x premake4
+  - hg clone "https://bitbucket.org/premake/premake-dev"
+  - ls
   - echo Current Directory is $PWD
   - cd Dependencies
   - ls ../*premake*
