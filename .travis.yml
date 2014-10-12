@@ -6,6 +6,7 @@ compiler:
 before_install:
   - echo Getting Premake4
   - echo Current Directory is $PWD 
+  - ls
   - wget http://ghostdev.gamedev-pt.net/Downloads/premake4
   - chmod +x premake4
   - export PATH=$PATH:$PWD
