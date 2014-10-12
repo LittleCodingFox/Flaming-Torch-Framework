@@ -16,7 +16,7 @@ before_install:
   - set PATH=$PATH:$PWD/bin/release
   - cd ../
   - ls
-  - premake5
+  - premake4
   - echo Current Directory is $PWD
   - cd Dependencies
   - ls ../*premake*
