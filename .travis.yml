@@ -11,9 +11,9 @@ before_install:
   - ls
   - export PATH=$PATH:$PWD
   - echo Current Directory is $PWD
-  - cd Dependencies && premake4 gmake
-  - cd ../Development/Tools && premake4 gmake
-  - cd ../DefaultProject && premake4 gmake
+  - cd Dependencies && ls && pwd && premake4 gmake
+  - cd ../Development/Tools && ls && pwd && premake4 gmake
+  - cd ../DefaultProject && ls && pwd && premake4 gmake
 
 install: true
 
