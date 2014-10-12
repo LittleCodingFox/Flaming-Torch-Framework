@@ -4,6 +4,8 @@ compiler:
   - clang
 
 before_install:
+  - sudo apt-get update
+  - sudo apt-get install ia32-libs
   - echo Getting Premake4
   - echo Current Directory is $PWD 
   - wget http://ghostdev.gamedev-pt.net/Downloads/premake-4.4-beta5-linux.tar.gz
