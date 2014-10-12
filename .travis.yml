@@ -5,6 +5,7 @@ compiler:
 
 before_install:
   - wget http://ghostdev.gamedev-pt.net/Downloads/premake4
+  - chmod +x premake4
   - export PATH=$PATH:$PWD
   - cd Dependencies && premake4 gmake
   - cd ../Development/Tools && premake4 gmake
