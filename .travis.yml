@@ -5,6 +5,7 @@ compiler:
 
 before_install:
   - sudo apt-get update
+  - sudo apt-get install ia32-libs-multiarch
   - sudo apt-get install ia32-libs
   - echo Getting Premake4
   - echo Current Directory is $PWD 
