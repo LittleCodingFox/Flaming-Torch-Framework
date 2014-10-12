@@ -13,8 +13,11 @@ before_install:
   - cd premake-4.4-beta5/build/gmake.unix
   - make config=release
   - cd ../../
+  - ls
+  - cd bin/release
+  - ls
   - set PATH=$PATH:$PWD/bin/release
-  - cd ../
+  - cd ../../../
   - ls
   - premake4
   - echo Current Directory is $PWD
