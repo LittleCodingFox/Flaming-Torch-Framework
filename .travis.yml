@@ -17,20 +17,22 @@ before_install:
   - cd bin/release
   - ls
   - export PATH=$PATH:$PWD
-  - echo $PATH
   - cd ../../../
-  - ls
-  - premake4
   - echo Current Directory is $PWD
+  - echo Generating Dependencies
   - cd Dependencies
-  - ls ../*premake*
-  - ../premake4 gmake
-  - cd ../Development/Tools && ../../premake4 gmake
-  - cd ../DefaultProject && ../../premake4 gmake
+  - premake4 gmake
+  - echo Generating Tools
+  - cd ../Development/Tools && premake4 gmake
+  - echo Generating DefaultProject
+  - cd ../DefaultProject && premake4 gmake
 
 install: true
 
 script:
+  - echo Compiling Dependencies
   - cd Dependencies && make config=release32
+  - echo Compiling Tools
   - cd ../Development/Tools && make config=release32
+  - echo Compiling DefaultProject
   - cd ../DefaultProject && make config=release32
