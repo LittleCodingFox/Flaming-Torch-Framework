@@ -8,12 +8,11 @@ before_install:
   - echo Current Directory is $PWD 
   - wget http://ghostdev.gamedev-pt.net/Downloads/premake4
   - chmod +x premake4
-  - ls
-  - export PATH=$PATH:$PWD
+  - ldd premake4
   - echo Current Directory is $PWD
-  - cd Dependencies && ls && pwd && premake4 gmake
-  - cd ../Development/Tools && ls && pwd && premake4 gmake
-  - cd ../DefaultProject && ls && pwd && premake4 gmake
+  - cd Dependencies && ../premake4 gmake
+  - cd ../Development/Tools && ../../premake4 gmake
+  - cd ../DefaultProject && ../../premake4 gmake
 
 install: true
 
