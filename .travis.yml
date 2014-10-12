@@ -16,7 +16,8 @@ before_install:
   - ls
   - cd bin/release
   - ls
-  - set PATH=$PATH:$PWD/bin/release
+  - export PATH=$PATH:$PWD
+  - echo $PATH
   - cd ../../../
   - ls
   - premake4
