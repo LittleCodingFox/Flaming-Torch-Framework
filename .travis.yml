@@ -9,7 +9,7 @@ before_install:
   - echo Getting Premake4
   - echo Current Directory is $PWD 
   - wget http://ghostdev.gamedev-pt.net/Downloads/premake-4.4-beta5-src.zip
-  - gunzip premake-4.4-beta5-src.zip
+  - unzip premake-4.4-beta5-src.zip
   - cd premake-4.4-beta5/build/gmake.unix
   - make config=release
   - cd ../../
