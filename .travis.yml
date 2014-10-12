@@ -4,9 +4,12 @@ compiler:
   - clang
 
 before_install:
+  - echo Getting Premake4
+  - echo Current Directory is: $PWD
   - wget http://ghostdev.gamedev-pt.net/Downloads/premake4
   - chmod +x premake4
   - export PATH=$PATH:$PWD
+  - echo Current Directory is: $PWD
   - cd Dependencies && premake4 gmake
   - cd ../Development/Tools && premake4 gmake
   - cd ../DefaultProject && premake4 gmake
