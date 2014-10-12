@@ -826,6 +826,17 @@ namespace FlamingTorch
 			FrameStatsValue.RendererCustomMessage += " VBOEnabled";
 		};
 
+		if(RenderCaps.AntialiasLevel == 0)
+		{
+			FrameStatsValue.RendererCustomMessage += " No-AA";
+		}
+		else
+		{
+			FrameStatsValue.RendererCustomMessage += " AAx" + StringUtils::MakeIntString(RenderCaps.AntialiasLevel);
+		};
+
+		FrameStatsValue.RendererCustomMessage += " RF: D" + StringUtils::MakeIntString(RenderCaps.DepthBits) + "S" + StringUtils::MakeIntString(RenderCaps.StencilBits);
+
 		FrameStatsValue.RendererCustomMessage += " [Saved " + StringUtils::MakeIntString(SavedTextDrawcalls) + " Text Drawcalls]";
 
 		PreviousFrameStatsValue = FrameStatsValue;

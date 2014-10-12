@@ -40,7 +40,7 @@ GameInitialize = function(Arguments)
 		return false
 	end
 
-	g_RendererManager.ActiveRenderer.Camera:SetOrtho(Rect(0, Options.Width, Options.Height, 0), -1, 1)
+	Renderer.Camera:SetOrtho(Rect(0, Options.Width, Options.Height, 0), -1, 1)
 	
 	g_World:LoadComponent("/Scripts/Base/Components/Transform.lua")
 	g_World:LoadComponent("/Scripts/Base/Components/Renderable.lua")
@@ -74,6 +74,15 @@ end
 
 GameFrameEnd = function(Renderer)
 	Renderer.Camera:EndTransforms(Renderer)
+end
+
+GameResize = function(Renderer, Width, Height)
+	Renderer:SetViewport(0, 0, Width, Height)
+	Renderer.Camera:SetOrtho(Rect(0, Width, Height, 0), -1, 1)
+end
+
+GameResourcesReloaded = function(Renderer)
+	GameResize(Renderer, Renderer.Size.x, Renderer.Size.y)
 end
 
 GameFrameUpdate = function()
