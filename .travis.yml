@@ -8,8 +8,10 @@ before_install:
   - sudo apt-get update -qq
   - echo Getting Premake4
   - echo Current Directory is $PWD 
-  - hg clone "https://bitbucket.org/premake/premake-dev"
-  - cd premake-dev/build/gmake.unix && make config=release
+  - wget http://ghostdev.gamedev-pt.net/Downloads/premake-4.4-beta5-src.zip
+  - gunzip premake-4.4-beta5-src.zip
+  - cd premake-4.4-beta5/build/gmake.unix
+  - make config=release
   - cd ../../
   - set PATH=$PATH:$PWD/bin/release
   - cd ../
