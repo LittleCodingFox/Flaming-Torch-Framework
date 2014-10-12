@@ -6,7 +6,7 @@ compiler:
 before_install:
   - echo Getting Premake4
   - echo Current Directory is $PWD 
-  - wget http://downloads.sourceforge.net/project/premake/Premake/4.4/premake-4.4-beta5-linux.tar.gz?r=http%3A%2F%2Findustriousone.com%2Fpremake%2Fdownload&ts=1413151633&use_mirror=heanet
+  - wget http://ghostdev.gamedev-pt.net/Downloads/premake-4.4-beta5-linux.tar.gz
   - tar -zxvf premake-4.4-beta5-linux.tar.gz
   - ls
   - chmod +x premake4
