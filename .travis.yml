@@ -9,7 +9,12 @@ before_install:
   - echo Getting Premake4
   - echo Current Directory is $PWD 
   - hg clone "https://bitbucket.org/premake/premake-dev"
+  - cd premake-dev/build/gmake.unix && make config=release
+  - cd ../../
+  - set PATH=$PATH:$PWD/bin/release
+  - cd ../
   - ls
+  - premake5
   - echo Current Directory is $PWD
   - cd Dependencies
   - ls ../*premake*
