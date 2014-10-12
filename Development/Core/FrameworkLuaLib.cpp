@@ -1562,8 +1562,6 @@ namespace FlamingTorch
 				.def("Normalized", &Quaternion::Normalized)
 				.def("IsNormalized", &Quaternion::IsNormalized)
 				.def("ToMatrix4x4", &Quaternion::ToMatrix4x4)
-				.def("FromCompressed", &Quaternion::FromCompressed)
-				.def("Compress", &Quaternion::Compress)
 				.def("FromAxis", &Quaternion::FromAxis)
 				.def("BezierInterpolation", &Quaternion::BezierInterpolation),
 

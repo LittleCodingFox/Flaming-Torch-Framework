@@ -481,6 +481,8 @@ namespace FlamingTorch
 			SpriteCache::Instance.Flush(Renderer);
 		};
 
+		Renderer->ReportSkippedDrawCall();
+
 		FLASSERT(CurrentCachePosition + VertexCount < MAX_SPRITE_CACHE_SIZE, "Exceeded vertex cache limit!");
 
 		if(CurrentCachePosition + VertexCount > MAX_SPRITE_CACHE_SIZE)

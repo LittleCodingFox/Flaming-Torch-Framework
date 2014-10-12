@@ -193,7 +193,8 @@ namespace FlamingTorch
 				continue;
 			};
 
-			Vector2 CurrentSize = RenderTextUtils::MeasureTextSimple(TheRenderer, Fragments[i], Params).Size();
+			Rect CurrentRect = RenderTextUtils::MeasureTextSimple(TheRenderer, Fragments[i], Params);
+			Vector2 CurrentSize = CurrentRect.Size() + Vector2(CurrentRect.Left, 0);
 
 			//Impossible to proceed
 			if(CurrentSize.y + CurrentY > Size.y || CurrentSize.x > Size.x)

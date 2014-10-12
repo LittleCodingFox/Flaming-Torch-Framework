@@ -190,6 +190,11 @@ namespace FlamingTorch
 		return Vector2(MathUtils::Round(x), MathUtils::Round(y));
 	};
 
+	std::string Vector2::ToString() const
+	{
+		return StringUtils::MakeFloatString(x) + ", " + StringUtils::MakeFloatString(y);
+	};
+
 	Vector2 Vector2::LinearInterpolate(const Vector2 &From, const Vector2 &To, const f32 &t)
 	{
 		return From + (To - From) * t;
@@ -416,6 +421,11 @@ namespace FlamingTorch
 	Vector3 Vector3::Round() const
 	{
 		return Vector3(MathUtils::Round(x), MathUtils::Round(y), MathUtils::Round(z));
+	};
+
+	std::string Vector3::ToString() const
+	{
+		return StringUtils::MakeFloatString(x) + ", " + StringUtils::MakeFloatString(y) + ", " + StringUtils::MakeFloatString(z);
 	};
 
 	Vector3 Vector3::NormalTri(const Vector3 &v1, const Vector3 &v2, const Vector3 &v3)
@@ -665,6 +675,11 @@ namespace FlamingTorch
 		return Vector4(y * o.z - z * o.y, z * o.x - x * o.z, x * o.y - y * o.x, 0);
 	};
 
+	std::string Vector4::ToString() const
+	{
+		return StringUtils::MakeFloatString(x) + ", " + StringUtils::MakeFloatString(y) + ", " + StringUtils::MakeFloatString(z) + ", " + StringUtils::MakeFloatString(w);
+	};
+
 	Vector4 Vector4::LinearInterpolate(const Vector4 &From, const Vector4 &To, const f32 &t)
 	{
 		return From + (To - From) * t;
@@ -707,59 +722,6 @@ namespace FlamingTorch
 
 		return PlanePointClassifications::On_Plane;
 	};
-
-	//TODO
-	/*
-	void Plane::Split(const Vector3 &v1, const Vector3 &v2, const Vector3 &v3, std::vector<Vector3> &CoplanarFront,
-		std::vector<Vector3> &CoplanarBack, std::vector<Vector3> &Front, std::vector<Vector3> &Back)
-	{
-		Vector3 Normal(a, b, c);
-		Plane TriPlane;
-		TriPlane.FromTriangle(v1, v2, v3);
-		Vector3 TriNormal(TriPlane.a, TriPlane.b, TriPlane.c);
-
-		uint32 Classifications[3];
-		uint32 PolygonClassification = 0;
-
-		Classifications[0] = ClassifyPoint(v1);
-		Classifications[1] = ClassifyPoint(v2);
-		Classifications[2] = ClassifyPoint(v3);
-
-		PolygonClassification |= Classifications[0];
-		PolygonClassification |= Classifications[1];
-		PolygonClassification |= Classifications[2];
-
-		switch(PolygonClassification)
-		{
-		case PlanePointClassifications::Front:
-			Front.push_back(v1);
-			Front.push_back(v2);
-			Front.push_back(v3);
-
-			break;
-		case PlanePointClassifications::Back:
-			Back.push_back(v1);
-			Back.push_back(v2);
-			Back.push_back(v3);
-
-			break;
-		case PlanePointClassifications::On_Plane:
-			{
-				std::vector<Vector3> &t = Normal.Dot(TriNormal) > 0 ? CoplanarFront : CoplanarBack;
-				t.push_back(v1);
-				t.push_back(v2);
-				t.push_back(v3);
-			}
-			break;
-		default:
-			FLASSERT(PolygonClassification == 3, "Somehow got a non-3-valued Polygon classification!");
-
-			std::vector<Vector3> f, b;
-
-			break;
-		};
-	};
-	*/
 
 	Rect::Rect()
 	{
@@ -1650,26 +1612,6 @@ namespace FlamingTorch
 	bool Quaternion::IsNormalized() const
 	{
 		return Vector4(x, y, z, w).IsNormalized();
-	};
-
-	bool Quaternion::FromCompressed(const Vector3 &v)
-	{
-		x = v.x;
-		y = v.y;
-		z = v.z;
-		w = sqrtf(1 - v.Dot(v));
-
-		return IsNormalized();
-	};
-
-	Vector3 Quaternion::Compress()
-	{
-		Quaternion q = *this;
-
-		if(q.w < 0)
-			q = -q;
-
-		return Vector3(q.x, q.y, q.z);
 	};
 
 	Quaternion Quaternion::BezierInterpolation(const Quaternion &A, const Quaternion &B, const Quaternion &C, const Quaternion &D, f32 t)

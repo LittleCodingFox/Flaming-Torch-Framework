@@ -642,6 +642,11 @@ namespace FlamingTorch
 		Impl->SetFrameRate(FPS);
 	};
 
+	void Renderer::ReportSkippedDrawCall()
+	{
+		Impl->ReportSkippedDrawCall();
+	};
+
 	void RendererManager::StartUp(uint32 Priority)
 	{
 		SUBSYSTEM_STARTUP_CHECK()

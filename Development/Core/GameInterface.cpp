@@ -121,9 +121,24 @@ namespace FlamingTorch
 
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
+		static std::stringstream str;
+
+		if(!!Console::Instance.GetVariable("r_drawrenderstats") && Console::Instance.GetVariable("r_drawrenderstats")->UintValue != 0)
+		{
+			str.str("");
+
+			const RendererFrameStats &Stats = TheRenderer->FrameStats();
+
+			str << "Renderer: " << Stats.RendererName << " version " << Stats.RendererVersion << "\n" << Stats.RendererCustomMessage << (Stats.RendererCustomMessage.length() ? "\n\n" : "\n");
+			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "/" << Stats.DrawCalls + Stats.SkippedDrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges << 
+				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\n";
+
+			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().Font(TheRenderer->UI->GetDefaultFont()).FontSize(TheRenderer->UI->GetDefaultFontSize())
+				.Color(Vector4(1, 1, 1, 1)).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
+		};
+
 		if(DevelopmentBuild)
 		{
-			std::stringstream str;
 #if _DEBUG
 #	define GAMEINTERFACE_BUILD_TYPE "DEBUG"
 #elif FLGAME_RELEASE
@@ -131,20 +146,12 @@ namespace FlamingTorch
 #else
 #	define GAMEINTERFACE_BUILD_TYPE "RELEASE"
 #endif
+			str.str("");
 
 			str << GameName() << " (" << GAMEINTERFACE_BUILD_TYPE << ") - " << FPSCounter::Instance.FPS() << " FPS (" << 1000.f / FPSCounter::Instance.FPS() << " ms)";
 
 			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().Font(TheRenderer->UI->GetDefaultFont()).FontSize(TheRenderer->UI->GetDefaultFontSize())
 				.Color(Vector4(1, 1, 1, 1)).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, TheRenderer->Size().y - 20.0f)));
-
-			str.str("");
-
-			const RendererFrameStats &Stats = TheRenderer->FrameStats();
-			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges << 
-				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)";
-
-			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().Font(TheRenderer->UI->GetDefaultFont()).FontSize(TheRenderer->UI->GetDefaultFontSize())
-				.Color(Vector4(1, 1, 1, 1)).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
 
 			static SuperSmartPointer<Texture> Logo;
 			static bool TriedLoadLogo = false;

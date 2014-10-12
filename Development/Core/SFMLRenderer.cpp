@@ -8,6 +8,9 @@ namespace FlamingTorch
 #	define GLCHECK() { int32 error = glGetError(); if(error != GL_NO_ERROR) { FLASSERT(0, "GL Error %08x!", error); } }
 #	define ONE_MB_FLOAT 1048576.f
 #	define BUFFER_OFFSET(x) ((char *)NULL + x)
+#	define SFML_RENDERER_VERSION_MAJOR 0
+#	define SFML_RENDERER_VERSION_MINOR 1
+#	define USE_TEXT_CACHE 1
 
 	bool SFMLRendererImplementation::FirstRenderer = true;
 	uint64 SFMLRendererImplementation::TextureCounter = 0;
@@ -63,8 +66,12 @@ namespace FlamingTorch
 		Log::Instance.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
 	};
 
-	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), SupportsVBOs(false), ExtensionsAvailable(false), LastBoundVBO(0)
+	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), SupportsVBOs(false), ExtensionsAvailable(false), LastBoundVBO(0), 
+		UniqueCacheStringID(0), SavedTextDrawcalls(0)
 	{
+		FrameStatsValue.RendererName = "SFML";
+		FrameStatsValue.RendererVersion = CoreUtils::MakeVersionString(SFML_RENDERER_VERSION_MAJOR, SFML_RENDERER_VERSION_MINOR);
+		FrameStatsValue.RendererCustomMessage = "";
 	};
 
 	SFMLRendererImplementation::~SFMLRendererImplementation()
@@ -561,6 +568,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		VertexBufferMap::iterator it = VertexBuffers.find(Buffer);
@@ -728,7 +737,24 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::Display()
 	{
+		FrameStatsValue.RendererCustomMessage = "";
+
+		if(ExtensionsAvailable)
+		{
+			FrameStatsValue.RendererCustomMessage += "SupportsExtensions";
+		};
+
+		if(SupportsVBOs)
+		{
+			FrameStatsValue.RendererCustomMessage += " VBOEnabled";
+		};
+
+		FrameStatsValue.RendererCustomMessage += " [Saved " + StringUtils::MakeIntString(SavedTextDrawcalls) + " Text Drawcalls]";
+
+		PreviousFrameStatsValue = FrameStatsValue;
 		FrameStatsValue.Clear();
+
+		FlushRenderText();
 
 		FrameStatsValue.TotalResources = Fonts.size() + VertexBuffers.size();
 		FrameStatsValue.TotalResourceUsage = 0;
@@ -750,12 +776,14 @@ namespace FlamingTorch
 			FrameStatsValue.TotalResourceUsage += (it->second.Width * it->second.Height * 8) / ONE_MB_FLOAT;
 		};
 
+		SavedTextDrawcalls = 0;
+
 		Window.display();
 	};
 
 	const RendererFrameStats &SFMLRendererImplementation::FrameStats() const
 	{
-		return FrameStatsValue;
+		return PreviousFrameStatsValue;
 	};
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
@@ -1315,6 +1343,20 @@ namespace FlamingTorch
 		if(TheText.length() == 0)
 			return;
 
+		std::stringstream UniqueString;
+
+		UniqueString << "BC:" << Parameters.BorderColorValue.ToString() << "BS:" << Parameters.BorderSizeValue << "FS:" << Parameters.FontSizeValue << "FH:" << Parameters.FontValue <<
+			"TC:" << Parameters.TextColorValue.ToString() << "STC:" <<Parameters.SecondaryTextColorValue.ToString() << "SV: " << Parameters.StyleValue;
+
+		StringID UniqueStringID = MakeStringID(UniqueString.str());
+
+		if(UniqueStringID != UniqueCacheStringID)
+		{
+			FlushRenderText();
+
+			UniqueCacheStringID = UniqueStringID;
+		};
+
 		Vector2 ActualPosition = Parameters.PositionValue;
 
 		FontMap::iterator FontIterator = Fonts.find(Handle);
@@ -1423,19 +1465,47 @@ namespace FlamingTorch
 				Positions[i] = Positions[i] + ActualPosition;
 			};
 		};
-
+		
 		SpriteCache::Instance.Flush(Target);
+
+		TheRenderTextCache.Positions.insert(TheRenderTextCache.Positions.end(), Positions.begin(), Positions.end());
+		TheRenderTextCache.Colors.insert(TheRenderTextCache.Colors.end(), Colors.begin(), Colors.end());
+		TheRenderTextCache.TexCoords.insert(TheRenderTextCache.TexCoords.end(), TexCoords.begin(), TexCoords.end());
+		TheRenderTextCache.TheTexture = const_cast<sf::Texture *>(FontTexture);
+
+#if USE_TEXT_CACHE
+		ReportSkippedDrawCall();
+		SavedTextDrawcalls++;
+#else
+		FlushRenderText();
+#endif
+	};
+
+	void SFMLRendererImplementation::FlushRenderText()
+	{
+		if(UniqueCacheStringID == 0 || TheRenderTextCache.Positions.size() == 0 || TheRenderTextCache.TheTexture == NULL)
+			return;
+
+		FrameStatsValue.DrawCalls++;
+		FrameStatsValue.TextureChanges += 2;
+		FrameStatsValue.VertexCount += TheRenderTextCache.Positions.size();
+
+		UniqueCacheStringID = 0;
 
 		LastBoundVBO = 0;
 
 		if(SupportsVBOs)
 		{
+			FrameStatsValue.StateChanges++;
+
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		};
 
+		TextureHandle PreviousTexture = LastBoundTexture;
+
 		BindTexture((TextureHandle)0);
 
-		sf::Texture::bind(FontTexture);
+		sf::Texture::bind(TheRenderTextCache.TheTexture);
 
 		EnableState(GL_VERTEX_ARRAY);
 		EnableState(GL_TEXTURE_COORD_ARRAY);
@@ -1446,18 +1516,26 @@ namespace FlamingTorch
 
 		EnableState(GL_TEXTURE_2D);
 
-		glVertexPointer(2, GL_FLOAT, 0, &Positions[0]);
-		glTexCoordPointer(2, GL_FLOAT, 0, &TexCoords[0]);
-		glColorPointer(4, GL_FLOAT, 0, &Colors[0]);
+		glVertexPointer(2, GL_FLOAT, 0, &TheRenderTextCache.Positions[0]);
+		glTexCoordPointer(2, GL_FLOAT, 0, &TheRenderTextCache.TexCoords[0]);
+		glColorPointer(4, GL_FLOAT, 0, &TheRenderTextCache.Colors[0]);
 
-		glDrawArrays(GL_TRIANGLES, 0, Positions.size());
+		glDrawArrays(GL_TRIANGLES, 0, TheRenderTextCache.Positions.size());
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		if(PreviousTexture != 0)
+		{
+			BindTexture(PreviousTexture);
+		};
 
 		if(!TextureWasEnabled)
 		{
 			DisableState(GL_TEXTURE_2D);
 		};
+
+		TheRenderTextCache.Positions.resize(0);
+		TheRenderTextCache.Colors.resize(0);
+		TheRenderTextCache.TexCoords.resize(0);
+		TheRenderTextCache.TheTexture = NULL;
 	};
 
 	bool SFMLRendererImplementation::IsStateEnabled(uint32 ID) const
@@ -1534,6 +1612,11 @@ namespace FlamingTorch
 		};
 
 		GLStates[ID] = false;
+	};
+
+	void SFMLRendererImplementation::ReportSkippedDrawCall()
+	{
+		FrameStatsValue.SkippedDrawCalls++;
 	};
 
 #	endif

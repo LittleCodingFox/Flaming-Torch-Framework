@@ -347,11 +347,11 @@ namespace FlamingTorch
 		RegisterCommand(HelpCommand);
 
 #if USE_GRAPHICS
-		SuperSmartPointer<ConsoleCommand> BindCommandVar(new ConsoleCommand());
-		BindCommandVar->Name = "bind";
-		BindCommandVar->Method.Connect(this, &Console::BindCommand);
+		SuperSmartPointer<ConsoleCommand> BindCommand(new ConsoleCommand());
+		BindCommand->Name = "bind";
+		BindCommand->Method.Connect(this, &Console::BindCommand);
 
-		RegisterCommand(BindCommandVar);
+		RegisterCommand(BindCommand);
 
 		SuperSmartPointer<ConsoleCommand> KeyCommand(new ConsoleCommand());
 		KeyCommand->Name = "keys";
@@ -359,33 +359,16 @@ namespace FlamingTorch
 
 		RegisterCommand(KeyCommand);
 
-		ConsoleVariable DrawGUIRects;
-		DrawGUIRects.Name = "r_drawuirects";
-		DrawGUIRects.Type = ConsoleVariableType::UInt;
-		DrawGUIRects.UintValue = 0;
-
-		RegisterVariable(DrawGUIRects);
-
-		ConsoleVariable DrawGUIFocusZones;
-		DrawGUIFocusZones.Name = "r_drawuifocuszones";
-		DrawGUIFocusZones.Type = ConsoleVariableType::UInt;
-		DrawGUIFocusZones.UintValue = 0;
-
-		RegisterVariable(DrawGUIFocusZones);
-
-		ConsoleVariable DrawGUI;
-		DrawGUI.Name = "r_drawui";
-		DrawGUI.Type = ConsoleVariableType::UInt;
-
-		DrawGUI.UintValue = 1;
-
-		RegisterVariable(DrawGUI);
-
 		SuperSmartPointer<ConsoleCommand> ScreenshotCommand(new ConsoleCommand());
 		ScreenshotCommand->Name = "screenshot";
 		ScreenshotCommand->Method.Connect(this, &Console::ScreenshotCommand);
 
 		RegisterCommand(ScreenshotCommand);
+
+		RegisterVariable(ConsoleVariable("r_drawuirects", (uint32)0));
+		RegisterVariable(ConsoleVariable("r_drawuifocuszones", (uint32)0));
+		RegisterVariable(ConsoleVariable("r_drawui", (uint32)1));
+		RegisterVariable(ConsoleVariable("r_drawrenderstats", (uint32)1));
 #endif
 	};
 

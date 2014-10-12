@@ -13,7 +13,7 @@ namespace FlamingTorch
 
 		static uint64 TextureCounter, FontCounter, VertexBufferCounter;
 	public:
-		RendererFrameStats FrameStatsValue;
+		RendererFrameStats FrameStatsValue, PreviousFrameStatsValue;
 
 		class FontInfo
 		{
@@ -46,10 +46,24 @@ namespace FlamingTorch
 			uint32 VBOID;
 		};
 
+		class RenderTextCache
+		{
+		public:
+			const sf::Texture *TheTexture;
+			std::vector<Vector2> Positions, TexCoords;
+			std::vector<Vector4> Colors;
+		};
+
+		RenderTextCache TheRenderTextCache;
+
 		sf::RenderWindow Window;
 		TextureHandle LastBoundTexture;
 		bool SupportsVBOs, ExtensionsAvailable;
 		uint32 LastBoundVBO;
+
+		StringID UniqueCacheStringID;
+
+		uint32 SavedTextDrawcalls;
 
 		typedef std::map<FontHandle, FontInfo> FontMap;
 		FontMap Fonts;
@@ -65,6 +79,16 @@ namespace FlamingTorch
 
 		SFMLRendererImplementation();
 		~SFMLRendererImplementation();
+
+		/*
+		*	PRIVATE METHODS	
+		*/
+
+		void FlushRenderText();
+
+		/*
+		*	END PRIVATE METHODS
+		*/
 
 		/*!
 		*	Creates a renderer from a Window Handle
@@ -335,5 +359,10 @@ namespace FlamingTorch
 		*	\note this uses the state cache so if you change states in custom OpenGL code it will be inaccurate
 		*/
 		bool IsStateEnabled(uint32 ID) const;
+
+		/*!
+		*	Reports a Skipped Draw Call (used to help figure out how much we're optimizing by skipping unnecessary drawcalls)
+		*/
+		void ReportSkippedDrawCall();
 	};
 #endif

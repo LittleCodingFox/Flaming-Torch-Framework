@@ -24,6 +24,10 @@ struct ConsoleVariable
 	std::string StringValue;
 
 	ConsoleVariable() : Type(ConsoleVariableType::String) {};
+	ConsoleVariable(const std::string _Name, uint32 Value) : Name(_Name), UintValue(Value), Type(ConsoleVariableType::UInt) {};
+	ConsoleVariable(const std::string _Name, int32 Value) : Name(_Name), IntValue(Value), Type(ConsoleVariableType::Int) {};
+	ConsoleVariable(const std::string _Name, f32 Value) : Name(_Name), FloatValue(Value), Type(ConsoleVariableType::Float) {};
+	ConsoleVariable(const std::string _Name, const std::string Value) : Name(_Name), StringValue(Value), Type(ConsoleVariableType::String) {};
 };
 
 class ConsoleCommand

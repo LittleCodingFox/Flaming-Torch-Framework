@@ -221,13 +221,25 @@ public:
 	//!Total amount of RAM used by resources (MB)
 	f32 TotalResourceUsage;
 
+	//!Skipped Draw Calls
+	uint32 SkippedDrawCalls;
+
+	//!Renderer Name
+	std::string RendererName;
+
+	//!Renderer Version
+	std::string RendererVersion;
+
+	//!Renderer Custom Message
+	std::string RendererCustomMessage;
+
 	/*!
 	*	Clears the statistics
 	*/
 	void Clear()
 	{
 		DrawCalls = VertexCount = TextureChanges = MatrixChanges = ClippingChanges =
-			StateChanges = TotalResources = 0;
+			StateChanges = TotalResources = SkippedDrawCalls = 0;
 
 		TotalResourceUsage = 0.0f;
 	};
@@ -549,6 +561,11 @@ public:
 	*	\param FPS the target FPS
 	*/
 	void SetFrameRate(uint32 FPS);
+
+	/*!
+	*	Reports a Skipped Draw Call (used to help figure out how much we're optimizing by skipping unnecessary drawcalls)
+	*/
+	void ReportSkippedDrawCall();
 };
 
 /*!
@@ -877,6 +894,11 @@ public:
 	*	\param FPS the target FPS
 	*/
 	virtual void SetFrameRate(uint32 FPS) = 0;
+
+	/*!
+	*	Reports a Skipped Draw Call (used to help figure out how much we're optimizing by skipping unnecessary drawcalls)
+	*/
+	virtual void ReportSkippedDrawCall() = 0;
 };
 
 #if USE_SFML_RENDERER
