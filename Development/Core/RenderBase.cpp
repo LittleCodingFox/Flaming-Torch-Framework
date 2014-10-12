@@ -9,6 +9,8 @@ namespace FlamingTorch
 	RendererManager RendererManager::Instance;
 	bool FirstRenderer = true;
 
+	SuperSmartPointer<IRendererImplementation> DefaultImpl;
+
 	class RendererInputProcessor : public InputCenter::Context
 	{
 	public:
@@ -155,7 +157,7 @@ namespace FlamingTorch
 		return Impl->Size();
 	};
 
-	RendererHandle RendererManager::AddRenderer(const char *Title, uint32 Width, uint32 Height, uint32 Style)
+	RendererHandle RendererManager::AddRenderer(const char *Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities Caps)
 	{
 		FLASSERT(&Instance == this, "We're not our own instance!");
 
@@ -167,15 +169,19 @@ namespace FlamingTorch
 
 		Log::Instance.LogInfo(TAG, "Attempting to create a Renderer ('%s'; (%dx%d))", Title, Width, Height);
 
-		if(!Info->Get()->Create(Title, Width, Height, Style))
+		if(!Info->Get()->Create(Title, Width, Height, Style, Caps))
+		{
+			Info->Dispose();
+
 			return 0;
+		};
 
 		Info->Get()->UI.Reset(new UIManager(Info->Get()));
 
 		return Out;
 	};
 
-	RendererHandle RendererManager::AddRenderer(void *Window)
+	RendererHandle RendererManager::AddRenderer(void *Window, RendererCapabilities Caps)
 	{
 		FLASSERT(&Instance == this, "We're not our own instance!");
 
@@ -185,7 +191,14 @@ namespace FlamingTorch
 		Info->Reset(new Renderer(new DEFAULT_RENDERER_IMPLEMENTATION()));
 		Info->Get()->HandleValue = Out;
 
-		Log::Instance.LogInfo(TAG, "Attempting to create a Renderer (WND: 0x%08x)", Window);
+		Log::Instance.LogInfo(TAG, "Attempting to create a Renderer (WND: 0x%08x)", StringUtils::PointerString(Window).c_str());
+
+		if(!Info->Get()->Create(Window, Caps))
+		{
+			Info->Dispose();
+
+			return 0;
+		};
 
 		Info->Get()->UI.Reset(new UIManager(Info->Get()));
 
@@ -385,14 +398,14 @@ namespace FlamingTorch
 		Impl->Target = this;
 	};
 
-	bool Renderer::Create(void *WindowHandle)
+	bool Renderer::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
 	{
-		return Impl->Create(WindowHandle);
+		return Impl->Create(WindowHandle, ExpectedCaps);
 	};
 
-	bool Renderer::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style)
+	bool Renderer::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
-		return Impl->Create(Title, Width, Height, Style);
+		return Impl->Create(Title, Width, Height, Style, ExpectedCaps);
 	};
 
 	VertexBufferHandle Renderer::CreateVertexBuffer()
@@ -647,6 +660,27 @@ namespace FlamingTorch
 		Impl->ReportSkippedDrawCall();
 	};
 
+	const RendererCapabilities &Renderer::Capabilities() const
+	{
+		return Impl->Capabilities();
+	};
+
+	/*!
+	*	\return the Desktop Display Mode
+	*/
+	RendererDisplayMode Renderer::DesktopDisplayMode()
+	{
+		return DefaultImpl->DesktopDisplayMode();
+	};
+
+	/*!
+	*	\return all available display modes
+	*/
+	std::vector<RendererDisplayMode> Renderer::DisplayModes()
+	{
+		return DefaultImpl->DisplayModes();
+	};
+
 	void RendererManager::StartUp(uint32 Priority)
 	{
 		SUBSYSTEM_STARTUP_CHECK()
@@ -664,6 +698,8 @@ namespace FlamingTorch
 
 		Input.AddContext(TheInputProcessor);
 		Input.EnableContext(MakeStringID(TheInputProcessor->Name), true);
+
+		DefaultImpl.Reset(new DEFAULT_RENDERER_IMPLEMENTATION());
 
 #if PROFILER_ENABLED
 		Profiler::Instance.OnFinishFrame.Connect(this, &RendererManager::OnGetProfilerPackets);
@@ -683,6 +719,8 @@ namespace FlamingTorch
 			Renderers.begin()->second.Dispose();
 			Renderers.erase(Renderers.begin());
 		};
+
+		DefaultImpl.Dispose();
 
 #if PROFILER_ENABLED
 		Profiler::Instance.OnFinishFrame.Disconnect(this, &RendererManager::OnGetProfilerPackets);

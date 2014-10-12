@@ -82,9 +82,9 @@ namespace RendererWindowStyle
 {
 	enum RendererWindowStyle
 	{
-		Popup = FLAGVALUE(0), //!<Window is a popup with no border or title bar
-		FullScreen = FLAGVALUE(1), //!<Window is a fullscreen window
-		Default = FLAGVALUE(2) //!<Default Window with a border and title bar
+		Popup = 0, //!<Window is a popup with no border or title bar
+		FullScreen, //!<Window is a fullscreen window
+		Default //!<Default Window with a border and title bar
 	};
 };
 
@@ -245,6 +245,34 @@ public:
 	};
 };
 
+/*!
+*	Renderer Capabilities container
+*/
+class RendererCapabilities
+{
+public:
+	uint32 AntialiasLevel; //!<Anti-Aliasing Level
+	uint32 DepthBits; //!<Depth Bits
+	uint32 StencilBits; //!<Stencil Bits
+
+	RendererCapabilities() : AntialiasLevel(0), DepthBits(32), StencilBits(0) {};
+};
+
+/*!
+*	RendererDisplayMode
+*	\note only 32 bpp displays are collected since lower than that is incredibly rare these days
+*/
+class RendererDisplayMode
+{
+public:
+	//!Width of the display
+	uint32 Width;
+	//!Height of the display
+	uint32 Height;
+	//!Bits per Pixel
+	uint32 Bpp;
+};
+
 class IRendererImplementation;
 
 /*!
@@ -307,17 +335,35 @@ public:
 
 	/*!
 	*	Creates a renderer from a Window Handle
+	*	\param WindowHandle the window handle
+	*	\param ExpectedCaps the expected capabilities of this renderer
 	*/
-	bool Create(void *WindowHandle);
+	bool Create(void *WindowHandle, RendererCapabilities ExpectedCaps = RendererCapabilities());
 
 	/*!
 	*	Creates a renderer from window details
 	*	\param Title the title of the window
 	*	\param Width the width of the window
 	*	\param Height the height of the window
-	*	\param Style the style of the window (one or more of RendererWindowStyle::*)
+	*	\param Style the style of the window (one of RendererWindowStyle::*)
+	*	\param ExpectedCaps the expected capabilities of this renderer
 	*/
-	bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style);
+	bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps = RendererCapabilities());
+
+	/*!
+	*	\return the currently available renderer capabilities
+	*/
+	const RendererCapabilities &Capabilities() const;
+
+	/*!
+	*	\return the Desktop Display Mode
+	*/
+	static RendererDisplayMode DesktopDisplayMode();
+
+	/*!
+	*	\return all available display modes
+	*/
+	static std::vector<RendererDisplayMode> DisplayModes();
 
 	/*!
 	*	Render Window Size
@@ -610,19 +656,21 @@ public:
 	*	\param Width the Renderer Width
 	*	\param Height the Renderer Height
 	*	\param Style the Window Style
+	*	\param Caps the requested Renderer Capabilities
 	*	\return a Renderer Handle. If it is 0, we failed to create the renderer
 	*	\note After creation you must set the renderer as the active renderer if you don't have any set yet
 	*/
 	RendererHandle AddRenderer(const char *Title, uint32 Width, uint32 Height,
-		uint32 Style = RendererWindowStyle::Default);
+		uint32 Style = RendererWindowStyle::Default, RendererCapabilities Caps = RendererCapabilities());
 
 	/*!
 	*	Add a renderer to an existing window
 	*	\param Window the Window Handle
+	*	\param Caps the requested Renderer Capabilities
 	*	\return a Renderer Handle. If it is 0, we failed to create the renderer
 	*	\note After creation you must set the renderer as the active renderer if you don't have any set yet
 	*/
-	RendererHandle AddRenderer(void *Window);
+	RendererHandle AddRenderer(void *Window, RendererCapabilities Caps = RendererCapabilities());
 
 	/*!
 	*	Destroy the currently active renderer
@@ -666,17 +714,35 @@ public:
 
 	/*!
 	*	Creates a renderer from a Window Handle
+	*	\param WindowHandle the window handle
+	*	\param ExpectedCaps the expected capabilities of this renderer
 	*/
-	virtual bool Create(void *WindowHandle) = 0;
+	virtual bool Create(void *WindowHandle, RendererCapabilities ExpectedCaps) = 0;
 
 	/*!
 	*	Creates a renderer from window details
 	*	\param Title the title of the window
 	*	\param Width the width of the window
 	*	\param Height the height of the window
-	*	\param Style the style of the window (one or more of RendererWindowStyle::*)
+	*	\param Style the style of the window (one of RendererWindowStyle::*)
+	*	\param ExpectedCaps the expected capabilities of this renderer
 	*/
-	virtual bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style) = 0;
+	virtual bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps) = 0;
+
+	/*!
+	*	\return the currently available renderer capabilities
+	*/
+	virtual const RendererCapabilities &Capabilities() const = 0;
+
+	/*!
+	*	\return the Desktop Display Mode
+	*/
+	virtual RendererDisplayMode DesktopDisplayMode() = 0;
+
+	/*!
+	*	\return all available display modes
+	*/
+	virtual std::vector<RendererDisplayMode> DisplayModes() = 0;
 
 	/*!
 	*	Render Window Size

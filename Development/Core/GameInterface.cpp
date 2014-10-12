@@ -69,7 +69,7 @@ namespace FlamingTorch
 		{
 			Log::Instance.LogInfo(TAG, "Creating renderer from window handle '0x%08x'", Options.WindowHandle);
 
-			Handle = RendererManager::Instance.AddRenderer(Options.WindowHandle);
+			Handle = RendererManager::Instance.AddRenderer(Options.WindowHandle, Options.Caps);
 		}
 		else
 		{
@@ -89,7 +89,7 @@ namespace FlamingTorch
 
 			Log::Instance.LogInfo(TAG, str.str().c_str());
 
-			Handle = RendererManager::Instance.AddRenderer(Options.Title.c_str(), Options.Width, Options.Height, Options.Style);
+			Handle = RendererManager::Instance.AddRenderer(Options.Title.c_str(), Options.Width, Options.Height, Options.Style, Options.Caps);
 		};
 
 		if(Handle == 0xFFFFFFF)
@@ -113,8 +113,10 @@ namespace FlamingTorch
 			TheRenderer->SetFrameRate(Options.FrameRate);
 		};
 
-		TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, (f32)Options.Width, (f32)Options.Height, 0, -1, 1));
-		TheRenderer->SetViewport(0, 0, (f32)Options.Width, (f32)Options.Height);
+		Vector2 RendererSize = TheRenderer->Size();
+
+		TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, RendererSize.x, RendererSize.y, 0, -1, 1));
+		TheRenderer->SetViewport(0, 0, RendererSize.x, RendererSize.y);
 
 		return TheRenderer;
 	};

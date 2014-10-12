@@ -278,6 +278,10 @@ namespace FlamingTorch
 
 			it->second->SetTextureFiltering(TextureFilter);
 		};
+
+		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
+
+		TheRenderer->OnResourcesReloaded(TheRenderer);
 	};
 
 	void ResourceManager::Cleanup()

@@ -624,6 +624,20 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
+	luabind::object GetRendererDisplayModes(lua_State *State)
+	{
+		luabind::object Out = luabind::newtable(State);
+
+		std::vector<RendererDisplayMode> Modes = Renderer::DisplayModes();
+
+		for(uint32 i = 0; i < Modes.size(); i++)
+		{
+			Out[i + 1] = Modes[i];
+		};
+
+		return Out;
+	};
+
 	luabind::object GetSpriteColors(SpriteDrawOptions &Self, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
@@ -1832,6 +1846,16 @@ namespace FlamingTorch
 #endif
 
 #if USE_GRAPHICS
+			luabind::class_<RendererCapabilities>("RendererCapabilities")
+				.def_readwrite("AntialiasLevel", &RendererCapabilities::AntialiasLevel)
+				.def_readwrite("DepthBits", &RendererCapabilities::DepthBits)
+				.def_readwrite("StencilBits", &RendererCapabilities::StencilBits),
+
+			luabind::class_<RendererDisplayMode>("RendererDisplayMode")
+				.def_readwrite("Width", &RendererDisplayMode::Width)
+				.def_readwrite("Height", &RendererDisplayMode::Height)
+				.def_readwrite("Bpp", &RendererDisplayMode::Bpp),
+
 			//RenderCreateOptions
 			luabind::class_<RenderCreateOptions>("RenderCreateOptions")
 				.enum_("constants") [
@@ -1844,7 +1868,8 @@ namespace FlamingTorch
 				.def_readwrite("Width", &RenderCreateOptions::Width)
 				.def_readwrite("Height", &RenderCreateOptions::Height)
 				.def_readwrite("FrameRate", &RenderCreateOptions::FrameRate)
-				.def_readwrite("Style", &RenderCreateOptions::Style),
+				.def_readwrite("Style", &RenderCreateOptions::Style)
+				.def_readwrite("Caps", &RenderCreateOptions::Caps),
 
 			//Sprite
 			luabind::class_<Sprite>("Sprite")
@@ -1935,22 +1960,70 @@ namespace FlamingTorch
 					luabind::value("Clear_Depth", RendererBuffer::Depth)
 				]
 				.def_readonly("Input", &RendererManager::Input)
-				.def("AddRenderer", (RendererHandle (RendererManager::*)(const char *, uint32, uint32, uint32)) &RendererManager::AddRenderer)
-				.def("AddRenderer", (RendererHandle (RendererManager::*)(void *)) &RendererManager::AddRenderer)
+				.def("AddRenderer", (RendererHandle (RendererManager::*)(const char *, uint32, uint32, uint32, RendererCapabilities)) &RendererManager::AddRenderer)
+				.def("AddRenderer", (RendererHandle (RendererManager::*)(void *, RendererCapabilities)) &RendererManager::AddRenderer)
 				.def("DestroyRenderer", &RendererManager::DestroyRenderer)
 				.def("SetActiveRenderer", &RendererManager::SetActiveRenderer)
 				.property("ActiveRenderer", &RendererManager::ActiveRenderer)
 				.def("RequestFrame", &RendererManager::RequestFrame),
 
+			//RendererFrameStats
+			luabind::class_<RendererFrameStats>("RendererFrameStats")
+				.def_readwrite("DrawCalls", &RendererFrameStats::DrawCalls)
+				.def_readwrite("VertexCount", &RendererFrameStats::VertexCount)
+				.def_readwrite("TextureChanges", &RendererFrameStats::TextureChanges)
+				.def_readwrite("MatrixChanges", &RendererFrameStats::MatrixChanges)
+				.def_readwrite("ClippingChanges", &RendererFrameStats::ClippingChanges)
+				.def_readwrite("StateChanges", &RendererFrameStats::StateChanges)
+				.def_readwrite("TotalResources", &RendererFrameStats::TotalResources)
+				.def_readwrite("TotalResourceUsage", &RendererFrameStats::TotalResourceUsage)
+				.def_readwrite("SkippedDrawCalls", &RendererFrameStats::SkippedDrawCalls)
+				.def_readwrite("RendererName", &RendererFrameStats::RendererName)
+				.def_readwrite("RendererVersion", &RendererFrameStats::RendererVersion)
+				.def_readwrite("RendererCustomMessage", &RendererFrameStats::RendererCustomMessage)
+				.def("Clear", &RendererFrameStats::Clear)
+				.def(luabind::constructor<>()),
+
 			//Renderer
 			luabind::class_<Renderer>("Renderer")
+				.scope [
+					luabind::def("DesktopDisplayMode", &Renderer::DesktopDisplayMode),
+					luabind::def("DisplayModes", &GetRendererDisplayModes)
+				]
 				.def_readonly("UI", &Renderer::UI)
 				.property("Handle", &Renderer::Handle)
 				.def("BindTexture", (void(Renderer::*)(Texture *))&Renderer::BindTexture)
 				.def("BindTexture", (void(Renderer::*)(TextureHandle))&Renderer::BindTexture)
 				.def_readwrite("Camera", &Renderer::RenderCamera)
 				.property("Size", &Renderer::Size)
-				.def("Clear", &Renderer::Clear),
+				.property("Capabilities", &Renderer::Capabilities)
+				.def("Clear", &Renderer::Clear)
+				.def("CreateVertexBuffer", &Renderer::CreateVertexBuffer)
+				.def("IsVertexBufferHandleValid", &Renderer::IsVertexBufferHandleValid)
+				.def("DestroyVertexBuffer", &Renderer::DestroyVertexBuffer)
+				.def("RendererVertices", &Renderer::RenderVertices)
+				.def("StartClipping", &Renderer::StartClipping)
+				.def("FinishClipping", &Renderer::FinishClipping)
+				.def("Display", &Renderer::Display)
+				.property("FrameStats", &Renderer::FrameStats)
+				.property("WorldMatrix", &Renderer::WorldMatrix, &Renderer::SetWorldMatrix)
+				.property("ProjectionMatrix", &Renderer::ProjectionMatrix, &Renderer::SetProjectionMatrix)
+				.def("PushMatrices", &Renderer::PushMatrices)
+				.def("PopMatrices", &Renderer::PopMatrices)
+				.def("SetViewport", &Renderer::SetViewport)
+				.def("CreateTexture", &Renderer::CreateTexture)
+				.def("IsTextureHandleValid", &Renderer::IsTextureHandleValid)
+				.def("DestroyTexture", &Renderer::DestroyTexture)
+				.def("SetTextureWrapMode", &Renderer::SetTextureWrapMode)
+				.def("SetTextureFiltering", &Renderer::SetTextureFiltering)
+				.def("SetBlendingMode", &Renderer::SetBlendingMode)
+				.def("PollEvent", &Renderer::PollEvent)
+				.def("CreateFont", &Renderer::CreateFont)
+				.def("DestroyFont", &Renderer::DestroyFont)
+				.def("MeasureText", &Renderer::MeasureText)
+				.def("RenderText", &Renderer::RenderText)
+				.def("SetMousePosition", &Renderer::SetMousePosition)
+				.def("SetFrameRate", &Renderer::SetFrameRate),
 				
 			//RenderTextUtils
 			luabind::class_<RenderTextUtils>("RenderTextUtils")

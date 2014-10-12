@@ -67,7 +67,7 @@ namespace FlamingTorch
 	};
 
 	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), SupportsVBOs(false), ExtensionsAvailable(false), LastBoundVBO(0), 
-		UniqueCacheStringID(0), SavedTextDrawcalls(0)
+		UniqueCacheStringID(0), SavedTextDrawcalls(0), BorderlessWindowMode(false)
 	{
 		FrameStatsValue.RendererName = "SFML";
 		FrameStatsValue.RendererVersion = CoreUtils::MakeVersionString(SFML_RENDERER_VERSION_MAJOR, SFML_RENDERER_VERSION_MINOR);
@@ -88,10 +88,12 @@ namespace FlamingTorch
 		};
 	};
 
-	bool SFMLRendererImplementation::Create(void *WindowHandle)
+	bool SFMLRendererImplementation::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
 	{
+		sf::ContextSettings ContextSettings(ExpectedCaps.DepthBits, ExpectedCaps.StencilBits, ExpectedCaps.AntialiasLevel);
+
 		//Init from an existing window
-		Window.create((sf::WindowHandle)WindowHandle);
+		Window.create((sf::WindowHandle)WindowHandle, ContextSettings);
 
 		GLCHECK();
 
@@ -102,6 +104,12 @@ namespace FlamingTorch
 
 			return 0;
 		};
+
+		ContextSettings = Window.getSettings();
+
+		RenderCaps.DepthBits = ContextSettings.depthBits;
+		RenderCaps.StencilBits = ContextSettings.stencilBits;
+		RenderCaps.AntialiasLevel = ContextSettings.antialiasingLevel;
 
 		//If the first renderer, init glew
 		if(FirstRenderer)
@@ -134,8 +142,10 @@ namespace FlamingTorch
 		return true;
 	};
 
-	bool SFMLRendererImplementation::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style)
+	bool SFMLRendererImplementation::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
+		OriginalRequestedSize = Vector2(Width, Height);
+
 		uint32 ActualStyle = sf::Style::None;
 
 		switch(Style)
@@ -147,6 +157,7 @@ namespace FlamingTorch
 
 		case RendererWindowStyle::Popup:
 			ActualStyle = sf::Style::None;
+			BorderlessWindowMode = true;
 
 			break;
 
@@ -156,8 +167,27 @@ namespace FlamingTorch
 			break;
 		};
 
+		sf::ContextSettings ContextSettings(ExpectedCaps.DepthBits, ExpectedCaps.StencilBits, ExpectedCaps.AntialiasLevel);
+
+		Rect WorkArea = CoreUtils::GetDesktopWorkArea();
+
+		uint32 ActualWidth = Width, ActualHeight = Height;
+
+		if(WorkArea.Right != 0)
+		{
+			if(ActualWidth > WorkArea.Right - WorkArea.Left)
+			{
+				ActualWidth = WorkArea.Right - WorkArea.Left;
+			};
+
+			if(ActualHeight > WorkArea.Bottom - WorkArea.Top)
+			{
+				ActualHeight = WorkArea.Bottom - WorkArea.Top;
+			};
+		};
+
 		//Create the window
-		Window.create(sf::VideoMode(Width, Height), Title, ActualStyle);
+		Window.create(sf::VideoMode(ActualWidth, ActualHeight), Title, ActualStyle, ContextSettings);
 
 		GLCHECK();
 
@@ -168,6 +198,14 @@ namespace FlamingTorch
 
 			return false;
 		};
+
+		Window.setPosition(sf::Vector2i((int32)WorkArea.Left, (int32)WorkArea.Top));
+
+		ContextSettings = Window.getSettings();
+
+		RenderCaps.DepthBits = ContextSettings.depthBits;
+		RenderCaps.StencilBits = ContextSettings.stencilBits;
+		RenderCaps.AntialiasLevel = ContextSettings.antialiasingLevel;
 
 		//If the first renderer, init glew
 		if(FirstRenderer)
@@ -198,6 +236,45 @@ namespace FlamingTorch
 		glDisable(GL_DEPTH_TEST);
 
 		return true;
+	};
+
+	const RendererCapabilities &SFMLRendererImplementation::Capabilities() const
+	{
+		return RenderCaps;
+	};
+
+	RendererDisplayMode SFMLRendererImplementation::DesktopDisplayMode()
+	{
+		sf::VideoMode Mode = sf::VideoMode::getDesktopMode();
+
+		RendererDisplayMode Out;
+
+		Out.Width = Mode.width;
+		Out.Height = Mode.height;
+		Out.Bpp = Mode.bitsPerPixel;
+
+		return Out;
+	};
+
+	std::vector<RendererDisplayMode> SFMLRendererImplementation::DisplayModes()
+	{
+		const std::vector<sf::VideoMode> &Modes = sf::VideoMode::getFullscreenModes();
+		std::vector<RendererDisplayMode> Out;
+
+		for(sf::VideoMode Mode : Modes)
+		{
+			if(Mode.bitsPerPixel != 32)
+				continue;
+
+			RendererDisplayMode OutMode;
+			OutMode.Width = Mode.width;
+			OutMode.Height = Mode.height;
+			OutMode.Bpp = Mode.bitsPerPixel;
+
+			Out.push_back(OutMode);
+		};
+
+		return Out;
 	};
 
 	Vector2 SFMLRendererImplementation::Size() const
@@ -1097,6 +1174,39 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::PollEvent(RendererEvent &Out)
 	{
+		if(BorderlessWindowMode)
+		{
+			//Disabled till can figure out the problem with the projection
+			/*
+			Rect WorkArea = CoreUtils::GetDesktopWorkArea();
+
+			Vector2 ExpectedSize = OriginalRequestedSize;
+
+			if(ExpectedSize.x > WorkArea.Right - WorkArea.Left)
+			{
+				ExpectedSize.x = WorkArea.Right - WorkArea.Left;
+			};
+
+			if(ExpectedSize.y > WorkArea.Bottom - WorkArea.Top)
+			{
+				ExpectedSize.y = WorkArea.Bottom - WorkArea.Top;
+			};
+
+			if(ExpectedSize != Size() || Window.getPosition().x < WorkArea.Left || Window.getPosition().y < WorkArea.Top) 
+			{
+				Window.setSize(sf::Vector2u((uint32)ExpectedSize.x, (uint32)ExpectedSize.y));
+				Window.setPosition(sf::Vector2i((uint32)WorkArea.Left, (uint32)WorkArea.Top));
+
+				sf::View TheView(sf::FloatRect(0, 0, ExpectedSize.x, ExpectedSize.y));
+				Window.setView(TheView);
+
+				Target->OnResized(Target, (uint32)ExpectedSize.x, (uint32)ExpectedSize.y);
+
+				LastWindowSize = ExpectedSize;
+			};
+			*/
+		};
+
 		static sf::Event Event;
 
 		if(Window.pollEvent(Event))

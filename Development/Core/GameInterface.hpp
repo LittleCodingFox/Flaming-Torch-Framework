@@ -8,6 +8,7 @@ struct RenderCreateOptions
 	uint32 Style;
 	uint32 FrameRate;
 	void *WindowHandle;
+	RendererCapabilities Caps;
 
 	RenderCreateOptions() : Style(RendererWindowStyle::Default), WindowHandle(NULL), FrameRate(0) {};
 };

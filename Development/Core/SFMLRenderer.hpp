@@ -77,6 +77,13 @@ namespace FlamingTorch
 		typedef std::map<uint32, bool> GLStatesMap;
 		GLStatesMap GLStates;
 
+		RendererCapabilities RenderCaps;
+
+		bool BorderlessWindowMode;
+		Vector2 OriginalRequestedSize;
+
+		Vector2 LastWindowSize;
+
 		SFMLRendererImplementation();
 		~SFMLRendererImplementation();
 
@@ -92,17 +99,35 @@ namespace FlamingTorch
 
 		/*!
 		*	Creates a renderer from a Window Handle
+		*	\param WindowHandle the window handle
+		*	\param ExpectedCaps the expected capabilities of this renderer
 		*/
-		bool Create(void *WindowHandle);
+		bool Create(void *WindowHandle, RendererCapabilities ExpectedCaps);
 
 		/*!
 		*	Creates a renderer from window details
 		*	\param Title the title of the window
 		*	\param Width the width of the window
 		*	\param Height the height of the window
-		*	\param Style the style of the window (one or more of RendererWindowStyle::*)
+		*	\param Style the style of the window (one of RendererWindowStyle::*)
+		*	\param ExpectedCaps the expected capabilities of this renderer
 		*/
-		bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style);
+		bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps);
+
+		/*!
+		*	\return the currently available renderer capabilities
+		*/
+		const RendererCapabilities &Capabilities() const;
+
+		/*!
+		*	\return the Desktop Display Mode
+		*/
+		RendererDisplayMode DesktopDisplayMode();
+
+		/*!
+		*	\return all available display modes
+		*/
+		std::vector<RendererDisplayMode> DisplayModes();
 
 		/*!
 		*	Render Window Size

@@ -32,6 +32,7 @@ using namespace Gallant;
 namespace FlamingTorch
 {
 	typedef uint32 VersionType;
+	class Rect;
 
 	template<typename type>
 	class DisposableResource
@@ -267,5 +268,10 @@ namespace FlamingTorch
 
 			return Result;
 		};
+
+		/*!
+		*	\return the current desktop work area (position and size)
+		*/
+		static Rect GetDesktopWorkArea();
 	};
 };

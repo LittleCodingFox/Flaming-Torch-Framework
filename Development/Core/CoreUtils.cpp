@@ -59,4 +59,23 @@ namespace FlamingTorch
 		return 0;
 #endif
 	};
+
+	Rect CoreUtils::GetDesktopWorkArea()
+	{
+#if FLPLATFORM_WINDOWS
+		MONITORINFOEXA MonitorInfo;
+		memset(&MonitorInfo, 0, sizeof(MonitorInfo));
+
+		MonitorInfo.cbSize = sizeof(MONITORINFOEXA);
+
+		HMONITOR Monitor = MonitorFromWindow(GetActiveWindow(), MONITOR_DEFAULTTOPRIMARY);
+
+		if(Monitor == INVALID_HANDLE_VALUE || !GetMonitorInfoA(Monitor, &MonitorInfo))
+			return Rect();
+
+		return Rect((f32)MonitorInfo.rcWork.left, (f32)MonitorInfo.rcWork.right, (f32)MonitorInfo.rcWork.top, (f32)MonitorInfo.rcWork.bottom);
+#else
+		return Rect();
+#endif
+	};
 };
