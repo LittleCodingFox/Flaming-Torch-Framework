@@ -31,6 +31,7 @@ install: true
 
 script:
   - echo Current Directory is $PWD
+  - cd ../../
   - echo Compiling Dependencies
   - cd Dependencies && make config=release32
   - echo Compiling Tools
