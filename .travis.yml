@@ -30,6 +30,7 @@ before_install:
 install: true
 
 script:
+  - echo Current Directory is $PWD
   - echo Compiling Dependencies
   - cd Dependencies && make config=release32
   - echo Compiling Tools
