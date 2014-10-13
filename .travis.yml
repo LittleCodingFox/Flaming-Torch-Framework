@@ -6,6 +6,11 @@ compiler:
 before_install:
   - sudo apt-get clean
   - sudo apt-get update -qq
+  - sudo apt-get install -y "gcc-4.6:i386"
+  - sudo apt-get install -y "libc6-dev-amd64:i386"
+  - sudo apt-get install -y "lib64gcc1:i386"
+  - sudo apt-get install -y "lib64gomp1:i386"
+  - sudo apt-get install -y "lib64quadmath0:i386"
   - sudo apt-get install -y "gcc-4.6-multilib:i386"
   - sudo apt-get install -y "gcc:i386"
   - sudo apt-get install -y "cpp:i386"
