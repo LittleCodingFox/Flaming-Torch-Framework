@@ -9,6 +9,7 @@ before_install:
   - sudo apt-get install -y "binutils:i386"
   - sudo apt-get install -y "cpp-4.6:i386"
   - sudo apt-get install -y "gcc-4.6:i386"
+  - sudo apt-get install -y "libc6-amd64:i386"
   - sudo apt-get install -y "libc6-dev-amd64:i386"
   - sudo apt-get install -y "lib64gcc1:i386"
   - sudo apt-get install -y "lib64gomp1:i386"
