@@ -240,7 +240,7 @@ namespace FlamingTorch
 				it = Textures.begin();
 
 				if(it == Textures.end())
-					break;
+					return;
 			};
 
 			it->second->Destroy();
@@ -257,9 +257,7 @@ namespace FlamingTorch
 				it = Textures.begin();
 
 				if(it == Textures.end())
-					break;
-
-				continue;
+					return;
 			};
 
 			uint32 TextureFilter = it->second->FilterMode();
@@ -303,9 +301,6 @@ namespace FlamingTorch
 				if(it == Textures.end())
 					break;
 			};
-
-			if(it == Textures.end())
-				break;
 		};
 
 		uint32 CurrentObjects = Textures.size() +

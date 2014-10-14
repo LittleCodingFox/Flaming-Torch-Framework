@@ -369,7 +369,7 @@ namespace FlamingTorch
 			{
 				int32 CurrentFrameRate = FrameRateValue;
 
-				if(1 != sscanf(it->second.Content.c_str(), "%d", &FrameRateValue) || FrameRateValue < 0)
+				if(1 != sscanf(it->second.Content.c_str(), "%d", &FrameRateValue) || FrameRateValue <= 0)
 				{
 					FrameRateValue = CurrentFrameRate;
 				};

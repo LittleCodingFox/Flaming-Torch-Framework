@@ -99,7 +99,8 @@ namespace FlamingTorch
 		EnabledValue(true), MouseInputValue(true), KeyboardInputValue(true), AlphaValue(1),
 		ClickPressed(false), BlockingInputValue(false), IsDraggableValue(false), IsDroppableValue(false),
 		DraggingValue(false), TooltipFixedValue(false), RotationValue(0), ExtraSizeScaleValue(1),
-		InputBlockerBackgroundValue(true), GlobalsTracker(_Manager->ScriptInstance)
+		InputBlockerBackgroundValue(true), GlobalsTracker(_Manager->ScriptInstance), JoystickInputValue(true),
+		LayoutValue(NULL), RespondsToTooltipsValue(false), ClickTimer(0), IDValue(0)
 	{
 		FLASSERT(ManagerValue != NULL, "Invalid UI Manager!");
 		FLASSERT(ManagerValue->ScriptInstance, "Invalid UI Manager Script!");

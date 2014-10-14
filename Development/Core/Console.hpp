@@ -23,11 +23,11 @@ struct ConsoleVariable
 	f32 FloatValue;
 	std::string StringValue;
 
-	ConsoleVariable() : Type(ConsoleVariableType::String) {};
-	ConsoleVariable(const std::string _Name, uint32 Value) : Name(_Name), UintValue(Value), Type(ConsoleVariableType::UInt) {};
-	ConsoleVariable(const std::string _Name, int32 Value) : Name(_Name), IntValue(Value), Type(ConsoleVariableType::Int) {};
-	ConsoleVariable(const std::string _Name, f32 Value) : Name(_Name), FloatValue(Value), Type(ConsoleVariableType::Float) {};
-	ConsoleVariable(const std::string _Name, const std::string Value) : Name(_Name), StringValue(Value), Type(ConsoleVariableType::String) {};
+	ConsoleVariable() : Type(ConsoleVariableType::String), UintValue(0), IntValue(0), FloatValue(0) {};
+	ConsoleVariable(const std::string _Name, uint32 Value) : Name(_Name), UintValue(Value), Type(ConsoleVariableType::UInt), IntValue(0), FloatValue(0) {};
+	ConsoleVariable(const std::string _Name, int32 Value) : Name(_Name), IntValue(Value), Type(ConsoleVariableType::Int), UintValue(0), FloatValue(0) {};
+	ConsoleVariable(const std::string _Name, f32 Value) : Name(_Name), FloatValue(Value), Type(ConsoleVariableType::Float), UintValue(0), IntValue(0) {};
+	ConsoleVariable(const std::string _Name, const std::string Value) : Name(_Name), StringValue(Value), Type(ConsoleVariableType::String), UintValue(0), IntValue(0), FloatValue(0) {};
 };
 
 class ConsoleCommand

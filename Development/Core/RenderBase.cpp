@@ -336,6 +336,8 @@ namespace FlamingTorch
 
 				RenderTextUtils::RenderText(Renderer, str.str(), TextParams().FontSize(PROFILER_FONT_SIZE)
 					.Color(TextColor).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
+
+				str << std::dec;
 			};
 
 			{
@@ -355,6 +357,8 @@ namespace FlamingTorch
 
 				RenderTextUtils::RenderText(Renderer, str.str(), TextParams().FontSize(PROFILER_FONT_SIZE)
 					.Color(TextColor).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
+
+				str << std::dec;
 			};
 		};
 #endif
@@ -388,7 +392,7 @@ namespace FlamingTorch
 		return ReturnValue;
 	};
 
-	Renderer::Renderer(IRendererImplementation *_Impl) : Impl(_Impl)
+	Renderer::Renderer(IRendererImplementation *_Impl) : Impl(_Impl), HandleValue(0)
 	{
 		FLASSERT(Impl, "Invalid Implementation!");
 

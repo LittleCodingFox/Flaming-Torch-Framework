@@ -28,7 +28,7 @@ namespace FlamingTorch
 		return Names.find(Name) != Names.end() ? "AXIS" + Names[Name] : "UNKNOWN";
 	};
 
-	InputCenter::InputCenter() : HasFocus(true)
+	InputCenter::InputCenter() : HasFocus(true), InputConsumedValue(false), Character(false), MouseWheel(false)
 	{
 	};
 

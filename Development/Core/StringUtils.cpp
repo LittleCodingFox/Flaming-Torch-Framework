@@ -91,7 +91,7 @@ namespace FlamingTorch
 			str << std::dec;
 		};
 
-		str << i;
+		str << i << std::dec;
 
 		return str.str();
 	};
@@ -110,7 +110,7 @@ namespace FlamingTorch
 			str << std::dec;
 		};
 
-		str << i;
+		str << i << std::dec;
 
 		return str.str();
 	};
@@ -129,7 +129,7 @@ namespace FlamingTorch
 			str << std::dec;
 		};
         
-		str << i;
+		str << i << std::dec;
         
 		return str.str();
 	};
@@ -148,7 +148,7 @@ namespace FlamingTorch
 			str << std::dec;
 		};
         
-		str << i;
+		str << i << std::dec;
         
 		return str.str();
 	};

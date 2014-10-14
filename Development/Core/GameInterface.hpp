@@ -10,7 +10,7 @@ struct RenderCreateOptions
 	void *WindowHandle;
 	RendererCapabilities Caps;
 
-	RenderCreateOptions() : Style(RendererWindowStyle::Default), WindowHandle(NULL), FrameRate(0) {};
+	RenderCreateOptions() : Style(RendererWindowStyle::Default), WindowHandle(NULL), FrameRate(0), Width(0), Height(0) {};
 };
 #endif
 

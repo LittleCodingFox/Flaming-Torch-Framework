@@ -409,6 +409,13 @@ namespace FlamingTorch
 		VertexSize = (uint32)MathUtils::Max((f32)VertexSize, (f32)ColorOffset + ColorDataSize);
 		VertexSize = (uint32)MathUtils::Max((f32)VertexSize, (f32)NormalOffset + NormalDataSize);
 
+		if(VertexSize == 0)
+		{
+			Log::Instance.LogErr(TAG, "Vertex Size is 0");
+
+			return;
+		};
+
 		if(DataByteSize % VertexSize != 0)
 		{
 			Log::Instance.LogErr(TAG, "Data Byte Size is incompatible with estimated Vertex Size '%d': Not a multiple of Vertex Size.", VertexSize);

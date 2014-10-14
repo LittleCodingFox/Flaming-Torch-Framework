@@ -822,6 +822,7 @@ public:
 class UILayout 
 {
 friend class UIManager;
+
 	UIManager *Owner;
 
 	Json::Value ContainedObjects;
@@ -839,6 +840,7 @@ public:
 	*/
 	SuperSmartPointer<UIPanel> Parent;
 
+	UILayout() : Owner(NULL) {};
 	~UILayout();
 
 	/*!
@@ -952,6 +954,9 @@ private:
 	void ProcessGroupJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessCustomProperty(UIPanel *Panel, const std::string &Property, const Json::Value &Value, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessCustomPropertyJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
+
+	UIManager();
+	UIManager(const UIManager &);
 public:
 	typedef std::map<StringID, SuperSmartPointer<UILayout> > LayoutMap;
 	LayoutMap Layouts, DefaultLayouts;

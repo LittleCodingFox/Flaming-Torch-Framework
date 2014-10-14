@@ -184,7 +184,7 @@ namespace FlamingTorch
 	};
 
 	UIManager::UIManager(Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DefaultFontColor(1, 1, 1, 1),
-		DefaultSecondaryFontColor(1, 1, 1, 1), DefaultFontSize(16), MouseOverElement(NULL)
+		DefaultSecondaryFontColor(1, 1, 1, 1), DefaultFontSize(16), MouseOverElement(NULL), DefaultFont(0), DrawUIRects(0), DrawUIFocusZones(0)
 	{
 		std::vector<LuaLib *> Libs;
 		Libs.push_back(&FrameworkLib::Instance);
@@ -607,8 +607,9 @@ namespace FlamingTorch
 			{
 				Rect NinePatchRect;
 
-				sscanf(NinePatchString.c_str(), "%f,%f,%f,%f", &NinePatchRect.Left, &NinePatchRect.Right, &NinePatchRect.Top,
-					&NinePatchRect.Bottom);
+				if(4 != sscanf(NinePatchString.c_str(), "%f,%f,%f,%f", &NinePatchRect.Left, &NinePatchRect.Right, &NinePatchRect.Top,
+					&NinePatchRect.Bottom))
+					return;
 
 				TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Panel->Size());
 				TheSprite->SelectBoxExtraSize = NinePatchRect.ToFullSize();
@@ -3083,7 +3084,10 @@ namespace FlamingTorch
 
 		std::string DefaultFontSizeValue = Skin->GetString("General", "DefaultFontSize");
 
-		sscanf(DefaultFontSizeValue.c_str(), "%u", &DefaultFontSize);
+		if(1 != sscanf(DefaultFontSizeValue.c_str(), "%u", &DefaultFontSize))
+		{
+			DefaultFontSize = 16;
+		};
 
 		std::string DefaultFontValue = Skin->GetString("General", "DefaultFont");
 		std::string FontDirectory = DefaultFontValue.substr(0, DefaultFontValue.rfind('/') + 1);

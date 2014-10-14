@@ -32,7 +32,7 @@ public:
         static std::stringstream str;
         str.str("");
         
-        str << std::hex << (intptr_t)Pointer;
+        str << std::hex << (intptr_t)Pointer << std::dec;
 
         return str.str();
     };

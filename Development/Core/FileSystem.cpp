@@ -279,6 +279,8 @@ namespace FlamingTorch
 		{
 			Log::Instance.LogErr(TAGUTILS, "Error while reading directory: %d", errno);
 
+			closedir(Root);
+
 			return Files;
 		};
 
@@ -403,11 +405,7 @@ namespace FlamingTorch
 	{
 		std::string Directory = Path(_Directory).FullPath();
 
-#if FLPLATFORM_WINDOWS
         bool result = _mkdir(Directory.c_str()) == 0;
-#else
-		bool result = mkdir(Directory.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) == 0;
-#endif
         
         if(!result)
 		{
@@ -447,6 +445,8 @@ namespace FlamingTorch
                     {
                         Log::Instance.LogDebug(TAGUTILS, "Failed to remove subdirectory %s/%s", Directory.c_str(), FileName.c_str());
 
+						closedir(Root);
+
                         return false;
                     };
                 }
@@ -455,6 +455,8 @@ namespace FlamingTorch
 					if(!FileSystemUtils::RemoveFile(Path(Directory + "/" + FileName).FullPath()))
                     {
                         Log::Instance.LogDebug(TAGUTILS, "Failed to remove file %s/%s", Directory.c_str(), FileName.c_str());
+
+						closedir(Root);
                         
                         return false;
                     };

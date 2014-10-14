@@ -39,7 +39,7 @@ namespace FlamingTorch
 		};
 	};
 
-	DijkstraField::DijkstraField(uint32 _EdgeMode) : EdgeMode(_EdgeMode)
+	DijkstraField::DijkstraField(uint32 _EdgeMode) : EdgeMode(_EdgeMode), UserData(NULL)
 	{
 		NodeIsValidFunction = NULL;
 	};

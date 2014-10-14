@@ -436,7 +436,7 @@ public:
 		SuperSmartPointer<Stream> PackageStream;
 		uint64 OriginalOffset;
 
-		Package() : HasBeenTampered(false) {};
+		Package() : HasBeenTampered(false), OriginalOffset(0) {};
 		~Package();
 
 		bool Serialize(Stream *Out);
@@ -457,7 +457,7 @@ public:
 		SuperSmartPointer<Stream> Source;
 		uint64 StartOffset, PositionValue, LengthValue;
 
-		PackageStream() {};
+		PackageStream() : StartOffset(0), PositionValue(0), LengthValue(0) {};
 		uint64 Length() const;
 		uint64 Position() const;
 		bool Seek(uint64 Position);

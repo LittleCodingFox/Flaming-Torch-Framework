@@ -209,7 +209,7 @@ public:
 
 		static InfoNameMap Names;
 
-		MouseButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false) {};
+		MouseButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false), Name(0) {};
 
 		std::string NameAsString() const;
 	};
@@ -223,7 +223,7 @@ public:
 		uint8 Name, JoystickIndex;
 		bool Pressed, JustPressed, JustReleased, FirstPress;
 
-		JoystickButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false) {};
+		JoystickButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false), Name(0) {};
 
 		std::string NameAsString() const;
 	};
@@ -239,7 +239,7 @@ public:
 
 		static InfoNameMap Names;
 
-		JoystickAxisInfo() {};
+		JoystickAxisInfo() : Name(0), JoystickIndex(0), Position(0) {};
 
 		std::string NameAsString() const;
 	};
@@ -270,7 +270,7 @@ public:
 		uint8 CurrentSequenceIndex;
 
 		Action() : Type(InputActionType::Keyboard), Index(0), SecondaryIndex(0), MaxTimeBetweenSequenceKeyPresses(0),
-			LastSequenceTime(0), CurrentSequenceIndex(0) {};
+			LastSequenceTime(0), CurrentSequenceIndex(0), PositiveValues(false) {};
 		KeyInfo *Key() const;
 		MouseButtonInfo *MouseButton() const;
 		JoystickButtonInfo *JoystickButton() const;

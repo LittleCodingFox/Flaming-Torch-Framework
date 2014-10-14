@@ -61,7 +61,7 @@ public:
 	/*!
 	*	\return the size in pixels or units of each chunk (separately)
 	*/
-	virtual const Vector3 &ChunkSize() = 0;
+	virtual Vector3 ChunkSize() = 0;
 
 	/*!
 	*	Inform the streamer whether a specific chunk can be loaded
@@ -141,7 +141,7 @@ public:
 		};
 	};
 
-	const Vector3 &ChunkSize()
+	Vector3 ChunkSize()
 	{
 		if(ChunkSizeFunction)
 		{
@@ -155,8 +155,7 @@ public:
 			};
 		};
 
-		static Vector3 Zero;
-		return Zero;
+		return Vector3();
 	};
 
 	bool ChunkNeedsLoad(const Vector3 &GlobalCoordinate)

@@ -30,7 +30,7 @@ public:
 	sf::Mutex Lock;
 
 private:
-	Profiler() : SubSystem(PROFILER_PRIORITY) {};
+	Profiler() : SubSystem(PROFILER_PRIORITY), UpdateTimer(0) {};
 public:
 	static Profiler Instance;
 

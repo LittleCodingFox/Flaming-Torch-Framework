@@ -108,24 +108,24 @@ namespace RendererEventType
 {
 	enum RendererEventType
 	{
-		JoystickConnected,
-		JoystickDisconnected,
-		JoystickButtonPressed,
-		JoystickButtonReleased,
-		JoystickAxisMoved,
-		MouseMoved,
-		MouseButtonPressed,
-		MouseButtonReleased,
-		MouseDeltaMoved,
-		KeyPressed,
-		KeyReleased,
-		CharacterEntered,
-		WindowGotFocus,
-		WindowLostFocus,
-		WindowResized,
-		WindowClosed,
-		MouseLeft,
-		MouseEntered
+		JoystickConnected, //!<Joystick Connected
+		JoystickDisconnected, //!Joystick Disconnected
+		JoystickButtonPressed, //!<Joystick Button Pressed
+		JoystickButtonReleased, //!<Joystick Button Released
+		JoystickAxisMoved, //!<Joystick Axis Moved
+		MouseMoved, //!<Mouse Moved
+		MouseButtonPressed, //!<Mouse Button Pressed
+		MouseButtonReleased, //!<Mouse Button Released
+		MouseDeltaMoved, //!<Mouse Delta (Wheel) Moved
+		KeyPressed, //!<Key Pressed
+		KeyReleased, //!<Key Released
+		CharacterEntered, //!<Character Entered
+		WindowGotFocus, //!<Window Gained Focus 
+		WindowLostFocus, //!<Window Lost Focus
+		WindowResized, //!<Window was Resized
+		WindowClosed, //!<Window was Closed
+		MouseLeft, //!<Mouse has left
+		MouseEntered //!<Mouse has entered
 	};
 };
 
@@ -189,6 +189,8 @@ public:
 	*	Joystick Index
 	*/
 	uint8 JoystickIndex;
+
+	RendererEvent() : Type(0), MouseDelta(0), JoystickAxisPosition(0), TypedCharacter(0), KeyCode(0), MouseButtonIndex(0), JoystickAxisIndex(0), JoystickButtonIndex(0), JoystickIndex(0) {};
 };
 
 /*!
@@ -232,6 +234,9 @@ public:
 
 	//!Renderer Custom Message
 	std::string RendererCustomMessage;
+
+	RendererFrameStats() : DrawCalls(0), VertexCount(0), TextureChanges(0), MatrixChanges(0), ClippingChanges(0),
+		StateChanges(0), TotalResources(0), TotalResourceUsage(0), SkippedDrawCalls(0) {};
 
 	/*!
 	*	Clears the statistics
