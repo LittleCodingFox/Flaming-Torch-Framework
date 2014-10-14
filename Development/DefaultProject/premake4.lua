@@ -79,6 +79,8 @@ solution "DefaultProject"
 			if os.get() == "linux" then
 				defines({ "__LINUX__" })
 				links { "GL", "GLU", "GLEW", "FlamingDependenciesd", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -112,6 +114,8 @@ solution "DefaultProject"
 			if os.get() == "linux" then
 				defines({ "__LINUX__" })
 				links { "GL", "GLU", "GLEW", "FlamingDependencies", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then

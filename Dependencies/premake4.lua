@@ -154,7 +154,7 @@ solution "Dependencies"
 					"Source/SFML/Headers/libsndfile/osx/"
 				}
 		
-				--buildoptions { "-std=c++11" }
+				buildoptions { "-std=c++0x" }
 			end
 
 			flags { "Symbols" }
@@ -185,7 +185,7 @@ solution "Dependencies"
 					"Source/SFML/Headers/libsndfile/osx/"
 				}
 		
-				--buildoptions { "-std=c++11" }
+				buildoptions { "-std=c++0x" }
 			end
 
 			flags { "Optimize" }

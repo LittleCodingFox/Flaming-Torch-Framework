@@ -74,6 +74,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
+				
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -96,6 +98,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -175,6 +179,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -197,6 +203,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -276,6 +284,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -298,6 +308,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -377,6 +389,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
@@ -399,6 +413,8 @@ solution "Tools"
 			if os.get() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
+
+				buildoptions { "-std=c++0x" }
 			end
 		
 			if os.get() == "macosx" then
