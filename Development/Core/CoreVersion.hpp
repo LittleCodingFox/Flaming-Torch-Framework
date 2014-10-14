@@ -87,9 +87,6 @@ namespace FlamingTorch
 		};
 	};
 
-	//Travis Test...
-	std::shared_ptr<int> potato;
-
 	template<typename type>
 	class SuperSmartPointer : public std::shared_ptr<DisposableResource<type> >
 	{
@@ -105,12 +102,12 @@ namespace FlamingTorch
 
 		inline type *Get()
 		{
-			return get() != NULL ? get()->Get() : NULL;
+			return this->get() != NULL ? this->get()->Get() : NULL;
 		};
 
 		inline const type *Get() const
 		{
-			return get() != NULL ? get()->Get() : NULL;
+			return this->get() != NULL ? this->get()->Get() : NULL;
 		};
 
 		inline type *operator->()
@@ -155,15 +152,15 @@ namespace FlamingTorch
 
 		inline void Dispose()
 		{
-			if(get())
+			if(this->get())
 			{
-				get()->Dispose();
+				this->get()->Dispose();
 			};
 		};
 
 		inline void Reset(type *New)
 		{
-			reset(new DisposableResource<type>(New));
+			this->reset(new DisposableResource<type>(New));
 		};
 
 		template<typename OutType>
