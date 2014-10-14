@@ -37,7 +37,7 @@ namespace FlamingTorch
 	template<typename type>
 	class DisposableResource
 	{
-		template<typename type>
+		template<typename othertype>
 		friend class SuperSmartPointer;
 	private:
 		type *ContainedObject;
