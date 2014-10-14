@@ -87,6 +87,9 @@ namespace FlamingTorch
 		};
 	};
 
+	//Travis Test...
+	std::shared_ptr<int> potato;
+
 	template<typename type>
 	class SuperSmartPointer : public std::shared_ptr<DisposableResource<type> >
 	{
