@@ -1,8 +1,16 @@
 #pragma once
+#if __WORDSIZE == 64
+#	define FLPLATFORM_64BITS 1
+#else
+#	define FLPLATFORM_64BITS 0
+#endif
+
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-#	if defined (_WIN32) || defined (WIN32)
+#	if defined (_WIN32)
 #		define FLPLATFORM_WIN32 1
-#	else
+#	endif
+#
+#	if defined (WIN32)
 #		define FLPLATFORM_WIN64 1
 #	endif
 #
