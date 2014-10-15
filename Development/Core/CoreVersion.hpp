@@ -1,5 +1,6 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
+#include <stdint.h>
 #include "Platform.hpp"
 #include "Common.hpp"
 #include <string.h>

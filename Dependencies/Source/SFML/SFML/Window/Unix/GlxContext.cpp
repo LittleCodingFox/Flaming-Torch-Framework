@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -25,12 +25,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#define GLX_GLXEXT_LEGACY // so that our local glxext.h is used instead of the system one
 #include <SFML/Window/Unix/GlxContext.hpp>
 #include <SFML/Window/Unix/WindowImplX11.hpp>
 #include <SFML/Window/Unix/Display.hpp>
 #include <SFML/OpenGL.hpp>
-#include <SFML/Window/glext/glxext.h>
 #include <SFML/System/Err.hpp>
 
 
@@ -165,7 +163,7 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
     XVisualInfo* visuals = XGetVisualInfo(display, 0, NULL, &count);
     if (visuals)
     {
-        // Evaluate all the returned visuals, and pick the best one1
+        // Evaluate all the returned visuals, and pick the best one
         int bestScore = 0xFFFF;
         XVisualInfo bestVisual;
         for (int i = 0; i < count; ++i)
@@ -236,10 +234,10 @@ void GlxContext::createContext(GlxContext* shared, unsigned int bitsPerPixel, co
             int nbConfigs = 0;
             int fbAttributes[] =
             {
-                GLX_DEPTH_SIZE, settings.depthBits,
-                GLX_STENCIL_SIZE, settings.stencilBits,
+                GLX_DEPTH_SIZE, static_cast<int>(settings.depthBits),
+                GLX_STENCIL_SIZE, static_cast<int>(settings.stencilBits),
                 GLX_SAMPLE_BUFFERS, settings.antialiasingLevel > 0,
-                GLX_SAMPLES, settings.antialiasingLevel,
+                GLX_SAMPLES, static_cast<int>(settings.antialiasingLevel),
                 GLX_RED_SIZE, 8,
                 GLX_GREEN_SIZE, 8,
                 GLX_BLUE_SIZE, 8,

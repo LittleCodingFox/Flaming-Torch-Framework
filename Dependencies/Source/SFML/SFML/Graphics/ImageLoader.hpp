@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -46,7 +46,7 @@ namespace priv
 ////////////////////////////////////////////////////////////
 class ImageLoader : NonCopyable
 {
-public :
+public:
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the unique instance of the class
@@ -94,7 +94,7 @@ public :
     bool loadImageFromStream(InputStream& stream, std::vector<Uint8>& pixels, Vector2u& size);
 
     ////////////////////////////////////////////////////////////
-    /// \bref Save an array of pixels as an image file
+    /// \brief Save an array of pixels as an image file
     ///
     /// \param filename Path of image file to save
     /// \param pixels   Array of pixels to save to image
@@ -105,7 +105,7 @@ public :
     ////////////////////////////////////////////////////////////
     bool saveImageToFile(const std::string& filename, const std::vector<Uint8>& pixels, const Vector2u& size);
 
-private :
+private:
 
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor

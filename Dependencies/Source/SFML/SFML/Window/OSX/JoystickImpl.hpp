@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Marco Antognini (antognini.marco@gmail.com),
+// Copyright (C) 2007-2014 Marco Antognini (antognini.marco@gmail.com),
 //                         Laurent Gomila (laurent.gom@gmail.com),
 //
 // This software is provided 'as-is', without any express or implied warranty.
@@ -30,7 +30,10 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/JoystickImpl.hpp>
+#include <SFML/System/String.hpp>
+#include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/hid/IOHIDDevice.h>
+#include <IOKit/hid/IOHIDKeys.h>
 #include <map>
 #include <vector>
 
@@ -44,7 +47,7 @@ namespace priv
 ////////////////////////////////////////////////////////////
 class JoystickImpl
 {
-public :
+public:
 
     ////////////////////////////////////////////////////////////
     /// \brief Perform the global initialization of the joystick module
@@ -93,6 +96,14 @@ public :
     JoystickCaps getCapabilities() const;
 
     ////////////////////////////////////////////////////////////
+    /// \brief Get the joystick identification
+    ///
+    /// \return Joystick identification
+    ///
+    ////////////////////////////////////////////////////////////
+    Joystick::Identification getIdentification() const;
+
+    ////////////////////////////////////////////////////////////
     /// \brief Update the joystick and get its new state
     ///
     /// \return Joystick state
@@ -100,7 +111,7 @@ public :
     ////////////////////////////////////////////////////////////
     JoystickState update();
 
-private :
+private:
 
     ////////////////////////////////////////////////////////////
     // Member data
@@ -109,9 +120,10 @@ private :
     typedef std::map<sf::Joystick::Axis, IOHIDElementRef> AxisMap;
     typedef std::vector<IOHIDElementRef>                  ButtonsVector;
 
-    AxisMap       m_axis;    ///< Axis (IOHIDElementRef) connected to the joystick
-    ButtonsVector m_buttons; ///< Buttons (IOHIDElementRef) connected to the joystick
-    unsigned int  m_index;   ///< SFML index
+    AxisMap                  m_axis;           ///< Axis (IOHIDElementRef) connected to the joystick
+    ButtonsVector            m_buttons;        ///< Buttons (IOHIDElementRef) connected to the joystick
+    unsigned int             m_index;          ///< SFML index
+    Joystick::Identification m_identification; ///< Joystick identification
 
     static Location m_locationIDs[sf::Joystick::Count]; ///< Global Joystick register
     /// For a corresponding SFML index, m_locationIDs is either some usb

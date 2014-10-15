@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -109,9 +109,16 @@ void Window::create(VideoMode mode, const String& title, Uint32 style, const Con
         }
     }
 
-    // Check validity of style
-    if ((style & Style::Close) || (style & Style::Resize))
-        style |= Style::Titlebar;
+    // Check validity of style according to the underlying platform
+    #if defined(SFML_SYSTEM_IOS) || defined(SFML_SYSTEM_ANDROID)
+        if (style & Style::Fullscreen)
+            style &= ~Style::Titlebar;
+        else
+            style |= Style::Titlebar;
+    #else
+        if ((style & Style::Close) || (style & Style::Resize))
+            style |= Style::Titlebar;
+    #endif
 
     // Recreate the window implementation
     m_impl = priv::WindowImpl::create(mode, title, style, settings);
@@ -144,19 +151,13 @@ void Window::create(WindowHandle handle, const ContextSettings& settings)
 ////////////////////////////////////////////////////////////
 void Window::close()
 {
-    if (m_context)
-    {
-        // Delete the context
-        delete m_context;
-        m_context = NULL;
-    }
+    // Delete the context
+    delete m_context;
+    m_context = NULL;
 
-    if (m_impl)
-    {
-        // Delete the window implementation
-        delete m_impl;
-        m_impl = NULL;
-    }
+    // Delete the window implementation
+    delete m_impl;
+    m_impl = NULL;
 
     // Update the fullscreen window
     if (this == fullscreenWindow)
@@ -336,6 +337,22 @@ bool Window::setActive(bool active) const
 
 
 ////////////////////////////////////////////////////////////
+void Window::requestFocus()
+{
+    if (m_impl)
+        m_impl->requestFocus();
+}
+
+
+////////////////////////////////////////////////////////////
+bool Window::hasFocus() const
+{
+    return m_impl && m_impl->hasFocus();
+}
+
+
+////////////////////////////////////////////////////////////
+
 void Window::display()
 {
     // Display the backbuffer on screen
@@ -398,6 +415,7 @@ void Window::initialize()
     setMouseCursorVisible(true);
     setVerticalSyncEnabled(false);
     setKeyRepeatEnabled(true);
+    setFramerateLimit(0);
 
     // Get and cache the initial size of the window
     m_size = m_impl->getSize();

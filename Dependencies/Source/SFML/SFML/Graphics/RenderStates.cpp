@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -32,7 +32,11 @@
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-const RenderStates RenderStates::Default;
+// We cannot use the default constructor here, because it accesses BlendAlpha, which is also global (and dynamically
+// initialized). Initialization order of global objects in different translation units is not defined.
+const RenderStates RenderStates::Default(BlendMode(
+    BlendMode::SrcAlpha, BlendMode::OneMinusSrcAlpha, BlendMode::Add,
+    BlendMode::One, BlendMode::OneMinusSrcAlpha, BlendMode::Add));
 
 
 ////////////////////////////////////////////////////////////
@@ -56,7 +60,7 @@ shader   (NULL)
 
 
 ////////////////////////////////////////////////////////////
-RenderStates::RenderStates(BlendMode theBlendMode) :
+RenderStates::RenderStates(const BlendMode& theBlendMode) :
 blendMode(theBlendMode),
 transform(),
 texture  (NULL),
@@ -86,7 +90,7 @@ shader   (theShader)
 
 
 ////////////////////////////////////////////////////////////
-RenderStates::RenderStates(BlendMode theBlendMode, const Transform& theTransform,
+RenderStates::RenderStates(const BlendMode& theBlendMode, const Transform& theTransform,
                            const Texture* theTexture, const Shader* theShader) :
 blendMode(theBlendMode),
 transform(theTransform),

@@ -890,6 +890,8 @@ namespace FlamingTorch
 		glLoadMatrixf(&WorldMatrix.m[0][0]);
 
 		GLCHECK();
+
+		LastWorldMatrix = WorldMatrix;
 	};
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
@@ -902,6 +904,8 @@ namespace FlamingTorch
 		glMatrixMode(GL_MODELVIEW);
 
 		GLCHECK();
+
+		LastProjectionMatrix = ProjectionMatrix;
 	};
 
 	void SFMLRendererImplementation::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
@@ -1528,6 +1532,7 @@ namespace FlamingTorch
 			Style |= sf::Text::Underlined;
 		};
 
+		Window.pushGLStates();
 		Text.setFont(*FontIterator->second.ActualFont);
 		Text.setCharacterSize(Parameters.FontSizeValue);
 		Text.setColor(ActualTextColor);
@@ -1536,6 +1541,7 @@ namespace FlamingTorch
 		Text.setBorderSize(Parameters.BorderSizeValue);
 		Text.setString(TheText);
 		Text.setStyle(Style);
+		Window.popGLStates();
 
 		const sf::VertexArray &Vertices = Text.getVertices();
 
@@ -1611,7 +1617,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::FlushRenderText()
 	{
-		if(UniqueCacheStringID == 0 || TheRenderTextCache.Positions.size() == 0 || TheRenderTextCache.TheTexture == NULL)
+		if(UniqueCacheStringID == 0 || TheRenderTextCache.Positions.size() == 0)
 			return;
 
 		FrameStatsValue.DrawCalls++;
@@ -1633,7 +1639,8 @@ namespace FlamingTorch
 
 		BindTexture((TextureHandle)0);
 
-		sf::Texture::bind(TheRenderTextCache.TheTexture);
+		if(TheRenderTextCache.TheTexture)
+			sf::Texture::bind(TheRenderTextCache.TheTexture);
 
 		EnableState(GL_VERTEX_ARRAY);
 		EnableState(GL_TEXTURE_COORD_ARRAY);

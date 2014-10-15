@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Marco Antognini (antognini.marco@gmail.com),
+// Copyright (C) 2007-2014 Marco Antognini (antognini.marco@gmail.com),
 //                         Laurent Gomila (laurent.gom@gmail.com),
 //
 // This software is provided 'as-is', without any express or implied warranty.
@@ -56,30 +56,31 @@
 
     // Set the main menu bar
     NSMenu* mainMenu = [NSApp mainMenu];
-    if (mainMenu != nil) return;
-    mainMenu = [[NSMenu alloc] initWithTitle:@""];
+    if (mainMenu != nil)
+        return;
+    mainMenu = [[[NSMenu alloc] initWithTitle:@""] autorelease];
     [NSApp setMainMenu:mainMenu];
 
     // Application Menu (aka Apple Menu)
     NSMenuItem* appleItem = [mainMenu addItemWithTitle:@"" action:nil keyEquivalent:@""];
-    NSMenu* appleMenu = [[SFApplication createAppleMenu] autorelease];
+    NSMenu* appleMenu = [[SFApplication newAppleMenu] autorelease];
     [appleItem setSubmenu:appleMenu];
 
     // File Menu
     NSMenuItem* fileItem = [mainMenu addItemWithTitle:@"" action:nil keyEquivalent:@""];
-    NSMenu* fileMenu = [[SFApplication createFileMenu] autorelease];
+    NSMenu* fileMenu = [[SFApplication newFileMenu] autorelease];
     [fileItem setSubmenu:fileMenu];
 
     // Window menu
     NSMenuItem* windowItem = [mainMenu addItemWithTitle:@"" action:nil keyEquivalent:@""];
-    NSMenu* windowMenu = [[SFApplication createWindowMenu] autorelease];
+    NSMenu* windowMenu = [[SFApplication newWindowMenu] autorelease];
     [windowItem setSubmenu:windowMenu];
     [NSApp setWindowsMenu:windowMenu];
 }
 
 
 ////////////////////////////////////////////////////////
-+(NSMenu *)createAppleMenu
++(NSMenu*)newAppleMenu
 {
     // Apple menu is as follow:
     //
@@ -158,7 +159,7 @@
 
 
 ////////////////////////////////////////////////////////
-+(NSMenu *)createFileMenu
++(NSMenu*)newFileMenu
 {
     // The File menu is as follow:
     //
@@ -180,7 +181,7 @@
 
 
 ////////////////////////////////////////////////////////
-+(NSMenu *)createWindowMenu
++(NSMenu*)newWindowMenu
 {
     // The Window menu is as follow:
     //
@@ -218,20 +219,18 @@
 
 
 ////////////////////////////////////////////////////////
-+(NSString *)applicationName
++(NSString*)applicationName
 {
     // First, try localized name
     NSString* appName = [[[NSBundle mainBundle] localizedInfoDictionary] objectForKey:@"CFBundleDisplayName"];
 
     // Then, try non-localized name
-    if (appName == nil || [appName length] == 0) {
+    if ((appName == nil) || ([appName length] == 0))
         appName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
-    }
 
     // Finally, fallback to the process info
-    if (appName == nil || [appName length] == 0) {
+    if ((appName == nil) || ([appName length] == 0))
         appName = [[NSProcessInfo processInfo] processName];
-    }
 
     return appName;
 }
@@ -240,6 +239,7 @@
 ////////////////////////////////////////////////////////
 -(void)bringAllToFront:(id)sender
 {
+    (void)sender;
     [[NSApp windows] makeObjectsPerformSelector:@selector(orderFrontRegardless)];
 }
 
@@ -252,8 +252,8 @@
     // custom OpenGL view. See -[SFOpenGLView sfKeyUp:] for more details.
 
     id firstResponder = [[anEvent window] firstResponder];
-    if ([anEvent type] != NSKeyUp
-        || ![firstResponder tryToPerform:@selector(sfKeyUp:) with:anEvent]) {
+    if (([anEvent type] != NSKeyUp) || (![firstResponder tryToPerform:@selector(sfKeyUp:) with:anEvent]))
+    {
         // It's either not a key up event or no responder has a sfKeyUp
         // message implemented.
         [super sendEvent:anEvent];

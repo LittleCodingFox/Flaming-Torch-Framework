@@ -58,7 +58,9 @@ solution "Dependencies"
 
 		excludes {
 			"Source/lua/luac.c", 
-			"Source/lua/lua.c"
+			"Source/lua/lua.c",
+			"Source/SFML/SFML/Window/EGL*.cpp",
+			"Source/SFML/SFML/Window/Egl*.cpp"
 		}
 		
 		files {

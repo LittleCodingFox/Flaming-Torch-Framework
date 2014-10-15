@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Marco Antognini (antognini.marco@gmail.com),
+// Copyright (C) 2007-2014 Marco Antognini (antognini.marco@gmail.com),
 //                         Laurent Gomila (laurent.gom@gmail.com),
 //
 // This software is provided 'as-is', without any express or implied warranty.
@@ -24,28 +24,26 @@
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-/// \brief Ensure at least one autorelease pool is available on this thread.
+/// \brief Ensure at least one autorelease pool is available on this thread
 ///
-/// Increment a retain count.
-/// See SPECIAL CONSIDERATION in implementation file.
+/// Increment a retain count for *this* thread.
 ///
 ////////////////////////////////////////////////////////////
 void retainPool(void);
 
 ////////////////////////////////////////////////////////////
+/// \brief Drain the pool
+///
+/// The pool retain count should be absolutely positive before calling this function on this thread.
+///
+////////////////////////////////////////////////////////////
+void drainCurrentPool(void);
+
+////////////////////////////////////////////////////////////
 /// \brief Release the pool.
 ///
-/// Drain the pool if it is no more needed (retain count is zero).
-/// See SPECIAL CONSIDERATION in implementation file.
+/// Decrease the retain count for *this* thread.
 ///
 ////////////////////////////////////////////////////////////
 void releasePool(void);
-
-////////////////////////////////////////////////////////////
-/// \brief Drain the pool.
-///
-/// releasePool must be called at least once before drainPool.
-///
-////////////////////////////////////////////////////////////
-void drainPool();
 

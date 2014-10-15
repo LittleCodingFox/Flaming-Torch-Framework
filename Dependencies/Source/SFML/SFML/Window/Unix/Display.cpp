@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -25,8 +25,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <SFML/System/Err.hpp>
 #include <SFML/Window/Unix/Display.hpp>
 #include <cassert>
+#include <cstdlib>
 
 
 namespace
@@ -44,7 +46,18 @@ namespace priv
 Display* OpenDisplay()
 {
     if (referenceCount == 0)
+    {
         sharedDisplay = XOpenDisplay(NULL);
+
+        // Opening display failed: The best we can do at the moment is to output a meaningful error message
+        // and cause an abnormal program termination
+        if (!sharedDisplay)
+        {
+            err() << "Failed to open X11 display; make sure the DISPLAY environment variable is set correctly" << std::endl;
+            std::abort();
+        }
+    }
+
     referenceCount++;
     return sharedDisplay;
 }

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -33,6 +33,7 @@
 #endif
 #define _WIN32_WINDOWS 0x0501
 #define _WIN32_WINNT   0x0501
+#define WINVER         0x0501
 #include <SFML/Window/Win32/WindowImplWin32.hpp>
 #include <SFML/Window/WindowStyle.hpp>
 #include <GL/gl.h>
@@ -57,6 +58,61 @@ namespace
     unsigned int               windowCount      = 0;
     const wchar_t*             className        = L"SFML_Window";
     sf::priv::WindowImplWin32* fullscreenWindow = NULL;
+
+    void setProcessDpiAware()
+    {
+        // Try SetProcessDpiAwareness first
+        HINSTANCE shCoreDll = LoadLibrary(L"Shcore.dll");
+
+        if (shCoreDll)
+        {
+            enum ProcessDpiAwareness
+            {
+                ProcessDpiUnaware         = 0,
+                ProcessSystemDpiAware     = 1,
+                ProcessPerMonitorDpiAware = 2
+            };
+
+            typedef HRESULT (WINAPI* SetProcessDpiAwarenessFuncType)(ProcessDpiAwareness);
+            SetProcessDpiAwarenessFuncType SetProcessDpiAwarenessFunc = reinterpret_cast<SetProcessDpiAwarenessFuncType>(GetProcAddress(shCoreDll, "SetProcessDpiAwareness"));
+
+            if (SetProcessDpiAwarenessFunc)
+            {
+                // We only check for E_INVALIDARG because we would get
+                // E_ACCESSDENIED if the DPI was already set previously
+                // and S_OK means the call was successful
+                if (SetProcessDpiAwarenessFunc(ProcessSystemDpiAware) == E_INVALIDARG)
+                {
+                    sf::err() << "Failed to set process DPI awareness" << std::endl;
+                }
+                else
+                {
+                    FreeLibrary(shCoreDll);
+                    return;
+                }
+            }
+
+            FreeLibrary(shCoreDll);
+        }
+
+        // Fall back to SetProcessDPIAware if SetProcessDpiAwareness
+        // is not available on this system
+        HINSTANCE user32Dll = LoadLibrary(L"user32.dll");
+
+        if (user32Dll)
+        {
+            typedef BOOL (WINAPI* SetProcessDPIAwareFuncType)(void);
+            SetProcessDPIAwareFuncType SetProcessDPIAwareFunc = reinterpret_cast<SetProcessDPIAwareFuncType>(GetProcAddress(user32Dll, "SetProcessDPIAware"));
+
+            if (SetProcessDPIAwareFunc)
+            {
+                if (!SetProcessDPIAwareFunc())
+                    sf::err() << "Failed to set process DPI awareness" << std::endl;
+            }
+
+            FreeLibrary(user32Dll);
+        }
+    }
 }
 
 namespace sf
@@ -75,11 +131,14 @@ m_resizing        (false),
 m_surrogate       (0),
 m_mouseInside     (false)
 {
+    // Set that this process is DPI aware and can handle DPI scaling
+    setProcessDpiAware();
+
     if (m_handle)
     {
         // We change the event procedure of the control (it is important to save the old one)
-        SetWindowLongPtr(m_handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-        m_callback = SetWindowLongPtr(m_handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&WindowImplWin32::globalOnEvent));
+        SetWindowLongPtrW(m_handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+        m_callback = SetWindowLongPtrW(m_handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&WindowImplWin32::globalOnEvent));
     }
 }
 
@@ -96,6 +155,9 @@ m_resizing        (false),
 m_surrogate       (0),
 m_mouseInside     (false)
 {
+    // Set that this process is DPI aware and can handle DPI scaling
+    setProcessDpiAware();
+
     // Register the window class at first call
     if (windowCount == 0)
         registerWindowClass();
@@ -132,7 +194,7 @@ m_mouseInside     (false)
     }
 
     // Create the window
-    m_handle = CreateWindow(className, title.toWideString().c_str(), win32Style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), this);
+    m_handle = CreateWindowW(className, title.toWideString().c_str(), win32Style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), this);
 
     // By default, the OS limits the size of the window the the desktop size,
     // we have to resize it after creation to apply the real size
@@ -165,12 +227,12 @@ WindowImplWin32::~WindowImplWin32()
 
         // Unregister window class if we were the last window
         if (windowCount == 0)
-            UnregisterClass(className, GetModuleHandle(NULL));
+            UnregisterClassW(className, GetModuleHandleW(NULL));
     }
     else
     {
-        // The window is external : remove the hook on its message callback
-        SetWindowLongPtr(m_handle, GWLP_WNDPROC, m_callback);
+        // The window is external: remove the hook on its message callback
+        SetWindowLongPtrW(m_handle, GWLP_WNDPROC, m_callback);
     }
 }
 
@@ -189,10 +251,10 @@ void WindowImplWin32::processEvents()
     if (!m_callback)
     {
         MSG message;
-        while (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
+        while (PeekMessageW(&message, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&message);
-            DispatchMessage(&message);
+            DispatchMessageW(&message);
         }
     }
 }
@@ -242,7 +304,7 @@ void WindowImplWin32::setSize(const Vector2u& size)
 ////////////////////////////////////////////////////////////
 void WindowImplWin32::setTitle(const String& title)
 {
-    SetWindowText(m_handle, title.toWideString().c_str());
+    SetWindowTextW(m_handle, title.toWideString().c_str());
 }
 
 
@@ -264,13 +326,13 @@ void WindowImplWin32::setIcon(unsigned int width, unsigned int height, const Uin
     }
 
     // Create the icon from the pixel array
-    m_icon = CreateIcon(GetModuleHandle(NULL), width, height, 1, 32, NULL, &iconPixels[0]);
+    m_icon = CreateIcon(GetModuleHandleW(NULL), width, height, 1, 32, NULL, &iconPixels[0]);
 
     // Set it as both big and small icon of the window
     if (m_icon)
     {
-        SendMessage(m_handle, WM_SETICON, ICON_BIG,   (LPARAM)m_icon);
-        SendMessage(m_handle, WM_SETICON, ICON_SMALL, (LPARAM)m_icon);
+        SendMessageW(m_handle, WM_SETICON, ICON_BIG,   (LPARAM)m_icon);
+        SendMessageW(m_handle, WM_SETICON, ICON_SMALL, (LPARAM)m_icon);
     }
     else
     {
@@ -290,7 +352,7 @@ void WindowImplWin32::setVisible(bool visible)
 void WindowImplWin32::setMouseCursorVisible(bool visible)
 {
     if (visible)
-        m_cursor = LoadCursor(NULL, IDC_ARROW);
+        m_cursor = LoadCursorW(NULL, IDC_ARROW);
     else
         m_cursor = NULL;
 
@@ -306,6 +368,40 @@ void WindowImplWin32::setKeyRepeatEnabled(bool enabled)
 
 
 ////////////////////////////////////////////////////////////
+void WindowImplWin32::requestFocus()
+{
+    // Allow focus stealing only within the same process; compare PIDs of current and foreground window
+    DWORD thisPid       = GetWindowThreadProcessId(m_handle, NULL);
+    DWORD foregroundPid = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+     
+    if (thisPid == foregroundPid)
+    {
+        // The window requesting focus belongs to the same process as the current window: steal focus
+        SetForegroundWindow(m_handle);
+    }
+    else
+    {
+        // Different process: don't steal focus, but create a taskbar notification ("flash")
+        FLASHWINFO info;
+        info.cbSize    = sizeof(info);
+        info.hwnd      = m_handle;
+        info.dwFlags   = FLASHW_TRAY;
+        info.dwTimeout = 0;
+        info.uCount    = 3;
+
+        FlashWindowEx(&info);
+    }
+}
+
+
+////////////////////////////////////////////////////////////
+bool WindowImplWin32::hasFocus() const
+{
+    return m_handle == GetForegroundWindow();
+}
+
+
+////////////////////////////////////////////////////////////
 void WindowImplWin32::registerWindowClass()
 {
     WNDCLASSW windowClass;
@@ -313,13 +409,13 @@ void WindowImplWin32::registerWindowClass()
     windowClass.lpfnWndProc   = &WindowImplWin32::globalOnEvent;
     windowClass.cbClsExtra    = 0;
     windowClass.cbWndExtra    = 0;
-    windowClass.hInstance     = GetModuleHandle(NULL);
+    windowClass.hInstance     = GetModuleHandleW(NULL);
     windowClass.hIcon         = NULL;
     windowClass.hCursor       = 0;
     windowClass.hbrBackground = 0;
     windowClass.lpszMenuName  = NULL;
     windowClass.lpszClassName = className;
-    RegisterClass(&windowClass);
+    RegisterClassW(&windowClass);
 }
 
 
@@ -334,15 +430,15 @@ void WindowImplWin32::switchToFullscreen(const VideoMode& mode)
     devMode.dmFields     = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
 
     // Apply fullscreen mode
-    if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+    if (ChangeDisplaySettingsW(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
     {
         err() << "Failed to change display mode for fullscreen" << std::endl;
         return;
     }
 
     // Make the window flags compatible with fullscreen mode
-    SetWindowLong(m_handle, GWL_STYLE, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-    SetWindowLong(m_handle, GWL_EXSTYLE, WS_EX_APPWINDOW);
+    SetWindowLongW(m_handle, GWL_STYLE, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+    SetWindowLongW(m_handle, GWL_EXSTYLE, WS_EX_APPWINDOW);
 
     // Resize the window so that it fits the entire screen
     SetWindowPos(m_handle, HWND_TOP, 0, 0, mode.width, mode.height, SWP_FRAMECHANGED);
@@ -359,7 +455,7 @@ void WindowImplWin32::cleanup()
     // Restore the previous video mode (in case we were running in fullscreen)
     if (fullscreenWindow == this)
     {
-        ChangeDisplaySettings(NULL, 0);
+        ChangeDisplaySettingsW(NULL, 0);
         fullscreenWindow = NULL;
     }
 
@@ -396,7 +492,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
         // Destroy event
-        case WM_DESTROY :
+        case WM_DESTROY:
         {
             // Here we must cleanup resources !
             cleanup();
@@ -404,7 +500,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Set cursor event
-        case WM_SETCURSOR :
+        case WM_SETCURSOR:
         {
             // The mouse has moved, if the cursor is in our window we must refresh the cursor
             if (LOWORD(lParam) == HTCLIENT)
@@ -414,7 +510,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Close event
-        case WM_CLOSE :
+        case WM_CLOSE:
         {
             Event event;
             event.type = Event::Closed;
@@ -423,7 +519,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Resize event
-        case WM_SIZE :
+        case WM_SIZE:
         {
             // Consider only events triggered by a maximize or a un-maximize
             if (wParam != SIZE_MINIMIZED && !m_resizing && m_lastSize != getSize())
@@ -442,14 +538,14 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Start resizing
-        case WM_ENTERSIZEMOVE :
+        case WM_ENTERSIZEMOVE:
         {
             m_resizing = true;
             break;
         }
 
         // Stop resizing
-        case WM_EXITSIZEMOVE :
+        case WM_EXITSIZEMOVE:
         {
             m_resizing = false;
 
@@ -470,7 +566,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // The system request the min/max window size and position
-        case WM_GETMINMAXINFO :
+        case WM_GETMINMAXINFO:
         {
             // We override the returned information to remove the default limit
             // (the OS doesn't allow windows bigger than the desktop by default)
@@ -481,7 +577,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Gain focus event
-        case WM_SETFOCUS :
+        case WM_SETFOCUS:
         {
             Event event;
             event.type = Event::GainedFocus;
@@ -490,7 +586,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Lost focus event
-        case WM_KILLFOCUS :
+        case WM_KILLFOCUS:
         {
             Event event;
             event.type = Event::LostFocus;
@@ -499,7 +595,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Text event
-        case WM_CHAR :
+        case WM_CHAR:
         {
             if (m_keyRepeatEnabled || ((lParam & (1 << 30)) == 0))
             {
@@ -534,8 +630,8 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Keydown event
-        case WM_KEYDOWN :
-        case WM_SYSKEYDOWN :
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
         {
             if (m_keyRepeatEnabled || ((HIWORD(lParam) & KF_REPEAT) == 0))
             {
@@ -552,8 +648,8 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Keyup event
-        case WM_KEYUP :
-        case WM_SYSKEYUP :
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
         {
             Event event;
             event.type        = Event::KeyReleased;
@@ -567,7 +663,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse wheel event
-        case WM_MOUSEWHEEL :
+        case WM_MOUSEWHEEL:
         {
             // Mouse position is in screen coordinates, convert it to window coordinates
             POINT position;
@@ -585,7 +681,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse left button down event
-        case WM_LBUTTONDOWN :
+        case WM_LBUTTONDOWN:
         {
             Event event;
             event.type               = Event::MouseButtonPressed;
@@ -597,7 +693,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse left button up event
-        case WM_LBUTTONUP :
+        case WM_LBUTTONUP:
         {
             Event event;
             event.type               = Event::MouseButtonReleased;
@@ -609,7 +705,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse right button down event
-        case WM_RBUTTONDOWN :
+        case WM_RBUTTONDOWN:
         {
             Event event;
             event.type               = Event::MouseButtonPressed;
@@ -621,7 +717,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse right button up event
-        case WM_RBUTTONUP :
+        case WM_RBUTTONUP:
         {
             Event event;
             event.type               = Event::MouseButtonReleased;
@@ -633,7 +729,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse wheel button down event
-        case WM_MBUTTONDOWN :
+        case WM_MBUTTONDOWN:
         {
             Event event;
             event.type               = Event::MouseButtonPressed;
@@ -645,7 +741,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse wheel button up event
-        case WM_MBUTTONUP :
+        case WM_MBUTTONUP:
         {
             Event event;
             event.type               = Event::MouseButtonReleased;
@@ -657,7 +753,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse X button down event
-        case WM_XBUTTONDOWN :
+        case WM_XBUTTONDOWN:
         {
             Event event;
             event.type               = Event::MouseButtonPressed;
@@ -669,7 +765,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse X button up event
-        case WM_XBUTTONUP :
+        case WM_XBUTTONUP:
         {
             Event event;
             event.type               = Event::MouseButtonReleased;
@@ -681,7 +777,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse leave event
-        case WM_MOUSELEAVE :
+        case WM_MOUSELEAVE:
         {
             // Avoid this firing a second time in case the cursor is dragged outside
             if (m_mouseInside)
@@ -697,7 +793,7 @@ void WindowImplWin32::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Mouse move event
-        case WM_MOUSEMOVE :
+        case WM_MOUSEMOVE:
         {
             // Extract the mouse local coordinates
             int x = static_cast<Int16>(LOWORD(lParam));
@@ -772,9 +868,9 @@ Keyboard::Key WindowImplWin32::virtualKeyCodeToSF(WPARAM key, LPARAM flags)
     switch (key)
     {
         // Check the scancode to distinguish between left and right shift
-        case VK_SHIFT :
+        case VK_SHIFT:
         {
-            static UINT lShift = MapVirtualKey(VK_LSHIFT, MAPVK_VK_TO_VSC);
+            static UINT lShift = MapVirtualKeyW(VK_LSHIFT, MAPVK_VK_TO_VSC);
             UINT scancode = static_cast<UINT>((flags & (0xFF << 16)) >> 16);
             return scancode == lShift ? Keyboard::LShift : Keyboard::RShift;
         }
@@ -786,101 +882,101 @@ Keyboard::Key WindowImplWin32::virtualKeyCodeToSF(WPARAM key, LPARAM flags)
         case VK_CONTROL : return (HIWORD(flags) & KF_EXTENDED) ? Keyboard::RControl : Keyboard::LControl;
 
         // Other keys are reported properly
-        case VK_LWIN :       return Keyboard::LSystem;
-        case VK_RWIN :       return Keyboard::RSystem;
-        case VK_APPS :       return Keyboard::Menu;
-        case VK_OEM_1 :      return Keyboard::SemiColon;
-        case VK_OEM_2 :      return Keyboard::Slash;
-        case VK_OEM_PLUS :   return Keyboard::Equal;
-        case VK_OEM_MINUS :  return Keyboard::Dash;
-        case VK_OEM_4 :      return Keyboard::LBracket;
-        case VK_OEM_6 :      return Keyboard::RBracket;
-        case VK_OEM_COMMA :  return Keyboard::Comma;
-        case VK_OEM_PERIOD : return Keyboard::Period;
-        case VK_OEM_7 :      return Keyboard::Quote;
-        case VK_OEM_5 :      return Keyboard::BackSlash;
-        case VK_OEM_3 :      return Keyboard::Tilde;
-        case VK_ESCAPE :     return Keyboard::Escape;
-        case VK_SPACE :      return Keyboard::Space;
-        case VK_RETURN :     return Keyboard::Return;
-        case VK_BACK :       return Keyboard::BackSpace;
-        case VK_TAB :        return Keyboard::Tab;
-        case VK_PRIOR :      return Keyboard::PageUp;
-        case VK_NEXT :       return Keyboard::PageDown;
-        case VK_END :        return Keyboard::End;
-        case VK_HOME :       return Keyboard::Home;
-        case VK_INSERT :     return Keyboard::Insert;
-        case VK_DELETE :     return Keyboard::Delete;
-        case VK_ADD :        return Keyboard::Add;
-        case VK_SUBTRACT :   return Keyboard::Subtract;
-        case VK_MULTIPLY :   return Keyboard::Multiply;
-        case VK_DIVIDE :     return Keyboard::Divide;
-        case VK_PAUSE :      return Keyboard::Pause;
-        case VK_F1 :         return Keyboard::F1;
-        case VK_F2 :         return Keyboard::F2;
-        case VK_F3 :         return Keyboard::F3;
-        case VK_F4 :         return Keyboard::F4;
-        case VK_F5 :         return Keyboard::F5;
-        case VK_F6 :         return Keyboard::F6;
-        case VK_F7 :         return Keyboard::F7;
-        case VK_F8 :         return Keyboard::F8;
-        case VK_F9 :         return Keyboard::F9;
-        case VK_F10 :        return Keyboard::F10;
-        case VK_F11 :        return Keyboard::F11;
-        case VK_F12 :        return Keyboard::F12;
-        case VK_F13 :        return Keyboard::F13;
-        case VK_F14 :        return Keyboard::F14;
-        case VK_F15 :        return Keyboard::F15;
-        case VK_LEFT :       return Keyboard::Left;
-        case VK_RIGHT :      return Keyboard::Right;
-        case VK_UP :         return Keyboard::Up;
-        case VK_DOWN :       return Keyboard::Down;
-        case VK_NUMPAD0 :    return Keyboard::Numpad0;
-        case VK_NUMPAD1 :    return Keyboard::Numpad1;
-        case VK_NUMPAD2 :    return Keyboard::Numpad2;
-        case VK_NUMPAD3 :    return Keyboard::Numpad3;
-        case VK_NUMPAD4 :    return Keyboard::Numpad4;
-        case VK_NUMPAD5 :    return Keyboard::Numpad5;
-        case VK_NUMPAD6 :    return Keyboard::Numpad6;
-        case VK_NUMPAD7 :    return Keyboard::Numpad7;
-        case VK_NUMPAD8 :    return Keyboard::Numpad8;
-        case VK_NUMPAD9 :    return Keyboard::Numpad9;
-        case 'A' :           return Keyboard::A;
-        case 'Z' :           return Keyboard::Z;
-        case 'E' :           return Keyboard::E;
-        case 'R' :           return Keyboard::R;
-        case 'T' :           return Keyboard::T;
-        case 'Y' :           return Keyboard::Y;
-        case 'U' :           return Keyboard::U;
-        case 'I' :           return Keyboard::I;
-        case 'O' :           return Keyboard::O;
-        case 'P' :           return Keyboard::P;
-        case 'Q' :           return Keyboard::Q;
-        case 'S' :           return Keyboard::S;
-        case 'D' :           return Keyboard::D;
-        case 'F' :           return Keyboard::F;
-        case 'G' :           return Keyboard::G;
-        case 'H' :           return Keyboard::H;
-        case 'J' :           return Keyboard::J;
-        case 'K' :           return Keyboard::K;
-        case 'L' :           return Keyboard::L;
-        case 'M' :           return Keyboard::M;
-        case 'W' :           return Keyboard::W;
-        case 'X' :           return Keyboard::X;
-        case 'C' :           return Keyboard::C;
-        case 'V' :           return Keyboard::V;
-        case 'B' :           return Keyboard::B;
-        case 'N' :           return Keyboard::N;
-        case '0' :           return Keyboard::Num0;
-        case '1' :           return Keyboard::Num1;
-        case '2' :           return Keyboard::Num2;
-        case '3' :           return Keyboard::Num3;
-        case '4' :           return Keyboard::Num4;
-        case '5' :           return Keyboard::Num5;
-        case '6' :           return Keyboard::Num6;
-        case '7' :           return Keyboard::Num7;
-        case '8' :           return Keyboard::Num8;
-        case '9' :           return Keyboard::Num9;
+        case VK_LWIN:       return Keyboard::LSystem;
+        case VK_RWIN:       return Keyboard::RSystem;
+        case VK_APPS:       return Keyboard::Menu;
+        case VK_OEM_1:      return Keyboard::SemiColon;
+        case VK_OEM_2:      return Keyboard::Slash;
+        case VK_OEM_PLUS:   return Keyboard::Equal;
+        case VK_OEM_MINUS:  return Keyboard::Dash;
+        case VK_OEM_4:      return Keyboard::LBracket;
+        case VK_OEM_6:      return Keyboard::RBracket;
+        case VK_OEM_COMMA:  return Keyboard::Comma;
+        case VK_OEM_PERIOD: return Keyboard::Period;
+        case VK_OEM_7:      return Keyboard::Quote;
+        case VK_OEM_5:      return Keyboard::BackSlash;
+        case VK_OEM_3:      return Keyboard::Tilde;
+        case VK_ESCAPE:     return Keyboard::Escape;
+        case VK_SPACE:      return Keyboard::Space;
+        case VK_RETURN:     return Keyboard::Return;
+        case VK_BACK:       return Keyboard::BackSpace;
+        case VK_TAB:        return Keyboard::Tab;
+        case VK_PRIOR:      return Keyboard::PageUp;
+        case VK_NEXT:       return Keyboard::PageDown;
+        case VK_END:        return Keyboard::End;
+        case VK_HOME:       return Keyboard::Home;
+        case VK_INSERT:     return Keyboard::Insert;
+        case VK_DELETE:     return Keyboard::Delete;
+        case VK_ADD:        return Keyboard::Add;
+        case VK_SUBTRACT:   return Keyboard::Subtract;
+        case VK_MULTIPLY:   return Keyboard::Multiply;
+        case VK_DIVIDE:     return Keyboard::Divide;
+        case VK_PAUSE:      return Keyboard::Pause;
+        case VK_F1:         return Keyboard::F1;
+        case VK_F2:         return Keyboard::F2;
+        case VK_F3:         return Keyboard::F3;
+        case VK_F4:         return Keyboard::F4;
+        case VK_F5:         return Keyboard::F5;
+        case VK_F6:         return Keyboard::F6;
+        case VK_F7:         return Keyboard::F7;
+        case VK_F8:         return Keyboard::F8;
+        case VK_F9:         return Keyboard::F9;
+        case VK_F10:        return Keyboard::F10;
+        case VK_F11:        return Keyboard::F11;
+        case VK_F12:        return Keyboard::F12;
+        case VK_F13:        return Keyboard::F13;
+        case VK_F14:        return Keyboard::F14;
+        case VK_F15:        return Keyboard::F15;
+        case VK_LEFT:       return Keyboard::Left;
+        case VK_RIGHT:      return Keyboard::Right;
+        case VK_UP:         return Keyboard::Up;
+        case VK_DOWN:       return Keyboard::Down;
+        case VK_NUMPAD0:    return Keyboard::Numpad0;
+        case VK_NUMPAD1:    return Keyboard::Numpad1;
+        case VK_NUMPAD2:    return Keyboard::Numpad2;
+        case VK_NUMPAD3:    return Keyboard::Numpad3;
+        case VK_NUMPAD4:    return Keyboard::Numpad4;
+        case VK_NUMPAD5:    return Keyboard::Numpad5;
+        case VK_NUMPAD6:    return Keyboard::Numpad6;
+        case VK_NUMPAD7:    return Keyboard::Numpad7;
+        case VK_NUMPAD8:    return Keyboard::Numpad8;
+        case VK_NUMPAD9:    return Keyboard::Numpad9;
+        case 'A':           return Keyboard::A;
+        case 'Z':           return Keyboard::Z;
+        case 'E':           return Keyboard::E;
+        case 'R':           return Keyboard::R;
+        case 'T':           return Keyboard::T;
+        case 'Y':           return Keyboard::Y;
+        case 'U':           return Keyboard::U;
+        case 'I':           return Keyboard::I;
+        case 'O':           return Keyboard::O;
+        case 'P':           return Keyboard::P;
+        case 'Q':           return Keyboard::Q;
+        case 'S':           return Keyboard::S;
+        case 'D':           return Keyboard::D;
+        case 'F':           return Keyboard::F;
+        case 'G':           return Keyboard::G;
+        case 'H':           return Keyboard::H;
+        case 'J':           return Keyboard::J;
+        case 'K':           return Keyboard::K;
+        case 'L':           return Keyboard::L;
+        case 'M':           return Keyboard::M;
+        case 'W':           return Keyboard::W;
+        case 'X':           return Keyboard::X;
+        case 'C':           return Keyboard::C;
+        case 'V':           return Keyboard::V;
+        case 'B':           return Keyboard::B;
+        case 'N':           return Keyboard::N;
+        case '0':           return Keyboard::Num0;
+        case '1':           return Keyboard::Num1;
+        case '2':           return Keyboard::Num2;
+        case '3':           return Keyboard::Num3;
+        case '4':           return Keyboard::Num4;
+        case '5':           return Keyboard::Num5;
+        case '6':           return Keyboard::Num6;
+        case '7':           return Keyboard::Num7;
+        case '8':           return Keyboard::Num8;
+        case '9':           return Keyboard::Num9;
     }
 
     return Keyboard::Unknown;
@@ -897,7 +993,7 @@ LRESULT CALLBACK WindowImplWin32::globalOnEvent(HWND handle, UINT message, WPARA
         LONG_PTR window = (LONG_PTR)reinterpret_cast<CREATESTRUCT*>(lParam)->lpCreateParams;
 
         // Set as the "user data" parameter of the window
-        SetWindowLongPtr(handle, GWLP_USERDATA, window);
+        SetWindowLongPtrW(handle, GWLP_USERDATA, window);
     }
 
     // Get the WindowImpl instance corresponding to the window handle
@@ -909,7 +1005,7 @@ LRESULT CALLBACK WindowImplWin32::globalOnEvent(HWND handle, UINT message, WPARA
         window->processEvent(message, wParam, lParam);
 
         if (window->m_callback)
-            return CallWindowProc(reinterpret_cast<WNDPROC>(window->m_callback), handle, message, wParam, lParam);
+            return CallWindowProcW(reinterpret_cast<WNDPROC>(window->m_callback), handle, message, wParam, lParam);
     }
 
     // We don't forward the WM_CLOSE message to prevent the OS from automatically destroying the window
@@ -920,7 +1016,7 @@ LRESULT CALLBACK WindowImplWin32::globalOnEvent(HWND handle, UINT message, WPARA
     if ((message == WM_SYSCOMMAND) && (wParam == SC_KEYMENU))
         return 0;
 
-    return DefWindowProc(handle, message, wParam, lParam);
+    return DefWindowProcW(handle, message, wParam, lParam);
 }
 
 } // namespace priv

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -182,10 +182,10 @@ SoundSource::Status SoundSource::getStatus() const
 
     switch (status)
     {
-        case AL_INITIAL :
-        case AL_STOPPED : return Stopped;
-        case AL_PAUSED :  return Paused;
-        case AL_PLAYING : return Playing;
+        case AL_INITIAL:
+        case AL_STOPPED: return Stopped;
+        case AL_PAUSED:  return Paused;
+        case AL_PLAYING: return Playing;
     }
 
     return Stopped;

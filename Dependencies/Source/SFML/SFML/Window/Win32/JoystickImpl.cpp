@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -27,9 +27,14 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/JoystickImpl.hpp>
 #include <SFML/System/Clock.hpp>
+#include <SFML/System/Err.hpp>
 #include <windows.h>
+#include <tchar.h>
+#include <regstr.h>
+#include <algorithm>
 #include <cmath>
-
+#include <sstream>
+#include <string>
 
 namespace
 {
@@ -42,6 +47,99 @@ namespace
 
     const sf::Time connectionRefreshDelay = sf::milliseconds(500);
     ConnectionCache connectionCache[sf::Joystick::Count];
+
+    // Get a system error string from an error code
+    std::string getErrorString(DWORD error)
+    {
+        PTCHAR buffer;
+
+        if (FormatMessage(FORMAT_MESSAGE_MAX_WIDTH_MASK | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, reinterpret_cast<PTCHAR>(&buffer), 0, NULL) == 0)
+            return "Unknown error.";
+
+        sf::String message = buffer;
+        LocalFree(buffer);
+        return message.toAnsiString();
+    }
+
+    // Get the joystick's name
+    sf::String getDeviceName(unsigned int index, JOYCAPS caps)
+    {
+        // Give the joystick a default name
+        sf::String joystickDescription = "Unknown Joystick";
+
+        LONG result;
+        HKEY rootKey;
+        HKEY currentKey;
+        std::basic_string<TCHAR> subkey;
+
+        subkey  = REGSTR_PATH_JOYCONFIG;
+        subkey += TEXT('\\');
+        subkey += caps.szRegKey;
+        subkey += TEXT('\\');
+        subkey += REGSTR_KEY_JOYCURR;
+
+        rootKey = HKEY_CURRENT_USER;
+        result  = RegOpenKeyEx(rootKey, subkey.c_str(), 0, KEY_READ, &currentKey);
+
+        if (result != ERROR_SUCCESS)
+        {
+            rootKey = HKEY_LOCAL_MACHINE;
+            result  = RegOpenKeyEx(rootKey, subkey.c_str(), 0, KEY_READ, &currentKey);
+
+            if (result != ERROR_SUCCESS)
+            {
+                sf::err() << "Unable to open registry for joystick at index " << index << ": " << getErrorString(result) << std::endl;
+                return joystickDescription;
+            }
+        }
+
+        std::basic_ostringstream<TCHAR> indexString;
+        indexString << index + 1;
+
+        subkey  = TEXT("Joystick");
+        subkey += indexString.str();
+        subkey += REGSTR_VAL_JOYOEMNAME;
+
+        TCHAR keyData[256];
+        DWORD keyDataSize = sizeof(keyData);
+
+        result = RegQueryValueEx(currentKey, subkey.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(keyData), &keyDataSize);
+        RegCloseKey(currentKey);
+
+        if (result != ERROR_SUCCESS)
+        {
+            sf::err() << "Unable to query registry key for joystick at index " << index << ": " << getErrorString(result) << std::endl;
+            return joystickDescription;
+        }
+
+        subkey  = REGSTR_PATH_JOYOEM;
+        subkey += TEXT('\\');
+        subkey.append(keyData, keyDataSize / sizeof(TCHAR));
+
+        result = RegOpenKeyEx(rootKey, subkey.c_str(), 0, KEY_READ, &currentKey);
+
+        if (result != ERROR_SUCCESS)
+        {
+            sf::err() << "Unable to open registry key for joystick at index " << index << ": " << getErrorString(result) << std::endl;
+            return joystickDescription;
+        }
+
+        keyDataSize = sizeof(keyData);
+
+        result = RegQueryValueEx(currentKey, REGSTR_VAL_JOYOEMNAME, NULL, NULL, reinterpret_cast<LPBYTE>(keyData), &keyDataSize);
+        RegCloseKey(currentKey);
+
+        if (result != ERROR_SUCCESS)
+        {
+            sf::err() << "Unable to query name for joystick at index " << index << ": " << getErrorString(result) << std::endl;
+            return joystickDescription;
+        }
+
+        keyData[255] = TEXT('\0'); // Ensure null terminator in case the data is too long.
+        joystickDescription = keyData;
+
+        return joystickDescription;
+    }
 }
 
 namespace sf
@@ -107,7 +205,16 @@ bool JoystickImpl::open(unsigned int index)
     m_index = JOYSTICKID1 + index;
 
     // Store the joystick capabilities
-    return joyGetDevCaps(m_index, &m_caps, sizeof(m_caps)) == JOYERR_NOERROR;
+    bool success = joyGetDevCaps(m_index, &m_caps, sizeof(m_caps)) == JOYERR_NOERROR;
+
+    if (success)
+    {
+        m_identification.name      = getDeviceName(m_index, m_caps);
+        m_identification.productId = m_caps.wPid;
+        m_identification.vendorId  = m_caps.wMid;
+    }
+
+    return success;
 }
 
 
@@ -116,7 +223,6 @@ void JoystickImpl::close()
 {
     // Nothing to do
 }
-
 
 ////////////////////////////////////////////////////////////
 JoystickCaps JoystickImpl::getCapabilities() const
@@ -137,6 +243,13 @@ JoystickCaps JoystickImpl::getCapabilities() const
     caps.axes[Joystick::PovY] = (m_caps.wCaps & JOYCAPS_HASPOV) != 0;
 
     return caps;
+}
+
+
+////////////////////////////////////////////////////////////
+Joystick::Identification JoystickImpl::getIdentification() const
+{
+    return m_identification;
 }
 
 
@@ -167,8 +280,8 @@ JoystickState JoystickImpl::update()
         if (pos.dwPOV != 0xFFFF)
         {
             float angle = pos.dwPOV / 18000.f * 3.141592654f;
-            state.axes[Joystick::PovX] = std::cos(angle) * 100;
-            state.axes[Joystick::PovY] = std::sin(angle) * 100;
+            state.axes[Joystick::PovX] = std::sin(angle) * 100;
+            state.axes[Joystick::PovY] = std::cos(angle) * 100;
         }
         else
         {

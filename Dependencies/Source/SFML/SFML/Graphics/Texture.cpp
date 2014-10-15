@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -29,6 +29,7 @@
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/TextureSaver.hpp>
+#include <SFML/Window/Context.hpp>
 #include <SFML/Window/Window.hpp>
 #include <SFML/System/Mutex.hpp>
 #include <SFML/System/Lock.hpp>
@@ -39,15 +40,30 @@
 
 namespace
 {
+    sf::Mutex mutex;
+
     // Thread-safe unique identifier generator,
     // is used for states cache (see RenderTarget)
     sf::Uint64 getUniqueId()
     {
-        static sf::Uint64 id = 1; // start at 1, zero is "no texture"
-        static sf::Mutex mutex;
-
         sf::Lock lock(mutex);
+
+        static sf::Uint64 id = 1; // start at 1, zero is "no texture"
+
         return id++;
+    }
+
+    unsigned int checkMaximumTextureSize()
+    {
+        // Create a temporary context in case the user queries
+        // the size before a GlResource is created, thus
+        // initializing the shared context
+        sf::Context context;
+
+        GLint size;
+        glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
+
+        return static_cast<unsigned int>(size);
     }
 }
 
@@ -266,6 +282,27 @@ Image Texture::copyToImage() const
     // Create an array of pixels
     std::vector<Uint8> pixels(m_size.x * m_size.y * 4);
 
+#ifdef SFML_OPENGL_ES
+
+    // OpenGL ES doesn't have the glGetTexImage function, the only way to read
+    // from a texture is to bind it to a FBO and use glReadPixels
+    GLuint frameBuffer = 0;
+    glCheck(GLEXT_glGenFramebuffers(1, &frameBuffer));
+    if (frameBuffer)
+    {
+        GLint previousFrameBuffer;
+        glCheck(glGetIntegerv(GLEXT_GL_FRAMEBUFFER_BINDING, &previousFrameBuffer));
+
+        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_FRAMEBUFFER, frameBuffer));
+        glCheck(GLEXT_glFramebufferTexture2D(GLEXT_GL_FRAMEBUFFER, GLEXT_GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0));
+        glCheck(glReadPixels(0, 0, m_size.x, m_size.y, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]));
+        glCheck(GLEXT_glDeleteFramebuffers(1, &frameBuffer));
+
+        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_FRAMEBUFFER, previousFrameBuffer));
+    }
+
+#else
+
     if ((m_size == m_actualSize) && !m_pixelsFlipped)
     {
         // Texture is not padded nor flipped, we can use a direct copy
@@ -301,6 +338,8 @@ Image Texture::copyToImage() const
             dst += dstPitch;
         }
     }
+
+#endif // SFML_OPENGL_ES
 
     // Create the image
     Image image;
@@ -499,12 +538,12 @@ void Texture::bind(const Texture* texture, CoordinateType coordinateType)
 ////////////////////////////////////////////////////////////
 unsigned int Texture::getMaximumSize()
 {
-    ensureGlContext();
+    // TODO: Remove this lock when it becomes unnecessary in C++11
+    Lock lock(mutex);
 
-    GLint size;
-    glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
+    static unsigned int size = checkMaximumTextureSize();
 
-    return static_cast<unsigned int>(size);
+    return size;
 }
 
 
@@ -530,10 +569,10 @@ unsigned int Texture::getValidSize(unsigned int size)
 {
     ensureGlContext();
 
-    // Make sure that GLEW is initialized
-    priv::ensureGlewInit();
+    // Make sure that extensions are initialized
+    priv::ensureExtensionsInit();
 
-    if (GLEW_ARB_texture_non_power_of_two)
+    if (GLEXT_texture_non_power_of_two)
     {
         // If hardware supports NPOT textures, then just return the unmodified size
         return size;

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Marco Antognini (antognini.marco@gmail.com),
+// Copyright (C) 2007-2014 Marco Antognini (antognini.marco@gmail.com),
 //                         Laurent Gomila (laurent.gom@gmail.com),
 //
 // This software is provided 'as-is', without any express or implied warranty.
@@ -39,8 +39,9 @@ namespace priv
 
 
 ////////////////////////////////////////////////////////////
-SFContext::SFContext(SFContext* shared)
-: m_view(0), m_window(0)
+SFContext::SFContext(SFContext* shared) :
+m_view(0),
+m_window(0)
 {
     // Ask for a pool.
     retainPool();
@@ -54,8 +55,9 @@ SFContext::SFContext(SFContext* shared)
 
 ////////////////////////////////////////////////////////////
 SFContext::SFContext(SFContext* shared, const ContextSettings& settings,
-                     const WindowImpl* owner, unsigned int bitsPerPixel)
-: m_view(0), m_window(0)
+                     const WindowImpl* owner, unsigned int bitsPerPixel) :
+m_view(0),
+m_window(0)
 {
     // Ask for a pool.
     retainPool();
@@ -64,15 +66,16 @@ SFContext::SFContext(SFContext* shared, const ContextSettings& settings,
     createContext(shared, bitsPerPixel, settings);
 
     // Apply context.
-    WindowImplCocoa const * ownerCocoa = static_cast<WindowImplCocoa const *>(owner);
+    const WindowImplCocoa* ownerCocoa = static_cast<const WindowImplCocoa*>(owner);
     ownerCocoa->applyContext(m_context);
 }
 
 
 ////////////////////////////////////////////////////////////
 SFContext::SFContext(SFContext* shared, const ContextSettings& settings,
-                     unsigned int width, unsigned int height)
-: m_view(0), m_window(0)
+                     unsigned int width, unsigned int height) :
+m_view(0),
+m_window(0)
 {
     // Ensure the process is setup in order to create a valid window.
     WindowImplCocoa::setUpProcess();
@@ -83,7 +86,7 @@ SFContext::SFContext(SFContext* shared, const ContextSettings& settings,
     // Create the context.
     createContext(shared, VideoMode::getDesktopMode().bitsPerPixel, settings);
 
-    // Create a dummy window/view pair (hidden) and asign it our context.
+    // Create a dummy window/view pair (hidden) and assign it our context.
     m_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height)
                                            styleMask:NSBorderlessWindowMask
                                              backing:NSBackingStoreBuffered
@@ -126,11 +129,6 @@ void SFContext::display()
 ////////////////////////////////////////////////////////////
 void SFContext::setVerticalSyncEnabled(bool enabled)
 {
-    // Make compiler happy
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1060
-    typedef int GLint;
-#endif
-
     GLint swapInterval = enabled ? 1 : 0;
 
     [m_context setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
@@ -142,16 +140,17 @@ void SFContext::createContext(SFContext* shared,
                               unsigned int bitsPerPixel,
                               const ContextSettings& settings)
 {
-    // Choose the attributs of OGL context.
+    // Choose the attributes of OGL context.
     std::vector<NSOpenGLPixelFormatAttribute> attrs;
-    attrs.reserve(20); // max attributs (estimation).
+    attrs.reserve(20); // max attributes (estimation).
 
     // These casts are safe. C++ is much more strict than Obj-C.
 
     attrs.push_back(NSOpenGLPFAClosestPolicy);
     attrs.push_back(NSOpenGLPFADoubleBuffer);
 
-    if (bitsPerPixel > 24) {
+    if (bitsPerPixel > 24)
+    {
         attrs.push_back(NSOpenGLPFAAlphaSize);
         attrs.push_back((NSOpenGLPixelFormatAttribute)8);
     }
@@ -162,7 +161,8 @@ void SFContext::createContext(SFContext* shared,
     attrs.push_back(NSOpenGLPFAStencilSize);
     attrs.push_back((NSOpenGLPixelFormatAttribute)settings.stencilBits);
 
-    if (settings.antialiasingLevel > 0) {
+    if (settings.antialiasingLevel > 0)
+    {
         /*
          * Antialiasing techniques are described in the
          * "OpenGL Programming Guide for Mac OS X" document.
@@ -189,12 +189,33 @@ void SFContext::createContext(SFContext* shared,
         attrs.push_back(NSOpenGLPFAAccelerated);
     }
 
+    // Support for OpenGL 3.2 on Mac OS X Lion and later:
+    // SFML 2 Graphics module uses some OpenGL features that are deprecated
+    // in OpenGL 3.2 and that are no more available with core context.
+    // Therefore the Graphics module won't work as expected.
+
+    // 2.x are mapped to 2.1 since Apple only support that legacy version.
+    // >=3.0 are mapped to a 3.2 core profile.
+    bool legacy = settings.majorVersion < 3;
+
+    if (legacy)
+    {
+        attrs.push_back(NSOpenGLPFAOpenGLProfile);
+        attrs.push_back(NSOpenGLProfileVersionLegacy);
+    }
+    else
+    {
+        attrs.push_back(NSOpenGLPFAOpenGLProfile);
+        attrs.push_back(NSOpenGLProfileVersion3_2Core);
+    }
+
     attrs.push_back((NSOpenGLPixelFormatAttribute)0); // end of array
 
-    // Create the pixel pormat.
+    // Create the pixel format.
     NSOpenGLPixelFormat* pixFmt = [[NSOpenGLPixelFormat alloc] initWithAttributes:&attrs[0]];
 
-    if (pixFmt == nil) {
+    if (pixFmt == nil)
+    {
         sf::err() << "Error. Unable to find a suitable pixel format." << std::endl;
         return;
     }
@@ -206,8 +227,16 @@ void SFContext::createContext(SFContext* shared,
     m_context = [[NSOpenGLContext alloc] initWithFormat:pixFmt
                                            shareContext:sharedContext];
 
-    if (m_context == nil) {
-        sf::err() << "Error. Unable to create the context." << std::endl;
+    if (m_context == nil)
+    {
+        sf::err() << "Error. Unable to create the context. Retrying without shared context." << std::endl;
+        m_context = [[NSOpenGLContext alloc] initWithFormat:pixFmt
+                                             shareContext:nil];
+
+        if (m_context == nil)
+            sf::err() << "Error. Unable to create the context." << std::endl;
+        else
+            sf::err() << "Warning. New context created without shared context." << std::endl;
     }
 
     // Free up.

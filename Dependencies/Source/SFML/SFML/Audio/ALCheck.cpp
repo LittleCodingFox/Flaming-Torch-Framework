@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -47,35 +47,35 @@ void alCheckError(const std::string& file, unsigned int line)
         // Decode the error code
         switch (errorCode)
         {
-            case AL_INVALID_NAME :
+            case AL_INVALID_NAME:
             {
                 error = "AL_INVALID_NAME";
                 description = "an unacceptable name has been specified";
                 break;
             }
 
-            case AL_INVALID_ENUM :
+            case AL_INVALID_ENUM:
             {
                 error = "AL_INVALID_ENUM";
                 description = "an unacceptable value has been specified for an enumerated argument";
                 break;
             }
 
-            case AL_INVALID_VALUE :
+            case AL_INVALID_VALUE:
             {
                 error = "AL_INVALID_VALUE";
                 description = "a numeric argument is out of range";
                 break;
             }
 
-            case AL_INVALID_OPERATION :
+            case AL_INVALID_OPERATION:
             {
                 error = "AL_INVALID_OPERATION";
                 description = "the specified operation is not allowed in the current state";
                 break;
             }
 
-            case AL_OUT_OF_MEMORY :
+            case AL_OUT_OF_MEMORY:
             {
                 error = "AL_OUT_OF_MEMORY";
                 description = "there is not enough memory left to execute the command";
@@ -97,7 +97,7 @@ void alCheckError(const std::string& file, unsigned int line)
 ////////////////////////////////////////////////////////////
 void ensureALInit()
 {
-    // The audio device is instanciated on demand rather than at global startup,
+    // The audio device is instantiated on demand rather than at global startup,
     // which solves a lot of weird crashes and errors.
     // It is destroyed at global exit which is fine.
 

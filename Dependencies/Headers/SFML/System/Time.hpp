@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -39,7 +39,7 @@ namespace sf
 ////////////////////////////////////////////////////////////
 class SFML_SYSTEM_API Time
 {
-public :
+public:
 
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
@@ -84,7 +84,7 @@ public :
     ////////////////////////////////////////////////////////////
     static const Time Zero; ///< Predefined "zero" time value
 
-private :
+private:
 
     friend SFML_SYSTEM_API Time seconds(float);
     friend SFML_SYSTEM_API Time milliseconds(Int32);
@@ -101,7 +101,7 @@ private :
     ////////////////////////////////////////////////////////////
     explicit Time(Int64 microseconds);
 
-private :
+private:
 
     ////////////////////////////////////////////////////////////
     // Member data

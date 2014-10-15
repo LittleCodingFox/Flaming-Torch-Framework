@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -43,7 +43,7 @@ namespace sf
 ////////////////////////////////////////////////////////////
 class SFML_AUDIO_API SoundRecorder
 {
-public :
+public:
 
     ////////////////////////////////////////////////////////////
     /// \brief destructor
@@ -126,7 +126,7 @@ public :
     /// while recording). If you do so while recording and
     /// opening the device fails, it stops the recording.
     ///
-    /// \param The name of the audio capture device
+    /// \param name The name of the audio capture device
     ///
     /// \return True, if it was able to set the requested device
     ///
@@ -156,7 +156,7 @@ public :
     ////////////////////////////////////////////////////////////
     static bool isAvailable();
 
-protected :
+protected:
 
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
@@ -224,7 +224,7 @@ protected :
     ////////////////////////////////////////////////////////////
     virtual void onStop();
 
-private :
+private:
 
     ////////////////////////////////////////////////////////////
     /// \brief Function called as the entry point of the thread

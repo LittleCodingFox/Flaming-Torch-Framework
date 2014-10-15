@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -48,52 +48,52 @@ void glCheckError(const char* file, unsigned int line)
         // Decode the error code
         switch (errorCode)
         {
-            case GL_INVALID_ENUM :
+            case GL_INVALID_ENUM:
             {
                 error = "GL_INVALID_ENUM";
                 description = "an unacceptable value has been specified for an enumerated argument";
                 break;
             }
 
-            case GL_INVALID_VALUE :
+            case GL_INVALID_VALUE:
             {
                 error = "GL_INVALID_VALUE";
                 description = "a numeric argument is out of range";
                 break;
             }
 
-            case GL_INVALID_OPERATION :
+            case GL_INVALID_OPERATION:
             {
                 error = "GL_INVALID_OPERATION";
                 description = "the specified operation is not allowed in the current state";
                 break;
             }
 
-            case GL_STACK_OVERFLOW :
+            case GL_STACK_OVERFLOW:
             {
                 error = "GL_STACK_OVERFLOW";
                 description = "this command would cause a stack overflow";
                 break;
             }
 
-            case GL_STACK_UNDERFLOW :
+            case GL_STACK_UNDERFLOW:
             {
                 error = "GL_STACK_UNDERFLOW";
                 description = "this command would cause a stack underflow";
                 break;
             }
 
-            case GL_OUT_OF_MEMORY :
+            case GL_OUT_OF_MEMORY:
             {
                 error = "GL_OUT_OF_MEMORY";
                 description = "there is not enough memory left to execute the command";
                 break;
             }
 
-            case GL_INVALID_FRAMEBUFFER_OPERATION_EXT :
+            case GLEXT_GL_INVALID_FRAMEBUFFER_OPERATION:
             {
-                error = "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
-                description = "the object bound to FRAMEBUFFER_BINDING_EXT is not \"framebuffer complete\"";
+                error = "GL_INVALID_FRAMEBUFFER_OPERATION";
+                description = "the object bound to FRAMEBUFFER_BINDING is not \"framebuffer complete\"";
                 break;
             }
         }
@@ -106,24 +106,6 @@ void glCheckError(const char* file, unsigned int line)
     }
 }
 
-
-////////////////////////////////////////////////////////////
-void ensureGlewInit()
-{
-    static bool initialized = false;
-    if (!initialized)
-    {
-        GLenum status = glewInit();
-        if (status == GLEW_OK)
-        {
-            initialized = true;
-        }
-        else
-        {
-            err() << "Failed to initialize GLEW, " << glewGetErrorString(status) << std::endl;
-        }
-    }
-}
 
 } // namespace priv
 

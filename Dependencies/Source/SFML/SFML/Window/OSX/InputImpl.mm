@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Marco Antognini (antognini.marco@gmail.com),
+// Copyright (C) 2007-2014 Marco Antognini (antognini.marco@gmail.com),
 //                         Laurent Gomila (laurent.gom@gmail.com),
 //
 // This software is provided 'as-is', without any express or implied warranty.
@@ -26,20 +26,20 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/OSX/InputImpl.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Window/Window.hpp>
-#include <SFML/System/Err.hpp>
+#include <SFML/Window/OSX/InputImpl.hpp>
 #include <SFML/Window/OSX/HIDInputManager.hpp>
+#include <SFML/System/Err.hpp>
 
-#import <AppKit/AppKit.h>
 #import <SFML/Window/OSX/SFOpenGLView.h>
+#import <AppKit/AppKit.h>
 
 ////////////////////////////////////////////////////////////
 /// In order to keep track of the keyboard's state and mouse buttons' state
 /// we use the HID manager. Mouse position is handled differently.
 ///
-/// NB : we probably could use
+/// NB: we probably could use
 /// NSEvent +addGlobalMonitorForEventsMatchingMask:handler: for mouse only.
 ///
 ////////////////////////////////////////////////////////////
@@ -62,42 +62,44 @@ SFOpenGLView* getSFOpenGLViewFromSFMLWindow(const Window& window)
     // Get our SFOpenGLView from ...
     SFOpenGLView* view = nil;
 
-    if ([nsHandle isKindOfClass:[NSWindow class]]) {
+    if ([nsHandle isKindOfClass:[NSWindow class]])
+    {
         // If system handle is a window then from its content view.
         view = [nsHandle contentView];
 
         // Subview doesn't match ?
-        if (![view isKindOfClass:[SFOpenGLView class]]) {
+        if (![view isKindOfClass:[SFOpenGLView class]])
+        {
             sf::err() << "The content view is not a valid SFOpenGLView"
                       << std::endl;
             view = nil;
         }
 
-    } else if ([nsHandle isKindOfClass:[NSView class]]) {
+    }
+    else if ([nsHandle isKindOfClass:[NSView class]])
+    {
         // If system handle is a view then from a subview of kind SFOpenGLView.
         NSArray* subviews = [nsHandle subviews];
-        for (NSView* subview in subviews) {
-            if ([subview isKindOfClass:[SFOpenGLView class]]) {
-                view = (SFOpenGLView *)subview;
+        for (NSView* subview in subviews)
+        {
+            if ([subview isKindOfClass:[SFOpenGLView class]])
+            {
+                view = (SFOpenGLView*)subview;
                 break;
             }
         }
 
         // No matching subview ?
-        if (view == nil) {
+        if (view == nil)
             sf::err() << "Cannot find a valid SFOpenGLView subview." << std::endl;
-
-        }
-
-    } else {
-        if (nsHandle != 0) {
+    }
+    else
+    {
+        if (nsHandle != 0)
             sf::err() << "The system handle is neither a <NSWindow*> nor <NSView*>"
                       << "object. This shouldn't happen."
                       << std::endl;
-        } else {
-            // This probably means the SFML window was previously closed.
-        }
-
+        // Else: this probably means the SFML window was previously closed.
     }
 
     return view;
@@ -107,6 +109,13 @@ SFOpenGLView* getSFOpenGLViewFromSFMLWindow(const Window& window)
 bool InputImpl::isKeyPressed(Keyboard::Key key)
 {
     return HIDInputManager::getInstance().isKeyPressed(key);
+}
+
+
+////////////////////////////////////////////////////////////
+void InputImpl::setVirtualKeyboardVisible(bool /*visible*/)
+{
+    // Not applicable
 }
 
 
@@ -124,7 +133,8 @@ Vector2i InputImpl::getMousePosition()
     NSPoint pos = [NSEvent mouseLocation];
     pos.y = sf::VideoMode::getDesktopMode().height - pos.y;
 
-    return Vector2i(pos.x, pos.y);
+    int scale = [[NSScreen mainScreen] backingScaleFactor];
+    return Vector2i(pos.x, pos.y) * scale;
 }
 
 
@@ -134,14 +144,14 @@ Vector2i InputImpl::getMousePosition(const Window& relativeTo)
     SFOpenGLView* view = getSFOpenGLViewFromSFMLWindow(relativeTo);
 
     // No view ?
-    if (view == nil) {
+    if (view == nil)
         return Vector2i();
-    }
 
     // Use -cursorPositionFromEvent: with nil.
     NSPoint pos = [view cursorPositionFromEvent:nil];
 
-    return Vector2i(pos.x, pos.y);
+    int scale = [view displayScaleFactor];
+    return Vector2i(pos.x, pos.y) * scale;
 }
 
 
@@ -149,13 +159,14 @@ Vector2i InputImpl::getMousePosition(const Window& relativeTo)
 void InputImpl::setMousePosition(const Vector2i& position)
 {
     // Here we don't need to reverse the coordinates.
-    CGPoint pos = CGPointMake(position.x, position.y);
+    int scale = [[NSScreen mainScreen] backingScaleFactor];
+    CGPoint pos = CGPointMake(position.x / scale, position.y / scale);
 
     // Place the cursor.
     CGEventRef event = CGEventCreateMouseEvent(NULL,
                                                kCGEventMouseMoved,
                                                pos,
-                                               /*we don't care about this : */0);
+                                               /*we don't care about this: */0);
     CGEventPost(kCGHIDEventTap, event);
     CFRelease(event);
     // This is a workaround to deprecated CGSetLocalEventsSuppressionInterval.
@@ -168,14 +179,38 @@ void InputImpl::setMousePosition(const Vector2i& position, const Window& relativ
     SFOpenGLView* view = getSFOpenGLViewFromSFMLWindow(relativeTo);
 
     // No view ?
-    if (view == nil) {
+    if (view == nil)
         return;
-    }
 
     // Let SFOpenGLView compute the position in global coordinate
-    NSPoint p = NSMakePoint(position.x, position.y);
+    int scale = [view displayScaleFactor];
+    NSPoint p = NSMakePoint(position.x / scale, position.y / scale);
     p = [view computeGlobalPositionOfRelativePoint:p];
-    setMousePosition(sf::Vector2i(p.x, p.y));
+    setMousePosition(sf::Vector2i(p.x, p.y) * scale);
+}
+
+
+////////////////////////////////////////////////////////////
+bool InputImpl::isTouchDown(unsigned int /*finger*/)
+{
+    // Not applicable
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////
+Vector2i InputImpl::getTouchPosition(unsigned int /*finger*/)
+{
+    // Not applicable
+    return Vector2i();
+}
+
+
+////////////////////////////////////////////////////////////
+Vector2i InputImpl::getTouchPosition(unsigned int /*finger*/, const Window& /*relativeTo*/)
+{
+    // Not applicable
+    return Vector2i();
 }
 
 } // namespace priv

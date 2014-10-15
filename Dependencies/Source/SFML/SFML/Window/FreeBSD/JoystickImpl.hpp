@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -28,9 +28,9 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-
 #include <dev/usb/usbhid.h>
 #include <usbhid.h>
+#include <vector>
 
 namespace sf
 {
@@ -43,7 +43,7 @@ namespace priv
 ////////////////////////////////////////////////////////////
 class JoystickImpl
 {
-public :
+public:
 
     ////////////////////////////////////////////////////////////
     /// \brief Perform the global initialization of the joystick module
@@ -92,6 +92,14 @@ public :
     JoystickCaps getCapabilities() const;
 
     ////////////////////////////////////////////////////////////
+    /// \brief Get the joystick identification
+    ///
+    /// \return Joystick identification
+    ///
+    ////////////////////////////////////////////////////////////
+    Joystick::Identification getIdentification() const;
+
+    ////////////////////////////////////////////////////////////
     /// \brief Update the joystick and get its new state
     ///
     /// \return Joystick state
@@ -99,20 +107,18 @@ public :
     ////////////////////////////////////////////////////////////
     JoystickState update();
 
-private :
+private:
 
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    int			m_file;                 ///< File descriptor of the joystick
-
-    report_desc_t	m_desc;			///< USB report descriptor
-    int			m_id;			///< USB id
-
-    void		*m_buffer;		///< USB HID buffer
-    int			m_length;		///< Buffer length
-
-    JoystickState	m_state;                ///< Current state of the joystick
+    int                      m_file;           ///< File descriptor of the joystick
+    report_desc_t            m_desc;           ///< USB report descriptor
+    int                      m_id;             ///< USB id
+    std::vector<char>        m_buffer;         ///< USB HID buffer
+    int                      m_length;         ///< Buffer length
+    Joystick::Identification m_identification; ///< Joystick identification
+    JoystickState            m_state;          ///< Current state of the joystick
 };
 
 } // namespace priv

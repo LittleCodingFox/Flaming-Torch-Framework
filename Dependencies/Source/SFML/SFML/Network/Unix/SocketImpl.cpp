@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -88,14 +88,14 @@ Socket::Status SocketImpl::getErrorStatus()
 
     switch (errno)
     {
-        case EWOULDBLOCK :  return Socket::NotReady;
-        case ECONNABORTED : return Socket::Disconnected;
-        case ECONNRESET :   return Socket::Disconnected;
-        case ETIMEDOUT :    return Socket::Disconnected;
-        case ENETRESET :    return Socket::Disconnected;
-        case ENOTCONN :     return Socket::Disconnected;
-        case EPIPE :        return Socket::Disconnected;
-        default :           return Socket::Error;
+        case EWOULDBLOCK:  return Socket::NotReady;
+        case ECONNABORTED: return Socket::Disconnected;
+        case ECONNRESET:   return Socket::Disconnected;
+        case ETIMEDOUT:    return Socket::Disconnected;
+        case ENETRESET:    return Socket::Disconnected;
+        case ENOTCONN:     return Socket::Disconnected;
+        case EPIPE:        return Socket::Disconnected;
+        default:           return Socket::Error;
     }
 }
 

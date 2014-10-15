@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -31,6 +31,17 @@
 #include <SFML/System/NonCopyable.hpp>
 #include <windows.h>
 
+// Fix for unaligned stack with clang and GCC on Windows XP 32-bit
+#if defined(SFML_SYSTEM_WINDOWS) && (defined(__clang__) || defined(__GNUC__))
+
+    #define ALIGN_STACK __attribute__((__force_align_arg_pointer__))
+
+#else
+
+    #define ALIGN_STACK
+
+#endif
+
 
 namespace sf
 {
@@ -43,7 +54,7 @@ namespace priv
 ////////////////////////////////////////////////////////////
 class ThreadImpl : NonCopyable
 {
-public :
+public:
 
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor, launch the thread
@@ -71,7 +82,7 @@ public :
     ////////////////////////////////////////////////////////////
     void terminate();
 
-private :
+private:
 
     ////////////////////////////////////////////////////////////
     /// \brief Global entry point for all threads
@@ -81,7 +92,7 @@ private :
     /// \return OS specific error code
     ///
     ////////////////////////////////////////////////////////////
-    static unsigned int __stdcall entryPoint(void* userData);
+    ALIGN_STACK static unsigned int __stdcall entryPoint(void* userData);
 
     ////////////////////////////////////////////////////////////
     // Member data

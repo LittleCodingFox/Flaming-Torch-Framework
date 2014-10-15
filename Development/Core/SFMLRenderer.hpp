@@ -52,6 +52,8 @@ namespace FlamingTorch
 			const sf::Texture *TheTexture;
 			std::vector<Vector2> Positions, TexCoords;
 			std::vector<Vector4> Colors;
+
+			RenderTextCache() : TheTexture(NULL) {};
 		};
 
 		RenderTextCache TheRenderTextCache;
@@ -83,6 +85,8 @@ namespace FlamingTorch
 		Vector2 OriginalRequestedSize;
 
 		Vector2 LastWindowSize;
+
+		Matrix4x4 LastWorldMatrix, LastProjectionMatrix;
 
 		SFMLRendererImplementation();
 		~SFMLRendererImplementation();

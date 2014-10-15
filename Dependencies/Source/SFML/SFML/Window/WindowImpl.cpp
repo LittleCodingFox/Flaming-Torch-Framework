@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -28,6 +28,7 @@
 #include <SFML/Window/WindowImpl.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/JoystickManager.hpp>
+#include <SFML/Window/SensorManager.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <algorithm>
 #include <cmath>
@@ -46,6 +47,16 @@
 
     #include <SFML/Window/OSX/WindowImplCocoa.hpp>
     typedef sf::priv::WindowImplCocoa WindowImplType;
+
+#elif defined(SFML_SYSTEM_IOS)
+
+    #include <SFML/Window/iOS/WindowImplUIKit.hpp>
+    typedef sf::priv::WindowImplUIKit WindowImplType;
+
+#elif defined(SFML_SYSTEM_ANDROID)
+
+    #include <SFML/Window/Android/WindowImplAndroid.hpp>
+    typedef sf::priv::WindowImplAndroid WindowImplType;
 
 #endif
 
@@ -70,12 +81,16 @@ WindowImpl* WindowImpl::create(WindowHandle handle)
 
 ////////////////////////////////////////////////////////////
 WindowImpl::WindowImpl() :
-m_joyThreshold(0.1f)
+m_joystickThreshold(0.1f)
 {
     // Get the initial joystick states
     JoystickManager::getInstance().update();
     for (unsigned int i = 0; i < Joystick::Count; ++i)
-        m_joyStates[i] = JoystickManager::getInstance().getState(i);
+        m_joystickStates[i] = JoystickManager::getInstance().getState(i);
+
+    // Get the initial sensor states
+    for (unsigned int i = 0; i < Sensor::Count; ++i)
+        m_sensorValue[i] = Vector3f(0, 0, 0);
 }
 
 
@@ -89,7 +104,7 @@ WindowImpl::~WindowImpl()
 ////////////////////////////////////////////////////////////
 void WindowImpl::setJoystickThreshold(float threshold)
 {
-    m_joyThreshold = threshold;
+    m_joystickThreshold = threshold;
 }
 
 
@@ -99,24 +114,23 @@ bool WindowImpl::popEvent(Event& event, bool block)
     // If the event queue is empty, let's first check if new events are available from the OS
     if (m_events.empty())
     {
-        if (!block)
-        {
-            // Non-blocking mode: process events and continue
-            processJoystickEvents();
-            processEvents();
-        }
-        else
-        {
-            // Blocking mode: process events until one is triggered
+        // Get events from the system
+        processJoystickEvents();
+        processSensorEvents();
+        processEvents();
 
+        // In blocking mode, we must process events until one is triggered
+        if (block)
+        {
             // Here we use a manual wait loop instead of the optimized
             // wait-event provided by the OS, so that we don't skip joystick
             // events (which require polling)
             while (m_events.empty())
             {
-                processJoystickEvents();
-                processEvents();
                 sleep(milliseconds(10));
+                processJoystickEvents();
+                processSensorEvents();
+                processEvents();
             }
         }
     }
@@ -150,12 +164,12 @@ void WindowImpl::processJoystickEvents()
     for (unsigned int i = 0; i < Joystick::Count; ++i)
     {
         // Copy the previous state of the joystick and get the new one
-        JoystickState previousState = m_joyStates[i];
-        m_joyStates[i] = JoystickManager::getInstance().getState(i);
+        JoystickState previousState = m_joystickStates[i];
+        m_joystickStates[i] = JoystickManager::getInstance().getState(i);
         JoystickCaps caps = JoystickManager::getInstance().getCapabilities(i);
 
         // Connection state
-        bool connected = m_joyStates[i].connected;
+        bool connected = m_joystickStates[i].connected;
         if (previousState.connected ^ connected)
         {
             Event event;
@@ -173,8 +187,8 @@ void WindowImpl::processJoystickEvents()
                 {
                     Joystick::Axis axis = static_cast<Joystick::Axis>(j);
                     float prevPos = previousState.axes[axis];
-                    float currPos = m_joyStates[i].axes[axis];
-                    if (fabs(currPos - prevPos) >= m_joyThreshold)
+                    float currPos = m_joystickStates[i].axes[axis];
+                    if (fabs(currPos - prevPos) >= m_joystickThreshold)
                     {
                         Event event;
                         event.type = Event::JoystickMoved;
@@ -190,7 +204,7 @@ void WindowImpl::processJoystickEvents()
             for (unsigned int j = 0; j < caps.buttonCount; ++j)
             {
                 bool prevPressed = previousState.buttons[j];
-                bool currPressed = m_joyStates[i].buttons[j];
+                bool currPressed = m_joystickStates[i].buttons[j];
 
                 if (prevPressed ^ currPressed)
                 {
@@ -205,6 +219,38 @@ void WindowImpl::processJoystickEvents()
     }
 }
 
+
+////////////////////////////////////////////////////////////
+void WindowImpl::processSensorEvents()
+{
+    // First update the sensor states
+    SensorManager::getInstance().update();
+
+    for (unsigned int i = 0; i < Sensor::Count; ++i)
+    {
+        Sensor::Type sensor = static_cast<Sensor::Type>(i);
+
+        // Only process enabled sensors
+        if (SensorManager::getInstance().isEnabled(sensor))
+        {
+            // Copy the previous value of the sensor and get the new one
+            Vector3f previousValue = m_sensorValue[i];
+            m_sensorValue[i] = SensorManager::getInstance().getValue(sensor);
+
+            // If the value has changed, trigger an event
+            if (m_sensorValue[i] != previousValue) // @todo use a threshold?
+            {
+                Event event;
+                event.type = Event::SensorChanged;
+                event.sensor.type = sensor;
+                event.sensor.x = m_sensorValue[i].x;
+                event.sensor.y = m_sensorValue[i].y;
+                event.sensor.z = m_sensorValue[i].z;
+                pushEvent(event);
+            }
+        }
+    }
+}
 
 } // namespace priv
 
