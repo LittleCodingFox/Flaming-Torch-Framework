@@ -14,8 +14,6 @@ solution "Dependencies"
 		
 		files {
 			"Headers/**.hpp",
-			"Source/angelscript/**.c",
-			"Source/angelscript/**.cpp",
 			"Source/base64/**.c",
 			"Source/base64/**.cpp",
 			"Source/enet/**.c",
@@ -49,7 +47,6 @@ solution "Dependencies"
 			"Headers/",
 			"Headers/lua/",
 			"Headers/zlib/",
-			"Source/angelscript/",
 			"Source/webp/",
 			"Source/SFML/",
 			"Source/SFML/Headers/AL/",
