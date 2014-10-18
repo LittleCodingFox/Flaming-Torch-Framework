@@ -32,11 +32,13 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
+#	if !FLPLATFORM_ANDROID
 	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
 	{
 		if(FileName == "GUILayout.resource" || FileName == "DefaultLayout.resource")
 			ReloadGUI();
 	};
+#	endif
 
 	void GameInterface::ReloadGUI()
 	{
@@ -195,6 +197,7 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 		if(IsGUISandbox)
 		{
+#	if !FLPLATFORM_ANDROID
 			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
 			{
 				Log::Instance.LogErr(TAG, "Failed to watch resources directory for GUI Sandbox Mode, quitting...");
@@ -207,6 +210,7 @@ namespace FlamingTorch
 			};
 
 			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+#	endif
 
 			ReloadGUI();
 		};
@@ -531,6 +535,7 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 		if(IsGUISandbox)
 		{
+#	if !FLPLATFORM_ANDROID
 			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
 			{
 				Instance.Dispose();
@@ -541,6 +546,7 @@ namespace FlamingTorch
 			};
 
 			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+#	endif
 
 			ReloadGUI();
 		};

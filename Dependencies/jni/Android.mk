@@ -1,12 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 LOCAL_PATH_MINUS_ONE_LEVEL := $(LOCAL_PATH)/../
 
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := FlamingDependencies
-LOCAL_CPP_FEATURES += exceptions
-LOCAL_CPP_FEATURES += rtti
-
 GLOBAL_INCLUDES := $(LOCAL_PATH_MINUS_ONE_LEVEL)/Headers/ \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Headers/lua/ \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Headers/zlib/ \
@@ -53,7 +47,7 @@ FREETYPE_SOURCES := $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/autofit/autofi
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/psaux/psaux.c \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/pshinter/pshinter.c \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/psnames/psnames.c \
-			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/raster/ftraster.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/raster/raster.c \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/sfnt/sfnt.c \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/smooth/smooth.c \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/freetype/truetype/truetype.c \
@@ -73,9 +67,27 @@ LUABIND_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/luabind/*.cpp
 
 TINYXML_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/tinyxml/*.cpp)
 
-WEBP_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/*.cpp)
+WEBP_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dec/*.c) \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_cpu.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_enc.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_upsampling.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_dec.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_enc_sse2.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_upsampling_sse2.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_dec_sse2.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_lossless.c \
+			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/webp_dsp_yuv.c \
+			$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/enc/*.c) \
+			$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/mux/*.c) \
+			$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/utils/*.c)
 
-ZLIB_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/zlib/*.cpp)
+WEBP_NEON_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dec/*neon*.c) \
+			$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/dsp/*neon*.c) \
+			$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/enc/*neon*.c) \
+			$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/mux/*neon*.c) \
+			$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/webp/utils/*neon*.c)
+
+ZLIB_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/zlib/*.c)
 
 LUA_SOURCES := $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/lua/lapi.c \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/lua/lauxlib.c \
@@ -111,9 +123,11 @@ ROOT_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/*.cpp)
 
 SFML_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/System/*.cpp) \
 				$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/System/Android/*.cpp) \
+				$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/System/Unix/*.cpp) \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/Context.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/EGLCheck.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/EglContext.cpp \
+				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/GlContext.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/GlResource.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/Joystick.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/JoystickManager.cpp \
@@ -135,6 +149,7 @@ SFML_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/System
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/Color.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/ConvexShape.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/Font.cpp \
+				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/GLExtensions.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/Image.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/ImageLoader.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/RectangleShape.cpp \
@@ -158,11 +173,40 @@ SFML_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/System
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/View.cpp \
 				$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Audio/*.cpp)
 
+ifeq ($(TARGET_ARCH_ABI),$(filter $(TARGET_ARCH_ABI), armeabi-v7a x86))
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE    := webp-neon
+LOCAL_SRC_FILES := $(WEBP_NEON_SOURCES)
+LOCAL_ARM_NEON  := true
+
+include $(BUILD_STATIC_LIBRARY)
+
+endif # TARGET_ARCH_ABI == armeabi-v7a || x86
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := FlamingDependencies
+LOCAL_CPP_FEATURES += exceptions
+LOCAL_CPP_FEATURES += rtti
+
 LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES -D__ANDROID__ -D__unix__ -DSFML_OPENGL_ES -DSFML_WINDOW_EXPORTS -DSFML_SYSTEM_EXPORTS -DSFML_NETWORK_EXPORTS -DSFML_GRAPHICS_EXPORTS -DSFML_AUDIO_EXPORTS -DGLEW_STATIC -DUNICODE -DFT2_BUILD_LIBRARY
 LOCAL_C_INCLUDES := $(GLOBAL_INCLUDES)
 
-LOCAL_SRC_FILES := $(LUA_SOURCES) $(SFML_SOURCES) $(BASE64_SOURCES) $(FREETYPE_SOURCES) $(LIBPNG_SOURCES) $(ENET_SOURCES) $(JSONCPP_SOURCES)\
-	$(LUABIND_SOURCES) $(TINYXML_SOURCES) $(WEBP_SOURCES) $(ZLIB_SOURCES) $(ROOT_SOURCES)
+LOCAL_SRC_FILES := $(WEBP_SOURCES) $(LUA_SOURCES) $(SFML_SOURCES) $(BASE64_SOURCES) $(FREETYPE_SOURCES) $(LIBPNG_SOURCES) $(ENET_SOURCES) $(JSONCPP_SOURCES)\
+	$(LUABIND_SOURCES) $(TINYXML_SOURCES) $(ZLIB_SOURCES) $(ROOT_SOURCES)
+
+LOCAL_STATIC_LIBRARIES := cpufeatures
+
+ifeq ($(TARGET_ARCH_ABI),$(filter $(TARGET_ARCH_ABI), armeabi-v7a x86))
+
+LOCAL_STATIC_LIBRARIES += webp-neon
+
+endif # TARGET_ARCH_ABI == armeabi-v7a || x86
 
 #LOCAL_SHORT_COMMANDS := true
 include $(BUILD_STATIC_LIBRARY)
+
+$(call import-module,android/cpufeatures)
+

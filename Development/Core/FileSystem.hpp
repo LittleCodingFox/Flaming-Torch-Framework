@@ -534,6 +534,7 @@ public:
 	void Update(uint32 Priority);
 };
 
+#if !FLPLATFORM_ANDROID
 namespace FileSystemWatcherAction
 {
 	enum FileSystemWatcherAction
@@ -569,3 +570,5 @@ public:
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
 };
+#endif
+

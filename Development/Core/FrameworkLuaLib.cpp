@@ -1636,6 +1636,7 @@ namespace FlamingTorch
 				.property("WorldRadius", &WorldStreamer::GetWorldRadius, &WorldStreamer::SetWorldRadius)
 				.property("GlobalCoordinate", &WorldStreamer::GetGlobalCoordinate, &WorldStreamer::SetGlobalCoordinate),
 
+#if !FLPLATFORM_ANDROID
 			//FileSystemWatcher
 			luabind::class_<FileSystemWatcher, SubSystem>("FileSystemWatcher")
 				.enum_("constants") [
@@ -1644,6 +1645,7 @@ namespace FlamingTorch
 					luabind::value("Action_Deleted", FileSystemWatcherAction::Deleted)
 				]
 				.def("WatchDirectory", &FileSystemWatcher::WatchDirectory),
+#endif
 
 #if USE_NETWORK
 			//GameClient
@@ -2460,7 +2462,9 @@ namespace FlamingTorch
 		Globals["g_GameInterface"] = GameInterface::Instance.Get();
 		Globals["Game"] = GameInterface::Instance.Get();
 
+#if !FLPLATFORM_ANDROID
 		Globals["g_FileSystemWatcher"] = &FileSystemWatcher::Instance;
+#endif
 
 		Globals["g_PackageManager"] = &PackageFileSystemManager::Instance;
 

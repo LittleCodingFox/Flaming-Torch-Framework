@@ -31,11 +31,12 @@ namespace FlamingTorch
 #	define TAGWATCHER "FileSystemWatcher"
 #	define STREAM_COPY_BUFFER_SIZE 1048576 //1MB
 
-	FW::FileWatcher GlobalFileWatcher;
-	FileSystemWatcher FileSystemWatcher::Instance;
-
 	std::string Path::PathSeparator = FLPLATFORM_UNIVERSAL_PATHSPLITSTRING;
 	std::string Path::PlatformPathSeparator = FLPLATFORM_PATHSPLITSTRING;
+
+#if !FLPLATFORM_ANDROID
+	FW::FileWatcher GlobalFileWatcher;
+	FileSystemWatcher FileSystemWatcher::Instance;
 
 	class FileSystemWatcherCallback : public FW::FileWatchListener
 	{
@@ -65,6 +66,7 @@ namespace FlamingTorch
 			FileSystemWatcher::Instance.OnAction(dir, filename, ActionID);
 		};
 	};
+#endif
 
 	Path::Path()
 	{
@@ -1658,7 +1660,7 @@ namespace FlamingTorch
 		return Out;
 	};
 
-
+#if !FLPLATFORM_ANDROID
 	void FileSystemWatcher::StartUp(uint32 Priority)
 	{
 		SUBSYSTEM_STARTUP_CHECK()
@@ -1705,4 +1707,5 @@ namespace FlamingTorch
 
 		return true;
 	};
+#endif
 };
