@@ -1,7 +1,10 @@
 #pragma once
 #if USE_GRAPHICS && USE_SFML_RENDERER
 }
+#if !__ANDROID__
 #	include <GL/glew.h>
+#endif
+#
 #	include <SFML/Graphics.hpp>
 
 namespace FlamingTorch

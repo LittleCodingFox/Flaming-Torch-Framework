@@ -676,7 +676,7 @@ namespace FlamingTorch
 
 	void UIPanel::AdjustSizeAndPosition(UIPanel *PanelToStopAt)
 	{
-		if(this == PanelToStopAt || ParentValue == NULL)
+		if(this == PanelToStopAt || !ParentValue)
 			return;
 
 		if(ParentValue->SizeValue.x < ComposedSize().x)

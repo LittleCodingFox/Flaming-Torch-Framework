@@ -4,6 +4,9 @@
 #	include <direct.h>
 #	undef CreateDirectory
 #endif
+#if FLPLATFORM_ANDROID
+#	include <android/log.h>
+#endif
 #include <time.h>
 namespace FlamingTorch
 {

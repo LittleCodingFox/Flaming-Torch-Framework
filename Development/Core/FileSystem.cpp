@@ -611,7 +611,7 @@ namespace FlamingTorch
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			}
-			else if(GameInterface::Instance != NULL)
+			else if(GameInterface::Instance.Get())
 			{
 				ActualStorageDirectory += "/" + GameInterface::Instance->GameName() + "_files";
 				GeneralizeSeparators(ActualDirectory);

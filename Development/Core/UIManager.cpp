@@ -189,7 +189,7 @@ namespace FlamingTorch
 		std::vector<LuaLib *> Libs;
 		Libs.push_back(&FrameworkLib::Instance);
 
-		if(GameInterface::Instance != NULL)
+		if(GameInterface::Instance)
 		{
 			Libs.push_back(GameInterface::Instance);
 

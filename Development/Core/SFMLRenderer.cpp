@@ -1,4 +1,7 @@
 #include "FlamingCore.hpp"
+#if FLPLATFORM_ANDROID
+#	include <SFML/OpenGL.hpp>
+#endif
 
 namespace FlamingTorch
 {
@@ -44,6 +47,7 @@ namespace FlamingTorch
 		Log::Instance.LogInfo(TAG, "   Vendor: %s", glGetString(GL_VENDOR));
 		Log::Instance.LogInfo(TAG, "   Version: %s", glGetString(GL_VERSION));
 
+#if !FLPLATFORM_ANDROID
 		int t, t2, t3;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &t);
 
@@ -64,6 +68,7 @@ namespace FlamingTorch
 		GLCHECK();
 
 		Log::Instance.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
+#endif
 	};
 
 	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), SupportsVBOs(false), ExtensionsAvailable(false), LastBoundVBO(0), 
@@ -116,6 +121,9 @@ namespace FlamingTorch
 		{
 			FirstRenderer = false;
 
+#if FLPLATFORM_ANDROID
+			ExtensionsAvailable = false;
+#else
 			GLenum err = glewInit();
 
 			if(GLEW_OK != err)
@@ -131,6 +139,7 @@ namespace FlamingTorch
 				//Disabled for now
 				//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
 			};
+#endif
 
 			GLCHECK();
 
@@ -212,6 +221,9 @@ namespace FlamingTorch
 		{
 			FirstRenderer = false;
 
+#if FLPLATFORM_ANDROID
+			ExtensionsAvailable = false;
+#else
 			GLenum err = glewInit();
 
 			if(GLEW_OK != err)
@@ -227,6 +239,7 @@ namespace FlamingTorch
 				//Disabled for now
 				//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
 			};
+#endif
 
 			GLCHECK();
 
@@ -973,7 +986,7 @@ namespace FlamingTorch
 			return;
 		};
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
 
 		GLCHECK();
 
@@ -1011,21 +1024,25 @@ namespace FlamingTorch
 
 			break;
 
-		case TextureWrapMode::Clamp:
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-			GLCHECK();
-
-			break;
-
 		case TextureWrapMode::ClampToBorder:
+#if !FLPLATFORM_ANDROID //"Hack" to make this the same as CLAMP_TO_EDGE due to GLES not supporting this
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 			GLCHECK();
 
 			break;
+#endif
+
+		case TextureWrapMode::Clamp:
+#if !FLPLATFORM_ANDROID //"Hack" to make this the same as CLAMP_TO_EDGE due to GLES not supporting this
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+			GLCHECK();
+
+			break;
+#endif
 
 		case TextureWrapMode::ClampToEdge:
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1069,7 +1086,12 @@ namespace FlamingTorch
 
 			GLCHECK();
 
+#if FLPLATFORM_ANDROID
+			//Unsure how to check if this is available?
+			//glGenerateMipmapOES(GL_TEXTURE_2D);
+#else
 			glGenerateMipmap(GL_TEXTURE_2D);
+#endif
 
 			GLCHECK();
 		};
@@ -1108,6 +1130,12 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount)
 	{
+#if FLPLATFORM_ANDROID
+		Log::Instance.LogErr(TAG, "Unable to GetTextureData on GLES");
+
+		return false;
+#endif
+
 		FrameStatsValue.StateChanges++;
 
 		TextureHandle Last = LastBoundTexture;
@@ -1134,7 +1162,9 @@ namespace FlamingTorch
 			return false;
 		};
 
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA8, GL_UNSIGNED_BYTE, Pixels);
+#if !FLPLATFORM_ANDROID
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
+#endif
 
 		GLCHECK();
 
@@ -1170,7 +1200,13 @@ namespace FlamingTorch
 
 		case BlendingMode::Subtractive:
 			EnableState(GL_BLEND);
+
+#if FLPLATFORM_ANDROID //GL_FUNC_SUBTRACT gives error, gotta figure out how to fix this.
+					   //If glBlendEquation is available, then GL_FUNC_SUBTRACT should as well.
+			FLASSERT(0, "Unable to use subtractive blending on Android!");
+#else
 			glBlendEquation(GL_FUNC_SUBTRACT);
+#endif
 
 			break;
 		};
@@ -1701,10 +1737,12 @@ namespace FlamingTorch
 		case GL_TEXTURE_COORD_ARRAY:
 		case GL_NORMAL_ARRAY:
 		case GL_COLOR_ARRAY:
+#if !FLPLATFORM_ANDROID
 		case GL_EDGE_FLAG_ARRAY:
 		case GL_FOG_COORD_ARRAY:
 		case GL_INDEX_ARRAY:
 		case GL_SECONDARY_COLOR_ARRAY:
+#endif
 			glEnableClientState(ID);
 
 			break;
@@ -1733,10 +1771,12 @@ namespace FlamingTorch
 		case GL_TEXTURE_COORD_ARRAY:
 		case GL_NORMAL_ARRAY:
 		case GL_COLOR_ARRAY:
+#if !FLPLATFORM_ANDROID
 		case GL_EDGE_FLAG_ARRAY:
 		case GL_FOG_COORD_ARRAY:
 		case GL_INDEX_ARRAY:
 		case GL_SECONDARY_COLOR_ARRAY:
+#endif
 			glDisableClientState(ID);
 
 			break;

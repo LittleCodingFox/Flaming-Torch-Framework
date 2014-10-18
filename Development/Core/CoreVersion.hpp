@@ -8,7 +8,7 @@
 #include <memory>
 #include <map>
 #include <math.h>
-#include "Signal.h"
+#include "_Signal.h"
 using namespace Gallant;
 
 #define FTSTD_VERSION_MAJOR 0
@@ -98,7 +98,17 @@ namespace FlamingTorch
 
 		explicit SuperSmartPointer(type *In)
 		{
-			reset(new DisposableResource<type>(In));
+			this->reset(new DisposableResource<type>(In));
+		};
+
+		bool operator==(const SuperSmartPointer<type> &o)
+		{
+			return o.Get() == Get();
+		};
+
+		bool operator!=(const SuperSmartPointer<type> &o)
+		{
+			return o.Get() != Get();
 		};
 
 		inline type *Get()

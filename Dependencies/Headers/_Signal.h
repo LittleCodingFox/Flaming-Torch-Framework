@@ -10,7 +10,7 @@
 #ifndef _GALLANT_SIGNAL_H_
 #define _GALLANT_SIGNAL_H_
 
-#include "Delegate.h"
+#include "_Delegate.h"
 #include <set>
 
 namespace Gallant {

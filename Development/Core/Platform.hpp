@@ -1,8 +1,23 @@
 #pragma once
-#if __WORDSIZE == 64
-#	define FLPLATFORM_64BITS 1
-#else
-#	define FLPLATFORM_64BITS 0
+#if _WIN32 || _WIN64
+#	if _WIN64
+#		define FLPLATFORM_64BITS 1
+#	else
+#		define FLPLATFORM_64BITS 0
+#	endif
+#endif
+
+// Check GCC
+#if __GNUC__
+#	if __x86_64__ || __ppc64__
+#		define FLPLATFORM_64BITS 1
+#	else
+#		define FLPLATFORM_64BITS 0
+#	endif
+#endif
+
+#if defined(__ANDROID__)
+#	define FLPLATFORM_ANDROID 1
 #endif
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)

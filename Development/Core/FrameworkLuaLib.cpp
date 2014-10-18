@@ -44,10 +44,13 @@ namespace luabind
 
 	REGISTER_POD_CONVERTER(wchar_t);
 
-#if !FLPLATFORM_64BITS
+//Not working yet..
+//#if !FLPLATFORM_64BITS
+#	if !defined(__ANDROID__)
 	REGISTER_POD_CONVERTER(FlamingTorch::int64);
 	REGISTER_POD_CONVERTER(FlamingTorch::uint64);
 #endif
+//#endif
 };
 
 namespace FlamingTorch
