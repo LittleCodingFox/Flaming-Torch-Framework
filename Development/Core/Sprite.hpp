@@ -1,5 +1,5 @@
 #pragma once
-#define MAX_SPRITE_CACHE_SIZE 20000000
+#define MAX_SPRITE_CACHE_SIZE 20000
 
 namespace PinningMode
 {

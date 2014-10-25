@@ -1699,6 +1699,12 @@ namespace FlamingTorch
 
 			//TiledMap
 			luabind::class_<TiledMap, SuperSmartPointer<TiledMap> >("TiledMap")
+				.enum_("constants") [
+					luabind::value("TileOrder_North", TiledMapOrder::North),
+					luabind::value("TileOrder_Easy", TiledMapOrder::East),
+					luabind::value("TileOrder_South", TiledMapOrder::South),
+					luabind::value("TileOrder_West", TiledMapOrder::West)
+				]
 				.scope [
 					luabind::class_<TiledMapInitOptions>("InitOptions")
 						.def_readwrite("FromPackageValue", &TiledMapInitOptions::FromPackageValue)
@@ -1742,6 +1748,7 @@ namespace FlamingTorch
 				.def_readwrite("Scale", &TiledMap::Scale)
 				.def_readwrite("Translation", &TiledMap::Translation)
 				.def_readwrite("Color", &TiledMap::Translation)
+				.def_readwrite("TileOrder", &TiledMap::TileOrder)
 				.def_readonly("MapTileSize", &TiledMap::MapTileSize)
 				.def_readonly("MapPixelSize", &TiledMap::MapPixelSize)
 				.def_readonly("MapTileCount", &TiledMap::MapTileCount)

@@ -277,9 +277,11 @@ namespace FlamingTorch
 			it->second->SetTextureFiltering(TextureFilter);
 		};
 
+#if USE_GRAPHICS
 		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
 
 		TheRenderer->OnResourcesReloaded(TheRenderer);
+#endif
 	};
 
 	void ResourceManager::Cleanup()

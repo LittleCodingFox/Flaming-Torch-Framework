@@ -34,7 +34,7 @@ namespace FlamingTorch
 
 	VertexBufferHandle TiledMapVertexBuffer = 0;
 
-	TiledMap::TiledMap() : ResourcesInitedValue(false), Scale(1, 1), Color(1, 1, 1), Orientation(0), TileRatio(0) {};
+	TiledMap::TiledMap() : ResourcesInitedValue(false), Scale(1, 1), Color(1, 1, 1), Orientation(0), TileRatio(0), TileOrder(TiledMapOrder::North) {};
 
 	bool TiledMap::DeSerialize(Stream *In)
 	{
@@ -244,6 +244,42 @@ namespace FlamingTorch
 			{
 				for(f32 x = 0; x < MapTileCount.x; x++)
 				{
+					f32 ActualX = x, ActualY = y;
+
+					uint32 ExtraSwapFlags = 0;
+
+					switch(TileOrder)
+					{
+						case TiledMapOrder::North:
+							//Do nothing
+
+							break;
+
+						case TiledMapOrder::East:
+							std::swap(ActualX, ActualY);
+							ActualX = MapTileCount.y - ActualX - 1;
+							ExtraSwapFlags = TileFlipFlags::Diagonal;
+
+							break;
+
+						case TiledMapOrder::South:
+							ActualY = MapTileCount.y - ActualY - 1;
+							ExtraSwapFlags = TileFlipFlags::Vertical;
+
+							break;
+
+						case TiledMapOrder::West:
+							std::swap(ActualX, ActualY);
+							ExtraSwapFlags = TileFlipFlags::Diagonal | TileFlipFlags::Vertical | TileFlipFlags::Horizontal;
+
+							break;
+
+						default:
+							Log::Instance.LogDebug(TAG, "Unknown Tiled Map Order '%d'", TileOrder);
+
+							break;
+					};
+
 					int32 FoundLayerIndex = -1;
 
 					for(uint32 j = 0; j < Layers[i]->Tiles.size(); j++)
@@ -264,7 +300,7 @@ namespace FlamingTorch
 					Vector2 FramePosition = Vector2((f32)TextureInfo.x, (f32)TextureInfo.y) / TileSet.UniqueTilesetTexture->Size();
 					Vector2 FrameSize = Vector2((f32)TextureInfo.Width, (f32)TextureInfo.Height) / TileSet.UniqueTilesetTexture->Size();
 
-					Vector2 ActualPosition = DrawingOffset + (Orientation == TiledMapOrientationMode::Isometric ? Vector2((x - y) * HalfTileSize.x, (x + y) * HalfTileSize.y) : Vector2(x, y) * MapTileSize);
+					Vector2 ActualPosition = DrawingOffset + (Orientation == TiledMapOrientationMode::Isometric ? Vector2((ActualX - ActualY) * HalfTileSize.x, (ActualX + ActualY) * HalfTileSize.y) : Vector2(ActualX, ActualY) * MapTileSize);
 					
 					Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = ActualPosition;
 					Layers[i]->Vertices[index + 1] = ActualPosition + Vector2(0, (f32)TextureInfo.Height);
@@ -297,6 +333,34 @@ namespace FlamingTorch
 					};
 
 					if(Layers[i]->Tiles[FoundLayerIndex].FlipFlag & TileFlipFlags::Horizontal)
+					{
+						memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
+						Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[4];
+						Layers[i]->Vertices[index + 1] = TempVertices[2];
+						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
+						Layers[i]->Vertices[index + 4] = TempVertices[0];
+					};
+
+					//Need to repeat here in case of rotating
+					if(ExtraSwapFlags & TileFlipFlags::Diagonal)
+					{
+						memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
+						Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[4];
+						Layers[i]->Vertices[index + 1] = TempVertices[0];
+						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
+						Layers[i]->Vertices[index + 4] = TempVertices[2];
+					};
+					
+					if(ExtraSwapFlags & TileFlipFlags::Vertical)
+					{
+						memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
+						Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[2];
+						Layers[i]->Vertices[index + 1] = TempVertices[4];
+						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[0];
+						Layers[i]->Vertices[index + 4] = TempVertices[1];
+					};
+					
+					if(ExtraSwapFlags & TileFlipFlags::Horizontal)
 					{
 						memcpy(TempVertices, &Layers[i]->Vertices[index], sizeof(Vector2[6]));
 						Layers[i]->Vertices[index] = Layers[i]->Vertices[index + 5] = TempVertices[4];

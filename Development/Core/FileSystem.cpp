@@ -514,15 +514,6 @@ namespace FlamingTorch
 #endif
 	
 	std::string ActualDirectory, ActualResourcesDirectory, ActualStorageDirectory;
-
-	void GeneralizeSeparators(std::string &Str)
-	{
-		for(uint32 i = 0; i < Str.length(); i++)
-		{
-			if(Str[i] == '\\')
-				Str[i] = '/';
-		};
-	};
 	
 	const std::string &FileSystemUtils::ActiveDirectory()
 	{
@@ -540,7 +531,7 @@ namespace FlamingTorch
 				ActualDirectory += "/";
 			};
 
-			GeneralizeSeparators(ActualDirectory);
+			ActualDirectory = Path(ActualDirectory).FullPath();
 		};
 		
 		return ActualDirectory;
@@ -571,7 +562,7 @@ namespace FlamingTorch
 				ActualResourcesDirectory += "/";
 			};
 
-			GeneralizeSeparators(ActualResourcesDirectory);
+			ActualResourcesDirectory = Path(ActualResourcesDirectory).FullPath();
 		};
 		
 		return ActualResourcesDirectory;
@@ -609,14 +600,14 @@ namespace FlamingTorch
 			if(Log::Instance.FolderName.length())
 			{
 				ActualStorageDirectory += "/" + Log::Instance.FolderName;
-				GeneralizeSeparators(ActualDirectory);
+				ActualStorageDirectory = Path(ActualStorageDirectory).FullPath();
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			}
 			else if(GameInterface::Instance.Get())
 			{
 				ActualStorageDirectory += "/" + GameInterface::Instance->GameName() + "_files";
-				GeneralizeSeparators(ActualDirectory);
+				ActualStorageDirectory = Path(ActualStorageDirectory).FullPath();
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			};

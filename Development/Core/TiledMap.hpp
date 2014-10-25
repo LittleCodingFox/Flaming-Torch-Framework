@@ -13,6 +13,20 @@ namespace TiledMapOrientationMode
 };
 
 /*!
+*	Tiled Map Order
+*/
+namespace TiledMapOrder
+{
+	enum
+	{
+		North = 0, //!<Default
+		East, //!<Rotated 45 degrees to the right
+		South, //!<Rotated 180 degrees
+		West //!<Rotated 270 degrees
+	};
+};
+
+/*!
 *	Tiled Map Init Options class
 */
 class TiledMapInitOptions
@@ -113,6 +127,11 @@ public:
 	*	Isometric Tile Ratio
 	*/
 	f32 TileRatio;
+
+	/*!
+	*	Tile Order (one of TiledMapOrder::*)
+	*/
+	uint32 TileOrder;
 
 	TiledMap();
 
