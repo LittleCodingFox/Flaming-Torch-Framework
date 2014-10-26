@@ -112,7 +112,7 @@ namespace FlamingTorch
 
 		printf("%s", (PrintTime ? Final : FinalPrint).c_str());
 
-#if ANDROID
+#if FLPLATFORM_ANDROID
 		__android_log_print(ANDROID_LOG_DEBUG, "Core", (PrintTime ? Final : FinalPrint).c_str());
 #endif
 	};

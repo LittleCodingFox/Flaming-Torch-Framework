@@ -142,13 +142,12 @@ SFML_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/System
 				$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Window/Android/*.cpp) \
 				$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Network/*.cpp) \
 				$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Network/Unix/*.cpp) \
-				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Main/MainAndroid.cpp \
-				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Main/SFMLActivity.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/BlendMode.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/CircleShape.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/Color.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/ConvexShape.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/Font.cpp \
+				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/GLCheck.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/GLExtensions.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/Image.cpp \
 				$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Graphics/ImageLoader.cpp \
@@ -207,6 +206,23 @@ endif # TARGET_ARCH_ABI == armeabi-v7a || x86
 
 #LOCAL_SHORT_COMMANDS := true
 include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := AndroidBootstrap
+LOCAL_CPP_FEATURES += exceptions
+LOCAL_CPP_FEATURES += rtti
+
+LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES -D__ANDROID__ -D__unix__ -DSFML_OPENGL_ES -DSFML_WINDOW_EXPORTS -DSFML_SYSTEM_EXPORTS -DSFML_NETWORK_EXPORTS -DSFML_GRAPHICS_EXPORTS -DSFML_AUDIO_EXPORTS -DGLEW_STATIC -DUNICODE -DFT2_BUILD_LIBRARY
+LOCAL_C_INCLUDES := $(GLOBAL_INCLUDES)
+
+LOCAL_SRC_FILES := $(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/SFML/SFML/Main/MainAndroid.cpp AndroidBootstrap.cpp
+
+LOCAL_STATIC_LIBRARIES := FlamingDependencies
+
+LOCAL_LDLIBS := -lEGL -llog -landroid -lGLESv1_CM -ldl
+
+include $(BUILD_SHARED_LIBRARY)
 
 $(call import-module,android/cpufeatures)
 

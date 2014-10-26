@@ -45,9 +45,11 @@
 #include <SFML/System/Err.hpp>
 #include <android/window.h>
 #include <android/native_activity.h>
+#include <android/log.h>
+#include <jni.h>
+#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_INFO, "AndroidBootstrap", __VA_ARGS__))
 
-
-extern int main(int argc, char *argv[]);
+extern void Bootstrap(sf::priv::ActivityStates *states, JavaVM *vm, JNIEnv *env);
 
 namespace sf
 {
@@ -96,7 +98,16 @@ void* main(ActivityStates* states)
     initializeMain(states);
 
     sleep(seconds(0.5));
-    ::main(0, NULL);
+	JNIEnv *env = NULL;
+
+	if(JNI_OK != states->activity->vm->AttachCurrentThread(&env, NULL))
+	{
+		LOGE("Unable to attach JVM");
+
+		return NULL;
+	};
+
+	::Bootstrap(states, states->activity->vm, env);
 
     // Terminate properly the main thread and wait until it's done
     terminateMain(states);
@@ -106,6 +117,8 @@ void* main(ActivityStates* states)
 
         states->terminated = true;
     }
+
+	states->activity->vm->DetachCurrentThread();
 
     return NULL;
 }
