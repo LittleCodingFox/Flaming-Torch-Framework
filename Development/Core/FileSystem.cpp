@@ -1,7 +1,7 @@
 #include "FlamingCore.hpp"
 #include <FileWatcher/FileWatcher.h>
 
-#ifdef FLPLATFORM_WINDOWS
+#if FLPLATFORM_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
 #	define VC_LEAN_AND_MEAN
 #	include <windows.h>
@@ -21,6 +21,12 @@
 #	define GetCWD getcwd
 #	define _mkdir(n) mkdir(n, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH)
 #	define _rmdir(n) rmdir(n)
+#endif
+
+#if FLPLATFORM_ANDROID
+#include <SFML/System/Android/Activity.hpp>
+#include <SFML/System/Android/ResourceStream.hpp>
+#include <android/log.h>
 #endif
 
 namespace FlamingTorch
@@ -819,16 +825,18 @@ namespace FlamingTorch
 		return Data;
 	};
 
-	FileStream::FileStream() : Handle(NULL), _Length(0), _Position(0) {};
+	FileStream::FileStream() : Handle(NULL), _Length(0), _Position(0), IsBasic(false) {};
 
 	FileStream::~FileStream()
 	{
 		Close(); 
 	};
 
-	bool FileStream::Open(const std::string &name, uint8 Flags)
+	bool FileStream::Open(const std::string &_name, uint8 Flags)
 	{
-		FLASSERT(name.length(), "Invalid Filename!");
+		FLASSERT(_name.length(), "Invalid Filename!");
+
+		std::string name = Path(_name).FullPath();
 
 		Close();
 
@@ -867,11 +875,49 @@ namespace FlamingTorch
 #endif
 		};
 
-		if(!Handle)
-			return false;
-
 		_Length = 0;
 		_Position = 0;
+
+		if(!Handle)
+		{
+#if FLPLATFORM_ANDROID
+			if(Flags & StreamFlags::Write)
+				return false;
+
+			if(name[0] == '/')
+			{
+				name = name.substr(1);
+			};
+
+			//__android_log_print(ANDROID_LOG_DEBUG, "Core", "Loading asset '%s'", name.c_str());
+			sf::priv::ResourceStream *resource = new sf::priv::ResourceStream(name);
+
+			if(!resource->getSize())
+			{
+				delete resource;
+				//GIF Hack Workaround
+				//__android_log_print(ANDROID_LOG_DEBUG, "Core", "Loading asset '%s.gif' (GIF Workaround)", name.c_str());
+				resource = new sf::priv::ResourceStream(name + ".gif");
+
+				if(!resource->getSize())
+				{
+					__android_log_print(ANDROID_LOG_DEBUG, "Core", "Asset '%s' not found", name.c_str());
+
+					delete resource;
+
+					return false;
+				};
+			};
+
+			_Length = resource->getSize();
+			Handle = resource;
+			IsBasic = false;
+
+			return true;
+#else
+			return false;
+#endif
+		};
 
 		if(Flags & StreamFlags::Read)
 		{
@@ -888,6 +934,8 @@ namespace FlamingTorch
 			fseek((FILE*)Handle, 0, SEEK_SET);
 		};
 
+		IsBasic = true;
+
 		return true;
 	};
 
@@ -895,12 +943,25 @@ namespace FlamingTorch
 	{
 		if(Handle)
 		{
+#if FLPLATFORM_ANDROID
+			if(!IsBasic)
+			{
+				delete (sf::priv::ResourceStream *)Handle;
+			}
+			else
+			{
+				fclose((FILE*)Handle);
+			};
+#else
 			fclose((FILE*)Handle);
+#endif
+
 			Handle = NULL;
 		};
 
 		_Length = 0;
 		_Position = 0;
+		IsBasic = true;
 	};
 
 	uint64 FileStream::Length() const
@@ -924,11 +985,22 @@ namespace FlamingTorch
 			FLASSERT(Position <= _Length, "Invalid Position!");
 
 #ifdef FLPLATFORM_WINDOWS
-		int Result = _fseeki64((FILE *)Handle, Position, SEEK_SET);
-#elif FLPLATFORM_MACOSX || ANDROID
-		int Result = fseek((FILE *)Handle, Position, SEEK_SET);
+		int64 Result = _fseeki64((FILE *)Handle, Position, SEEK_SET);
+#elif FLPLATFORM_MACOSX
+		int64 Result = fseek((FILE *)Handle, Position, SEEK_SET);
+#elif FLPLATFORM_ANDROID
+		int64 Result = 0;
+
+		if(!IsBasic)
+		{
+			Result = ((sf::priv::ResourceStream *)Handle)->seek(Position);
+		}
+		else
+		{
+			Result = fseek((FILE *)Handle, Position, SEEK_SET);
+		};
 #else
-		int Result = fseeko64((FILE *)Handle, Position, SEEK_SET);
+		int64 Result = fseeko64((FILE *)Handle, Position, SEEK_SET);
 #endif
 
 		if(Result == -1)
@@ -948,6 +1020,11 @@ namespace FlamingTorch
 
 		if(!Handle || !Data || ElementSize == 0 || Length == 0)
 			return false;
+
+#if FLPLATFORM_ANDROID
+		if(!IsBasic)
+			return false;
+#endif
 
 		if(Processor)
 		{
@@ -988,8 +1065,21 @@ namespace FlamingTorch
 		if(_Position + ElementSize * Length > this->_Length)
 			return false;
 
+#if FLPLATFORM_ANDROID
+		if(!IsBasic)
+		{
+			if(((sf::priv::ResourceStream *)Handle)->read(Data, ElementSize * Length) != ElementSize * Length)
+				return false;
+		}
+		else
+		{
+			if(fread(Data, ElementSize, Length, (FILE*)Handle) != Length)
+				return false;
+		};
+#else
 		if(fread(Data, ElementSize, Length, (FILE*)Handle) != Length)
 			return false;
+#endif
 
 		if(Processor)
 			Processor->Decode(Data, ElementSize * Length);
@@ -1007,12 +1097,7 @@ namespace FlamingTorch
 		if(!Data || Length == 0)
 			return;
 
-		uint32 Count = fread(Data, sizeof(uint8), Length, (FILE *)Handle);
-
-		if(Processor)
-			Processor->Decode(Data, Length);
-
-		_Position += Count;
+		Read(Data, sizeof(uint8), Length);
 	};
 
 	bool Stream::CopyTo(Stream *Out)
@@ -1159,7 +1244,7 @@ namespace FlamingTorch
 
 		if(!EntryList.size())
 		{
-			Log::Instance.LogWarn("Package", "Serializing a package with no Entries!");
+			Log::Instance.LogWarn(TAGMANAGER, "Serializing a package with no Entries!");
 
 			return true;
 		};
@@ -1168,7 +1253,7 @@ namespace FlamingTorch
 		{
 			if(!EntryList[i]->Input->CopyTo(Out))
 			{
-				Log::Instance.LogErr("PackageFileManager", "While serializing: Unable to serialize Entry '%d/%s'!", EntryList[i]->DirectoryID,
+				Log::Instance.LogErr(TAGMANAGER, "While serializing: Unable to serialize Entry '%d/%s'!", EntryList[i]->DirectoryID,
 					EntryList[i]->Name.c_str());
 
 				return false;
@@ -1197,7 +1282,7 @@ namespace FlamingTorch
 
 		if(Version != TargetVersion)
 		{
-			Log::Instance.LogErr("PackageFileManager", "While deserializing: Invalid Version ID '%lld' (should be '%lld')",
+			Log::Instance.LogErr(TAGMANAGER, "While deserializing: Invalid Version ID '%lld' (should be '%lld')",
 				Version, TargetVersion);
 
 			return false;
@@ -1216,7 +1301,7 @@ namespace FlamingTorch
 
 		if(ActualCRC != CRC)
 		{
-			Log::Instance.LogErr("PackageFileManager", "While deserializing: Invalid CRC '%08x' (should be '%08x')",
+			Log::Instance.LogErr(TAGMANAGER, "While deserializing: Invalid CRC '%08x' (should be '%08x')",
 				ActualCRC, CRC);
 
 			return false;
@@ -1262,6 +1347,8 @@ namespace FlamingTorch
 			Entry->DirectoryName = DirectoryNameStr;
 			Entry->Offset = Offset;
 			Entry->Length = Length;
+
+			Log::Instance.LogInfo(TAGMANAGER, "Added Entry: '%s%s' (%08x/%08x)", DirectoryNameStr.c_str(), NameStr.c_str(), DirectoryID, NameID);
 
 			Entries[DirectoryID][NameID] = Entry;
 		};
@@ -1568,6 +1655,8 @@ namespace FlamingTorch
 			return SuperSmartPointer<Stream>();
 
 		sf::Lock Lock(fit->second.first->FileAccessMutex);
+
+		Log::Instance.LogInfo(TAGMANAGER, "Getting file '%s%s' (%08x/%08x)", GetStringIDString(Directory).c_str(), GetStringIDString(Name).c_str(), Directory, Name);
 
 		PackageFileSystemManager::PackageStream *PStream = new PackageFileSystemManager::PackageStream();
 

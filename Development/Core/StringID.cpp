@@ -13,6 +13,9 @@ namespace FlamingTorch
 			if(it == StringIDMap.end())
 			{
 				StringIDMap[Hash] = Name;
+
+				//Enable if necessary to debug StringIDs
+				//Log::Instance.LogInfo("StringID", "New StringID: '%s' => 0x%08x", Name.c_str(), Hash);
 			};
 		};
 

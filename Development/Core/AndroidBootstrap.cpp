@@ -9,7 +9,6 @@
 #include <SFML/System/Err.hpp>
 #include <android/window.h>
 #include <android/native_activity.h>
-#include <android/native_activity.h>
 #include <android/log.h>
 #include <dlfcn.h>
 #include <errno.h>
@@ -21,6 +20,7 @@ int main(int argc, char **argv);
 
 extern "C" void AndroidBootstrap(sf::priv::ActivityStates *states, JavaVM *vm, JNIEnv *env)
 {
+    sf::priv::getActivity(states, true);
 	LOGE("Main Loop starting!");
 
 	int result = main(0, NULL);

@@ -92,7 +92,8 @@ namespace FlamingTorch
 			Depth++;
 		}
 
-		LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
+		if(LuaScriptManager::Instance.ErrorStream)
+			LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
 
 		Log::Instance.LogErr(TAG, str.str().c_str());
 
@@ -188,9 +189,11 @@ namespace FlamingTorch
 				Depth++;
 			};
 
-			LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
+			if(LuaScriptManager::Instance.ErrorStream.Get())
+				LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
 
 			Log::Instance.LogErr(TAG, str.str().c_str());
+			Log::Instance.LogInfo(TAG, "Script Code: '%s'", Code.c_str());
 		};
 
 		return Error;
@@ -252,9 +255,11 @@ namespace FlamingTorch
 				Depth++;
 			};
 
-			LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
+			if(ErrorStream)
+				ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
 
 			Log::Instance.LogErr(TAG, str.str().c_str());
+			Log::Instance.LogInfo(TAG, "Script Code: '%s'", Code.c_str());
 
 			return SuperSmartPointer<LuaScript>();
 		};
@@ -271,7 +276,8 @@ namespace FlamingTorch
 
 		std::string FinalMessage = Message + "\n";
 
-		ErrorStream->Write2<char>(FinalMessage.c_str(), FinalMessage.length());
+		if(ErrorStream.Get())
+			ErrorStream->Write2<char>(FinalMessage.c_str(), FinalMessage.length());
 
 		Log::Instance.LogErr(TAG, FinalMessage.c_str());
 	};
