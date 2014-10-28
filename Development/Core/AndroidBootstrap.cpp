@@ -319,6 +319,7 @@ static void onNativeWindowRedrawNeeded(ANativeActivity* activity, ANativeWindow*
 ////////////////////////////////////////////////////////////
 static void onNativeWindowResized(ANativeActivity* activity, ANativeWindow* window)
 {
+	
 }
 
 

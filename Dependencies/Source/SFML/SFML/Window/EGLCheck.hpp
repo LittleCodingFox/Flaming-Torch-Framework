@@ -40,17 +40,17 @@ namespace priv
 ////////////////////////////////////////////////////////////
 /// Let's define a macro to quickly check every EGL API call
 ////////////////////////////////////////////////////////////
-//#ifdef SFML_DEBUG
+#ifdef SFML_DEBUG
 
     //// In debug mode, perform a test on every EGL call
     #define eglCheck(x) x; sf::priv::eglCheckError(__FILE__, __LINE__);
 
-//#else
+#else
 
     // Else, we don't add any overhead
-//    #define eglCheck(x) (x)
+    #define eglCheck(x) (x)
 
-//#endif
+#endif
 
 ////////////////////////////////////////////////////////////
 /// \brief Check the last EGL error

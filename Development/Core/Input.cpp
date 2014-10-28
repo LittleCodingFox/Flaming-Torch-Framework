@@ -319,6 +319,10 @@ namespace FlamingTorch
 					MouseButtons[i].JustReleased = true;
 				};
 
+#if FLPLATFORM_MOBILE
+				HasFocus = false;
+#endif
+
 				break;
 
 			case RendererEventType::MouseEntered:
@@ -327,6 +331,10 @@ namespace FlamingTorch
 					//TODO: Pool for input somehow
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
 				};
+
+#if FLPLATFORM_MOBILE
+				HasFocus = true;
+#endif
 
 				break;
 

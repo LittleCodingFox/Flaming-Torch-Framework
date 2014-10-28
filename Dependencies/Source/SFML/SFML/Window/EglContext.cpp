@@ -173,15 +173,6 @@ EglContext::~EglContext()
 ////////////////////////////////////////////////////////////
 bool EglContext::makeCurrent()
 {
-	err() << "Attempting to makeCurrent" << std::endl;
-
-	if(m_surface == EGL_NO_SURFACE)
-	{
-		err() << "Invalid Surface!" << std::endl;
-	}
-
-	eglCheck(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
-
     return m_surface != EGL_NO_SURFACE && eglCheck(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
 }
 
@@ -224,7 +215,6 @@ void EglContext::createContext(EglContext* shared)
 ////////////////////////////////////////////////////////////
 void EglContext::createSurface(EGLNativeWindowType window)
 {
-	err() << "Creating surface!" << std::endl;
     m_surface = eglCheck(eglCreateWindowSurface(m_display, m_config, window, NULL));
 }
 

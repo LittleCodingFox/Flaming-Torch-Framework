@@ -272,6 +272,9 @@ namespace FlamingTorch
 			};
 		};
 
+		if(!Input.HasFocus)
+			return ReturnValue;
+
 		Renderer *Renderer = ActiveRenderer();
 
 		{

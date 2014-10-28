@@ -117,7 +117,7 @@ namespace FlamingTorch
 
 		Vector2 RendererSize = TheRenderer->Size();
 
-		TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, RendererSize.x, RendererSize.y, 0, -1, 1));
+		TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, RendererSize.x, 0, RendererSize.y, -1, 1));
 		TheRenderer->SetViewport(0, 0, RendererSize.x, RendererSize.y);
 
 		return TheRenderer;
@@ -596,6 +596,11 @@ namespace FlamingTorch
 
 			if(ShouldQuit())
 				break;
+
+#if FLPLATFORM_MOBILE
+			if(!RendererManager::Instance.Input.HasFocus)
+				sf::sleep(sf::milliseconds(1000));
+#endif
 		};
 
 		if(DeInitFunction)
