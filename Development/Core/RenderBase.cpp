@@ -227,6 +227,7 @@ namespace FlamingTorch
 		Active = Handle;
 
 		SuperSmartPointer<Renderer> &In = Renderers[Handle];
+		//TODO
 		//In->Window.setActive();
 	};
 
@@ -300,6 +301,15 @@ namespace FlamingTorch
 		{
 			PROFILE("Render FrameEnd", StatTypes::Rendering);
 			Renderer->OnFrameEnded(Renderer);
+		};
+
+		//TODO: Optimize this to prevent doing it twice per frame on dev mode?
+		bool PushOrtho = Renderer->MatrixStackSize() == 0;
+
+		if(PushOrtho)
+		{
+			Renderer->PushMatrices();
+			Renderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, Renderer->Size().x, Renderer->Size().y, 0, -1, 1));
 		};
 
 #if PROFILER_ENABLED
@@ -396,6 +406,11 @@ namespace FlamingTorch
 		};
 
 		SpriteCache::Instance.Flush(Renderer);
+
+		if(PushOrtho)
+		{
+			Renderer->PopMatrices();
+		};
 
 		Renderer->Display();
 
@@ -679,20 +694,19 @@ namespace FlamingTorch
 		return Impl->Capabilities();
 	};
 
-	/*!
-	*	\return the Desktop Display Mode
-	*/
 	RendererDisplayMode Renderer::DesktopDisplayMode()
 	{
 		return DefaultImpl->DesktopDisplayMode();
 	};
 
-	/*!
-	*	\return all available display modes
-	*/
 	std::vector<RendererDisplayMode> Renderer::DisplayModes()
 	{
 		return DefaultImpl->DisplayModes();
+	};
+
+	uint32 Renderer::MatrixStackSize()
+	{
+		return MatrixStack.size();
 	};
 
 	void RendererManager::StartUp(uint32 Priority)

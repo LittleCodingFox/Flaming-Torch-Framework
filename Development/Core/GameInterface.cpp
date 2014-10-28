@@ -117,7 +117,6 @@ namespace FlamingTorch
 
 		Vector2 RendererSize = TheRenderer->Size();
 
-		TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, RendererSize.x, 0, RendererSize.y, -1, 1));
 		TheRenderer->SetViewport(0, 0, RendererSize.x, RendererSize.y);
 
 		return TheRenderer;
@@ -125,6 +124,14 @@ namespace FlamingTorch
 
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
+		bool PushOrtho = TheRenderer->MatrixStackSize() == 0;
+
+		if(PushOrtho)
+		{
+			TheRenderer->PushMatrices();
+			TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, TheRenderer->Size().x, TheRenderer->Size().y, 0, -1, 1));
+		};
+
 		static std::stringstream str;
 
 		if(!!Console::Instance.GetVariable("r_drawrenderstats") && Console::Instance.GetVariable("r_drawrenderstats")->UintValue != 0)
@@ -175,6 +182,11 @@ namespace FlamingTorch
 
 				TheSprite.Draw(TheRenderer);
 			};
+		};
+
+		if(PushOrtho)
+		{
+			TheRenderer->PopMatrices();
 		};
 	};
 #endif

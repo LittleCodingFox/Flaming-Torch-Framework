@@ -630,6 +630,15 @@ public:
 	*	Reports a Skipped Draw Call (used to help figure out how much we're optimizing by skipping unnecessary drawcalls)
 	*/
 	void ReportSkippedDrawCall();
+
+	/*!
+	*	\return the amount of matrices on our Matrix Stack 
+	*	\sa PopMatrix
+	*	\sa PushMatrix
+	*	\sa SetWorldMatrix
+	*	\sa SetProjectionMatrix
+	*/
+	uint32 MatrixStackSize();
 };
 
 /*!
