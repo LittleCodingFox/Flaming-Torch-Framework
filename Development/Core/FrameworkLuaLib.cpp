@@ -2258,6 +2258,7 @@ namespace FlamingTorch
 
 					luabind::class_<InputCenter::TouchInfo>("TouchInfo")
 						.def_readonly("Name", &InputCenter::TouchInfo::Index)
+						.def_readonly("Position", &InputCenter::TouchInfo::Position)
 						.def_readonly("Pressed", &InputCenter::TouchInfo::Pressed)
 						.def_readonly("JustPressed", &InputCenter::TouchInfo::JustPressed)
 						.def_readonly("JustReleased", &InputCenter::TouchInfo::JustReleased)
