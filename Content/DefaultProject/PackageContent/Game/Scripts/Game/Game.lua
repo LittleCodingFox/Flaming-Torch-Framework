@@ -9,7 +9,10 @@ GamePreInitialize = function()
 	g_ResourceManager:Register()
 	g_RendererManager:Register()
 	g_Console:Register()
-	g_FileSystemWatcher:Register()
+	
+	if Game.IsMobile == false then
+		g_FileSystemWatcher:Register()
+	end
 	
 	Game.DevelopmentBuild = true
 
@@ -40,7 +43,7 @@ GameInitialize = function(Arguments)
 		return false
 	end
 
-	Renderer.Camera:SetOrtho(Rect(0, Options.Width, Options.Height, 0), -1, 1)
+	Renderer.Camera:SetOrtho(Rect(0, Renderer.Size.x, 0, Renderer.Size.y), -1, 1)
 	
 	g_World:LoadComponent("/Scripts/Base/Components/Transform.lua")
 	g_World:LoadComponent("/Scripts/Base/Components/Renderable.lua")
@@ -50,6 +53,7 @@ GameInitialize = function(Arguments)
 	Entity:AddComponent("Renderable")
 
 	Entity:GetComponent("Renderable").Properties["Sprite"].Texture = LogoTexture
+	Entity:GetComponent("Transform").Properties["Position"] = Vector2()
 	
 	local SkinStream = g_PackageManager:GetFile(MakeStringID("/UIThemes/PolyCode/"), MakeStringID("skin.cfg"))
 	local SkinConfig = GenericConfig()
@@ -78,7 +82,7 @@ end
 
 GameResize = function(Renderer, Width, Height)
 	Renderer:SetViewport(0, 0, Width, Height)
-	Renderer.Camera:SetOrtho(Rect(0, Width, Height, 0), -1, 1)
+	Renderer.Camera:SetOrtho(Rect(0, Width, 0, Height), -1, 1)
 end
 
 GameResourcesReloaded = function(Renderer)
@@ -88,6 +92,10 @@ end
 GameFrameUpdate = function()
 	local Position = Entity:GetComponent("Transform").Properties["Position"]
 	
+	if g_Input:GetTouch(InputCenter.Touch_0).JustPressed then
+		Position = g_Input:GetTouch(InputCenter.Touch_0).Position
+	end
+
 	if g_Input:GetKey(InputCenter.Key_Left).Pressed then
 		Position.x = Position.x - g_Clock:Delta() * 500
 		
