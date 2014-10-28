@@ -25,6 +25,7 @@ private:
 public:
 	bool DevelopmentBuild;
 	bool IsGUISandbox;
+	bool IsMobile;
 	uint32 UpdateRateValue, FrameRateValue;
 
 	static SuperSmartPointer<GameInterface> Instance;

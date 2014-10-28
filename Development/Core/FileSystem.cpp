@@ -1348,8 +1348,6 @@ namespace FlamingTorch
 			Entry->Offset = Offset;
 			Entry->Length = Length;
 
-			Log::Instance.LogInfo(TAGMANAGER, "Added Entry: '%s%s' (%08x/%08x)", DirectoryNameStr.c_str(), NameStr.c_str(), DirectoryID, NameID);
-
 			Entries[DirectoryID][NameID] = Entry;
 		};
 
@@ -1655,8 +1653,6 @@ namespace FlamingTorch
 			return SuperSmartPointer<Stream>();
 
 		sf::Lock Lock(fit->second.first->FileAccessMutex);
-
-		Log::Instance.LogInfo(TAGMANAGER, "Getting file '%s%s' (%08x/%08x)", GetStringIDString(Directory).c_str(), GetStringIDString(Name).c_str(), Directory, Name);
 
 		PackageFileSystemManager::PackageStream *PStream = new PackageFileSystemManager::PackageStream();
 

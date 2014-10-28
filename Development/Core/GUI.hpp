@@ -80,7 +80,7 @@ class UIPanel
 	friend class UIScrollableFrame;
 	friend class UILayout;
 protected:
-	bool VisibleValue, EnabledValue, MouseInputValue, KeyboardInputValue, JoystickInputValue;
+	bool VisibleValue, EnabledValue, MouseInputValue, KeyboardInputValue, JoystickInputValue, TouchInputValue;
 	Vector2 PositionValue, SizeValue, TranslationValue, SelectBoxExtraSize, OffsetValue;
 	f32 AlphaValue, RotationValue, ExtraSizeScaleValue;
 	UILayout *LayoutValue;
@@ -114,6 +114,9 @@ protected:
 	void OnMouseJustPressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
 	void OnMousePressedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
 	void OnMouseReleasedScript(UIPanel *Self, const InputCenter::MouseButtonInfo &o);
+	void OnTouchDownScript(UIPanel *Self, const InputCenter::TouchInfo &o);
+	void OnTouchUpScript(UIPanel *Self, const InputCenter::TouchInfo &o);
+	void OnTouchDragScript(UIPanel *Self, const InputCenter::TouchInfo &o);
 	void OnKeyJustPressedScript(UIPanel *Self, const InputCenter::KeyInfo &o);
 	void OnKeyPressedScript(UIPanel *Self, const InputCenter::KeyInfo &o);
 	void OnKeyReleasedScript(UIPanel *Self, const InputCenter::KeyInfo &o);
@@ -139,6 +142,9 @@ protected:
 	void OnMousePressedPriv(const InputCenter::MouseButtonInfo &o);
 	void OnMouseReleasedPriv(const InputCenter::MouseButtonInfo &o);
 	void OnMouseMovePriv();
+	void OnTouchDownPriv(const InputCenter::TouchInfo &o);
+	void OnTouchUpPriv(const InputCenter::TouchInfo &o);
+	void OnTouchDragPriv(const InputCenter::TouchInfo &o);
 	void OnKeyPressedPriv(const InputCenter::KeyInfo &o);
 	void OnKeyJustPressedPriv(const InputCenter::KeyInfo &o);
 	void OnKeyReleasedPriv(const InputCenter::KeyInfo &o);
@@ -165,6 +171,7 @@ public:
 		OnMouseEnteredFunction, OnMouseOverFunction, OnMouseLeftFunction, OnClickFunction, OnDragBeginFunction, OnDragEndFunction,
 		OnDraggingFunction, OnDropFunction, OnJoystickConnectedFunction, OnJoystickDisconnectedFunction, OnJoystickAxisMovedFunction,
 		OnJoystickButtonJustPressedFunction, OnJoystickButtonPressedFunction, OnJoystickButtonReleasedFunction, PositionFunction,
+		OnTouchDownFunction, OnTouchUpFunction, OnTouchDragFunction,
 		SizeFunction, OnStartFunction, PropertiesStartupDefaultFunction, PropertiesStartupSetFunction;
 
 	std::string Name, LayoutName, NativeType;
@@ -172,6 +179,7 @@ public:
 	Signal1<UIPanel *> OnLoseFocus, OnGainFocus, OnCharacterEntered, OnMouseMove, OnMouseEntered, OnMouseOver, OnMouseLeft;
 	Signal2<UIPanel *, const InputCenter::MouseButtonInfo &> OnMouseJustPressed, OnMousePressed, OnMouseReleased, OnClick;
 	Signal2<UIPanel *, const InputCenter::KeyInfo &> OnKeyJustPressed, OnKeyPressed, OnKeyReleased;
+	Signal2<UIPanel *, const InputCenter::TouchInfo &> OnTouchDown, OnTouchUp, OnTouchDrag;
 	Signal1<UIPanel *> OnDragBegin, OnDragging, OnDragEnd;
 	//[Self, Target]
 	Signal2<UIPanel *, UIPanel *> OnDrop;
@@ -459,6 +467,17 @@ public:
 	*	\return whether this element receives Mouse Input
 	*/
 	bool MouseInputEnabled() const;
+
+	/*!
+	*	Sets whether this element receives Touch Input
+	*	\param value whether this element receives Touch Input
+	*/
+	void SetTouchInputEnabled(bool value);
+
+	/*!
+	*	\return whether this element receives Touch Input
+	*/
+	bool TouchInputEnabled() const;
 
 	/*!
 	*	Sets whether this element receives Keyboard Input
@@ -918,6 +937,9 @@ private:
 	void OnMouseJustPressedPriv(const InputCenter::MouseButtonInfo &o);
 	void OnMousePressedPriv(const InputCenter::MouseButtonInfo &o);
 	void OnMouseReleasedPriv(const InputCenter::MouseButtonInfo &o);
+	void OnTouchDownPriv(const InputCenter::TouchInfo &o);
+	void OnTouchUpPriv(const InputCenter::TouchInfo &o);
+	void OnTouchDragPriv(const InputCenter::TouchInfo &o);
 	void OnMouseMovePriv();
 	void OnKeyPressedPriv(const InputCenter::KeyInfo &o);
 	void OnKeyJustPressedPriv(const InputCenter::KeyInfo &o);

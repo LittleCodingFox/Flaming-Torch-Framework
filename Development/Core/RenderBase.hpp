@@ -117,6 +117,9 @@ namespace RendererEventType
 		MouseButtonPressed, //!<Mouse Button Pressed
 		MouseButtonReleased, //!<Mouse Button Released
 		MouseDeltaMoved, //!<Mouse Delta (Wheel) Moved
+		TouchDown, //!<Touched Down (Pressed finger on screen)
+		TouchUp, //!<Touched Up (Released finger from screen)
+		TouchDrag, //!<Dragged Touch (Moved finger on screen)
 		KeyPressed, //!<Key Pressed
 		KeyReleased, //!<Key Released
 		CharacterEntered, //!<Character Entered
@@ -190,7 +193,17 @@ public:
 	*/
 	uint8 JoystickIndex;
 
-	RendererEvent() : Type(0), MouseDelta(0), JoystickAxisPosition(0), TypedCharacter(0), KeyCode(0), MouseButtonIndex(0), JoystickAxisIndex(0), JoystickButtonIndex(0), JoystickIndex(0) {};
+	/*!
+	*	Touch Index
+	*/
+	uint8 TouchIndex;
+
+	/*!
+	*	Touch Position
+	*/
+	Vector2 TouchPosition;
+
+	RendererEvent() : Type(0), MouseDelta(0), JoystickAxisPosition(0), TypedCharacter(0), KeyCode(0), MouseButtonIndex(0), JoystickAxisIndex(0), JoystickButtonIndex(0), JoystickIndex(0), TouchIndex(0) {};
 };
 
 /*!

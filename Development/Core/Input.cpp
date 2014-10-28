@@ -7,10 +7,16 @@ namespace FlamingTorch
 	InputCenter::InfoNameMap InputCenter::KeyInfo::Names;
 	InputCenter::InfoNameMap InputCenter::JoystickAxisInfo::Names;
 	InputCenter::InfoNameMap InputCenter::MouseButtonInfo::Names;
+	InputCenter::InfoNameMap InputCenter::TouchInfo::Names;
 
 	std::string InputCenter::KeyInfo::NameAsString() const
 	{
 		return Names.find(Name) != Names.end() ? Names[Name] : "UNKNOWN";
+	};
+
+	std::string InputCenter::TouchInfo::NameAsString() const
+	{
+		return Names.find(Index) != Names.end() ? Names[Index] : "UNKNOWN";
 	};
 
 	std::string InputCenter::MouseButtonInfo::NameAsString() const
@@ -59,6 +65,17 @@ namespace FlamingTorch
 			};
 		};
 
+		Touches[0].Index = 0;
+		Touches[1].Index = 1;
+		Touches[2].Index = 2;
+		Touches[3].Index = 3;
+		Touches[4].Index = 4;
+		Touches[5].Index = 5;
+		Touches[6].Index = 6;
+		Touches[7].Index = 7;
+		Touches[8].Index = 8;
+		Touches[9].Index = 9;
+
 		MouseWheel = 0;
 
 #define REGISTER_KEYBOARD_NAME(name)\
@@ -69,6 +86,9 @@ namespace FlamingTorch
 
 #define REGISTER_JOYAXIS_NAME(name)\
 	JoystickAxisInfo::Names[InputJoystickAxis::name] = StringUtils::ToUpperCase(#name);
+
+#define REGISTER_TOUCH_NAME(name)\
+	TouchInfo::Names[name] = StringUtils::ToUpperCase(#name);
 
 		REGISTER_KEYBOARD_NAME(A);
 		REGISTER_KEYBOARD_NAME(B);
@@ -186,6 +206,17 @@ namespace FlamingTorch
 		REGISTER_JOYAXIS_NAME(V);
 		REGISTER_JOYAXIS_NAME(PovX);
 		REGISTER_JOYAXIS_NAME(PovY);
+
+		REGISTER_TOUCH_NAME(0);
+		REGISTER_TOUCH_NAME(1);
+		REGISTER_TOUCH_NAME(2);
+		REGISTER_TOUCH_NAME(3);
+		REGISTER_TOUCH_NAME(4);
+		REGISTER_TOUCH_NAME(5);
+		REGISTER_TOUCH_NAME(6);
+		REGISTER_TOUCH_NAME(7);
+		REGISTER_TOUCH_NAME(8);
+		REGISTER_TOUCH_NAME(9);
 	};
 
 	bool InputCenter::Update(Renderer *TheRenderer)
@@ -211,6 +242,11 @@ namespace FlamingTorch
 			{
 				JoystickButtons[i][j].JustPressed = JoystickButtons[i][j].JustReleased = JoystickButtons[i][j].FirstPress = false;
 			};
+		};
+
+		for(TouchMap::iterator it = Touches.begin(); it != Touches.end(); it++)
+		{
+			it->second.JustPressed = it->second.JustReleased = false;
 		};
 
 		Character = L'\0';
@@ -291,6 +327,23 @@ namespace FlamingTorch
 					//TODO: Pool for input somehow
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
 				};
+
+				break;
+
+			case RendererEventType::TouchDown:
+				Touches[Event.TouchIndex].JustPressed = Touches[Event.TouchIndex].Pressed = true;
+				Touches[Event.TouchIndex].Position = Event.TouchPosition;
+
+				break;
+
+			case RendererEventType::TouchUp:
+				Touches[Event.TouchIndex].JustReleased = true;
+				Touches[Event.TouchIndex].Position = Event.TouchPosition;
+
+				break;
+
+			case RendererEventType::TouchDrag:
+				Touches[Event.TouchIndex].Position = Event.TouchPosition;
 
 				break;
 
@@ -430,6 +483,27 @@ namespace FlamingTorch
 
 				if(!IgnoreAction)
 					FireAction(Keys[i]);
+			};
+		};
+
+		for(TouchMap::iterator it = Touches.begin(); it != Touches.end(); it++)
+		{
+			if(it->second.JustPressed || it->second.Pressed || it->second.JustReleased)
+			{
+				bool IgnoreAction = false;
+
+				for(uint32 j = 0; j < EnabledContexts.size(); j++)
+				{
+					if(Contexts[EnabledContexts[j]]->OnTouch(it->second))
+					{
+						IgnoreAction = true;
+
+						break;
+					};
+				};
+
+				if(!IgnoreAction)
+					FireAction(it->second);
 			};
 		};
 
@@ -709,6 +783,26 @@ namespace FlamingTorch
 			};
 		};
 	};
+	
+	void InputCenter::FireAction(const TouchInfo &Touch)
+	{
+		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
+		{
+			if(it->second.Index != Touch.Index)
+				continue;
+
+			if(((it->second.Type == InputActionType::TouchDown || it->second.Type == InputActionType::TouchDrag) && (Touch.JustPressed || Touch.Pressed)) ||
+				(it->second.Type == InputActionType::TouchUp && Touch.JustReleased))
+			{
+				for(uint32 i = 0; i < EnabledContexts.size(); i++)
+				{
+					Contexts[EnabledContexts[i]]->OnAction(it->second);
+				};
+
+				return;
+			};
+		};
+	};
 
 	void InputCenter::FireAction(f32 MouseScrollDelta)
 	{
@@ -805,6 +899,12 @@ namespace FlamingTorch
 		return Type == InputActionType::Keyboard ? &RendererManager::Instance.Input.Keys[Index] : NULL;
 	};
 
+	InputCenter::TouchInfo *InputCenter::Action::Touch() const
+	{
+		return (Type == InputActionType::TouchDown || Type == InputActionType::TouchUp || Type == InputActionType::TouchDrag) ?
+			&RendererManager::Instance.Input.Touches[Index] : NULL;
+	};
+
 	InputCenter::MouseButtonInfo *InputCenter::Action::MouseButton() const
 	{
 		return Type == InputActionType::MouseButton ? &RendererManager::Instance.Input.MouseButtons[Index] : NULL;
@@ -841,6 +941,13 @@ namespace FlamingTorch
 
 		case InputActionType::JoystickAxis:
 			return JoystickAxis()->NameAsString() + (PositiveValues ? "+" : "-");
+
+			break;
+
+		case InputActionType::TouchDown:
+		case InputActionType::TouchUp:
+		case InputActionType::TouchDrag:
+			return Touch()->NameAsString();
 
 			break;
 

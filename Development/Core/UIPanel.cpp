@@ -111,6 +111,9 @@ namespace FlamingTorch
 		OnMouseJustPressed.Connect(this, &UIPanel::OnMouseJustPressedScript);
 		OnMousePressed.Connect(this, &UIPanel::OnMousePressedScript);
 		OnMouseReleased.Connect(this, &UIPanel::OnMouseReleasedScript);
+		OnTouchDown.Connect(this, &UIPanel::OnTouchUpScript);
+		OnTouchUp.Connect(this, &UIPanel::OnTouchUpScript);
+		OnTouchDrag.Connect(this, &UIPanel::OnTouchDragScript);
 		OnKeyJustPressed.Connect(this, &UIPanel::OnKeyJustPressedScript);
 		OnKeyPressed.Connect(this, &UIPanel::OnKeyPressedScript);
 		OnKeyReleased.Connect(this, &UIPanel::OnKeyReleasedScript);
@@ -224,6 +227,65 @@ namespace FlamingTorch
 		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 		{
 			ParentValue->OnMouseReleasedPriv(o);
+		};
+	};
+
+	void UIPanel::OnTouchDownPriv(const InputCenter::TouchInfo &o)
+	{
+		if(!TouchInputValue || !EnabledValue)
+			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
+		ClickTimer = GameClockTimeNoPause();
+		ClickPressed = true;
+
+		OnTouchDown(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnTouchDownPriv(o);
+		};
+	};
+
+	void UIPanel::OnTouchUpPriv(const InputCenter::TouchInfo &o)
+	{
+		if(!TouchInputValue || !EnabledValue)
+			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
+		if(ClickPressed && GameClockDiffNoPause(ClickTimer) < 500)
+		{
+			InputCenter::MouseButtonInfo Button = RendererManager::Instance.Input.MouseButtons[InputMouseButton::Left];
+			Button.Pressed = Button.JustPressed = false;
+			Button.JustReleased = true;
+
+			OnClick(this, Button);
+		};
+
+		ClickPressed = false;
+
+		OnTouchUp(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnTouchUpPriv(o);
+		};
+	};
+
+	void UIPanel::OnTouchDragPriv(const InputCenter::TouchInfo &o)
+	{
+		if(!TouchInputValue || !EnabledValue)
+			return;
+
+		REPORT_UIPANEL_INPUT_EVENTPRIV();
+
+		OnTouchDrag(this, o);
+
+		if(!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+		{
+			ParentValue->OnTouchDragPriv(o);
 		};
 	};
 
@@ -434,6 +496,36 @@ namespace FlamingTorch
 		REPORT_UIPANEL_INPUT_EVENT();
 
 		RUN_GUI_SCRIPT_EVENTS(OnMouseReleasedFunction, (Self, o))
+	};
+
+	void UIPanel::OnTouchDownScript(UIPanel *Self, const InputCenter::TouchInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
+
+		RUN_GUI_SCRIPT_EVENTS(OnTouchDownFunction, (Self, o));
+	};
+
+	void UIPanel::OnTouchUpScript(UIPanel *Self, const InputCenter::TouchInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
+
+		RUN_GUI_SCRIPT_EVENTS(OnTouchUpFunction, (Self, o));
+	};
+
+	void UIPanel::OnTouchDragScript(UIPanel *Self, const InputCenter::TouchInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		REPORT_UIPANEL_INPUT_EVENT();
+
+		RUN_GUI_SCRIPT_EVENTS(OnTouchDragFunction, (Self, o))
 	};
 
 	void UIPanel::OnKeyJustPressedScript(UIPanel *Self, const InputCenter::KeyInfo &o)
@@ -1025,6 +1117,16 @@ namespace FlamingTorch
 	bool UIPanel::KeyboardInputEnabled() const
 	{
 		return KeyboardInputValue;
+	};
+
+	void UIPanel::SetTouchInputEnabled(bool value)
+	{
+		TouchInputValue = value;
+	};
+
+	bool UIPanel::TouchInputEnabled() const
+	{
+		return TouchInputValue;
 	};
 
 	void UIPanel::SetJoystickInputEnabled(bool value)

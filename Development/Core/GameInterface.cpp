@@ -181,6 +181,7 @@ namespace FlamingTorch
 
 	int32 NativeGameInterface::Run(int32 argc, char **argv)
 	{
+		IsMobile = FLPLATFORM_MOBILE;
 		InitSubsystems();
 
 		if(!Initialize(argc, argv))
@@ -294,6 +295,7 @@ namespace FlamingTorch
 
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
 	{
+		IsMobile = FLPLATFORM_MOBILE;
 		PackageFileSystemManager::Instance.Register();
 
 		InitSubsystems();

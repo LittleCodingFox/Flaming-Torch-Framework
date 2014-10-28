@@ -1,6 +1,7 @@
 #include "FlamingCore.hpp"
 #if FLPLATFORM_ANDROID
 #	include <SFML/OpenGL.hpp>
+#	include <SFML/System/Android/Activity.hpp>
 #endif
 
 namespace FlamingTorch
@@ -153,6 +154,8 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
+		Log::Instance.LogInfo("SFMLRendererImplementation", "Creating!");
+
 		OriginalRequestedSize = Vector2(Width, Height);
 
 		uint32 ActualStyle = sf::Style::None;
@@ -178,9 +181,13 @@ namespace FlamingTorch
 
 		sf::ContextSettings ContextSettings(ExpectedCaps.DepthBits, ExpectedCaps.StencilBits, ExpectedCaps.AntialiasLevel);
 
-		Rect WorkArea = CoreUtils::GetDesktopWorkArea();
-
 		uint32 ActualWidth = Width, ActualHeight = Height;
+
+#if FLPLATFORM_ANDROID
+		ActualWidth = DesktopDisplayMode().Width;
+		ActualHeight = DesktopDisplayMode().Height;
+#else
+		Rect WorkArea = CoreUtils::GetDesktopWorkArea();
 
 		if(WorkArea.Right != 0)
 		{
@@ -194,6 +201,7 @@ namespace FlamingTorch
 				ActualHeight = WorkArea.Bottom - WorkArea.Top;
 			};
 		};
+#endif
 
 		//Create the window
 		Window.create(sf::VideoMode(ActualWidth, ActualHeight), Title, ActualStyle, ContextSettings);
@@ -208,7 +216,9 @@ namespace FlamingTorch
 			return false;
 		};
 
+#if !FLPLATFORM_ANDROID
 		Window.setPosition(sf::Vector2i((int32)WorkArea.Left, (int32)WorkArea.Top));
+#endif
 
 		ContextSettings = Window.getSettings();
 
@@ -1399,6 +1409,27 @@ namespace FlamingTorch
 
 			case sf::Event::LostFocus:
 				Out.Type = RendererEventType::WindowLostFocus;
+
+				return true;
+
+			case sf::Event::TouchBegan:
+				Out.Type = RendererEventType::TouchDown;
+				Out.TouchIndex = Event.touch.finger;
+				Out.TouchPosition = Vector2((f32)Event.touch.x, (f32)Event.touch.y);
+
+				return true;
+
+			case sf::Event::TouchEnded:
+				Out.Type = RendererEventType::TouchUp;
+				Out.TouchIndex = Event.touch.finger;
+				Out.TouchPosition = Vector2((f32)Event.touch.x, (f32)Event.touch.y);
+
+				return true;
+
+			case sf::Event::TouchMoved:
+				Out.Type = RendererEventType::TouchDrag;
+				Out.TouchIndex = Event.touch.finger;
+				Out.TouchPosition = Vector2((f32)Event.touch.x, (f32)Event.touch.y);
 
 				return true;
 			};

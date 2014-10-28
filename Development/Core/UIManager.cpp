@@ -47,6 +47,29 @@ namespace FlamingTorch
 			return TheManager.Input.InputConsumed();
 		};
 
+		bool OnTouch(const InputCenter::TouchInfo &Touch)
+		{
+			RendererManager &TheManager = RendererManager::Instance;
+			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
+
+			if(Touch.JustPressed || Touch.Pressed)
+			{
+				TheGUIManager.OnTouchDownPriv(Touch);
+			}
+			//TODO: TouchDrag support
+			else if(Touch.JustReleased)
+			{
+				TheGUIManager.OnTouchUpPriv(Touch);
+			};
+
+			if(TheGUIManager.GetInputBlocker().Get())
+			{
+				TheManager.Input.ConsumeInput();
+			};
+
+			return TheManager.Input.InputConsumed();
+		};
+
 		bool OnMouseButton(const InputCenter::MouseButtonInfo &Button)
 		{
 			RendererManager &TheManager = RendererManager::Instance;
@@ -1108,6 +1131,7 @@ namespace FlamingTorch
 				KeyboardInputEnabledValue = Data.get("KeyboardInput", Json::Value(true)),
 				JoystickInputEnabledValue = Data.get("JoystickInput", Json::Value(true)),
 				MouseInputEnabledValue = Data.get("MouseInput", Json::Value(true)),
+				TouchInputEnabledValue = Data.get("TouchInput", Json::Value(true)),
 				AlphaValue = Data.get("Opacity", Json::Value(1.0)),
 				VisibleValue = Data.get("Visible", Json::Value(true)),
 				BlockingInputValue = Data.get("BlockingInput", Json::Value(false)),
@@ -1131,6 +1155,15 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(KeyboardInputEnabledValue, "KeyboardInput", bool);
+			};
+
+			if(TouchInputEnabledValue.isBool())
+			{
+				Panel->SetTouchInputEnabled(TouchInputEnabledValue.asBool());
+			}
+			else
+			{
+				CHECKJSONVALUE(TouchInputEnabledValue, "TouchInput", bool);
 			};
 
 			if(JoystickInputEnabledValue.isBool())
@@ -1235,6 +1268,9 @@ namespace FlamingTorch
 			REGISTER_LUA_EVENT(OnMouseJustPressed, ", Button");
 			REGISTER_LUA_EVENT(OnMousePressed, ", Button");
 			REGISTER_LUA_EVENT(OnMouseReleased, ", Button");
+			REGISTER_LUA_EVENT(OnTouchDown, ", Touch");
+			REGISTER_LUA_EVENT(OnTouchUp, ", Touch");
+			REGISTER_LUA_EVENT(OnTouchDrag, ", Touch");
 			REGISTER_LUA_EVENT(OnJoystickButtonJustPressed, ", Button");
 			REGISTER_LUA_EVENT(OnJoystickButtonPressed, ", Button");
 			REGISTER_LUA_EVENT(OnJoystickButtonReleased, ", Button");
@@ -2786,6 +2822,30 @@ namespace FlamingTorch
 		if(FocusedElementValue)
 		{
 			FocusedElementValue->OnMouseJustPressedPriv(o);
+			RendererManager::Instance.Input.ConsumeInput();
+		};
+	};
+
+	void UIManager::OnTouchDownPriv(const InputCenter::TouchInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnTouchDownPriv(o);
+			RendererManager::Instance.Input.ConsumeInput();
+		};
+	};
+
+	void UIManager::OnTouchUpPriv(const InputCenter::TouchInfo &o)
+	{
+		if(RendererManager::Instance.Input.InputConsumed())
+			return;
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnTouchUpPriv(o);
 			RendererManager::Instance.Input.ConsumeInput();
 		};
 	};

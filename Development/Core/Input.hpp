@@ -12,6 +12,9 @@ namespace InputActionType
 		MouseScroll, //!<Mouse Scroll Action
 		JoystickButton, //!<Joystick Button Action
 		JoystickAxis, //!<Joystick Axis Action
+		TouchDown, //!<Touch Down Action
+		TouchUp, //!<Touch Up Action
+		TouchDrag, //!<Touch Drag Action
 		Sequence //!<Sequence Action
 	};
 };
@@ -244,10 +247,30 @@ public:
 		std::string NameAsString() const;
 	};
 
+	/*!
+	* Touch Information
+	*/
+	class TouchInfo
+	{
+	public:
+		uint8 Index;
+		Vector2 Position;
+		bool Pressed, JustPressed, JustReleased;
+
+		static InfoNameMap Names;
+
+		TouchInfo() : Index(0), Pressed(false), JustPressed(false), JustReleased(false) {};
+
+		std::string NameAsString() const;
+	};
+
 	KeyInfo Keys[InputKey::Count];
 	MouseButtonInfo MouseButtons[InputMouseButton::Count];
 	JoystickButtonInfo JoystickButtons[JoystickCount][JoystickButtonCount];
 	JoystickAxisInfo JoystickAxis[JoystickCount][InputJoystickAxis::Count];
+
+	typedef std::map<uint8, TouchInfo> TouchMap;
+	TouchMap Touches;
 
 	/*!
 	*	Input Action class
@@ -275,6 +298,7 @@ public:
 		MouseButtonInfo *MouseButton() const;
 		JoystickButtonInfo *JoystickButton() const;
 		JoystickAxisInfo *JoystickAxis() const;
+		TouchInfo *Touch() const;
 		std::string AsString() const;
 	};
 
@@ -291,6 +315,8 @@ public:
 		virtual bool OnKey(const KeyInfo &Key) = 0;
 		//Return true to stop propagating
 		virtual bool OnMouseButton(const MouseButtonInfo &Button) = 0;
+		//Return true to stop propagating
+		virtual bool OnTouch(const TouchInfo &Touch) = 0;
 		//Return true to stop propagating
 		virtual bool OnJoystickButton(const JoystickButtonInfo &Button) = 0;
 		//Return true to stop propagating
@@ -309,7 +335,7 @@ public:
 	public:
 		luabind::object OnKeyFunction, OnMouseButtonFunction, OnJoystickButtonFunction, OnJoystickAxisFunction,
 			OnJoystickConnectedFunction, OnJoystickDisconnectedFunction, OnMouseMoveFunction, OnCharacterEnteredFunction,
-			OnActionFunction, OnGainFocusFunction, OnLoseFocusFunction;
+			OnActionFunction, OnGainFocusFunction, OnLoseFocusFunction, OnTouchFunction;
 
 		ScriptedContext() {};
 
@@ -346,6 +372,23 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnMouseButton: Scripting Error: " + e.what());
+				};
+			};
+
+			return false;
+		};
+
+		bool OnTouch(const TouchInfo &Touch)
+		{
+			if(OnTouchFunction)
+			{
+				try
+				{
+					return ProtectedLuaCast<bool>(OnTouchFunction(Touch));
+				}
+				catch(std::exception &e)
+				{
+					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnTouch: Scripting Error: " + e.what());
 				};
 			};
 
@@ -600,5 +643,6 @@ private:
 	void FireAction(const JoystickButtonInfo &Button);
 	void FireAction(const MouseButtonInfo &Button);
 	void FireAction(const KeyInfo &Key);
+	void FireAction(const TouchInfo &Touch);
 	void FireAction(f32 MouseScrollDelta);
 };

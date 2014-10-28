@@ -385,6 +385,7 @@ class FileStream : public Stream
 private:
 	void *Handle;
 	uint64 _Length, _Position;
+	bool IsBasic;
 public:
 	FileStream();
 	~FileStream();

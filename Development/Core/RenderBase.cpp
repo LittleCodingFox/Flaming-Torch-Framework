@@ -96,6 +96,13 @@ namespace FlamingTorch
 			return TheManager.ShowConsole;
 		};
 
+		bool OnTouch(const InputCenter::TouchInfo &Touch)
+		{
+			RendererManager &TheManager = RendererManager::Instance;
+
+			return TheManager.ShowConsole;
+		};
+
 		void OnJoystickConnected(uint8 Index) {};
 
 		void OnJoystickDisconnected(uint8 Index) {};

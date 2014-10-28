@@ -18,6 +18,9 @@
 
 #if defined(__ANDROID__)
 #	define FLPLATFORM_ANDROID 1
+#	define FLPLATFORM_MOBILE 1
+#else
+#	define FLPLATFORM_MOBILE 0
 #endif
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)

@@ -173,6 +173,15 @@ EglContext::~EglContext()
 ////////////////////////////////////////////////////////////
 bool EglContext::makeCurrent()
 {
+	err() << "Attempting to makeCurrent" << std::endl;
+
+	if(m_surface == EGL_NO_SURFACE)
+	{
+		err() << "Invalid Surface!" << std::endl;
+	}
+
+	eglCheck(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
+
     return m_surface != EGL_NO_SURFACE && eglCheck(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
 }
 
@@ -215,6 +224,7 @@ void EglContext::createContext(EglContext* shared)
 ////////////////////////////////////////////////////////////
 void EglContext::createSurface(EGLNativeWindowType window)
 {
+	err() << "Creating surface!" << std::endl;
     m_surface = eglCheck(eglCreateWindowSurface(m_display, m_config, window, NULL));
 }
 
@@ -235,13 +245,12 @@ EGLConfig EglContext::getBestConfig(EGLDisplay display, unsigned int bitsPerPixe
 {
     // Set our video settings constraint
     const EGLint attributes[] = {
-        EGL_BUFFER_SIZE, bitsPerPixel,
-        EGL_DEPTH_SIZE, settings.depthBits,
-        EGL_STENCIL_SIZE, settings.stencilBits,
-        EGL_SAMPLE_BUFFERS, settings.antialiasingLevel,
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
-        EGL_NONE
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+		EGL_BLUE_SIZE, 8,
+		EGL_GREEN_SIZE, 8,
+		EGL_RED_SIZE, 8,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+		EGL_NONE
     };
     
     EGLint configCount;

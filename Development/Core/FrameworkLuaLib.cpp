@@ -13,6 +13,9 @@
 #define REGISTER_JOYSTICKBUTTON(button)\
 	luabind::value("JoyButton_" #button, button)
 
+#define REGISTER_TOUCH(index)\
+	luabind::value("Touch_" #index, index)
+
 namespace luabind
 {
 	//StringID
@@ -934,6 +937,11 @@ namespace FlamingTorch
 		return Self.Keys[Name];
 	};
 
+	const InputCenter::TouchInfo &GetInputCenterTouch(InputCenter &Self, uint32 Name)
+	{
+		return Self.Touches[Name];
+	};
+
 	const InputCenter::MouseButtonInfo &GetInputCenterMouseButton(InputCenter &Self, uint32 Name)
 	{
 		return Self.MouseButtons[Name];
@@ -1303,6 +1311,7 @@ namespace FlamingTorch
 				.def_readwrite("FrameRate", &GameInterface::FrameRateValue)
 				.def_readwrite("DevelopmentBuild", &GameInterface::DevelopmentBuild)
 				.def_readwrite("IsGUISandbox", &GameInterface::IsGUISandbox)
+				.def_readonly("IsMobile", &GameInterface::IsMobile)
 #if USE_GRAPHICS
 				.def("CreateRenderer", &GameInterface::CreateRenderer)
 #endif
@@ -2225,7 +2234,18 @@ namespace FlamingTorch
 					REGISTER_JOYSTICKBUTTON(28),
 					REGISTER_JOYSTICKBUTTON(29),
 					REGISTER_JOYSTICKBUTTON(30),
-					REGISTER_JOYSTICKBUTTON(31)
+					REGISTER_JOYSTICKBUTTON(31),
+
+					REGISTER_TOUCH(0),
+					REGISTER_TOUCH(1),
+					REGISTER_TOUCH(2),
+					REGISTER_TOUCH(3),
+					REGISTER_TOUCH(4),
+					REGISTER_TOUCH(5),
+					REGISTER_TOUCH(6),
+					REGISTER_TOUCH(7),
+					REGISTER_TOUCH(8),
+					REGISTER_TOUCH(9)
 				]
 				.scope[
 					luabind::class_<InputCenter::MouseButtonInfo>("MouseButtonInfo")
@@ -2235,6 +2255,13 @@ namespace FlamingTorch
 						.def_readonly("JustReleased", &InputCenter::MouseButtonInfo::JustReleased)
 						.def_readonly("FirstPress", &InputCenter::MouseButtonInfo::FirstPress)
 						.def("NameAsString", &InputCenter::MouseButtonInfo::NameAsString),
+
+					luabind::class_<InputCenter::TouchInfo>("TouchInfo")
+						.def_readonly("Name", &InputCenter::TouchInfo::Index)
+						.def_readonly("Pressed", &InputCenter::TouchInfo::Pressed)
+						.def_readonly("JustPressed", &InputCenter::TouchInfo::JustPressed)
+						.def_readonly("JustReleased", &InputCenter::TouchInfo::JustReleased)
+						.def("NameAsString", &InputCenter::TouchInfo::NameAsString),
 
 					luabind::class_<InputCenter::JoystickButtonInfo>("JoystickButtonInfo")
 						.def_readonly("Name", &InputCenter::JoystickButtonInfo::Name)
@@ -2273,12 +2300,16 @@ namespace FlamingTorch
 							luabind::value("InputAction_MouseButton", InputActionType::MouseButton),
 							luabind::value("InputAction_MouseScroll", InputActionType::MouseScroll),
 							luabind::value("InputAction_JoystickButton", InputActionType::JoystickButton),
-							luabind::value("InputAction_JoystickAxis", InputActionType::JoystickAxis)
+							luabind::value("InputAction_JoystickAxis", InputActionType::JoystickAxis),
+							luabind::value("InputAction_TouchDown", InputActionType::TouchDown),
+							luabind::value("InputAction_TouchUp", InputActionType::TouchUp),
+							luabind::value("InputAction_TouchDrag", InputActionType::TouchDrag)
 						]
-						.def("Key", &InputCenter::Action::Key)
-						.def("MouseButton", &InputCenter::Action::MouseButton)
-						.def("JoystickButton", &InputCenter::Action::JoystickButton)
-						.def("JoystickAxis", &InputCenter::Action::JoystickAxis)
+						.property("Key", &InputCenter::Action::Key)
+						.property("MouseButton", &InputCenter::Action::MouseButton)
+						.property("JoystickButton", &InputCenter::Action::JoystickButton)
+						.property("JoystickAxis", &InputCenter::Action::JoystickAxis)
+						.property("Touch", &InputCenter::Action::Touch)
 						.def("AsString", &InputCenter::Action::AsString),
 
 					luabind::class_<InputCenter::Context, SuperSmartPointer<InputCenter::Context> >("InputContext")
@@ -2303,6 +2334,7 @@ namespace FlamingTorch
 						.def_readwrite("OnJoystickAxis", &InputCenter::ScriptedContext::OnJoystickAxisFunction)
 						.def_readwrite("OnJoystickConnected", &InputCenter::ScriptedContext::OnJoystickConnectedFunction)
 						.def_readwrite("OnJoystickDisconnected", &InputCenter::ScriptedContext::OnJoystickDisconnectedFunction)
+						.def_readwrite("OnTouch", &InputCenter::ScriptedContext::OnTouchFunction)
 						.def_readwrite("OnMouseMove", &InputCenter::ScriptedContext::OnMouseMoveFunction)
 						.def_readwrite("OnCharacterEntered", &InputCenter::ScriptedContext::OnCharacterEnteredFunction)
 						.def_readwrite("OnAction", &InputCenter::ScriptedContext::OnActionFunction)
@@ -2313,6 +2345,7 @@ namespace FlamingTorch
 				.def("GetMouseButton", &GetInputCenterMouseButton)
 				.def("GetJoystickButton", &GetInputCenterJoystickButton)
 				.def("GetJoystickAxis", &GetInputCenterJoystickAxis)
+				.def("GetTouch", &GetInputCenterTouch)
 				.def("GetAction", &InputCenter::GetAction)
 				.def_readonly("HasFocus", &InputCenter::HasFocus)
 				.def_readonly("MousePosition", &InputCenter::MousePosition)
