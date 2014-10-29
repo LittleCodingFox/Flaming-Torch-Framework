@@ -1178,6 +1178,18 @@ namespace FlamingTorch
 		return M;
 	};
 
+	bool Matrix4x4::operator==(const Matrix4x4 &o) const
+	{
+		//Ugly and possibly slow... Any way to improve this?
+		return memcmp(this, &o, sizeof(Matrix4x4)) == 0;
+	};
+
+	bool Matrix4x4::operator!=(const Matrix4x4 &o) const
+	{
+		//Ugly and possibly slow... Any way to improve this?
+		return memcmp(this, &o, sizeof(Matrix4x4)) != 0;
+	};
+
 	void Matrix4x4::Identity()
 	{
 		static const f32 IdentityData[16] = {

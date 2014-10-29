@@ -273,8 +273,10 @@ namespace FlamingTorch
 			};
 		};
 
+#if FLPLATFORM_MOBILE
 		if(!Input.HasFocus)
 			return ReturnValue;
+#endif
 
 		Renderer *Renderer = ActiveRenderer();
 
@@ -286,16 +288,6 @@ namespace FlamingTorch
 		{
 			PROFILE("Render FrameDraw", StatTypes::Rendering);
 			Renderer->OnFrameDraw(Renderer);
-		};
-
-		{
-			PROFILE("Update UI", StatTypes::Rendering);
-			Renderer->UI->Update();
-		};
-
-		{
-			PROFILE("Render UI", StatTypes::Rendering);
-			Renderer->UI->Draw(Renderer);
 		};
 
 		{

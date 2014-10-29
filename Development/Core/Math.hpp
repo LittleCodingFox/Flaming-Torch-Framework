@@ -16,6 +16,9 @@ public:
 
 	f32 &operator[](uint32 index) const;
 
+	bool operator==(const Matrix4x4 &o) const;
+	bool operator!=(const Matrix4x4 &o) const;
+
 	/*!
 	*	\return this matrix's Determinant
 	*/

@@ -502,6 +502,8 @@ namespace FlamingTorch
 			return;
 
 		Renderer->BindTexture((Texture *)ActiveTexture);
+		//Enable to disable textures
+		//Renderer->BindTexture(TextureHandle(0));
 
 		if(!Renderer->IsVertexBufferHandleValid(SpriteVertexBuffer))
 		{

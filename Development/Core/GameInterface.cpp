@@ -53,7 +53,7 @@ namespace FlamingTorch
 
 			return;
 		};
-		
+
 		if(!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text) ||
 			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream))
 		{
@@ -124,12 +124,24 @@ namespace FlamingTorch
 
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
+		SpriteCache::Instance.Flush(TheRenderer);
+
 		bool PushOrtho = TheRenderer->MatrixStackSize() == 0;
 
 		if(PushOrtho)
 		{
 			TheRenderer->PushMatrices();
 			TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, TheRenderer->Size().x, TheRenderer->Size().y, 0, -1, 1));
+		};
+
+		{
+			PROFILE("Update UI", StatTypes::Rendering);
+			TheRenderer->UI->Update();
+		};
+
+		{
+			PROFILE("Render UI", StatTypes::Rendering);
+			TheRenderer->UI->Draw(TheRenderer);
 		};
 
 		static std::stringstream str;
@@ -186,6 +198,8 @@ namespace FlamingTorch
 
 		if(PushOrtho)
 		{
+			SpriteCache::Instance.Flush(TheRenderer);
+
 			TheRenderer->PopMatrices();
 		};
 	};
@@ -546,26 +560,6 @@ namespace FlamingTorch
 			return 1;
 		};
 
-#if USE_GRAPHICS
-		if(IsGUISandbox)
-		{
-#	if !FLPLATFORM_ANDROID
-			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
-			{
-				Instance.Dispose();
-
-				DeInitSubsystems();
-
-				return 1;
-			};
-
-			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
-#	endif
-
-			ReloadGUI();
-		};
-#endif
-
 		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
@@ -592,6 +586,24 @@ namespace FlamingTorch
 		if(RendererManager::Instance.ActiveRenderer())
 		{
 			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "DefaultFont.ttf");
+		};
+
+		if(IsGUISandbox)
+		{
+#	if !FLPLATFORM_ANDROID
+			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
+			{
+				Instance.Dispose();
+
+				DeInitSubsystems();
+
+				return 1;
+			};
+
+			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+#	endif
+
+			ReloadGUI();
 		};
 #endif
 

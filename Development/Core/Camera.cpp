@@ -15,6 +15,8 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	void Camera::BeginTransforms(Renderer *TheRenderer)
 	{
+		SpriteCache::Instance.Flush(TheRenderer);
+
 		Matrix4x4 CameraTransform = WorldTransform;
 		CameraTransform.Inverse();
 
@@ -27,6 +29,8 @@ namespace FlamingTorch
 
 	void Camera::EndTransforms(Renderer *TheRenderer)
 	{
+		SpriteCache::Instance.Flush(TheRenderer);
+
 		TheRenderer->PopMatrices();
 	};
 #endif
