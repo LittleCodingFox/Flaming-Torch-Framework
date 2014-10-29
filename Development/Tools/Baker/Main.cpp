@@ -104,6 +104,7 @@ int main(int argc, char **argv)
 	std::string PackerPath = Configuration.GetString("Tools", "Packer", "../../Binaries/Packer/Release/Packer");
 	std::string TiledConverterPath = Configuration.GetString("Tools", "TiledConverter", "../../Binaries/TiledConverter/Release/TiledConverter");
 	std::string TexturePackerPath = Configuration.GetString("Tools", "TexturePacker", "../../Binaries/TexturePacker/Release/TexturePacker");
+	std::string AndroidPath = Configuration.GetString("Android", "ProjectPath", "Android");
     
     Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
 
@@ -249,6 +250,45 @@ int main(int argc, char **argv)
 			Log::Instance.LogErr(TAG, "Unable to run Packer: Exit Code '%d'", ExitCode);
 
 			continue;
+		};
+
+        Log::Instance.LogInfo(TAG, "...    Processing for Android...");
+
+		std::string FinalAndroidPath = Path(FileSystemUtils::ResourcesDirectory() + "/" + AndroidPath).FullPath();
+
+		if(!FileSystemUtils::DirectoryExists(FinalAndroidPath))
+		{
+			Log::Instance.LogWarn(TAG, "Android Path '%s' not found!", AndroidPath.c_str());
+		}
+		else
+		{
+			std::string AssetsPath = FinalAndroidPath + "/assets/";
+
+			if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
+			{
+				Log::Instance.LogWarn(TAG, "Android: Unable to create Assets folder");
+
+				continue;
+			};
+
+			AssetsPath += "/Content/";
+
+			if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
+			{
+				Log::Instance.LogWarn(TAG, "Android: Unable to create Content folder");
+
+				continue;
+			};
+
+			FileStream OutStream, InStream;
+
+			if(!OutStream.Open(Path(AssetsPath + "/" + DirectoryName + ".package.gif").FullPath(), StreamFlags::Write) ||
+				!InStream.Open(Path(FileSystemUtils::ResourcesDirectory() + "/Content/" + DirectoryName + ".package").FullPath(), StreamFlags::Read) || !InStream.CopyTo(&OutStream))
+			{
+				Log::Instance.LogErr(TAG, "Android: Unable to create copy package '%s'", DirectoryName.c_str());
+
+				continue;
+			};
 		};
 	};
     
