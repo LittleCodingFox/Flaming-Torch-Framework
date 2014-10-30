@@ -421,12 +421,26 @@ namespace FlamingTorch
 
 	bool Renderer::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
 	{
-		return Impl->Create(WindowHandle, ExpectedCaps);
+		bool Result = Impl->Create(WindowHandle, ExpectedCaps);
+
+		if(Result)
+		{
+			BaseResolutionValue = Size();
+		};
+
+		return Result;
 	};
 
 	bool Renderer::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
-		return Impl->Create(Title, Width, Height, Style, ExpectedCaps);
+		bool Result = Impl->Create(Title, Width, Height, Style, ExpectedCaps);
+
+		if(Result)
+		{
+			BaseResolutionValue = Size();
+		};
+
+		return Result;
 	};
 
 	VertexBufferHandle Renderer::CreateVertexBuffer()
@@ -696,9 +710,23 @@ namespace FlamingTorch
 		return DefaultImpl->DisplayModes();
 	};
 
-	uint32 Renderer::MatrixStackSize()
+	uint32 Renderer::MatrixStackSize() const
 	{
 		return MatrixStack.size();
+	};
+
+	const Vector2 &Renderer::BaseResolution() const
+	{
+		return BaseResolutionValue;
+	};
+
+	Vector2 Renderer::ScaleCoordinate(const Vector2 &Coordinate) const
+	{
+		Vector2 BaseScale = MathUtils::ScaleKeepingAspectRatio(BaseResolutionValue, Size());
+		Vector2 NormalizedBaseScale = BaseScale / BaseResolutionValue;
+		Vector2 RescaledValue = Coordinate * NormalizedBaseScale;
+
+		return RescaledValue;
 	};
 
 	void RendererManager::StartUp(uint32 Priority)

@@ -112,6 +112,11 @@ int main(int argc, char **argv)
 		else
 		{
 			FileName = Path(argv[i]).FullPath();
+
+			if(OutFileName.length() == 0)
+			{
+				OutFileName = Path(FileName).BaseName;
+			};
 		};
 	};
 
@@ -223,7 +228,7 @@ int main(int argc, char **argv)
 		OutFileName = OutFileName.substr(0, OutFileName.rfind('.')) + "_out";
 	};
 
-	std::string OutFileNamePNG = OutDirectory + "/" + OutFileName.c_str() + ".png", OutFileNameCFG = OutDirectory + "/" + OutFileName.c_str() + ".cfg";
+	std::string OutFileNamePNG = Path(OutDirectory + "/" + OutFileName.c_str()).ChangeExtension("png").FullPath(), OutFileNameCFG = Path(OutDirectory + "/" + OutFileName.c_str()).ChangeExtension("cfg").FullPath();
 
 	TextureEncoderInfo TEInfo;
 	TEInfo.Encoder = TextureEncoderType::PNG;

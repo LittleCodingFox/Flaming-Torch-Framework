@@ -104,6 +104,10 @@ namespace FlamingTorch
 		RendererManager::Instance.SetActiveRenderer(Handle);
 
 		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
+
+		if(BaseResolution != Vector2())
+			TheRenderer->BaseResolutionValue = BaseResolution;
+
 		TheRenderer->OnFrameStarted.Connect(this, &GameInterface::OnFrameBegin);
 		TheRenderer->OnFrameDraw.Connect(this, &GameInterface::OnFrameDraw);
 		TheRenderer->OnFrameEnded.Connect(this, &GameInterface::OnFrameEnd);
@@ -404,6 +408,34 @@ namespace FlamingTorch
 				if(1 != sscanf(it->second.Content.c_str(), "%d", &FrameRateValue) || FrameRateValue <= 0)
 				{
 					FrameRateValue = CurrentFrameRate;
+				};
+			};
+
+			it = GameSection.Values.find("BaseWidth");
+
+			if(it != GameSection.Values.end())
+			{
+				int32 Width = 0;
+
+				if(1 == sscanf(it->second.Content.c_str(), "%d", &Width) && Width > 0)
+				{
+					BaseResolution.x = Width;
+				};
+			};
+
+			it = GameSection.Values.find("BaseHeight");
+
+			if(BaseResolution.x > 0 && it != GameSection.Values.end())
+			{
+				int32 Height = 0;
+
+				if(1 == sscanf(it->second.Content.c_str(), "%d", &Height) && Height > 0)
+				{
+					BaseResolution.y = Height;
+				}
+				else
+				{
+					BaseResolution = Vector2();
 				};
 			};
 		};

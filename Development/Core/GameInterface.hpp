@@ -27,6 +27,7 @@ public:
 	bool IsGUISandbox;
 	bool IsMobile;
 	uint32 UpdateRateValue, FrameRateValue;
+	Vector2 BaseResolution;
 
 	static SuperSmartPointer<GameInterface> Instance;
 

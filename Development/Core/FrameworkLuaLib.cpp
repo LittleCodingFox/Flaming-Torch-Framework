@@ -669,6 +669,11 @@ namespace FlamingTorch
 		};
 	};
 
+	bool UIManagerLoadLayoutsSimple(UIManager &Self, Stream *TheStream, bool Default)
+	{
+		return Self.LoadLayouts(TheStream, SuperSmartPointer<UIPanel>(), Default);
+	};
+
 	luabind::object GetUIManagerLayouts(UIManager &Self, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
@@ -2047,7 +2052,9 @@ namespace FlamingTorch
 				.def("MeasureText", &Renderer::MeasureText)
 				.def("RenderText", &Renderer::RenderText)
 				.def("SetMousePosition", &Renderer::SetMousePosition)
-				.def("SetFrameRate", &Renderer::SetFrameRate),
+				.def("SetFrameRate", &Renderer::SetFrameRate)
+				.def("ScaleCoordinate", &Renderer::ScaleCoordinate)
+				.property("BaseResolution", &Renderer::BaseResolution),
 				
 			//RenderTextUtils
 			luabind::class_<RenderTextUtils>("RenderTextUtils")
@@ -2364,6 +2371,7 @@ namespace FlamingTorch
 				.def("AddElement", &UIManager::AddElement)
 				.def("RemoveElement", &UIManager::RemoveElement)
 				.def("LoadLayouts", &UIManager::LoadLayouts)
+				.def("LoadLayouts", &UIManagerLoadLayoutsSimple)
 				.property("Layouts", &GetUIManagerLayouts)
 				.def("AddLayout", &AddUIManagerLayout)
 				.def("RemoveLayout", &RemoveUIManagerLayout)

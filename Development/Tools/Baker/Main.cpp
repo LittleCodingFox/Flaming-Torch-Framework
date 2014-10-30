@@ -204,11 +204,21 @@ int main(int argc, char **argv)
 				};
             };
         };
+        
+        Log::Instance.LogInfo(TAG, "...    Packing Textures (if any)");
 
 		for(uint32 j = 0; j < TexturePackDirectories.size(); j++)
 		{
             std::vector<std::string> TexturePackFiles = FileSystemUtils::ScanDirectory(TargetDirectory + "/" + TexturePackDirectories[j].first, "cfg");
-			FileSystemUtils::CreateDirectory(TargetDirectory + "/" + TexturePackDirectories[j].second);
+
+			if(TexturePackFiles.size() == 0)
+			{
+				Log::Instance.LogInfo(TAG, "...    No Config files found at '%s'", TexturePackDirectories[j].first.c_str());
+
+				continue;
+			};
+
+			FileSystemUtils::CreateDirectoryRecursive(TargetDirectory + "/" + TexturePackDirectories[j].second);
             
 			for(uint32 k = 0; k < TexturePackDirectories.size(); k++)
             {

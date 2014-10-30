@@ -427,6 +427,23 @@ namespace FlamingTorch
         
         return result;
 	};
+
+	bool FileSystemUtils::CreateDirectoryRecursive(const std::string &Directory)
+	{
+		std::vector<std::string> DirectoryPieces = StringUtils::Split(Path(Directory).FullPath(), '/');
+
+		std::stringstream str;
+
+		for(uint32 i = 0; i < DirectoryPieces.size(); i++)
+		{
+			str << (i > 0 ? "/" : "") << DirectoryPieces[i];
+
+			if(_mkdir(str.str().c_str()) != 0 && errno != EEXIST && (i != 0 || str.str().find(':') != std::string::npos))
+				return false;
+		};
+
+		return true;
+	};
     
     bool FileSystemUtils::DeleteDirectory(const std::string &Directory)
     {

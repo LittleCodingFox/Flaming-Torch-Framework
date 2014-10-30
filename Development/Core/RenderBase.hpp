@@ -301,8 +301,10 @@ class Renderer
 	friend class RendererManager;
 	friend class InputCenter;
 	friend class Texture;
+	friend class GameInterface;
 private:
 	IRendererImplementation *Impl;
+	Vector2 BaseResolutionValue;
 
 	Renderer(IRendererImplementation *_Impl);
 	Renderer(const Renderer &o);
@@ -638,7 +640,18 @@ public:
 	*	\sa SetWorldMatrix
 	*	\sa SetProjectionMatrix
 	*/
-	uint32 MatrixStackSize();
+	uint32 MatrixStackSize() const;
+
+	/*!
+	*	\return the base resolution of the render
+	*/
+	const Vector2 &BaseResolution() const;
+
+	/*!
+	*	Scales a coordinate by the base resolution
+	*	\param Coordinate the coordinate to scale by the base resolution
+	*/
+	Vector2 ScaleCoordinate(const Vector2 &Coordinate) const;
 };
 
 /*!

@@ -82,6 +82,12 @@ public:
 	*	\param Directory the directory path
 	*/
 	static bool CreateDirectory(const std::string &Directory);
+
+	/*!
+	*	Creates a directory recursively (tries to create all path pieces)
+	*	\param Directory the directory path
+	*/
+	static bool CreateDirectoryRecursive(const std::string &Directory);
     
     /*!
     *   Copies a directory and its contents
