@@ -596,7 +596,12 @@ namespace FlamingTorch
 		if(ActualStorageDirectory.length() == 0)
 		{
 #if SANDBOX_BUILD
+#	if FLPLATFORM_ANDROID
+			ActualStorageDirectory = sf::priv::getActivity(NULL, false)->activity->externalDataPath;
+			FileSystemUtils::CreateDirectoryRecursive(ActualStorageDirectory.c_str());
+#	else
 			ActualStorageDirectory = ResourcesDirectory();
+#	endif
 #else
 #	if FLPLATFORM_WINDOWS
 			ActualStorageDirectory.resize(1024);
@@ -617,9 +622,9 @@ namespace FlamingTorch
 			
 			ActualStorageDirectory += "/Games";
 #	elif FLPLATFORM_ANDROID
-			ActualStorageDirectory = sf::priv::getActivity(false)->activity->externalDataPath;
+			ActualStorageDirectory = sf::priv::getActivity(NULL, false)->activity->externalDataPath;
 #	endif
-			FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
+			FileSystemUtils::CreateDirectoryRecursive(ActualStorageDirectory.c_str());
 #endif
 
 			if(Log::Instance.FolderName.length())
