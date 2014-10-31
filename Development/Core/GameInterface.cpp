@@ -225,28 +225,6 @@ namespace FlamingTorch
 			return 1;
 		};
 
-#if USE_GRAPHICS
-		if(IsGUISandbox)
-		{
-#	if !FLPLATFORM_ANDROID
-			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
-			{
-				Log::Instance.LogErr(TAG, "Failed to watch resources directory for GUI Sandbox Mode, quitting...");
-
-				Instance.Dispose();
-
-				DeInitSubsystems();
-
-				return 1;
-			};
-
-			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
-#	endif
-
-			ReloadGUI();
-		};
-#endif
-
 		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
@@ -282,6 +260,36 @@ namespace FlamingTorch
 
 			if(ShouldQuit())
 				break;
+
+			if(FirstFrame)
+			{
+				FirstFrame = false;
+
+#if USE_GRAPHICS
+				if(IsGUISandbox)
+				{
+#	if !FLPLATFORM_ANDROID
+					if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
+					{
+						Instance.Dispose();
+
+						DeInitSubsystems();
+
+						return 1;
+					};
+
+					FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+#	endif
+
+					ReloadGUI();
+				};
+#endif
+			};
+
+#if FLPLATFORM_MOBILE
+			if(!RendererManager::Instance.Input.HasFocus)
+				sf::sleep(sf::milliseconds(1000));
+#endif
 		};
 
 		if(!DeInitialize())
@@ -326,6 +334,7 @@ namespace FlamingTorch
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
 	{
 		IsMobile = FLPLATFORM_MOBILE;
+		FirstFrame = true;
 		PackageFileSystemManager::Instance.Register();
 
 		InitSubsystems();
@@ -619,24 +628,6 @@ namespace FlamingTorch
 		{
 			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "DefaultFont.ttf");
 		};
-
-		if(IsGUISandbox)
-		{
-#	if !FLPLATFORM_ANDROID
-			if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
-			{
-				Instance.Dispose();
-
-				DeInitSubsystems();
-
-				return 1;
-			};
-
-			FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
-#	endif
-
-			ReloadGUI();
-		};
 #endif
 
 		for(;;)
@@ -652,6 +643,31 @@ namespace FlamingTorch
 
 			if(ShouldQuit())
 				break;
+
+			if(FirstFrame)
+			{
+				FirstFrame = false;
+
+#if USE_GRAPHICS
+				if(IsGUISandbox)
+				{
+#	if !FLPLATFORM_ANDROID
+					if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
+					{
+						Instance.Dispose();
+
+						DeInitSubsystems();
+
+						return 1;
+					};
+
+					FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+#	endif
+
+					ReloadGUI();
+				};
+#endif
+			};
 
 #if FLPLATFORM_MOBILE
 			if(!RendererManager::Instance.Input.HasFocus)

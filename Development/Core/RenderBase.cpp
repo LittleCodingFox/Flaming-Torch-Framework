@@ -722,11 +722,10 @@ namespace FlamingTorch
 
 	Vector2 Renderer::ScaleCoordinate(const Vector2 &Coordinate) const
 	{
-		Vector2 BaseScale = MathUtils::ScaleKeepingAspectRatio(BaseResolutionValue, Size());
-		Vector2 NormalizedBaseScale = BaseScale / BaseResolutionValue;
-		Vector2 RescaledValue = Coordinate * NormalizedBaseScale;
+		//KISS till find a better solution...
+		Vector2 ScaleFactor = Size() / BaseResolutionValue;
 
-		return RescaledValue;
+		return ScaleFactor * Coordinate;
 	};
 
 	void RendererManager::StartUp(uint32 Priority)

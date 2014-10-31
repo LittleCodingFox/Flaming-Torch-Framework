@@ -22,6 +22,7 @@ private:
 #if USE_GRAPHICS
 	void OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action);
 #endif
+	bool FirstFrame;
 public:
 	bool DevelopmentBuild;
 	bool IsGUISandbox;
@@ -31,7 +32,7 @@ public:
 
 	static SuperSmartPointer<GameInterface> Instance;
 
-	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0) {};
+	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false) {};
 	virtual ~GameInterface() {};
 
 	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);

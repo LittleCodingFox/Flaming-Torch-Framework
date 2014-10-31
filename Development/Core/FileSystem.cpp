@@ -616,6 +616,8 @@ namespace FlamingTorch
 			ActualStorageDirectory = OSXPreferredStorageDirectory();
 			
 			ActualStorageDirectory += "/Games";
+#	elif FLPLATFORM_ANDROID
+			ActualStorageDirectory = sf::priv::getActivity(false)->activity->externalDataPath;
 #	endif
 			FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 #endif
