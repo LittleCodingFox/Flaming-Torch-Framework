@@ -2,7 +2,7 @@
 #if FLPLATFORM_WINDOWS
 #	include <windows.h>
 #elif FLPLATFORM_ANDROID
-#	include <cutils/properties.h>
+//#	include <cutils/properties.h>
 #endif
 
 namespace FlamingTorch
@@ -37,6 +37,7 @@ namespace FlamingTorch
 
 		return "Linux";
 #elif FLPLATFORM_ANDROID
+		/*
 		std::string VersionResult, ModelResult, ABIResult;
 		VersionResult.resize(PROPERTY_VALUE_MAX);
 		ModelResult.resize(PROPERTY_VALUE_MAX);
@@ -49,7 +50,9 @@ namespace FlamingTorch
 		if(IncludeVersion)
 			return ModelResult + " (Android " + VersionResult + " [" + ABIResult + "])";
 
-		return "Android [" + ABIResult + "]";
+		return "Android [" + ABIResult + "]"
+		*/
+		return "Android";
 #else
 		return "UNKNOWN v. UNKNOWN";
 #endif

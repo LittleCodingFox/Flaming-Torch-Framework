@@ -65,7 +65,7 @@ namespace FlamingTorch
 
 		LogInfo("Log", "Starting Logging Subsystem");
 		LogInfo("Log", "Core Build: %s", CoreUtils::MakeVersionString(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR).c_str());
-		LogInfo("Log", "System Version: %s", CoreUtils::PlatformString(true));
+		LogInfo("Log", "System Version: %s", CoreUtils::PlatformString(true).c_str());
 		LogInfo("Log", "Working Directory: %s\n\n", FileSystemUtils::ActiveDirectory().c_str());
 	};
 
