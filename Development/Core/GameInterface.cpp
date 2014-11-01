@@ -719,6 +719,9 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	void ScriptedGameInterface::OnFrameBegin(Renderer *TheRenderer)
 	{
+		if(ErroredOnFrameBegin)
+			return;
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameBeginFunction);
 
 		try
@@ -728,11 +731,15 @@ namespace FlamingTorch
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError(e.what());
+			ErroredOnFrameBegin = true;
 		};
 	};
 
 	void ScriptedGameInterface::OnFrameDraw(Renderer *TheRenderer)
 	{
+		if(ErroredOnFrameDraw)
+			return;
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameDrawFunction);
 
 		try
@@ -742,11 +749,15 @@ namespace FlamingTorch
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError(e.what());
+			ErroredOnFrameDraw = true;
 		};
 	};
 
 	void ScriptedGameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
+		if(ErroredOnFrameEnd)
+			return;
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameEndFunction);
 
 		try
@@ -756,6 +767,7 @@ namespace FlamingTorch
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError(e.what());
+			ErroredOnFrameEnd = true;
 		};
 
 		GameInterface::OnFrameEnd(TheRenderer);
@@ -763,6 +775,9 @@ namespace FlamingTorch
 
 	void ScriptedGameInterface::OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height)
 	{
+		if(ErroredOnResize)
+			return;
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnResizeFunction);
 
 		try
@@ -772,11 +787,15 @@ namespace FlamingTorch
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError(e.what());
+			ErroredOnResize = true;
 		};
 	};
 
 	void ScriptedGameInterface::OnResourcesReloaded(Renderer *TheRenderer)
 	{
+		if(ErroredOnResourcesReloaded)
+			return;
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnResourcesReloadedFunction);
 
 		try
@@ -786,12 +805,16 @@ namespace FlamingTorch
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError(e.what());
+			ErroredOnResourcesReloaded = true;
 		};
 	};
 #endif
 
 	void ScriptedGameInterface::OnFixedUpdate()
 	{
+		if(ErroredOnFixedUpdate)
+			return;
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFixedUpdateFunction);
 
 		try
@@ -801,11 +824,15 @@ namespace FlamingTorch
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError(e.what());
+			ErroredOnFixedUpdate = true;
 		};
 	};
 
 	void ScriptedGameInterface::OnFrameUpdate()
 	{
+		if(ErroredOnFrameUpdate)
+			return;
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameUpdateFunction);
 
 		try
@@ -815,6 +842,7 @@ namespace FlamingTorch
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError(e.what());
+			ErroredOnFrameUpdate = true;
 		};
 	};
 

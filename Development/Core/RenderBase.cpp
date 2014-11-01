@@ -485,6 +485,8 @@ namespace FlamingTorch
 
 	void Renderer::StartClipping(const Rect &_ClippingRect)
 	{
+		//Disabled for now
+		/*
 		FLASSERT(_ClippingRect.Bottom > _ClippingRect.Top, "Expected a larger Bottom coordinate on ClippingRect");
 		FLASSERT(_ClippingRect.Right > _ClippingRect.Left, "Expected a larger Right coordinate on ClippingRect");
 
@@ -521,10 +523,13 @@ namespace FlamingTorch
 		SpriteCache::Instance.Flush(this);
 
 		Impl->StartClipping(ClippingRect);
+		*/
 	};
 
 	void Renderer::FinishClipping()
 	{
+		//Disabled for now
+		/*
 		SpriteCache::Instance.Flush(this);
 
 		if(!ClippingStack.size())
@@ -542,6 +547,7 @@ namespace FlamingTorch
 		{
 			Impl->FinishClipping();
 		};
+		*/
 	};
 
 	void Renderer::Clear(uint32 ID)

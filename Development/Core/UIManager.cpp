@@ -721,6 +721,10 @@ namespace FlamingTorch
 			};
 
 			TheSprite->TheSprite.Options.Colors(Colors[0], Colors[1], Colors[2], Colors[3]);
+		}
+		else if(Property == "Wireframe")
+		{
+			TheSprite->TheSprite.Options.Wireframe(Value == "true");
 		};
 	};
 
@@ -801,6 +805,17 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Color", string)
+		};
+
+		Value = Data.get("Wireframe", Json::Value(false));
+
+		if(Value.isBool())
+		{
+			ProcessSpriteProperty(Panel, "Wireframe", Value.asBool() ? "true" : "false", ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Wireframe", bool)
 		};
 
 		Value = Data.get("ScaleWide", Json::Value(""));

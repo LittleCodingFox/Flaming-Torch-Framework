@@ -76,7 +76,7 @@ namespace FlamingTorch
 			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
-		Renderer->StartClipping(Rect(ActualPosition.x, ActualPosition.x + ComposedSize().x, ActualPosition.y, ActualPosition.y + ComposedSize().y));
+		Renderer->StartClipping(Rect(ActualPosition.x - 1, ActualPosition.x + ComposedSize().x + 1, ActualPosition.y - 1, ActualPosition.y + ComposedSize().y + 1));
 
 		UIPanel::Draw(ParentPosition, Renderer);
 

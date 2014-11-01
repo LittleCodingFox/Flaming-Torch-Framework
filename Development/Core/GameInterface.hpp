@@ -29,10 +29,13 @@ public:
 	bool IsMobile;
 	uint32 UpdateRateValue, FrameRateValue;
 	Vector2 BaseResolution;
+	bool ErroredOnFrameUpdate, ErroredOnFixedUpdate, ErroredOnFrameBegin, ErroredOnFrameEnd, ErroredOnFrameDraw, ErroredOnResize, ErroredOnResourcesReloaded;
 
 	static SuperSmartPointer<GameInterface> Instance;
 
-	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false) {};
+	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
+			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
+			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false) {};
 	virtual ~GameInterface() {};
 
 	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);
