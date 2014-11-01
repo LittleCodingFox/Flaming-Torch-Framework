@@ -717,13 +717,19 @@ namespace FlamingTorch
 
 	const Vector2 &Renderer::BaseResolution() const
 	{
+		//Almost 100% sure this is Portrait... Maybe set this up as Mobile only?
+#if FLPLATFORM_MOBILE
+		if(Size().x < Size().y)
+			return Vector2(BaseResolutionValue.y, BaseResolutionValue.x);
+#endif
+
 		return BaseResolutionValue;
 	};
 
 	Vector2 Renderer::ScaleCoordinate(const Vector2 &Coordinate) const
 	{
 		//KISS till find a better solution...
-		Vector2 ScaleFactor = Size() / BaseResolutionValue;
+		Vector2 ScaleFactor = Size() / BaseResolution();
 
 		return ScaleFactor * Coordinate;
 	};

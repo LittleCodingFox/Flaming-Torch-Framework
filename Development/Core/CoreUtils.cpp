@@ -1,6 +1,8 @@
 #include "FlamingCore.hpp"
 #if FLPLATFORM_WINDOWS
 #	include <windows.h>
+#elif FLPLATFORM_ANDROID
+#	include <cutils/properties.h>
 #endif
 
 namespace FlamingTorch
@@ -11,6 +13,46 @@ namespace FlamingTorch
 		str << (uint32)a << "." << (uint32)b;
 
 		return str.str();
+	};
+
+	std::string CoreUtils::PlatformString(bool IncludeVersion)
+	{
+#if FLPLATFORM_WINDOWS
+		std::string ArchString;
+
+#	if FLPLATFORM_WIN64
+		ArchString = "x64";
+#	else
+		ArchString = "x86";
+#	endif
+
+		//TODO: Version String
+		return "Windows [" + ArchString + "]";
+#elif FLPLATFORM_OSX
+		//TOOD: Version String
+
+		return "Mac OS X";
+#elif FLPLATFORM_LINUX
+		//TOOD: Version String
+
+		return "Linux";
+#elif FLPLATFORM_ANDROID
+		std::string VersionResult, ModelResult, ABIResult;
+		VersionResult.resize(PROPERTY_VALUE_MAX);
+		ModelResult.resize(PROPERTY_VALUE_MAX);
+		ABIResult.resize(PROPERTY_VALUE_MAX);
+
+		property_get("ro.build.version.release", &VersionResult[0], "");
+		property_get("ro.product.model", &ModelResult[0], "");
+		property_get("ro.product.cpu.abi", &ABIResult[0], "");
+
+		if(IncludeVersion)
+			return ModelResult + " (Android " + VersionResult + " [" + ABIResult + "])";
+
+		return "Android [" + ABIResult + "]";
+#else
+		return "UNKNOWN v. UNKNOWN";
+#endif
 	};
 
 	int32 CoreUtils::RunProgram(const std::string &_ExePath, const std::string &Parameters, const std::string &WorkingDirectory)

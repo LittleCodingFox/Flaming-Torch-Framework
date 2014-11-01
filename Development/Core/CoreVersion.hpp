@@ -201,6 +201,12 @@ namespace FlamingTorch
 	{
 	public:
 		/*!
+		*	\return a string with the name of this platform
+		*	\param IncludeVersion whether to include version info
+		*/
+		static std::string PlatformString(bool IncludeVersion = false);
+
+		/*!
 		*	Runs a program from the OS
 		*	\param ExePath the path to the executable file
 		*	\param Parameters the parameters to pass to the executable
