@@ -261,6 +261,24 @@ namespace FlamingTorch
 				TheText->ExpandHeight = !!IntValue;
 			};
 		}
+		else if(Property == "Font")
+		{
+			FontHandle Handle = ResourceManager::Instance.GetFontFromPackage(Owner, Path(Value));
+
+			if(Handle == 0)
+			{
+				Handle = ResourceManager::Instance.GetFont(Owner, Path(Value));
+
+				if(Handle == 0)
+				{
+					Log::Instance.LogWarn(TAG, "Unable to load font '%s'", Value.c_str());
+
+					return;
+				};
+			};
+
+			TheText->TextParameters.Font(Handle);
+		}
 		else if(Property == "FontSize")
 		{
 			uint32 FontSize = 0;
@@ -417,6 +435,18 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "FontSize", int);
+		};
+
+		Value = Data.get("Font", Json::Value(""));
+
+		if(Value.isString())
+		{
+			if(Value.asString().length() > 0)
+				ProcessTextProperty(Panel, "Font", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Font", string);
 		};
 
 		Value = Data.get("Text", Json::Value(""));
