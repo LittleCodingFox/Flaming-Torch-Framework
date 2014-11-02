@@ -955,7 +955,7 @@ private:
 	void RegisterInput();
 	void UnRegisterInput();
 
-	void RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement);
+	void RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement, bool Mouse, const Vector2 &TargetPosition);
 
 	Renderer *Owner;
 

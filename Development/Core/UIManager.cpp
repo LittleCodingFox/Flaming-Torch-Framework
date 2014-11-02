@@ -2582,6 +2582,7 @@ namespace FlamingTorch
 
 	SuperSmartPointer<UIPanel> UIManager::GetMouseOverElement()
 	{
+#if !FLPLATFORM_MOBILE //Mobile has no mouse over events
 		if(DrawOrderCacheDirty)
 		{
 			DrawOrderCacheDirty = false;
@@ -2603,7 +2604,7 @@ namespace FlamingTorch
 		if(InputBlocker.Get())
 		{
 			UIPanel *p = InputBlocker;
-			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement);
+			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
 		}
 		else
 		{
@@ -2616,7 +2617,7 @@ namespace FlamingTorch
 
 					UIPanel *p = DrawOrderCache[j]->Panel;
 
-					RecursiveFindFocusedElement(Vector2(), p, FoundElement);
+					RecursiveFindFocusedElement(Vector2(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
 
 					if(FoundElement)
 						break;
@@ -2648,6 +2649,7 @@ namespace FlamingTorch
 		};
 
 		MouseOverElement = FoundElement;
+#endif
 
 		return SuperSmartPointer<UIPanel>();
 	};
@@ -2738,9 +2740,9 @@ namespace FlamingTorch
 		Tooltip->Draw(RendererManager::Instance.Input.MousePosition, Renderer);
 	};
 
-	void UIManager::RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement)
+	void UIManager::RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement, bool Mouse, const Vector2 &TargetPosition)
 	{
-		if(!p->Visible() || !p->Enabled() || !p->MouseInputEnabled())
+		if(!p->Visible() || !p->Enabled() || (Mouse && !p->MouseInputEnabled()) || (!Mouse && !p->TouchInputEnabled()))
 			return;
 
 		static AxisAlignedBoundingBox AABB;
@@ -2776,7 +2778,7 @@ namespace FlamingTorch
 			PanelSize *= 2;
 		};
 
-		if(Rectangle.IsInside(RendererManager::Instance.Input.MousePosition))
+		if(Rectangle.IsInside(TargetPosition))
 		{
 			FoundElement = p;
 
@@ -2788,7 +2790,7 @@ namespace FlamingTorch
 				Vector2 ChildrenPosition = p->Children[i]->Position() - p->Children[i]->Translation() + p->Children[i]->Offset();
 
 				RecursiveFindFocusedElement(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, p->ParentRotation()) + ParentSizeHalf -
-					ChildrenSizeHalf - ChildrenPosition, p->Children[i], FoundElement);
+					ChildrenSizeHalf - ChildrenPosition, p->Children[i], FoundElement, Mouse, TargetPosition);
 			};
 		}
 		else
@@ -2825,7 +2827,7 @@ namespace FlamingTorch
 		if(InputBlocker.Get())
 		{
 			UIPanel *p = InputBlocker;
-			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement);
+			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
 		}
 		else
 		{
@@ -2838,7 +2840,7 @@ namespace FlamingTorch
 
 					UIPanel *p = DrawOrderCache[j]->Panel;
 
-					RecursiveFindFocusedElement(Vector2(), p, FoundElement);
+					RecursiveFindFocusedElement(Vector2(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
 
 					if(FoundElement)
 						break;
@@ -2875,6 +2877,68 @@ namespace FlamingTorch
 	{
 		if(RendererManager::Instance.Input.InputConsumed())
 			return;
+
+		if(DrawOrderCacheDirty)
+		{
+			DrawOrderCacheDirty = false;
+			DrawOrderCache.clear();
+
+			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
+			{
+				if(it->second->Panel->Parent() == NULL)
+				{
+					DrawOrderCache.push_back(it->second);
+				};
+			};
+		};
+
+		SuperSmartPointer<UIPanel> PreviouslyFocusedElement = FocusedElementValue;
+		FocusedElementValue = SuperSmartPointer<UIPanel>();
+		UIPanel *FoundElement = NULL;
+
+		SuperSmartPointer<UIPanel> InputBlocker = GetInputBlocker();
+
+		if(InputBlocker.Get())
+		{
+			UIPanel *p = InputBlocker;
+			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, false, o.Position);
+		}
+		else
+		{
+			for(int32 i = DrawOrderCounter; i >= 0; i--)
+			{
+				for(uint32 j = 0; j < DrawOrderCache.size(); j++)
+				{
+					if(!DrawOrderCache[j]->Panel->TouchInputValue || DrawOrderCache[j]->DrawOrder != i)
+						continue;
+
+					UIPanel *p = DrawOrderCache[j]->Panel;
+
+					RecursiveFindFocusedElement(Vector2(), p, FoundElement, false, o.Position);
+
+					if(FoundElement)
+						break;
+				};
+
+				if(FoundElement)
+					break;
+			};
+		};
+
+		if(FoundElement)
+		{
+			FocusedElementValue = Elements[FoundElement->ID()]->Panel;
+		};
+
+		if(PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
+		{
+			PreviouslyFocusedElement->OnLoseFocusPriv();
+		};
+
+		if(FocusedElementValue)
+		{
+			FocusedElementValue->OnGainFocusPriv();
+		};
 
 		if(FocusedElementValue)
 		{

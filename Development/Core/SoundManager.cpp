@@ -330,16 +330,16 @@ namespace FlamingTorch
 			Sounds.erase(Sounds.begin());
 		};
 
-		while(SoundBuffers.begin() != SoundBuffers.end())
-		{
-			SoundBuffers.begin()->second.Dispose();
-			SoundBuffers.erase(SoundBuffers.begin());
-		};
-
 		while(Musics.begin() != Musics.end())
 		{
 			Musics.begin()->second.Dispose();
 			Musics.erase(Musics.begin());
+		};
+
+		while(SoundBuffers.begin() != SoundBuffers.end())
+		{
+			SoundBuffers.begin()->second.Dispose();
+			SoundBuffers.erase(SoundBuffers.begin());
 		};
 
 		SubSystem::Shutdown(Priority);

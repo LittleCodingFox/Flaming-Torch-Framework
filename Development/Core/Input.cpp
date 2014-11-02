@@ -345,6 +345,7 @@ namespace FlamingTorch
 				break;
 
 			case RendererEventType::TouchUp:
+				Touches[Event.TouchIndex].JustPressed = Touches[Event.TouchIndex].Pressed = false;
 				Touches[Event.TouchIndex].JustReleased = true;
 				Touches[Event.TouchIndex].Position = Event.TouchPosition;
 
