@@ -561,7 +561,7 @@ int main(int argc, char **argv)
 
 	if(Map->HasError())
 	{
-		Log::Instance.LogInfo(TAG, "Error parsing '%s': %s.", argv[1], Map->GetErrorText().c_str());
+		Log::Instance.LogInfo(TAG, "Error parsing '%s': %s.", FileName.c_str(), Map->GetErrorText().c_str());
 
 		DeInitSubsystems();
 
@@ -576,22 +576,30 @@ int main(int argc, char **argv)
 
 	switch(Map->GetOrientation())
 	{
-	case Tmx::MapOrientation::TMX_MO_ISOMETRIC:
+	case Tmx::TMX_MO_ISOMETRIC:
 		MapData.Orientation = TiledMapOrientationMode::Isometric;
 
 		break;
 
-	case Tmx::MapOrientation::TMX_MO_ORTHOGONAL:
+	case Tmx::TMX_MO_ORTHOGONAL:
 		MapData.Orientation = TiledMapOrientationMode::Orthogonal;
 
 		break;
 
-	case Tmx::MapOrientation::TMX_MO_STAGGERED:
-		Log::Instance.LogInfo(TAG, "Error parsing '%s': Staggered maps not supported.", argv[1]);
+	case Tmx::TMX_MO_STAGGERED:
+		Log::Instance.LogInfo(TAG, "Error parsing '%s': Staggered maps not supported.", FileName.c_str());
 
 		DeInitSubsystems();
 
 		return 1;
+
+    default:
+        Log::Instance.LogInfo(TAG, "Error parsing '%s': Map Orientation not supported.", FileName.c_str());
+            
+        DeInitSubsystems();
+            
+        return 1;
+
 	};
 
 	const std::vector<Tmx::Tileset *> &Sets = Map->GetTilesets();

@@ -291,6 +291,7 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
+				buildoptions { "-std=c++0x" }
 			end
 
 			flags { "Symbols" }
@@ -315,6 +316,7 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
+				buildoptions { "-std=c++0x" }
 			end
 
 			flags { "Optimize" }
