@@ -428,7 +428,7 @@ namespace FlamingTorch
 
 				if(1 == sscanf(it->second.Content.c_str(), "%d", &Width) && Width > 0)
 				{
-					BaseResolution.x = Width;
+					BaseResolution.x = (f32)Width;
 				};
 			};
 
@@ -440,7 +440,7 @@ namespace FlamingTorch
 
 				if(1 == sscanf(it->second.Content.c_str(), "%d", &Height) && Height > 0)
 				{
-					BaseResolution.y = Height;
+					BaseResolution.y = (f32)Height;
 				}
 				else
 				{

@@ -156,7 +156,7 @@ namespace FlamingTorch
 	{
 		Log::Instance.LogInfo("SFMLRendererImplementation", "Creating!");
 
-		OriginalRequestedSize = Vector2(Width, Height);
+		OriginalRequestedSize = Vector2((f32)Width, (f32)Height);
 
 		uint32 ActualStyle = sf::Style::None;
 
@@ -193,12 +193,12 @@ namespace FlamingTorch
 		{
 			if(ActualWidth > WorkArea.Right - WorkArea.Left)
 			{
-				ActualWidth = WorkArea.Right - WorkArea.Left;
+				ActualWidth = (uint32)(WorkArea.Right - WorkArea.Left);
 			};
 
 			if(ActualHeight > WorkArea.Bottom - WorkArea.Top)
 			{
-				ActualHeight = WorkArea.Bottom - WorkArea.Top;
+				ActualHeight = (uint32)(WorkArea.Bottom - WorkArea.Top);
 			};
 		};
 #endif

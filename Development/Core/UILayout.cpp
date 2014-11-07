@@ -51,12 +51,16 @@ namespace FlamingTorch
 			Out->Name, Parent);
 
 		if(ShouldDisplayParentlessElements)
-		{
 			Out->DisplayParentlessElements();
-		};
 
 		if(DoStartupEvents)
+		{
 			Out->PerformStartupEvents(NULL);
+		}
+		else
+		{
+			Out->FinalizeAllProperties(NULL);
+		};
 
 		return Out;
 	};
@@ -73,6 +77,34 @@ namespace FlamingTorch
 		};
 	};
 
+	void UILayout::FinalizeProperties(UIPanel *ParentElement)
+	{
+		ParentElement->Manager()->ScriptInstance->DoString(ParentElement->PropertySetFunctionCode.str().c_str());
+
+		ParentElement->PropertiesStartupSetFunction.Add(luabind::globals(ParentElement->Manager()->ScriptInstance->State)
+			["PropertyStartupSet_" + StringUtils::PointerString(ParentElement)]);
+	};
+
+	void UILayout::FinalizeAllProperties(UIPanel *ParentElement)
+	{
+		if(ParentElement)
+		{
+			for(uint32 i = 0; i < ParentElement->ChildrenCount(); i++)
+			{
+				FinalizeAllProperties(ParentElement->Child(i));
+			};
+
+			FinalizeProperties(ParentElement);
+		}
+		else
+		{
+			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
+			{
+				FinalizeAllProperties(it->second.Get());
+			};
+		};
+	};
+
 	void UILayout::PerformStartupEvents(UIPanel *ParentElement)
 	{
 		if(ParentElement)
@@ -82,15 +114,7 @@ namespace FlamingTorch
 				PerformStartupEvents(ParentElement->Child(i));
 			};
 
-			//Need to init properties here and finish up the property set function code since we might need to add further
-			//property sets before we are finished initing
-
-			ParentElement->PropertySetFunctionCode << "\nend\n";
-
-			luaL_dostring(ParentElement->Manager()->ScriptInstance->State, ParentElement->PropertySetFunctionCode.str().c_str());
-
-			ParentElement->PropertiesStartupSetFunction.Add(luabind::globals(ParentElement->Manager()->ScriptInstance->State)
-				["PropertyStartupSet_" + StringUtils::PointerString(ParentElement)]);
+			FinalizeProperties(ParentElement);
 
 			RUN_GUI_SCRIPT_EVENTS2(ParentElement->PropertiesStartupDefaultFunction, (ParentElement), ParentElement->ID());
 			RUN_GUI_SCRIPT_EVENTS2(ParentElement->PropertiesStartupSetFunction, (ParentElement), ParentElement->ID());

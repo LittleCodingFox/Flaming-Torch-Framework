@@ -2017,7 +2017,7 @@ namespace FlamingTorch
 				static std::stringstream PropertiesStream;
 				PropertiesStream.str("");
 
-				std::string PropertiesStreamFunctionName = "PropertyStartupDefault_" + StringUtils::PointerString(Panel.Get());
+				std::string PropertiesStreamFunctionName = "PropertyStartupDefault_" + StringUtils::PointerString(Panel.Get()) + "_" + StringUtils::Replace(ElementName, ".", "_");
 
 				Panel->GlobalsTracker.Add(PropertiesStreamFunctionName);
 
@@ -2051,7 +2051,7 @@ namespace FlamingTorch
 						str.str("");
 
 						std::string FunctionName = "PropertyGet_" + StringUtils::PointerString(Panel.Get()) + "_" +
-							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
+							StringUtils::MakeIntString(MakeStringID(PropertyName), true) + "_" + StringUtils::Replace(ElementIDName, ".", "_");
 
 						Panel->GlobalsTracker.Add(FunctionName);
 
@@ -2075,7 +2075,7 @@ namespace FlamingTorch
 						str.str("");
 
 						std::string FunctionName = "PropertySet_" + StringUtils::PointerString(Panel.Get()) + "_" +
-							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
+							StringUtils::MakeIntString(MakeStringID(PropertyName), true) + "_" + StringUtils::Replace(ElementIDName, ".", "_");
 
 						Panel->GlobalsTracker.Add(FunctionName);
 
@@ -2118,7 +2118,7 @@ namespace FlamingTorch
 						str.str("");
 
 						std::string FunctionName = "PropertyDefault_" + StringUtils::PointerString(Panel.Get()) + "_" +
-							StringUtils::MakeIntString(MakeStringID(PropertyName), true);
+							StringUtils::MakeIntString(MakeStringID(PropertyName), true) + "_" + StringUtils::Replace(ElementIDName, ".", "_");
 
 						Panel->GlobalsTracker.Add(FunctionName);
 
@@ -2476,6 +2476,8 @@ namespace FlamingTorch
 			{
 				CHECKJSONVALUE(Value, "ContentPanel", bool);
 			};
+
+			Panel->PropertySetFunctionCode << "\nend\n";
 
 			Panel->AdjustSizeAndPosition(ParentLimit);
 

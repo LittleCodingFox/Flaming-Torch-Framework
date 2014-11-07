@@ -326,12 +326,18 @@ namespace FlamingTorch
 
 		while(Sounds.begin() != Sounds.end())
 		{
+			if(Sounds.begin()->second.Get())
+				Sounds.begin()->second->Stop();
+
 			Sounds.begin()->second.Dispose();
 			Sounds.erase(Sounds.begin());
 		};
 
 		while(Musics.begin() != Musics.end())
 		{
+			if(Musics.begin()->second.Get())
+				Musics.begin()->second->Stop();
+
 			Musics.begin()->second.Dispose();
 			Musics.erase(Musics.begin());
 		};

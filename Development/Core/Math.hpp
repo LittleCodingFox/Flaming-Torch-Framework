@@ -1055,4 +1055,92 @@ public:
 		\return the Scale between the two sizes
 	*/
 	static Vector2 ScaleFromViewport(const Vector2 &TargetSize, const Vector2 &CurrentSize);
+
+	/*!
+	*	4-point Bézier Interpolation
+	*/
+	template<typename PointClass>
+	static PointClass BezierInterpolate4(const PointClass &p, const PointClass &p2, const PointClass &p3, const PointClass &p4, f32 t)
+	{
+		f32 InvertedT = 1 - t;
+		f32 Pow2T = powf(t, 2);
+		f32 Pow2IT = powf(InvertedT, 2);
+		f32 Pow3T = powf(t, 3);
+		f32 Pow3IT = powf(InvertedT, 3);
+
+		return p * Pow3IT + p2 * 3 * Pow2IT * t + p3 * 3 * InvertedT * Pow2T + p4 * Pow3T;
+	};
+
+	/*!
+	*	Perform a linear interpolation
+	*	\param a the start point
+	*	\param b the end point
+	*	\param t the interpolator
+	*	\note t should be between 0.0 and 1.0
+	*/
+	template<typename PointClass>
+	static PointClass LinearInterpolate(const PointClass &a, const PointClass &b, f32 t)
+	{
+		return a + (b - a) * t;
+	};
+
+	/*!
+	*	Perform a smoothstep interpolation
+	*	\param a the start point
+	*	\param b the end point
+	*	\param t the interpolator
+	*	\note t should be between 0.0 and 1.0
+	*/
+	template<typename PointClass>
+	static PointClass SmoothstepInterpolate(const PointClass &a, const PointClass &b, f32 t)
+	{
+		return LinearInterpolate(a, b, t * t * (3 - 2 * t));
+	};
+
+	/*!
+	*	Perform a spring interpolation
+	*	\param a the start point
+	*	\param b the end point
+	*	\param t the interpolator
+	*	\param Factor the buoyancy factor
+	*	\note t should be between 0.0 and 1.0
+	*	\note Factor should be between 0.1 and 1.0, but this is optional
+	*/
+	template<typename PointClass>
+	static PointClass SpringInterpolate(const PointClass &a, const PointClass &b, f32 t, f32 Factor)
+	{
+		return LinearInterpolate(a, b, powf(2, -10 * t) * sinf((t - Factor / 4) * (2 * Pi) / Factor) + 1);
+	};
+
+	/*!
+	*	Perform a bounce interpolation
+	*	\param a the start point
+	*	\param b the end point
+	*	\param t the interpolator
+	*	\note t should be between 0.0 and 1.0
+	*/
+	template<typename PointClass>
+	static PointClass BounceInterpolate(const PointClass &a, const PointClass &b, f32 t)
+	{
+#define BOUNCE(x) (x * x * 8)
+
+		return LinearInterpolate(a, b, t < 0.3535f ? BOUNCE(t) : (t < 0.7408f ? BOUNCE(t - 0.54719f) + 0.7f : (t < 0.9644f ? BOUNCE(t - 0.8526f) + 0.9f : BOUNCE(t - 1.0435f) + 0.95f)));
+
+#undef BOUNCE
+	};
+
+	/*!
+	*	Perform an acceleration interpolation
+	*	\param a the start point
+	*	\param b the end point
+	*	\param t the interpolator
+	*	\param Factor the acceleration factor
+	*	\note t should be between 0.0 and 1.0
+	*	\note Factor should be between 0.0 and 1.0
+	*/
+	template<typename PointClass>
+	static PointClass AccelerationInterpolate(const PointClass &a, const PointClass &b, f32 t, f32 Factor)
+	{
+		return LinearInterpolate(a, b, Factor == 1 ? t * t : powf(t, 2 * Factor));
+	};
 };

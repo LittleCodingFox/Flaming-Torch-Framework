@@ -845,6 +845,9 @@ friend class UIManager;
 	UIManager *Owner;
 
 	Json::Value ContainedObjects;
+
+	void FinalizeProperties(UIPanel *ParentElement);
+	void FinalizeAllProperties(UIPanel *ParentElement);
 public:
 	typedef std::map<StringID, SuperSmartPointer<UIPanel> > ElementMap;
 	ElementMap Elements;

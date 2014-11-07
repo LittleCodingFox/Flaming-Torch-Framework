@@ -1257,19 +1257,18 @@ namespace FlamingTorch
 			luabind::class_<GameClock, SubSystem>("GameClock")
 				.def("Pause", &GameClock::Pause)
 				.def("Unpause", &GameClock::Unpause)
-				.def("ElapsedTime", &GameClock::GetElapsedTime)
-				.def("Delta", &GameClock::Delta)
-				.def("CurrentTimeAsString", &GameClock::CurrentTimeAsString)
-				.def("CurrentTime", &GameClock::CurrentTime)
+				.property("Delta", &GameClockDelta)
+				.property("CurrentTimeString", &GameClock::CurrentTimeAsString)
+				.property("CurrentTime", &GameClock::CurrentTime)
 				.def("SetFixedStepRate", &GameClock::SetFixedStepRate)
 				.def("FixedStepInterval", &GameClock::GetFixedStepInterval)
 				.def("GetFixedStepRate", &GameClock::GetFixedStepRate)
 				.def("MayPerformFixedStepStep", &GameClock::MayPerformFixedStepStep)
 				.def("FixedStepDelta", &GameClock::FixedStepDelta)
-				.def("Time", &GameClockTime)
-				.def("TimeNoPause", &GameClockTimeNoPause)
-				.def("Difference", &GameClockDiff)
-				.def("DifferenceNoPause", &GameClockDiffNoPause),
+				.property("Time", &GameClockTime)
+				.property("TimeNoPause", &GameClockTimeNoPause)
+				.property("Difference", &GameClockDiff)
+				.property("DifferenceNoPause", &GameClockDiffNoPause),
 
 			//LinearTimer
 			luabind::class_<LinearTimer>("LinearTimer")
@@ -1611,7 +1610,30 @@ namespace FlamingTorch
 					luabind::def("RadToDeg", &MathUtils::RadToDeg),
 					luabind::def("ColorFromHTML", &MathUtils::ColorFromHTML),
 					luabind::def("CalculateViewportKeepingAspectRatio", &MathUtils::CalculateViewportKeepingAspectRatio),
-					luabind::def("ScaleFromViewport", &MathUtils::ScaleFromViewport)
+					luabind::def("ScaleFromViewport", &MathUtils::ScaleFromViewport),
+					luabind::def("BezierInterpolate", &MathUtils::BezierInterpolate4<Vector2>),
+					luabind::def("BezierInterpolate", &MathUtils::BezierInterpolate4<Vector3>),
+					luabind::def("BezierInterpolate", &MathUtils::BezierInterpolate4<Vector4>),
+					luabind::def("LinearInterpolate", &MathUtils::LinearInterpolate<f32>),
+					luabind::def("LinearInterpolate", &MathUtils::LinearInterpolate<Vector2>),
+					luabind::def("LinearInterpolate", &MathUtils::LinearInterpolate<Vector3>),
+					luabind::def("LinearInterpolate", &MathUtils::LinearInterpolate<Vector4>),
+					luabind::def("SmoothstepInterpolate", &MathUtils::SmoothstepInterpolate<f32>),
+					luabind::def("SmoothstepInterpolate", &MathUtils::SmoothstepInterpolate<Vector2>),
+					luabind::def("SmoothstepInterpolate", &MathUtils::SmoothstepInterpolate<Vector3>),
+					luabind::def("SmoothstepInterpolate", &MathUtils::SmoothstepInterpolate<Vector4>),
+					luabind::def("SpringInterpolate", &MathUtils::SpringInterpolate<f32>),
+					luabind::def("SpringInterpolate", &MathUtils::SpringInterpolate<Vector2>),
+					luabind::def("SpringInterpolate", &MathUtils::SpringInterpolate<Vector3>),
+					luabind::def("SpringInterpolate", &MathUtils::SpringInterpolate<Vector4>),
+					luabind::def("BounceInterpolate", &MathUtils::BounceInterpolate<f32>),
+					luabind::def("BounceInterpolate", &MathUtils::BounceInterpolate<Vector2>),
+					luabind::def("BounceInterpolate", &MathUtils::BounceInterpolate<Vector3>),
+					luabind::def("BounceInterpolate", &MathUtils::BounceInterpolate<Vector4>),
+					luabind::def("AccelerationInterpolate", &MathUtils::AccelerationInterpolate<f32>),
+					luabind::def("AccelerationInterpolate", &MathUtils::AccelerationInterpolate<Vector2>),
+					luabind::def("AccelerationInterpolate", &MathUtils::AccelerationInterpolate<Vector3>),
+					luabind::def("AccelerationInterpolate", &MathUtils::AccelerationInterpolate<Vector4>)
 				]
 				.property("Pi", &GetMathUtilsPi)
 				.property("Epsilon", &GetMathUtilsEpsilon),
@@ -2463,9 +2485,18 @@ namespace FlamingTorch
 				.enum_("constants") [
 					luabind::value("LayoutMode_None", UIGroupLayoutMode::None),
 					luabind::value("LayoutMode_Horizontal", UIGroupLayoutMode::Horizontal),
-					luabind::value("LayoutMode_Vertical", UIGroupLayoutMode::Vertical)
+					luabind::value("LayoutMode_Vertical", UIGroupLayoutMode::Vertical),
+					luabind::value("LayoutMode_AdjustWidth", UIGroupLayoutMode::AdjustWidth),
+					luabind::value("LayoutMode_AdjustHeight", UIGroupLayoutMode::AdjustWidth),
+					luabind::value("LayoutMode_Center", UIGroupLayoutMode::Center),
+					luabind::value("LayoutMode_VerticalCenter", UIGroupLayoutMode::VerticalCenter),
+					luabind::value("LayoutMode_AdjustCloser", UIGroupLayoutMode::AdjustCloser),
+					luabind::value("LayoutMode_InvertDirection", UIGroupLayoutMode::InvertDirection),
+					luabind::value("LayoutMode_InvertX", UIGroupLayoutMode::InvertX),
+					luabind::value("LayoutMode_InvertY", UIGroupLayoutMode::InvertY)
 				]
 				.def_readwrite("LayoutMode", &UIGroup::LayoutMode),
+
 			//UILayout
 			luabind::class_<UILayout, SuperSmartPointer<UILayout> >("UILayout")
 				.def("Clone", &UILayout::Clone)
