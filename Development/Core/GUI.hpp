@@ -176,18 +176,18 @@ public:
 
 	std::string Name, LayoutName, NativeType;
 
-	Signal1<UIPanel *> OnLoseFocus, OnGainFocus, OnCharacterEntered, OnMouseMove, OnMouseEntered, OnMouseOver, OnMouseLeft;
-	Signal2<UIPanel *, const InputCenter::MouseButtonInfo &> OnMouseJustPressed, OnMousePressed, OnMouseReleased, OnClick;
-	Signal2<UIPanel *, const InputCenter::KeyInfo &> OnKeyJustPressed, OnKeyPressed, OnKeyReleased;
-	Signal2<UIPanel *, const InputCenter::TouchInfo &> OnTouchDown, OnTouchUp, OnTouchDrag;
-	Signal1<UIPanel *> OnDragBegin, OnDragging, OnDragEnd;
+	SimpleDelegate::SimpleDelegate<UIPanel *> OnLoseFocus, OnGainFocus, OnCharacterEntered, OnMouseMove, OnMouseEntered, OnMouseOver, OnMouseLeft;
+	SimpleDelegate::SimpleDelegate<UIPanel *, const InputCenter::MouseButtonInfo &> OnMouseJustPressed, OnMousePressed, OnMouseReleased, OnClick;
+	SimpleDelegate::SimpleDelegate<UIPanel *, const InputCenter::KeyInfo &> OnKeyJustPressed, OnKeyPressed, OnKeyReleased;
+	SimpleDelegate::SimpleDelegate<UIPanel *, const InputCenter::TouchInfo &> OnTouchDown, OnTouchUp, OnTouchDrag;
+	SimpleDelegate::SimpleDelegate<UIPanel *> OnDragBegin, OnDragging, OnDragEnd;
 	//[Self, Target]
-	Signal2<UIPanel *, UIPanel *> OnDrop;
+	SimpleDelegate::SimpleDelegate<UIPanel *, UIPanel *> OnDrop;
 
-	Signal2<UIPanel *, uint32> OnJoystickConnected, OnJoystickDisconnected;
-	Signal2<UIPanel *, const InputCenter::JoystickButtonInfo &> OnJoystickButtonJustPressed, OnJoystickButtonPressed,
+	SimpleDelegate::SimpleDelegate<UIPanel *, uint32> OnJoystickConnected, OnJoystickDisconnected;
+	SimpleDelegate::SimpleDelegate<UIPanel *, const InputCenter::JoystickButtonInfo &> OnJoystickButtonJustPressed, OnJoystickButtonPressed,
 		OnJoystickButtonReleased;
-	Signal2<UIPanel *, const InputCenter::JoystickAxisInfo &> OnJoystickAxisMoved;
+	SimpleDelegate::SimpleDelegate<UIPanel *, const InputCenter::JoystickAxisInfo &> OnJoystickAxisMoved;
 
 	struct PropertyInfo
 	{
@@ -928,6 +928,11 @@ private:
 
 	typedef std::map<StringID, SuperSmartPointer<ElementInfo> > ElementMap;
 	ElementMap Elements;
+
+#if FLPLATFORM_DEBUG
+	typedef std::map<std::string, StringID> ElementIDMap;
+	ElementIDMap ElementIDs;
+#endif
 
 	SuperSmartPointer<UIPanel> FocusedElementValue;
 	SuperSmartPointer<UITooltip> Tooltip;

@@ -35,7 +35,7 @@ class ConsoleCommand
 public:
 	std::string Name;
 
-	Signal1<const std::vector<std::string> &> Method;
+	SimpleDelegate::SimpleDelegate<const std::vector<std::string> &> Method;
 
 	virtual ~ConsoleCommand() {};
 };
@@ -69,7 +69,7 @@ public:
 
 	ScriptedConsoleCommand()
 	{
-		Method.Connect(this, &ScriptedConsoleCommand::ScriptedMethodProxy);
+		Method.Connect<ScriptedConsoleCommand, &ScriptedConsoleCommand::ScriptedMethodProxy>(this);
 	};
 };
 

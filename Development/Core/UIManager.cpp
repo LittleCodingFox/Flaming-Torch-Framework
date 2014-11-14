@@ -2184,6 +2184,10 @@ namespace FlamingTorch
 			{
 				ProcessTextJSON(Panel, Data, ElementName, TheLayout->Name);
 			}
+			else if (Control == "TEXTCOMPOSER")
+			{
+				//Do nothing for now
+			}
 			else
 			{
 				SuperSmartPointer<UILayout> TargetLayout;
@@ -2215,6 +2219,9 @@ namespace FlamingTorch
 				{
 					Log::Instance.LogErr(TAG, "While processing Layout element '%s' of layout '%s': Layout '%s' not found (may not have been created already)",
 						ElementName.c_str(), TheLayout->Name.c_str(), Control.c_str());
+
+					TheLayout->Elements.erase(Panel->ID());
+					RemoveElement(Panel->ID());
 
 					return;
 				};
@@ -3165,6 +3172,15 @@ namespace FlamingTorch
 		Element->IDValue = ID;
 		Element->Name = GetStringIDString(ID);
 		Element->SetSkin(Skin);
+
+#if FLPLATFORM_DEBUG
+		std::string ElementID = GetStringIDString(ID);
+
+		if(ElementID.length())
+		{
+			ElementIDs[ElementID] = ID;
+		};
+#endif
 
 		return true;
 	};

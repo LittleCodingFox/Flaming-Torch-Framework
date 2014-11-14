@@ -108,11 +108,11 @@ namespace FlamingTorch
 		if(BaseResolution != Vector2())
 			TheRenderer->BaseResolutionValue = BaseResolution;
 
-		TheRenderer->OnFrameStarted.Connect(this, &GameInterface::OnFrameBegin);
-		TheRenderer->OnFrameDraw.Connect(this, &GameInterface::OnFrameDraw);
-		TheRenderer->OnFrameEnded.Connect(this, &GameInterface::OnFrameEnd);
-		TheRenderer->OnResized.Connect(this, &GameInterface::OnResize);
-		TheRenderer->OnResourcesReloaded.Connect(this, &GameInterface::OnResourcesReloaded);
+		TheRenderer->OnFrameStarted.Connect<GameInterface, &GameInterface::OnFrameBegin>(this);
+		TheRenderer->OnFrameDraw.Connect<GameInterface, &GameInterface::OnFrameDraw>(this);
+		TheRenderer->OnFrameEnded.Connect<GameInterface, &GameInterface::OnFrameEnd>(this);
+		TheRenderer->OnResized.Connect<GameInterface, &GameInterface::OnResize>(this);
+		TheRenderer->OnResourcesReloaded.Connect<GameInterface, &GameInterface::OnResourcesReloaded>(this);
 
 		if(Options.FrameRate != 0)
 		{
@@ -278,7 +278,7 @@ namespace FlamingTorch
 						return 1;
 					};
 
-					FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+					FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
 #	endif
 
 					ReloadGUI();
@@ -661,7 +661,7 @@ namespace FlamingTorch
 						return 1;
 					};
 
-					FileSystemWatcher::Instance.OnAction.Connect(this, &GameInterface::OnGUISandboxTrigger);
+					FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
 #	endif
 
 					ReloadGUI();

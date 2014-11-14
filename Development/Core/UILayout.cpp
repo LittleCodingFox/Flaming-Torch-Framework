@@ -100,6 +100,9 @@ namespace FlamingTorch
 		{
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
+				if (it->second.Get() == NULL)
+					continue;
+
 				FinalizeAllProperties(it->second.Get());
 			};
 		};
@@ -124,6 +127,9 @@ namespace FlamingTorch
 		{
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
+				if(it->second.Get() == NULL)
+					continue;
+
 				PerformStartupEvents(it->second.Get());
 			};
 		};

@@ -562,7 +562,7 @@ public:
 	static FileSystemWatcher Instance;
 
 	//!<Directory, FileName, Action
-	Signal3<const std::string &, const std::string &, uint32> OnAction;
+	SimpleDelegate::SimpleDelegate<const std::string &, const std::string &, uint32> OnAction;
 
 	FileSystemWatcher() : SubSystem(FILESYSTEM_WATCHER_PRIORITY) {};
 

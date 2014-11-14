@@ -1,9 +1,9 @@
 #include "FlamingCore.hpp"
 namespace FlamingTorch
 {
-	Signal1<uint32> SubSystem::OnSubsystemStartUp;
-	Signal1<uint32> SubSystem::OnSubsystemShutdown;
-	Signal1<uint32> SubSystem::OnSubsystemUpdate;
+	SimpleDelegate::SimpleDelegate<uint32> SubSystem::OnSubsystemStartUp;
+	SimpleDelegate::SimpleDelegate<uint32> SubSystem::OnSubsystemShutdown;
+	SimpleDelegate::SimpleDelegate<uint32> SubSystem::OnSubsystemUpdate;
 
 	void InitSubsystems()
 	{

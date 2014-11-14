@@ -761,7 +761,7 @@ namespace FlamingTorch
 		DefaultImpl.Reset(new DEFAULT_RENDERER_IMPLEMENTATION());
 
 #if PROFILER_ENABLED
-		Profiler::Instance.OnFinishFrame.Connect(this, &RendererManager::OnGetProfilerPackets);
+		Profiler::Instance.OnFinishFrame.Connect<RendererManager, &RendererManager::OnGetProfilerPackets>(this);
 #endif
 	};
 
@@ -782,7 +782,7 @@ namespace FlamingTorch
 		DefaultImpl.Dispose();
 
 #if PROFILER_ENABLED
-		Profiler::Instance.OnFinishFrame.Disconnect(this, &RendererManager::OnGetProfilerPackets);
+		Profiler::Instance.OnFinishFrame.Disconnect<RendererManager, &RendererManager::OnGetProfilerPackets>(this);
 #endif
 	};
 

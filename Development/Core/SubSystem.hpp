@@ -20,9 +20,9 @@ private:
 	SubSystem(const SubSystem &o);
 public:
 	//Will be called by priority
-	static Signal1<uint32> OnSubsystemStartUp;
-	static Signal1<uint32> OnSubsystemShutdown;
-	static Signal1<uint32> OnSubsystemUpdate;
+	static SimpleDelegate::SimpleDelegate<uint32> OnSubsystemStartUp;
+	static SimpleDelegate::SimpleDelegate<uint32> OnSubsystemShutdown;
+	static SimpleDelegate::SimpleDelegate<uint32> OnSubsystemUpdate;
 
 	SubSystem(uint32 Priority) : WasStarted(false), SubsystemPriority(Priority) {};
 
@@ -47,8 +47,8 @@ public:
 	//Call this to enable usage of this Subsystem before you call InitSubsystems()
 	void Register()
 	{
-		OnSubsystemStartUp.Connect(this, &SubSystem::StartUp);
-		OnSubsystemShutdown.Connect(this, &SubSystem::Shutdown);
-		OnSubsystemUpdate.Connect(this, &SubSystem::Update);
+		OnSubsystemStartUp.Connect<SubSystem, &SubSystem::StartUp>(this);
+		OnSubsystemShutdown.Connect<SubSystem, &SubSystem::Shutdown>(this);
+		OnSubsystemUpdate.Connect<SubSystem, &SubSystem::Update>(this);
 	};
 };

@@ -1,3 +1,4 @@
+#include "FlamingCore.hpp"
 #include <SFML/Config.hpp>
 
 #ifdef SFML_SYSTEM_ANDROID

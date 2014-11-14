@@ -336,32 +336,32 @@ namespace FlamingTorch
 
 		SuperSmartPointer<ConsoleCommand> VersionCommandVar(new ConsoleCommand());
 		VersionCommandVar->Name = "version";
-		VersionCommandVar->Method.Connect(this, &Console::VersionCommand);
+		VersionCommandVar->Method.Connect<Console, &Console::VersionCommand>(this);
 
 		RegisterCommand(VersionCommandVar);
 
 		SuperSmartPointer<ConsoleCommand> HelpCommand(new ConsoleCommand());
 		HelpCommand->Name = "help";
-		HelpCommand->Method.Connect(this, &Console::HelpCommand);
+		HelpCommand->Method.Connect<Console, &Console::HelpCommand>(this);
 
 		RegisterCommand(HelpCommand);
 
 #if USE_GRAPHICS
 		SuperSmartPointer<ConsoleCommand> BindCommand(new ConsoleCommand());
 		BindCommand->Name = "bind";
-		BindCommand->Method.Connect(this, &Console::BindCommand);
+		BindCommand->Method.Connect<Console, &Console::BindCommand>(this);
 
 		RegisterCommand(BindCommand);
 
 		SuperSmartPointer<ConsoleCommand> KeyCommand(new ConsoleCommand());
 		KeyCommand->Name = "keys";
-		KeyCommand->Method.Connect(this, &Console::ValidKeyCommand);
+		KeyCommand->Method.Connect<Console, &Console::ValidKeyCommand>(this);
 
 		RegisterCommand(KeyCommand);
 
 		SuperSmartPointer<ConsoleCommand> ScreenshotCommand(new ConsoleCommand());
 		ScreenshotCommand->Name = "screenshot";
-		ScreenshotCommand->Method.Connect(this, &Console::ScreenshotCommand);
+		ScreenshotCommand->Method.Connect<Console, &Console::ScreenshotCommand>(this);
 
 		RegisterCommand(ScreenshotCommand);
 

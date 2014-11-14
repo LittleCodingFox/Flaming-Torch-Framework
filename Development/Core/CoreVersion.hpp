@@ -8,8 +8,7 @@
 #include <memory>
 #include <map>
 #include <math.h>
-#include "_Signal.h"
-using namespace Gallant;
+#include <SimpleDelegate/SimpleDelegate.hpp>
 
 #define FTSTD_VERSION_MAJOR 0
 #define FTSTD_VERSION_MINOR 11
@@ -179,6 +178,11 @@ namespace FlamingTorch
 		{
 			if(!Get())
 				return SuperSmartPointer<OutType>();
+
+#if CHECK_SSP_CONVERSIONS
+			if(dynamic_cast<OutType *>(Get()) == NULL)
+				return SuperSmartPointer<OutType>();
+#endif
 
 			return *(SuperSmartPointer<OutType> *)this;
 		};

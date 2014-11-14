@@ -43,7 +43,7 @@ public:
 	void ReportStat(const std::string &Name, uint32 Type, uint64 ms);
 	static std::string StatTypeString(uint32 Type);
 
-	Signal1<const PacketMap &> OnFinishFrame;
+	SimpleDelegate::SimpleDelegate<const PacketMap &> OnFinishFrame;
 };
 
 class ProfilerFragment

@@ -77,7 +77,7 @@ public:
 
 #if USE_GRAPHICS
 		std::vector<Vector2> Vertices, TexCoords;
-		Signal3<TiledMap *, uint32, Renderer *> OnLayerDraw;
+		SimpleDelegate::SimpleDelegate<TiledMap *, uint32, Renderer *> OnLayerDraw;
 #endif
 	};
 

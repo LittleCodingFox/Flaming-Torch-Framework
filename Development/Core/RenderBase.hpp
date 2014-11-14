@@ -329,19 +329,19 @@ public:
 	*	OnFrameEnded should be used to draw stuff after the frame has ended, such as our HUD
 	*	OnFrameDraw should be used for drawing the main content of the frame
 	*/
-	Signal1<Renderer *> OnFrameStarted, OnFrameEnded, OnFrameDraw;
+	SimpleDelegate::SimpleDelegate<Renderer *> OnFrameStarted, OnFrameEnded, OnFrameDraw;
 
 	/*!
 	*	OnResized should be used to reset your camera and projection matrix
 	*	Parameters are Renderer, Width, Height
 	*/
-	Signal3<Renderer *, uint32, uint32> OnResized;
+	SimpleDelegate::SimpleDelegate<Renderer *, uint32, uint32> OnResized;
 
 	/*!
 	*	On Resources Reloaded should be used to reset any states that are not usually saved by the renderer
 	*	Might be removed later on
 	*/
-	Signal1<Renderer *> OnResourcesReloaded;
+	SimpleDelegate::SimpleDelegate<Renderer *> OnResourcesReloaded;
 
 	/*!
 	*	UI Manager
@@ -1021,8 +1021,10 @@ class NULLRendererImplementation : public IRendererImplementation
 public:
 	/*!
 	*	Creates a renderer from a Window Handle
+	*	\param WindowHandle the window handle
+	*	\param ExpectedCaps the expected capabilities of this renderer
 	*/
-	bool Create(void *WindowHandle)
+	bool Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
 	{
 		return true;
 	};
@@ -1032,12 +1034,40 @@ public:
 	*	\param Title the title of the window
 	*	\param Width the width of the window
 	*	\param Height the height of the window
-	*	\param Style the style of the window (one or more of RendererWindowStyle::*)
+	*	\param Style the style of the window (one of RendererWindowStyle::*)
+	*	\param ExpectedCaps the expected capabilities of this renderer
 	*/
-	bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style)
+	bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
 		return true;
 	};
+
+	/*!
+	*	\return the currently available renderer capabilities
+	*/
+	const RendererCapabilities &Capabilities() const
+	{
+		static RendererCapabilities caps;
+
+		return caps;
+	};
+
+	/*!
+	*	\return the Desktop Display Mode
+	*/
+	RendererDisplayMode DesktopDisplayMode()
+	{
+		return RendererDisplayMode();
+	};
+
+	/*!
+	*	\return all available display modes
+	*/
+	std::vector<RendererDisplayMode> DisplayModes()
+	{
+		return std::vector<RendererDisplayMode>();
+	};
+
 
 	/*!
 	*	Render Window Size
@@ -1114,6 +1144,16 @@ public:
 	*	Displays a frame
 	*/
 	void Display() {};
+
+	/*!
+	*	Gets the last Frame Statistics
+	*/
+	const RendererFrameStats &FrameStats() const
+	{
+		static RendererFrameStats stats;
+
+		return stats;
+	};
 
 	/*!
 	*	Sets the current World Matrix
@@ -1280,6 +1320,11 @@ public:
 	*	\param FPS the target FPS
 	*/
 	void SetFrameRate(uint32 FPS) {};
+
+	/*!
+	*	Reports a Skipped Draw Call (used to help figure out how much we're optimizing by skipping unnecessary drawcalls)
+	*/
+	void ReportSkippedDrawCall() {};
 };
 
 #endif

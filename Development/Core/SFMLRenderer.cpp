@@ -154,8 +154,6 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
-		Log::Instance.LogInfo("SFMLRendererImplementation", "Creating!");
-
 		OriginalRequestedSize = Vector2((f32)Width, (f32)Height);
 
 		uint32 ActualStyle = sf::Style::None;

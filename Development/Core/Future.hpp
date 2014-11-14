@@ -11,10 +11,16 @@ class Future : public SubSystem
 		uint32 Length;
 		MemoryStream Stream;
 
-		Signal1<MemoryStream &> Signal;
+		SimpleDelegate::SimpleDelegate<MemoryStream &> Signal;
+
+		FutureInfo() {};
+		FutureInfo(const FutureInfo &o) {};
 	};
 
 	std::list<FutureInfo> Futures;
+
+	Future(const Future &);
+	Future &operator=(const Future &);
 public:
 	typedef void (*FutureFn)(MemoryStream &Arguments);
 
