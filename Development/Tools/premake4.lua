@@ -75,7 +75,7 @@ solution "Tools"
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
 				
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
@@ -99,7 +99,7 @@ solution "Tools"
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
 
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
@@ -180,7 +180,7 @@ solution "Tools"
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
 
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
@@ -204,7 +204,7 @@ solution "Tools"
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
 
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
@@ -285,13 +285,13 @@ solution "Tools"
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
 
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Symbols" }
@@ -310,13 +310,13 @@ solution "Tools"
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
 
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Optimize" }
@@ -392,7 +392,7 @@ solution "Tools"
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
 
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
@@ -416,7 +416,7 @@ solution "Tools"
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
 
-				buildoptions { "-std=c++0x" }
+				buildoptions { "-std=c++11" }
 			end
 		
 			if os.get() == "macosx" then
