@@ -1,6 +1,5 @@
 LogoTexture = nil
-Entity = nil
-Map = TiledMap()
+LogoSprite = Sprite()
 
 GamePreInitialize = function()
 	g_Log:Register()
@@ -45,15 +44,7 @@ GameInitialize = function(Arguments)
 
 	Renderer.Camera:SetOrtho(Rect(0, Renderer.Size.x, 0, Renderer.Size.y), -1, 1)
 	
-	g_World:LoadComponent("/Scripts/Base/Components/Transform.lua")
-	g_World:LoadComponent("/Scripts/Base/Components/Renderable.lua")
-	
-	Entity = g_World:NewEntity("Test")
-	Entity:AddComponent("Transform")
-	Entity:AddComponent("Renderable")
-
-	Entity:GetComponent("Renderable").Properties["Sprite"].Texture = LogoTexture
-	Entity:GetComponent("Transform").Properties["Position"] = Vector2()
+	LogoSprite.Texture = LogoTexture
 	
 	local SkinStream = g_PackageManager:GetFile(MakeStringID("/UIThemes/PolyCode/"), MakeStringID("skin.cfg"))
 	local SkinConfig = GenericConfig()
@@ -73,7 +64,7 @@ GameFrameBegin = function(Renderer)
 end
 
 GameFrameDraw = function(Renderer)
-	Entity:GetComponent("Renderable"):Update()
+	LogoSprite:Draw(Renderer)
 end
 
 GameFrameEnd = function(Renderer)
@@ -90,14 +81,14 @@ GameResourcesReloaded = function(Renderer)
 end
 
 GameFrameUpdate = function()
-	local Position = Entity:GetComponent("Transform").Properties["Position"]
+	local Position = LogoSprite.Options.PositionValue
 	
 	if g_Input:GetTouch(InputCenter.Touch_0).JustPressed then
 		Position = g_Input:GetTouch(InputCenter.Touch_0).Position
 	end
 
 	if g_Input:GetKey(InputCenter.Key_Left).Pressed then
-		Position.x = Position.x - g_Clock:Delta() * 500
+		Position.x = Position.x - g_Clock.Delta * 500
 		
 		if Position.x < 0 then
 			Position.x = 0
@@ -105,7 +96,7 @@ GameFrameUpdate = function()
 	end
 
 	if g_Input:GetKey(InputCenter.Key_Right).Pressed then
-		Position.x = Position.x + g_Clock:Delta() * 500
+		Position.x = Position.x + g_Clock.Delta * 500
 		
 		if Position.x > g_RendererManager.ActiveRenderer.Size.x - LogoTexture.Size.x then
 			Position.x = g_RendererManager.ActiveRenderer.Size.x - LogoTexture.Size.x
@@ -113,7 +104,7 @@ GameFrameUpdate = function()
 	end
 	
 	if g_Input:GetKey(InputCenter.Key_Up).Pressed then
-		Position.y = Position.y - g_Clock:Delta() * 500
+		Position.y = Position.y - g_Clock.Delta * 500
 		
 		if Position.y < 0 then
 			Position.y = 0
@@ -121,14 +112,14 @@ GameFrameUpdate = function()
 	end
 
 	if g_Input:GetKey(InputCenter.Key_Down).Pressed then
-		Position.y = Position.y + g_Clock:Delta() * 500
+		Position.y = Position.y + g_Clock.Delta * 500
 		
 		if Position.y > g_RendererManager.ActiveRenderer.Size.y - LogoTexture.Size.y then
 			Position.y = g_RendererManager.ActiveRenderer.Size.y - LogoTexture.Size.y
 		end
 	end
 	
-	Entity:GetComponent("Transform").Properties["Position"] = Position
+	LogoSprite.Options:Position(Position)
 end
 
 GameDeInitialize = function()

@@ -41,6 +41,38 @@ namespace FlamingTorch
 		return &Out[0];
 	};
 
+	std::string StringUtils::Trim(const std::string &str)
+	{
+		int32 StartIndex = 0, EndIndex = str.length() - 1;
+
+		if(EndIndex == -1)
+			return std::string();
+
+		while(StartIndex < str.length())
+		{
+			if(!isspace((char)str[StartIndex]))
+				break;
+
+			StartIndex++;
+		};
+
+		if(StartIndex >= str.length())
+			return std::string();
+
+		while (EndIndex >= 0)
+		{
+			if (!isspace((char)str[EndIndex]))
+				break;
+
+			EndIndex--;
+		};
+
+		if (EndIndex < 0)
+			return std::string();
+
+		return str.substr(StartIndex, str.length() - EndIndex - StartIndex);
+	};
+
 	std::string StringUtils::Join(const std::string &Separator, const std::vector<std::string> &Fragments)
 	{
 		if(Fragments.size() == 0)

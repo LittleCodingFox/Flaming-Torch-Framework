@@ -325,10 +325,6 @@ namespace FlamingTorch
 		OnResizeFunction = luabind::object();
 		OnResourcesReloadedFunction = luabind::object();
 		ShouldQuitFunction = luabind::object();
-
-		World::Instance.Entities.clear();
-		World::Instance.Components.clear();
-		World::Instance.ComponentArchetypes.clear();
 	};
 
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
@@ -517,8 +513,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
-
 			Instance.Dispose();
 
 			DeInitSubsystems();
@@ -540,22 +534,6 @@ namespace FlamingTorch
 		InitSubsystems();
 
 		Success = false;
-
-		std::vector<std::pair<std::string, std::string> > Files = PackageFileSystemManager::Instance.FindFiles("", "", "lua", "/Scripts/Base/Components/");
-
-		for(uint32 i = 0; i < Files.size(); i++)
-		{
-			if(!World::Instance.LoadComponent(Files[i].first + Files[i].second))
-			{
-				LuaScriptManager::Instance.LogError("Unable to load all base components");
-
-				Instance.Dispose();
-
-				DeInitSubsystems();
-
-				return 1;
-			};
-		};
 
 		if(!InitFunction)
 		{
@@ -581,8 +559,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
-
 			Instance.Dispose();
 
 			DeInitSubsystems();
@@ -683,8 +659,6 @@ namespace FlamingTorch
 			}
 			catch(std::exception &e)
 			{
-				LuaScriptManager::Instance.LogError(e.what());
-
 				Instance.Dispose();
 
 				DeInitSubsystems();
@@ -730,7 +704,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
 			ErroredOnFrameBegin = true;
 		};
 	};
@@ -748,7 +721,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
 			ErroredOnFrameDraw = true;
 		};
 	};
@@ -766,7 +738,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
 			ErroredOnFrameEnd = true;
 		};
 
@@ -786,7 +757,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
 			ErroredOnResize = true;
 		};
 	};
@@ -804,7 +774,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
 			ErroredOnResourcesReloaded = true;
 		};
 	};
@@ -823,7 +792,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
 			ErroredOnFixedUpdate = true;
 		};
 	};
@@ -841,7 +809,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
 			ErroredOnFrameUpdate = true;
 		};
 	};
@@ -856,8 +823,6 @@ namespace FlamingTorch
 		}
 		catch(std::exception &e)
 		{
-			LuaScriptManager::Instance.LogError(e.what());
-
 			return true;
 		};
 	};

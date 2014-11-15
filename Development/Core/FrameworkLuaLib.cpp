@@ -46,14 +46,6 @@ namespace luabind
 	{};
 
 	REGISTER_POD_CONVERTER(wchar_t);
-
-//Not working yet..
-//#if !FLPLATFORM_64BITS
-#	if !defined(__ANDROID__)
-	REGISTER_POD_CONVERTER(FlamingTorch::int64);
-	REGISTER_POD_CONVERTER(FlamingTorch::uint64);
-#endif
-//#endif
 };
 
 namespace FlamingTorch
@@ -73,6 +65,41 @@ namespace FlamingTorch
 	int32 BitwiseRemove(int32 a, int32 b)
 	{
 		return a | ~b;
+	};
+
+	void LuaGameClockPause(GameClock &)
+	{
+		GameClock::Instance.Pause();
+	};
+
+	void LuaGameClockUnpause(GameClock &)
+	{
+		GameClock::Instance.Unpause();
+	};
+
+	bool LuaGameClockMayPerformFixedStepStep(GameClock &)
+	{
+		return GameClock::Instance.MayPerformFixedStepStep();
+	};
+
+	f32 LuaGameClockFixedDelta(GameClock &)
+	{
+		return GameClock::Instance.FixedStepDelta();
+	};
+
+	f32 LuaGameClockDelta(GameClock &)
+	{
+		return GameClock::Instance.Delta();
+	};
+
+	uint64 LuaGameClockTime(GameClock &)
+	{
+		return GameClockTime();
+	};
+
+	uint64 LuaGameClockTimeNoPause(GameClock &)
+	{
+		return GameClockTimeNoPause();
 	};
 
 	luabind::object GetGenericConfigSections(GenericConfig &Self, lua_State *State)
@@ -152,16 +179,6 @@ namespace FlamingTorch
 		};
 
 		return Out;
-	};
-
-	luabind::object GetComponentProperties(Component &Self)
-	{
-		return Self.Properties;
-	};
-
-	luabind::object GetEntityProperties(Entity &Self)
-	{
-		return Self.Properties;
 	};
 
 	luabind::object FileSystemUtilsGetDirectories(const std::string &Directory, lua_State *State)
@@ -618,20 +635,6 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	luabind::object GetWorldEntitiesWithComponent(World &Self, const std::string &ComponentName)
-	{
-		luabind::object Out = luabind::newtable(GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance->State);
-
-		std::vector<Entity *> Entities = Self.EntitiesWithComponent(ComponentName);
-
-		for(uint32 i = 0; i < Entities.size(); i++)
-		{
-			Out[i + 1] = Entities[i];
-		};
-
-		return Out;
-	};
-
 #if USE_GRAPHICS
 	luabind::object GetRendererDisplayModes(lua_State *State)
 	{
@@ -982,14 +985,6 @@ namespace FlamingTorch
 				.def("SetOrtho", &Camera::SetOrtho)
 				.def("SetPerspective", &Camera::SetPerspective),
 
-			//Component
-			luabind::class_<Component>("Component")
-				.property("Name", &Component::Name)
-				.property("ID", &Component::ID)
-				.property("Owner", &Component::Owner)
-				.property("Properties", &GetComponentProperties)
-				.def("Update", &Component::Update),
-
 			//CoreUtils
 			luabind::class_<CoreUtils>("CoreUtils")
 				.def("MakeVersion", &CoreUtils::MakeVersion)
@@ -1030,28 +1025,6 @@ namespace FlamingTorch
 				]
 				.property("Weight", &DijkstraEdge::Weight)
 				.property("Target", &DijkstraEdge::Target),
-
-			//Entity
-			luabind::class_<Entity, SuperSmartPointer<Entity> >("Entity")
-				.property("Name", &Entity::Name)
-				.property("ID", &Entity::ID)
-				.property("Properties", &GetEntityProperties)
-				.def("Destroy", &Entity::Destroy)
-				.def("Clone", &Entity::Clone)
-				.def("HasComponent", &Entity::HasComponent)
-				.def("HasProperty", &Entity::HasProperty)
-				.def("GetComponent", &Entity::GetComponent)
-				.def("AddComponent", &Entity::AddComponent),
-
-			//World
-			luabind::class_<World>("World")
-				.def("LoadComponent", &World::LoadComponent)
-				.def("NewEntity", (Entity *(World::*)(const std::string &)) &World::NewEntity)
-				.def("NewEntity", (Entity *(World::*)(const std::string &, const std::string &)) &World::NewEntity)
-				.def("IterateEntitiesWithComponents", &World::IterateEntitiesWithComponents)
-				.def("EntitiesWithComponent", &GetWorldEntitiesWithComponent)
-				.def("Clear", &World::Clear)
-				.def("Update", &World::Update),
 
 			//Log
 			luabind::class_<Log, SubSystem>("Log")
@@ -1255,20 +1228,18 @@ namespace FlamingTorch
 
 			//GameClock
 			luabind::class_<GameClock, SubSystem>("GameClock")
-				.def("Pause", &GameClock::Pause)
-				.def("Unpause", &GameClock::Unpause)
-				.property("Delta", &GameClockDelta)
+				.def("Pause", &LuaGameClockPause)
+				.def("Unpause", &LuaGameClockUnpause)
 				.property("CurrentTimeString", &GameClock::CurrentTimeAsString)
 				.property("CurrentTime", &GameClock::CurrentTime)
-				.def("SetFixedStepRate", &GameClock::SetFixedStepRate)
-				.def("FixedStepInterval", &GameClock::GetFixedStepInterval)
-				.def("GetFixedStepRate", &GameClock::GetFixedStepRate)
-				.def("MayPerformFixedStepStep", &GameClock::MayPerformFixedStepStep)
-				.def("FixedStepDelta", &GameClock::FixedStepDelta)
-				.property("Time", &GameClockTime)
-				.property("TimeNoPause", &GameClockTimeNoPause)
-				.property("Difference", &GameClockDiff)
-				.property("DifferenceNoPause", &GameClockDiffNoPause),
+				.property("FixedStepInterval", &GameClock::GetFixedStepRate, &GameClock::SetFixedStepRate)
+				.def("MayPerformFixedStepStep", &LuaGameClockMayPerformFixedStepStep)
+				.property("Delta", &LuaGameClockDelta)
+				.property("FixedDelta", &LuaGameClockFixedDelta)
+				.property("Time", &LuaGameClockTime)
+				.property("TimeNoPause", &LuaGameClockTimeNoPause)
+				.def("Difference", &GameClockDiff)
+				.def("DifferenceNoPause", &GameClockDiffNoPause),
 
 			//LinearTimer
 			luabind::class_<LinearTimer>("LinearTimer")
@@ -2533,7 +2504,6 @@ namespace FlamingTorch
 		Globals["ResourceManager"]["InvalidTexture"] = ResourceManager::InvalidTexture;
 
 		Globals["g_CRC"] = &CRC32::Instance;
-		Globals["g_World"] = &World::Instance;
 		Globals["g_Clock"] = &GameClock::Instance;
 		Globals["g_Log"] = &Log::Instance;
 		Globals["g_FPSCounter"] = &FPSCounter::Instance;

@@ -108,9 +108,9 @@ public:
 		uint32 MaxBandwidthOutgoing);
 	void SendPacket(const MemoryStream &Packet, uint32 Flags);
 	void SendPacketNoQueue(const MemoryStream &Packet, uint32 Flags);
-	Signal0<void> OnConnected;
-	Signal0<void> OnDisconnected;
-	Signal1<MemoryStream &> OnPacketReceived;
+	SimpleDelegate::SimpleDelegate<> OnConnected;
+	SimpleDelegate::SimpleDelegate<> OnDisconnected;
+	SimpleDelegate::SimpleDelegate<MemoryStream &> OnPacketReceived;
 };
 
 class GameServer
@@ -145,9 +145,9 @@ public:
 		uint32 MaxBandwidthIncoming, uint32 MaxBandwidthOutgoing);
 	void SendPacket(uint32 ClientID, const MemoryStream &Packet, uint32 Flags);
 	void SendPacketNoQueue(uint32 ClientID, const MemoryStream &Packet, uint32 Flags);
-	Signal1<uint32> OnClientConnected;
-	Signal1<uint32> OnClientDisconnected;
-	Signal2<uint32, MemoryStream &> OnPacketReceived;
+	SimpleDelegate::SimpleDelegate<uint32> OnClientConnected;
+	SimpleDelegate::SimpleDelegate<uint32> OnClientDisconnected;
+	SimpleDelegate::SimpleDelegate<uint32, MemoryStream &> OnPacketReceived;
 };
 
 class GameNetwork : public SubSystem

@@ -5,6 +5,61 @@ namespace FlamingTorch
 #	define TAG "LuaScriptManager"
 #	define TAG2 "LuaScript"
 
+	void LuaErrorFunction(lua_State *State)
+	{
+		lua_Debug DebugInfo;
+		int32 Depth = 0, LineIndex = 1;
+		std::string Error = lua_tostring(State, -1);
+		lua_pop(State, 1);
+
+		static std::stringstream str;
+
+		str.str("");
+		str << "Error: " << Error << "\n";
+
+		while (lua_getstack(State, Depth, &DebugInfo))
+		{
+			int status = lua_getinfo(State, "Sln", &DebugInfo);
+
+			if (status <= 0)
+				break;
+
+			if (DebugInfo.currentline < 0)
+			{
+				Depth++;
+
+				continue;
+			};
+
+			static std::vector<std::string> Lines;
+			Lines = StringUtils::Split(StringUtils::Replace(DebugInfo.source, "\r", ""), '\n');
+
+			if ((int32)Lines.size() <= DebugInfo.currentline)
+			{
+				Depth++;
+
+				continue;
+			};
+
+			str << "#" << LineIndex << "  " << DebugInfo.short_src << ":" << DebugInfo.currentline << ": " << StringUtils::Trim(Lines[DebugInfo.currentline - 1]);
+
+			if (DebugInfo.name != NULL)
+			{
+				str << "(" << DebugInfo.namewhat << " " << DebugInfo.name << ")";
+			};
+
+			str << "\n";
+
+			LineIndex++;
+			Depth++;
+		}
+
+		if (LuaScriptManager::Instance.ErrorStream)
+			LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
+
+		Log::Instance.LogErr(TAG, str.str().c_str());
+	};
+
 	void LuaEventGroup::Add(luabind::object Member)
 	{
 		if(!Member)
@@ -65,37 +120,7 @@ namespace FlamingTorch
 
 	int LuabindPCall(lua_State* State)
 	{
-		lua_Debug d;
-		int32 Depth = 0;
-		std::string Error = lua_tostring(State, -1);
-		static std::stringstream str;
-		
-		str.str("");
-		str << "Error: " << Error << "\n";
-
-		while (lua_getstack(State, Depth, &d))
-		{
-			int status = lua_getinfo(State, "Sln", &d);
-
-			if(status <= 0)
-				break;
-
-			str << d.short_src << ":" << d.currentline;
-
-			if(d.name != NULL)
-			{
-				str << "(" << d.name << ")";
-			};
-
-			str << "\n";
-
-			Depth++;
-		}
-
-		if(LuaScriptManager::Instance.ErrorStream)
-			LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
-
-		Log::Instance.LogErr(TAG, str.str().c_str());
+		LuaErrorFunction(State);
 
 		return 1;
 	};
@@ -161,40 +186,7 @@ namespace FlamingTorch
 		int32 Error = luaL_dostring(State, Code.c_str());
 
 		if(Error != 0)
-		{
-			lua_Debug d;
-			int32 Depth = 0;
-			std::string Error = lua_tostring(State, -1);
-			static std::stringstream str;
-
-			str.str("");
-			str << "Error: " << Error << "\n";
-
-			while(lua_getstack(State, Depth, &d))
-			{
-				int status = lua_getinfo(State, "Sln", &d);
-
-				if(status <= 0)
-					break;
-
-				str << d.short_src << ":" << d.currentline;
-
-				if(d.name != NULL)
-				{
-					str << "(" << d.name << ")";
-				};
-
-				str << "\n";
-
-				Depth++;
-			};
-
-			if(LuaScriptManager::Instance.ErrorStream.Get())
-				LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
-
-			Log::Instance.LogErr(TAG, str.str().c_str());
-			Log::Instance.LogInfo(TAG, "Script Code: '%s'", Code.c_str());
-		};
+			LuaErrorFunction(State);
 
 		return Error;
 	};
@@ -222,47 +214,14 @@ namespace FlamingTorch
 			};
 		};
 
-		lua_atpanic(ScriptInstance->State, LuabindPCall);
+		luabind::set_pcall_callback(LuabindPCall);
 
-		error = luaL_dostring(ScriptInstance->State, Code.c_str());
+		//lua_atpanic(ScriptInstance->State, LuabindPCall);
+
+		error = ScriptInstance->DoString(Code.c_str());
 
 		if(error != 0)
-		{
-			lua_Debug d;
-			int32 Depth = 0;
-			std::string Error = lua_tostring(ScriptInstance->State, -1);
-			static std::stringstream str;
-
-			str.str("");
-			str << "Error: " << Error << "\n";
-
-			while(lua_getstack(ScriptInstance->State, Depth, &d))
-			{
-				int status = lua_getinfo(ScriptInstance->State, "Sln", &d);
-
-				if(status <= 0)
-					break;
-
-				str << d.short_src << ":" << d.currentline;
-
-				if(d.name != NULL)
-				{
-					str << "(" << d.name << ")";
-				};
-
-				str << "\n";
-
-				Depth++;
-			};
-
-			if(ErrorStream)
-				ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
-
-			Log::Instance.LogErr(TAG, str.str().c_str());
-			Log::Instance.LogInfo(TAG, "Script Code: '%s'", Code.c_str());
-
 			return SuperSmartPointer<LuaScript>();
-		};
 
 		InstancedScripts.push_back(ScriptInstance);
 

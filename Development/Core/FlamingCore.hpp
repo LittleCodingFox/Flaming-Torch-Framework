@@ -49,8 +49,6 @@ namespace FlamingTorch
 #	include "GenericConfig.hpp"
 #	include "StringUtils.hpp"
 #	include "Future.hpp"
-#	include "Entity.hpp"
-#	include "Component.hpp"
 #	include "Randomizer.hpp"
 #	include "Camera.hpp"
 #	include "DynamicLink.hpp"

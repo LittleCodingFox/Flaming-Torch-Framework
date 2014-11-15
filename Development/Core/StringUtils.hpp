@@ -21,6 +21,13 @@ public:
 	*	\sa Split
 	*/
 	static std::string Join(const std::string &Separator, const std::vector<std::string> &Fragments);
+
+	/*!
+	*	Trims a string (removes starting and ending empty space)
+	*	\param str the string to trim
+	*	\return the trimmed string
+	*/
+	static std::string Trim(const std::string &str);
     
     /*!
     *   Creates a Pointer String from a generic type Pointer

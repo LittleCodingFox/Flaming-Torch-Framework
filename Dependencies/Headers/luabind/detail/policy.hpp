@@ -696,8 +696,10 @@ LUABIND_NUMBER_CONVERTER(signed int, integer)
 
 LUABIND_NUMBER_CONVERTER(unsigned int, number)
 LUABIND_NUMBER_CONVERTER(unsigned long, number)
+LUABIND_NUMBER_CONVERTER(unsigned long long, number)
 
 LUABIND_NUMBER_CONVERTER(signed long, integer)
+LUABIND_NUMBER_CONVERTER(signed long long, number)
 LUABIND_NUMBER_CONVERTER(float, number)
 LUABIND_NUMBER_CONVERTER(double, number)
 LUABIND_NUMBER_CONVERTER(long double, number)
