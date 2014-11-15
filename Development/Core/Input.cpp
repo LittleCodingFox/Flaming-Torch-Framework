@@ -458,6 +458,8 @@ namespace FlamingTorch
 			};
 		};
 
+		InputConsumedValue = false;
+
 		Vector3 NewFrameMouseMovement(MousePosition.x, MousePosition.y, (f32)MouseWheel);
 		MouseMovement = NewFrameMouseMovement - MouseMovement;
 
@@ -473,6 +475,8 @@ namespace FlamingTorch
 				};
 			};
 		};
+
+		InputConsumedValue = false;
 
 		for(uint32 i = 0; i < InputKey::Count; i++)
 		{
@@ -495,6 +499,8 @@ namespace FlamingTorch
 			};
 		};
 
+		InputConsumedValue = false;
+
 		for(TouchMap::iterator it = Touches.begin(); it != Touches.end(); it++)
 		{
 			if(it->second.JustPressed || it->second.Pressed || it->second.JustReleased)
@@ -516,6 +522,8 @@ namespace FlamingTorch
 			};
 		};
 
+		InputConsumedValue = false;
+
 		for(uint32 i = 0; i < InputMouseButton::Count; i++)
 		{
 			if(MouseButtons[i].JustPressed || MouseButtons[i].Pressed || MouseButtons[i].JustReleased)
@@ -536,6 +544,8 @@ namespace FlamingTorch
 					FireAction(MouseButtons[i]);
 			};
 		};
+
+		InputConsumedValue = false;
 
 		for(uint32 i = 0; i < JoystickCount; i++)
 		{
@@ -586,6 +596,8 @@ namespace FlamingTorch
 				};
 			};
 		};
+
+		InputConsumedValue = false;
 
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
