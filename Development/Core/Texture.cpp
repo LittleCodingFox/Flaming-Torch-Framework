@@ -1372,4 +1372,62 @@ namespace FlamingTorch
 	{
 		return Index < Indices.size() ? Indices[Index].TextureInstance : SuperSmartPointer<Texture>();
 	};
+
+	TextureGroup::TextureGroup(uint32 _MaxWidth, uint32 _MaxHeight) : MaxWidth(_MaxWidth), MaxHeight(_MaxHeight)
+	{
+	};
+
+	int32 TextureGroup::Add(SuperSmartPointer<Texture> t)
+	{
+		if(t.Get() == NULL)
+			return -1;
+
+		for(int32 i = 0; i < StoredTextures.size(); i++)
+		{
+			if (StoredTextures[i].Get() == t.Get())
+			{
+				for(uint32 j = 0; j < InstanceTextures.size(); j++)
+				{
+					if(InstanceTextures[j]->GetIndex().Index == i)
+						return i;
+				};
+			};
+		};
+
+		StoredTextures.push_back(t);
+
+		SuperSmartPointer<TexturePacker> Out = TexturePacker::FromTextures(StoredTextures, MaxWidth, MaxHeight);
+
+		if(Out.Get() == NULL || Out->IndexCount() < StoredTextures.size())
+		{
+			StoredTextures.pop_back();
+
+			return -1;
+		};
+
+		TexturePackerIndex Index;
+
+		for(uint32 i = 0; i < InstanceTextures.size(); i++)
+		{
+			Index = InstanceTextures[i]->GetIndex();
+			Index.Index = Out->Indices[i].Index;
+			Index.Owner = Out;
+
+			InstanceTextures[i]->SetIndex(Index);
+		};
+
+		for(uint32 i = InstanceTextures.size(); i < Out->IndexCount(); i++)
+		{
+			InstanceTextures.push_back(Out->GetTexture(i));
+		};
+
+		PackedTexture = Out;
+
+		return Out->IndexCount() - 1;
+	};
+
+	SuperSmartPointer<Texture> TextureGroup::Get(int32 Index)
+	{
+		return Index >= 0 && Index < InstanceTextures.size() ? InstanceTextures[Index] : SuperSmartPointer<Texture>();
+	};
 };

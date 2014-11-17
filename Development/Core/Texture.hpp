@@ -448,3 +448,32 @@ public:
 	*/
 	static SuperSmartPointer<TexturePacker> FromConfig(SuperSmartPointer<Texture> MainTexture, GenericConfig Config);
 };
+
+/*!
+*	Texture Group
+*	Automatically repacks textures into a single TexturePacker
+*/
+class TextureGroup
+{
+private:
+	SuperSmartPointer<TexturePacker> PackedTexture;
+	uint32 MaxWidth, MaxHeight;
+	std::vector<SuperSmartPointer<Texture> > InstanceTextures, StoredTextures;
+
+	void UpdateInstanceTextures();
+public:
+	TextureGroup(uint32 MaxWidth, uint32 MaxHeight);
+
+	/*!
+	*	Adds a texture
+	*	\param t the texture to add to this group
+	*	\return a texture index or -1
+	*/
+	int32 Add(SuperSmartPointer<Texture> t);
+
+	/*!
+	*	Gets a texture
+	*	\param Index the texture index
+	*/
+	SuperSmartPointer<Texture> Get(int32 Index);
+};

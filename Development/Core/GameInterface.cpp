@@ -156,7 +156,7 @@ namespace FlamingTorch
 
 			const RendererFrameStats &Stats = TheRenderer->FrameStats();
 
-			str << "Renderer: " << Stats.RendererName << " version " << Stats.RendererVersion << "\n" << Stats.RendererCustomMessage << (Stats.RendererCustomMessage.length() ? "\n\n" : "\n");
+			str << "Renderer: " << Stats.RendererName << " version " << Stats.RendererVersion << " on " << CoreUtils::PlatformString() << "\n" << Stats.RendererCustomMessage << (Stats.RendererCustomMessage.length() ? "\n\n" : "\n");
 			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "/" << Stats.DrawCalls + Stats.SkippedDrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges << 
 				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\n";
 
@@ -211,7 +211,6 @@ namespace FlamingTorch
 
 	int32 NativeGameInterface::Run(int32 argc, char **argv)
 	{
-		IsMobile = FLPLATFORM_MOBILE;
 		InitSubsystems();
 
 		if(!Initialize(argc, argv))
@@ -286,10 +285,8 @@ namespace FlamingTorch
 #endif
 			};
 
-#if FLPLATFORM_MOBILE
-			if(!RendererManager::Instance.Input.HasFocus)
+			if(IsMobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
-#endif
 		};
 
 		if(!DeInitialize())
@@ -329,7 +326,6 @@ namespace FlamingTorch
 
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
 	{
-		IsMobile = FLPLATFORM_MOBILE;
 		FirstFrame = true;
 		PackageFileSystemManager::Instance.Register();
 
@@ -645,10 +641,8 @@ namespace FlamingTorch
 #endif
 			};
 
-#if FLPLATFORM_MOBILE
-			if(!RendererManager::Instance.Input.HasFocus)
+			if(IsMobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
-#endif
 		};
 
 		if(DeInitFunction)

@@ -1208,6 +1208,12 @@ namespace FlamingTorch
 				.def("GetTexture", &TexturePacker::GetTexture)
 				.property("IndexCount", &TexturePacker::IndexCount),
 
+			//TextureGroup
+			luabind::class_<TextureGroup, SuperSmartPointer<TextureGroup> >("TextureGroup")
+				.def(luabind::constructor<uint32, uint32>())
+				.def("Add", &TextureGroup::Add)
+				.def("Get", &TextureGroup::Get),
+
 			//FrustumCuller
 			luabind::class_<FrustumCuller>("FrustumCuller")
 				.enum_("constants") [
@@ -1287,6 +1293,7 @@ namespace FlamingTorch
 				.def_readwrite("DevelopmentBuild", &GameInterface::DevelopmentBuild)
 				.def_readwrite("IsGUISandbox", &GameInterface::IsGUISandbox)
 				.def_readonly("IsMobile", &GameInterface::IsMobile)
+				.def_readonly("GraphicsEnabled", &GameInterface::GraphicsEnabled)
 #if USE_GRAPHICS
 				.def("CreateRenderer", &GameInterface::CreateRenderer)
 #endif

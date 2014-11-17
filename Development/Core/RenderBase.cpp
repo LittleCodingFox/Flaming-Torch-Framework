@@ -397,8 +397,6 @@ namespace FlamingTorch
 			};
 		};
 
-		SpriteCache::Instance.Flush(Renderer);
-
 		if(PushOrtho)
 		{
 			Renderer->PopMatrices();

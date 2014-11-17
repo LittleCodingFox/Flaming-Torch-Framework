@@ -27,6 +27,7 @@ public:
 	bool DevelopmentBuild;
 	bool IsGUISandbox;
 	bool IsMobile;
+	bool GraphicsEnabled;
 	uint32 UpdateRateValue, FrameRateValue;
 	Vector2 BaseResolution;
 	bool ErroredOnFrameUpdate, ErroredOnFixedUpdate, ErroredOnFrameBegin, ErroredOnFrameEnd, ErroredOnFrameDraw, ErroredOnResize, ErroredOnResourcesReloaded;
@@ -35,7 +36,8 @@ public:
 
 	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
-			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false) {};
+			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS),
+			IsMobile(FLPLATFORM_MOBILE) {};
 	virtual ~GameInterface() {};
 
 	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);

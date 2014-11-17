@@ -267,7 +267,7 @@ namespace FlamingTorch
 		}
 		else
 		{
-			LogConsole("> Invalid key identifier");
+			LogConsole("> Invalid key identifier '" + Target + "'");
 		};
 
 		RendererManager::Instance.Input.RegisterAction(TheAction);

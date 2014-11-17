@@ -871,8 +871,9 @@ namespace FlamingTorch
 		FrameStatsValue.Clear();
 
 		FlushRenderText();
+		SpriteCache::Instance.Flush(Target);
 
-		FrameStatsValue.TotalResources = Fonts.size() + VertexBuffers.size();
+		FrameStatsValue.TotalResources = Fonts.size() + VertexBuffers.size() + Textures.size();
 		FrameStatsValue.TotalResourceUsage = 0;
 
 		for(FontMap::iterator it = Fonts.begin(); it != Fonts.end(); it++)
@@ -904,6 +905,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
 
@@ -917,6 +921,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
 

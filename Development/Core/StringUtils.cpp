@@ -48,7 +48,7 @@ namespace FlamingTorch
 		if(EndIndex == -1)
 			return std::string();
 
-		while(StartIndex < str.length())
+		while(StartIndex < (int32)str.length())
 		{
 			if(!isspace((char)str[StartIndex]))
 				break;
@@ -56,7 +56,7 @@ namespace FlamingTorch
 			StartIndex++;
 		};
 
-		if(StartIndex >= str.length())
+		if(StartIndex >= (int32)str.length())
 			return std::string();
 
 		while (EndIndex >= 0)
