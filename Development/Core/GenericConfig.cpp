@@ -165,7 +165,7 @@ namespace FlamingTorch
 					continue;
 				};
 
-				ActiveSection = Lines[i].substr(1, Lines[i].length() - 2);
+				ActiveSection = StringUtils::Trim(Lines[i].substr(1, Lines[i].length() - 2));
 			}
 			else if(ActiveSection.length())
 			{
@@ -178,7 +178,7 @@ namespace FlamingTorch
 					continue;
 				};
 
-				Sections[ActiveSection].Values[Lines[i].substr(0, Index)].Content = Lines[i].substr(Index + 1);
+				Sections[ActiveSection].Values[StringUtils::Trim(Lines[i].substr(0, Index))].Content = StringUtils::Trim(Lines[i].substr(Index + 1));
 			};
 		};
 
