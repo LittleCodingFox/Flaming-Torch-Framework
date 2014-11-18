@@ -1,5 +1,120 @@
 /*!
 *	\page luasample1 Lua Sample #1 - Starting Up
 *
+*	\page loadingscriptsinlua Loading Scripts in Lua
+*	\code
 *	
+*	local Entities = g_PackageManager.FindFiles("", "", "lua", "/Entities/")
+*	
+*	for i = 1, table.getn(Entities) do
+*		local EntityName = string.gsub(Entities[i][2], ".lua", "")
+*		local Stream = g_PackageManager:GetFile(MakeStringID(Entities[i][1]), MakeStringID(Entities[i][2]))
+*		
+*		if Stream ~= nil and type(DoStream(Stream)) ~= type("") then
+*			g_Log:Info("Loaded Entity Archetype '" .. EntityName .. "'")
+*
+*			EntityArchetypes[EntityName] = Stream
+*		end
+*	end
+*	\endcode
+*
+*	\page loadingmapwithscripts Loading Maps with Lua Scripts
+*	\code
+*	LoadMap = function(Name)
+*		local MapStream = g_PackageManager:GetFile(MakeStringID("/WorldChunks/"), MakeStringID(Name .. ".fttm"))
+*
+*		local Out = {
+*			Map = TiledMap(),
+*			Entities = {}
+*		}
+*		
+*		if MapStream == nil or Out.Map:DeSerialize(MapStream) == false or Out.Map:InitResources(TiledMap.InitOptions():FromPackage(true):
+*			AdditionalPackageDirectory("/WorldChunks/")) == false then
+*			return nil
+*		end
+*		
+*		Out.Map.Scale = Vector2(2, 2) --Optional, used to increase the world size
+*		
+*		local Objects = Out.Map.Objects
+*		
+*		for i = 1, table.getn(Objects) do
+*			if Objects[i].ObjectType == "Collision" then -- Special mode for invisible walls
+*				Out.Entities[table.getn(Out.Entities) + 1] = {}
+*				
+*				local Entity = Out.Entities[table.getn(Out.Entities)]
+*				
+*				Entity.CollisionBox = AxisAlignedBoundingBox()
+*				
+*				Entity.CollisionBox.min = Vector3(Objects[i].Position + Vector2(1, 1))
+*				Entity.CollisionBox.max = Vector3(Objects[i].Position + Objects[i].Size - Vector2(1, 1))
+*				
+*				Entity.OnHit = function(Self, Target, IntendedPosition) --Return whether we may cross
+*					return false
+*				end
+*				
+*				Entity.OnDraw = function(Self, Renderer)
+*				end
+*				
+*				Entity.UpdateAnimations = function(Self)
+*				end
+*			else
+*				if EntityArchetypes[Objects[i].ObjectType] == nil then
+*					g_Log:Info("Unable to spawn entity '" .. Objects[i].ObjectType .. "': Not found")
+*				else
+*					local EntityArchetype = EntityArchetypes[Objects[i].ObjectType]
+*					
+*					EntityArchetype:Seek(0)
+*					
+*					local Entity = DoStream(EntityArchetype)
+*					
+*					if type(Entity) == type("") then
+*						g_Log:Info("Error loading entity: " .. Entity)
+*						
+*						return
+*					end
+*					
+*					Entity.Position = Objects[i].Position
+*					Entity.Chunk = Out
+*					
+*					if Entity.LoadResources ~= nil then
+*						Entity:LoadResources()
+*					end
+*					
+*					if Entity.OnSpawn ~= nil then
+*						Entity:OnSpawn(Objects[i])
+*					end
+*					
+*					if Entity.OnHit == nil then
+*						Entity.OnHit = function(Self, Target, IntendedPosition)
+*							return true
+*						end
+*					end
+*					
+*					if Entity.OnUse == nil then
+*						Entity.OnUse = function(Self, User)
+*						end
+*					end
+*					
+*					if Entity.OnDraw == nil then
+*						Entity.OnDraw = function(Self, Renderer)
+*						end
+*					end
+*					
+*					if Entity.UpdateAnimations == nil then
+*						Entity.UpdateAnimations = function(Self)
+*						end
+*					end
+*					
+*					Out.Entities[table.getn(Out.Entities) + 1] = Entity
+*					
+*					if Objects[i].ObjectType == "Player" then
+*						Player = Entity
+*					end
+*				end
+*			end
+*		end
+*		
+*		return Out
+*	end
+*	\endcode
 */

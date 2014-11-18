@@ -53,6 +53,12 @@
 *	    
 *	    [MapDirectories]
 *	    Map=Maps|WorldChunks
+*	    
+*	    #Texture Packing Directories tell TexturePacker where to find directories with texture packing
+*	    #configuration files and where to put them. This uses the same logic as MapDirectories
+*	    
+*	    [TexturePackingDirectories]
+*	    Player=Entities/Player|Entities/Player/PlayerAnimation
 *
 *	\subsection repackagingfiles Repackaging Files
 *
@@ -83,4 +89,10 @@
 *	\subsection tutorialsmixed C++ and Lua
 *
 *	\section luaapi Lua API
+*
+*	\subsection usefulcode Useful Code Snippets
+*
+*	\ref loadingscriptsinlua "Loading Scripts in Lua"
+*
+*	\ref loadingmapwithscripts "Loading Maps with Lua Scripts"
 */

@@ -285,8 +285,10 @@ namespace FlamingTorch
 #endif
 			};
 
+#if USE_GRAPHICS
 			if(IsMobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
+#endif
 		};
 
 		if(!DeInitialize())
@@ -641,8 +643,10 @@ namespace FlamingTorch
 #endif
 			};
 
+#if USE_GRAPHICS
 			if(IsMobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
+#endif
 		};
 
 		if(DeInitFunction)

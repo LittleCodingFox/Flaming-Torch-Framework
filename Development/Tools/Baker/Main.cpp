@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
 	Log::Instance.LogInfo(TAG, "Version %s starting up", CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
 
-	for(uint32 i = 1; i < argc; i++)
+	for(uint32 i = 1; i < (uint32)argc; i++)
 	{
 		if(std::string(argv[i]) == "-nocleanup")
 		{
@@ -184,6 +184,8 @@ int main(int argc, char **argv)
             
             for(uint32 k = 0; k < MapFiles.size(); k++)
             {
+				Log::Instance.LogInfo(TAG, "...    Converting Map '%s'", Path(MapFiles[k]).BaseName.c_str());
+
 				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TiledConverterPath;
 				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].second + "\"";
 
@@ -220,10 +222,12 @@ int main(int argc, char **argv)
 
 			FileSystemUtils::CreateDirectoryRecursive(TargetDirectory + "/" + TexturePackDirectories[j].second);
             
-			for(uint32 k = 0; k < TexturePackDirectories.size(); k++)
+			for(uint32 k = 0; k < TexturePackFiles.size(); k++)
             {
+				Log::Instance.LogInfo(TAG, "...    Texture Packing '%s'", Path(TexturePackFiles[k]).BaseName.c_str());
+
 				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TexturePackerPath;
-				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  TexturePackDirectories[j].second + "\"";
+				std::string Parameters = "-dir \"" + Path(TargetDirectory + "/" +  TexturePackDirectories[j].second).FullPath() + "\"";
 
 				for(uint32 l = 0; l < PrioritizedResourceDirectories.size(); l++)
 				{
@@ -245,7 +249,9 @@ int main(int argc, char **argv)
 
 		for(uint32 j = 0; j < ValidResourceDirectories[DirectoryName].size(); j++)
 		{
-			FileSystemUtils::DeleteDirectory(TargetDirectory + "/" + ValidResourceDirectories[DirectoryName][j]);
+			Log::Instance.LogInfo(TAG, "...    Deleting Resource Directory '%s'", Path(ValidResourceDirectories[DirectoryName][j]).BaseName.c_str());
+
+			FileSystemUtils::DeleteDirectory(Path(ValidResourceDirectories[DirectoryName][j]).FullPath());
 		};
         
         Log::Instance.LogInfo(TAG, "...    Packing...");

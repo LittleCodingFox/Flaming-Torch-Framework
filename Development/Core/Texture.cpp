@@ -1262,10 +1262,16 @@ namespace FlamingTorch
 
 	SuperSmartPointer<TexturePacker> TexturePacker::FromTextures(const std::vector<SuperSmartPointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
 	{
+		if(Textures.size() == 0)
+			return SuperSmartPointer<TexturePacker>();
+
 		SuperSmartPointer<TexturePacker> Out(new TexturePacker());
 
 		for(uint32 i = 0; i < Textures.size(); i++)
 		{
+			if(Textures[i].Get() == NULL)
+				return SuperSmartPointer<TexturePacker>();
+
 			SortedTexture Texture;
 			Texture.Index = i;
 			Texture.Width = Textures[i]->Width() + 2;
@@ -1382,7 +1388,7 @@ namespace FlamingTorch
 		if(t.Get() == NULL)
 			return -1;
 
-		for(int32 i = 0; i < StoredTextures.size(); i++)
+		for(int32 i = 0; i < (int32)StoredTextures.size(); i++)
 		{
 			if (StoredTextures[i].Get() == t.Get())
 			{
@@ -1428,6 +1434,6 @@ namespace FlamingTorch
 
 	SuperSmartPointer<Texture> TextureGroup::Get(int32 Index)
 	{
-		return Index >= 0 && Index < InstanceTextures.size() ? InstanceTextures[Index] : SuperSmartPointer<Texture>();
+		return Index >= 0 && Index < (int32)InstanceTextures.size() ? InstanceTextures[Index] : SuperSmartPointer<Texture>();
 	};
 };

@@ -135,6 +135,8 @@ int main(int argc, char **argv)
 		return 1;
 	};
 
+	Stream.Dispose();
+
 	GenericConfig::Section &AnimationsSection = InConfig.Sections["Animations"];
 
 	std::vector<SuperSmartPointer<Texture> > Frames;
@@ -188,6 +190,10 @@ int main(int argc, char **argv)
 	{
 		Log::Instance.LogErr(TAG, "Unable to pack all textures together; Make sure you have a large enough size and don't have too many textures set up. "
 			"Current Max Size: %dx%d", MaxWidth, MaxHeight);
+
+		DeInitSubsystems();
+
+		return 1;
 	};
 
 	GenericConfig OutConfig;
