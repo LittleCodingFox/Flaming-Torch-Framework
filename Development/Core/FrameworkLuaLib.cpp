@@ -1294,6 +1294,8 @@ namespace FlamingTorch
 				.def_readwrite("IsGUISandbox", &GameInterface::IsGUISandbox)
 				.def_readonly("IsMobile", &GameInterface::IsMobile)
 				.def_readonly("GraphicsEnabled", &GameInterface::GraphicsEnabled)
+				.def_readonly("FirstFrame", &GameInterface::FirstFrame)
+				.def_readwrite("QuitFlag", &GameInterface::QuitFlag)
 #if USE_GRAPHICS
 				.def("CreateRenderer", &GameInterface::CreateRenderer)
 #endif

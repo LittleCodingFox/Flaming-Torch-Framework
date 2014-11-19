@@ -128,8 +128,6 @@ namespace FlamingTorch
 
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
-		SpriteCache::Instance.Flush(TheRenderer);
-
 		bool PushOrtho = TheRenderer->MatrixStackSize() == 0;
 
 		if(PushOrtho)
@@ -202,8 +200,6 @@ namespace FlamingTorch
 
 		if(PushOrtho)
 		{
-			SpriteCache::Instance.Flush(TheRenderer);
-
 			TheRenderer->PopMatrices();
 		};
 	};
@@ -211,6 +207,7 @@ namespace FlamingTorch
 
 	int32 NativeGameInterface::Run(int32 argc, char **argv)
 	{
+		FirstFrame = true;
 		InitSubsystems();
 
 		if(!Initialize(argc, argv))
@@ -817,7 +814,7 @@ namespace FlamingTorch
 
 		try
 		{
-			return ProtectedLuaCast<bool>(ShouldQuitFunction());
+			return ProtectedLuaCast<bool>(ShouldQuitFunction()) || QuitFlag;
 		}
 		catch(std::exception &e)
 		{

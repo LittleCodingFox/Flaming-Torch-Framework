@@ -70,7 +70,7 @@ namespace FlamingTorch
 		if (EndIndex < 0)
 			return std::string();
 
-		return str.substr(StartIndex, str.length() - EndIndex - StartIndex);
+		return str.substr(StartIndex, EndIndex - StartIndex + 1);
 	};
 
 	std::string StringUtils::Join(const std::string &Separator, const std::vector<std::string> &Fragments)

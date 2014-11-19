@@ -22,11 +22,12 @@ private:
 #if USE_GRAPHICS
 	void OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action);
 #endif
-	bool FirstFrame;
 public:
+	bool FirstFrame;
 	bool DevelopmentBuild;
 	bool IsGUISandbox;
 	bool IsMobile;
+	bool QuitFlag;
 	bool GraphicsEnabled;
 	uint32 UpdateRateValue, FrameRateValue;
 	Vector2 BaseResolution;
@@ -37,7 +38,7 @@ public:
 	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
 			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS),
-			IsMobile(FLPLATFORM_MOBILE) {};
+			IsMobile(FLPLATFORM_MOBILE), QuitFlag(false){};
 	virtual ~GameInterface() {};
 
 	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);
@@ -78,7 +79,7 @@ public:
 	/*!
 	*	Whether we should quit
 	*/
-	virtual bool ShouldQuit() { return false; };
+	virtual bool ShouldQuit() { return QuitFlag; };
 
 	/*!
 	*	Gets any script instances available for this game
