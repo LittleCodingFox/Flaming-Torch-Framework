@@ -77,6 +77,26 @@ namespace FlamingTorch
 		GameClock::Instance.Unpause();
 	};
 
+	ConsoleVariable MakeLuaConsoleVariable_Int(const std::string &Name, int32 Value)
+	{
+		return ConsoleVariable(Name, Value);
+	};
+
+	ConsoleVariable MakeLuaConsoleVariable_UInt(const std::string &Name, uint32 Value)
+	{
+		return ConsoleVariable(Name, Value);
+	};
+
+	ConsoleVariable MakeLuaConsoleVariable_Float(const std::string &Name, f32 Value)
+	{
+		return ConsoleVariable(Name, Value);
+	};
+
+	ConsoleVariable MakeLuaConsoleVariable_String(const std::string &Name, const std::string &Value)
+	{
+		return ConsoleVariable(Name, Value);
+	};
+
 	bool LuaGameClockMayPerformFixedStepStep(GameClock &)
 	{
 		return GameClock::Instance.MayPerformFixedStepStep();
@@ -1811,16 +1831,18 @@ namespace FlamingTorch
 					luabind::value("Type_String", ConsoleVariableType::String)
 				]
 				.def(luabind::constructor<>())
-				.def(luabind::constructor<const std::string &, uint32>())
-				.def(luabind::constructor<const std::string &, int32>())
-				.def(luabind::constructor<const std::string &, f32>())
-				.def(luabind::constructor<const std::string &, const std::string &>())
 				.def_readwrite("Type", &ConsoleVariable::Type)
 				.def_readwrite("Name", &ConsoleVariable::Name)
-				.def_readwrite("UintValue", &ConsoleVariable::UintValue)
+				.def_readwrite("UIntValue", &ConsoleVariable::UIntValue)
 				.def_readwrite("IntValue", &ConsoleVariable::IntValue)
 				.def_readwrite("FloatValue", &ConsoleVariable::FloatValue)
-				.property("StringValue", &GetConsoleVariableString, &SetConsoleVariableString),
+				.property("StringValue", &GetConsoleVariableString, &SetConsoleVariableString)
+				.scope [
+					luabind::def("IntVariable", &MakeLuaConsoleVariable_Int),
+					luabind::def("UIntVariable", &MakeLuaConsoleVariable_UInt),
+					luabind::def("FloatVariable", &MakeLuaConsoleVariable_Float),
+					luabind::def("StringVariable", &MakeLuaConsoleVariable_String)
+				],
 
 			//Console
 			luabind::class_<Console, SubSystem>("Console")

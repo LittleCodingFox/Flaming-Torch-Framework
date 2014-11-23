@@ -2693,8 +2693,8 @@ namespace FlamingTorch
 
 	void UIManager::Draw(Renderer *Renderer)
 	{
-		DrawUIRects = !!(Console::Instance.GetVariable("r_drawuirects") ? Console::Instance.GetVariable("r_drawuirects")->UintValue : 0);
-		DrawUIFocusZones = !!(Console::Instance.GetVariable("r_drawuifocuszones") ? Console::Instance.GetVariable("r_drawuifocuszones")->UintValue : 0);
+		DrawUIRects = !!(Console::Instance.GetVariable("r_drawuirects") ? Console::Instance.GetVariable("r_drawuirects")->UIntValue : 0);
+		DrawUIFocusZones = !!(Console::Instance.GetVariable("r_drawuifocuszones") ? Console::Instance.GetVariable("r_drawuifocuszones")->UIntValue : 0);
 
 		if(DrawOrderCacheDirty)
 		{

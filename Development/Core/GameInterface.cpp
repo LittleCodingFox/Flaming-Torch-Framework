@@ -148,7 +148,7 @@ namespace FlamingTorch
 
 		static std::stringstream str;
 
-		if(!!Console::Instance.GetVariable("r_drawrenderstats") && Console::Instance.GetVariable("r_drawrenderstats")->UintValue != 0)
+		if(!!Console::Instance.GetVariable("r_drawrenderstats") && Console::Instance.GetVariable("r_drawrenderstats")->UIntValue != 0)
 		{
 			str.str("");
 

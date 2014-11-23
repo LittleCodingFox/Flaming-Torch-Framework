@@ -558,15 +558,15 @@ namespace FlamingTorch
 
 							if(1 != sscanf(ParameterStrings[0].c_str(), "%u", &Value))
 							{
-								ConsoleVariables[i].UintValue = 0;
+								ConsoleVariables[i].UIntValue = 0;
 							}
 							else
 							{
-								ConsoleVariables[i].UintValue = Value;
+								ConsoleVariables[i].UIntValue = Value;
 							};
 						};
 
-						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].UintValue));
+						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].UIntValue));
 
 						break;
 
