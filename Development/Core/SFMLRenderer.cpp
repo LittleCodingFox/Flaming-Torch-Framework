@@ -1495,7 +1495,7 @@ namespace FlamingTorch
 			Fonts.erase(it);
 	};
 
-	Rect SFMLRendererImplementation::MeasureText(FontHandle Handle, const std::string &TheText, const TextParams &Parameters)
+	Rect SFMLRendererImplementation::MeasureText(const std::string &TheText, const TextParams &Parameters)
 	{
 		FrameStatsValue.StateChanges++;
 
@@ -1503,7 +1503,7 @@ namespace FlamingTorch
 		if(TheText.length() == 0)
 			return Rect(0, 0, 0, (f32)Parameters.FontSizeValue);
 
-		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue ? Parameters.FontValue : 0);
+		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
 
 		if(FontIterator == Fonts.end())
 			return Rect();
@@ -1539,7 +1539,7 @@ namespace FlamingTorch
 		return Rect(InRect.left, InRect.width + InRect.left * 2, InRect.top, InRect.height + InRect.top * 2);
 	};
 
-	void SFMLRendererImplementation::RenderText(FontHandle Handle, const std::string &TheText, const TextParams &Parameters)
+	void SFMLRendererImplementation::RenderText(const std::string &TheText, const TextParams &Parameters)
 	{
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.TextureChanges++;
@@ -1563,7 +1563,7 @@ namespace FlamingTorch
 
 		Vector2 ActualPosition = Parameters.PositionValue;
 
-		FontMap::iterator FontIterator = Fonts.find(Handle);
+		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
 
 		if(FontIterator == Fonts.end())
 			return;

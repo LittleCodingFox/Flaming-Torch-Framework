@@ -109,7 +109,7 @@ namespace FlamingTorch
 		*	\param WindowHandle the window handle
 		*	\param ExpectedCaps the expected capabilities of this renderer
 		*/
-		bool Create(void *WindowHandle, RendererCapabilities ExpectedCaps);
+		virtual bool Create(void *WindowHandle, RendererCapabilities ExpectedCaps) override;
 
 		/*!
 		*	Creates a renderer from window details
@@ -119,33 +119,33 @@ namespace FlamingTorch
 		*	\param Style the style of the window (one of RendererWindowStyle::*)
 		*	\param ExpectedCaps the expected capabilities of this renderer
 		*/
-		bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps);
+		virtual bool Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps) override;
 
 		/*!
 		*	\return the currently available renderer capabilities
 		*/
-		const RendererCapabilities &Capabilities() const;
+		virtual const RendererCapabilities &Capabilities() const override;
 
 		/*!
 		*	\return the Desktop Display Mode
 		*/
-		RendererDisplayMode DesktopDisplayMode();
+		virtual RendererDisplayMode DesktopDisplayMode() override;
 
 		/*!
 		*	\return all available display modes
 		*/
-		std::vector<RendererDisplayMode> DisplayModes();
+		virtual std::vector<RendererDisplayMode> DisplayModes() override;
 
 		/*!
 		*	Render Window Size
 		*/
-		Vector2 Size() const;
+		virtual Vector2 Size() const override;
 
 		/*!
 		*	Creates a Vertex Buffer
 		*	\return a vertex buffer handle, or 0 on error
 		*/
-		VertexBufferHandle CreateVertexBuffer();
+		virtual VertexBufferHandle CreateVertexBuffer() override;
 
 		/*!
 		*	Sets a Vertex Buffer's Data
@@ -156,19 +156,19 @@ namespace FlamingTorch
 		*	\param Data the data for the vertex buffer
 		*	\param DataByteSize the byte size of the entire data
 		*/
-		void SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize);
+		virtual void SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize) override;
 
 		/*!
 		*	Checks whether a vertex buffer handle is valid
 		*	\param Handle the Vertex Buffer Handle to check
 		*/
-		bool IsVertexBufferHandleValid(VertexBufferHandle Handle);
+		virtual bool IsVertexBufferHandleValid(VertexBufferHandle Handle) override;
 
 		/*!
 		*	Destroys a Vertex Buffer
 		*	\param Handle the handle of the vertex buffer to destroy
 		*/
-		void DestroyVertexBuffer(VertexBufferHandle Handle);
+		virtual void DestroyVertexBuffer(VertexBufferHandle Handle) override;
 
 		/*!
 		*	Render vertices
@@ -177,67 +177,47 @@ namespace FlamingTorch
 		*	\param Start the starting vertex
 		*	\param End the ending vertex
 		*/
-		void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End);
+		virtual void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End) override;
 
 		/*!
 		*	Start clipping the rendering to a rectangle
 		*	\param ClippingRect the clipping rectangle
 		*	\note The orientation is always from bottom left and up, so e.g., to clip a 100x100 rect on the top right of a screen of 1000x1000px size, you must pass a rect of (900, 100, 900, 100)
 		*/
-		void StartClipping(const Rect &ClippingRect);
+		virtual void StartClipping(const Rect &ClippingRect) override;
 
 		/*!
 		*	Finishes clipping the rendering from a rectangle
 		*/
-		void FinishClipping();
+		virtual void FinishClipping() override;
 
 		/*!
 		*	Clear a render buffer
 		*	\param Buffers a Bitmask of RenderBuffer::*
 		*/
-		void Clear(uint32 Buffers);
+		virtual void Clear(uint32 Buffers) override;
 
 		/*!
 		*	Displays a frame
 		*/
-		void Display();
+		virtual void Display() override;
 
 		/*!
 		*	Gets the last Frame Statistics
 		*/
-		const RendererFrameStats &FrameStats() const;
+		virtual const RendererFrameStats &FrameStats() const override;
 
 		/*!
 		*	Sets the current World Matrix
 		*	\param WorldMatrix the new World Matrix
 		*/
-		void SetWorldMatrix(const Matrix4x4 &WorldMatrix);
+		virtual void SetWorldMatrix(const Matrix4x4 &WorldMatrix) override;
 
 		/*!
 		*	Sets the current Projection Matrix
 		*	\param ProjectionMatrix the new World Matrix
 		*/
-		void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix);
-
-		/*!
-		*	Pushes (stores) the currently used world and projection matrices
-		*/
-		void PushMatrices();
-
-		/*!
-		*	Pops (restores) the last used world and projection matrices
-		*/
-		void PopMatrices();
-
-		/*!
-		*	Gets the current World Matrix
-		*/
-		const Matrix4x4 &WorldMatrix();
-
-		/*!
-		*	Gets the current projection matrix
-		*/
-		const Matrix4x4 &ProjectionMatrix();
+		virtual void SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix) override;
 
 		/*!
 		*	Sets the current viewport
@@ -246,25 +226,25 @@ namespace FlamingTorch
 		*	\param Width the viewport's width
 		*	\param Height the viewport's height
 		*/
-		void SetViewport(f32 x, f32 y, f32 Width, f32 Height);
+		virtual void SetViewport(f32 x, f32 y, f32 Width, f32 Height) override;
 
 		/*!
 		*	Creates a texture
 		*	\return a texture handle, or 0xFFFFFFFF on error
 		*/
-		TextureHandle CreateTexture();
+		virtual TextureHandle CreateTexture() override;
 
 		/*!
 		*	Check whether a texture handle is still valid
 		*	\param Handle the texture's handle
 		*/
-		bool IsTextureHandleValid(TextureHandle Handle);
+		virtual bool IsTextureHandleValid(TextureHandle Handle) override;
 
 		/*!
 		*	Destroys a texture
 		*	\param Handle the texture handle to destroy
 		*/
-		void DestroyTexture(TextureHandle Handle);
+		virtual void DestroyTexture(TextureHandle Handle) override;
 
 		/*!
 		*	Fills in a texture's data
@@ -273,7 +253,7 @@ namespace FlamingTorch
 		*	\param Width the width of the texture
 		*	\param Height the height of the texture
 		*/
-		void SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height);
+		virtual void SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height) override;
 
 		/*!
 		*	Gets a texture's data to a pixel buffer
@@ -282,27 +262,27 @@ namespace FlamingTorch
 		*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
 		*	\return whether we were able to capture the screen
 		*/
-		virtual bool GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount);
+		virtual bool GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount) override;
 
 		/*!
 		*	Sets a texture's wrap mode
 		*	\param Handle the texture's Handle
 		*	\param WrapMode one of TextureWrapMode::*
 		*/
-		void SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode);
+		virtual void SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode) override;
 
 		/*!
 		*	Sets a texture's filter mode
 		*	\param Handle the texture's Handle
 		*	\param Filtering one of TextureFiltering::*
 		*/
-		void SetTextureFiltering(TextureHandle Handle, uint32 Filtering);
+		virtual void SetTextureFiltering(TextureHandle Handle, uint32 Filtering) override;
 
 		/*!
 		*	Sets the current blending mode
 		*	\param BlendingMode one of BlendingMode::*
 		*/
-		void SetBlendingMode(uint32 BlendingMode);
+		virtual void SetBlendingMode(uint32 BlendingMode) override;
 
 		/*!
 		*	Captures the screen to a pixel buffer
@@ -310,67 +290,65 @@ namespace FlamingTorch
 		*	\param BufferByteCount the byte count of the buffer. It should always be equal to Width x Height x 4 bytes
 		*	\return whether we were able to capture the screen
 		*/
-		bool CaptureScreen(uint8 *Pixels, uint32 BufferByteCount);
+		virtual bool CaptureScreen(uint8 *Pixels, uint32 BufferByteCount) override;
 
 		/*!
 		*	Binds a texture for use
 		*	\param Handle the texture's handle
 		*/
-		void BindTexture(TextureHandle Handle);
+		virtual void BindTexture(TextureHandle Handle) override;
 
 		/*!
 		*	Polls for new renderer events
 		*	\param Out the RendererEvent we received
 		*	\return true if there's a new event, false otherwise
 		*/
-		bool PollEvent(RendererEvent &Out);
+		virtual bool PollEvent(RendererEvent &Out) override;
 
 		/*!
 		*	Creates a Font from a Stream of Data
 		*	\param Data the data of the font
 		*	\return a FontHandle or 0xFFFFFFFF
 		*/
-		FontHandle CreateFont(Stream *Data);
+		virtual FontHandle CreateFont(Stream *Data) override;
 
 		/*!
 		*	Destroys a font
 		*	\param Handle the font's handle
 		*/
-		void DestroyFont(FontHandle Handle);
+		virtual void DestroyFont(FontHandle Handle) override;
 
 		/*!
 		*	Measures Text
-		*	\param Handle the font's handle
 		*	\param Text the text to measure
 		*	\param Parameters the text parameters to use
 		*	\return a rectangle with the text's bounds
 		*/
-		Rect MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters);
+		virtual Rect MeasureText(const std::string &Text, const TextParams &Parameters) override;
 
 		/*!
 		*	Renders Text to the screen
-		*	\param Handle the font's handle
 		*	\param Text the text to measure
 		*	\param Parameters the text parameters to use
 		*/
-		void RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters);
+		virtual void RenderText(const std::string &Text, const TextParams &Parameters) override;
 
 		/*!
 		*	Sets the current Mouse Position
 		*	\param Position the new Mouse Position
 		*/
-		void SetMousePosition(const Vector2 &Position);
+		virtual void SetMousePosition(const Vector2 &Position) override;
 
 		/*!
 		*	Gets the Native Window Handle of this Renderer
 		*/
-		void *WindowHandle() const;
+		virtual void *WindowHandle() const override;
 
 		/*!
 		*	Sets the Rendering Frame Rate
 		*	\param FPS the target FPS
 		*/
-		void SetFrameRate(uint32 FPS);
+		virtual void SetFrameRate(uint32 FPS) override;
 
 		/*!
 		*	Enables a GL State
@@ -395,6 +373,6 @@ namespace FlamingTorch
 		/*!
 		*	Reports a Skipped Draw Call (used to help figure out how much we're optimizing by skipping unnecessary drawcalls)
 		*/
-		void ReportSkippedDrawCall();
+		virtual void ReportSkippedDrawCall() override;
 	};
 #endif

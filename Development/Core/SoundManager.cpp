@@ -3,7 +3,7 @@ namespace FlamingTorch
 {
 #	if USE_SOUND
 #	define TAG "SoundManager"
-
+	uint64 SoundManager::SoundCounter = 0, SoundManager::MusicCounter = 0;
 	SoundManager SoundManager::Instance;
 
 	void SoundManager::Music::Play()
@@ -161,7 +161,7 @@ namespace FlamingTorch
 			return 0xFFFFFFFF;
 		};
 
-		StringID SoundID = MakeStringID("SOUND__STREAM__" + StringUtils::PointerString(In) + "_" + StringUtils::MakeIntString(GameClockTimeNoPause()));
+		StringID SoundID = MakeStringID("SOUND__STREAM__" + StringUtils::PointerString(In) + "_" + StringUtils::MakeIntString(SoundCounter));
 
 		SoundMap::iterator sit = Sounds.find(SoundID);
 
@@ -207,6 +207,8 @@ namespace FlamingTorch
 
 		Sounds[SoundID] = TheSound;
 
+		SoundCounter++;
+
 		return SoundID;
 	};
 
@@ -250,7 +252,7 @@ namespace FlamingTorch
 		std::stringstream str;
 		str << "MUSIC__STREAM__" << std::hex << (uint64)In << GameClockTimeNoPause();
 
-		StringID MusicID = MakeStringID("MUSIC__STREAM__" + StringUtils::PointerString(In) + "_" + StringUtils::MakeIntString(GameClockTimeNoPause()));
+		StringID MusicID = MakeStringID("MUSIC__STREAM__" + StringUtils::PointerString(In) + "_" + StringUtils::MakeIntString(MusicCounter));
 
 		MusicMap::iterator sit = Musics.find(MusicID);
 
@@ -272,6 +274,8 @@ namespace FlamingTorch
 		};
 
 		Musics[MusicID] = Out;
+
+		MusicCounter++;
 
 		return MusicID;
 	};
@@ -368,6 +372,9 @@ namespace FlamingTorch
 		{
 			while(it->second.Get() == NULL || it->second.use_count() == 1)
 			{
+				if (it->second.Get())
+					it->second->Stop();
+
 				Sounds.erase(it);
 				it = Sounds.begin();
 
@@ -383,6 +390,9 @@ namespace FlamingTorch
 		{
 			while(it->second.Get() == NULL || it->second.use_count() == 1)
 			{
+				if (it->second.Get())
+					it->second->Stop();
+
 				Musics.erase(it);
 				it = Musics.begin();
 

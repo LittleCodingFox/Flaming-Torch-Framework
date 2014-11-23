@@ -98,6 +98,8 @@ int main(int argc, char **argv)
 
 	for(GenericConfig::Section::ValueMap::iterator it = ResourceDirectoriesSection.Values.begin(); it != ResourceDirectoriesSection.Values.end(); it++)
     {
+		Log::Instance.LogInfo(TAG, "Added Resource Directory '%s'", it->second.Content.c_str());
+
 		ResourceDirectories.push_back(it->second.Content);
 	};
 
@@ -140,6 +142,8 @@ int main(int argc, char **argv)
 
 			if(FileSystemUtils::DirectoryExists(ResourceDirectoryName))
 			{
+				Log::Instance.LogInfo(TAG, "... Added valid resource directory '%s'", ResourceDirectoryName.c_str());
+
 				ValidResourceDirectories[DirectoryName].push_back(ResourceDirectoryName);
 			};
 		};
@@ -149,6 +153,8 @@ int main(int argc, char **argv)
 	{
         std::string DirectoryName = CopyDirectories[i].substr((FileSystemUtils::ResourcesDirectory() + "/PackageContent/").length());
         std::string TargetDirectory = FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/" + DirectoryName;
+
+		Log::Instance.LogInfo(TAG, "... Processing %s", DirectoryName.c_str());
 
 		std::vector<std::string> PrioritizedResourceDirectories;
 
@@ -196,11 +202,13 @@ int main(int argc, char **argv)
 				
 				Parameters += " \"" + MapFiles[k] + "\"";
 
+				Log::Instance.LogInfo(TAG, "...    Calling TiledConverter with arguments '%s'", Parameters.c_str());
+
 				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 				if(0 != ExitCode)
 				{
-					Log::Instance.LogErr(TAG, "Unable to run TiledMap: Exit Code '%d'", ExitCode);
+					Log::Instance.LogErr(TAG, "...    Unable to run TiledConverter: Exit Code '%d'", ExitCode);
 
 					continue;
 				};
@@ -236,11 +244,13 @@ int main(int argc, char **argv)
 				
 				Parameters += " \"" + TexturePackFiles[k] + "\"";
 
+				Log::Instance.LogInfo(TAG, "...    Calling TexturePacker with arguments '%s'", Parameters.c_str());
+
 				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 				if(0 != ExitCode)
 				{
-					Log::Instance.LogErr(TAG, "Unable to run TexturePacker: Exit Code '%d'", ExitCode);
+					Log::Instance.LogErr(TAG, "...    Unable to run TexturePacker: Exit Code '%d'", ExitCode);
 
 					continue;
 				};
@@ -259,51 +269,56 @@ int main(int argc, char **argv)
 		std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + PackerPath;
 		std::string Parameters = "-dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
 
+		Log::Instance.LogInfo(TAG, "...    Calling Packer with arguments '%s'", Parameters.c_str());
+
 		int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 		if(0 != ExitCode)
 		{
-			Log::Instance.LogErr(TAG, "Unable to run Packer: Exit Code '%d'", ExitCode);
+			Log::Instance.LogErr(TAG, "...    Unable to run Packer: Exit Code '%d'", ExitCode);
 
 			continue;
 		};
 
-        Log::Instance.LogInfo(TAG, "...    Processing for Android...");
-
 		std::string FinalAndroidPath = Path(FileSystemUtils::ResourcesDirectory() + "/" + AndroidPath).FullPath();
 
-		if(!FileSystemUtils::DirectoryExists(FinalAndroidPath))
+		if(FileSystemUtils::DirectoryExists(Path(FinalAndroidPath).FullPath()))
 		{
-			Log::Instance.LogWarn(TAG, "Android Path '%s' not found!", AndroidPath.c_str());
-		}
-		else
-		{
-			std::string AssetsPath = FinalAndroidPath + "/assets/";
+			Log::Instance.LogInfo(TAG, "...    Processing for Android...");
 
-			if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
+			if(!FileSystemUtils::DirectoryExists(FinalAndroidPath))
 			{
-				Log::Instance.LogWarn(TAG, "Android: Unable to create Assets folder");
-
-				continue;
-			};
-
-			AssetsPath += "/Content/";
-
-			if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
+				Log::Instance.LogWarn(TAG, "Android Path '%s' not found!", AndroidPath.c_str());
+			}
+			else
 			{
-				Log::Instance.LogWarn(TAG, "Android: Unable to create Content folder");
+				std::string AssetsPath = FinalAndroidPath + "/assets/";
 
-				continue;
-			};
+				if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
+				{
+					Log::Instance.LogWarn(TAG, "Android: Unable to create Assets folder");
 
-			FileStream OutStream, InStream;
+					continue;
+				};
 
-			if(!OutStream.Open(Path(AssetsPath + "/" + DirectoryName + ".package.gif").FullPath(), StreamFlags::Write) ||
-				!InStream.Open(Path(FileSystemUtils::ResourcesDirectory() + "/Content/" + DirectoryName + ".package").FullPath(), StreamFlags::Read) || !InStream.CopyTo(&OutStream))
-			{
-				Log::Instance.LogErr(TAG, "Android: Unable to create copy package '%s'", DirectoryName.c_str());
+				AssetsPath += "/Content/";
 
-				continue;
+				if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
+				{
+					Log::Instance.LogWarn(TAG, "Android: Unable to create Content folder");
+
+					continue;
+				};
+
+				FileStream OutStream, InStream;
+
+				if(!OutStream.Open(Path(AssetsPath + "/" + DirectoryName + ".package.gif").FullPath(), StreamFlags::Write) ||
+					!InStream.Open(Path(FileSystemUtils::ResourcesDirectory() + "/Content/" + DirectoryName + ".package").FullPath(), StreamFlags::Read) || !InStream.CopyTo(&OutStream))
+				{
+					Log::Instance.LogErr(TAG, "Android: Unable to create copy package '%s'", DirectoryName.c_str());
+
+					continue;
+				};
 			};
 		};
 	};

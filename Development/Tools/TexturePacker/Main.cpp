@@ -66,6 +66,8 @@ int main(int argc, char **argv)
 			{
 				OutDirectory = argv[i + 1];
 
+				Log::Instance.LogInfo(TAG, "Set Out directory '%s'", argv[i + 1]);
+
 				i++;
 			};
 		}
@@ -74,6 +76,8 @@ int main(int argc, char **argv)
 			if(i + 1 < argc)
 			{
 				ResourceDirectories.push_back(argv[i + 1]);
+
+				Log::Instance.LogInfo(TAG, "Added resource directory '%s'", argv[i + 1]);
 
 				i++;
 			};
@@ -106,6 +110,8 @@ int main(int argc, char **argv)
 			{
 				OutFileName = argv[i + 1];
 
+				Log::Instance.LogInfo(TAG, "Set Out file '%s'", argv[i + 1]);
+
 				i++;
 			};
 		}
@@ -121,7 +127,9 @@ int main(int argc, char **argv)
 	};
 
 	Log::Instance.LogInfo(TAG, "Starting version %d.%d", VERSION_MAJOR, VERSION_MINOR);
-	Log::Instance.LogInfo(TAG, "Will store compiled data to directory '%s'", OutDirectory.c_str());
+	Log::Instance.LogInfo(TAG, "Will store compiled data to directory '%s' as '%s'", OutDirectory.c_str(), OutFileName.c_str());
+	Log::Instance.LogInfo(TAG, "Maximum size: %dx%d", MaxWidth, MaxHeight);
+	Log::Instance.LogInfo(TAG, "Processing '%s'", FileName.c_str());
 
 	SuperSmartPointer<FileStream> Stream(new FileStream());
 	GenericConfig InConfig;
@@ -179,6 +187,8 @@ int main(int argc, char **argv)
 			{
 				AnimationIndices[AnimationName] = Frames.size();
 			};
+			
+			Log::Instance.LogWarn(TAG, "Loaded frame '%s'", AnimationFrames[i].c_str());
 
 			Frames.push_back(Frame);
 		};

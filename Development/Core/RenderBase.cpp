@@ -674,14 +674,14 @@ namespace FlamingTorch
 		Impl->DestroyFont(Handle);
 	};
 
-	Rect Renderer::MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
+	Rect Renderer::MeasureText(const std::string &Text, const TextParams &Parameters)
 	{
-		return Impl->MeasureText(Handle, Text, Parameters);
+		return Impl->MeasureText(Text, Parameters);
 	};
 
-	void Renderer::RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
+	void Renderer::RenderText(const std::string &Text, const TextParams &Parameters)
 	{
-		Impl->RenderText(Handle, Text, Parameters);
+		Impl->RenderText(Text, Parameters);
 	};
 
 	void *Renderer::WindowHandle() const

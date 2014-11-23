@@ -28,7 +28,7 @@ namespace FlamingTorch
 	{
 		PROFILE("RenderTextUtils MeasureTextSimple", StatTypes::Rendering);
 
-		return TheRenderer->MeasureText(Params.FontValue ? Params.FontValue : DefaultFont, Str, Params);
+		return TheRenderer->MeasureText(Str, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
 	};
 
 	void RenderTextUtils::FitTextAroundLength(Renderer *TheRenderer, const std::string &Str, TextParams Params, const f32 &LengthInPixels, int32 *OutFontSize)
@@ -52,7 +52,7 @@ namespace FlamingTorch
 	{
 		PROFILE("RenderTextUtils RenderText", StatTypes::Rendering);
 
-		TheRenderer->RenderText(Params.FontValue ? Params.FontValue : DefaultFont, String, Params);
+		TheRenderer->RenderText(String, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
 	};
 
 	Rect RenderTextUtils::MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params)

@@ -1811,6 +1811,10 @@ namespace FlamingTorch
 					luabind::value("Type_String", ConsoleVariableType::String)
 				]
 				.def(luabind::constructor<>())
+				.def(luabind::constructor<const std::string &, uint32>())
+				.def(luabind::constructor<const std::string &, int32>())
+				.def(luabind::constructor<const std::string &, f32>())
+				.def(luabind::constructor<const std::string &, const std::string &>())
 				.def_readwrite("Type", &ConsoleVariable::Type)
 				.def_readwrite("Name", &ConsoleVariable::Name)
 				.def_readwrite("UintValue", &ConsoleVariable::UintValue)

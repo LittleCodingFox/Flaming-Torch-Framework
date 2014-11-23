@@ -596,20 +596,18 @@ public:
 
 	/*!
 	*	Measures Text
-	*	\param Handle the font's handle
 	*	\param Text the text to measure
 	*	\param Parameters the text parameters to use
 	*	\return a rectangle with the text's bounds
 	*/
-	Rect MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters);
+	Rect MeasureText(const std::string &Text, const TextParams &Parameters);
 
 	/*!
 	*	Renders Text to the screen
-	*	\param Handle the font's handle
 	*	\param Text the text to measure
 	*	\param Parameters the text parameters to use
 	*/
-	void RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters);
+	void RenderText(const std::string &Text, const TextParams &Parameters);
 
 	/*!
 	*	Gets the Native Window Handle of this Renderer
@@ -969,20 +967,18 @@ public:
 
 	/*!
 	*	Measures Text
-	*	\param Handle the font's handle
 	*	\param Text the text to measure
 	*	\param Parameters the text parameters to use
 	*	\return a rectangle with the text's bounds
 	*/
-	virtual Rect MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters) = 0;
+	virtual Rect MeasureText(const std::string &Text, const TextParams &Parameters) = 0;
 
 	/*!
 	*	Renders Text to the screen
-	*	\param Handle the font's handle
 	*	\param Text the text to measure
 	*	\param Parameters the text parameters to use
 	*/
-	virtual void RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters) = 0;
+	virtual void RenderText(const std::string &Text, const TextParams &Parameters) = 0;
 
 	/*!
 	*	Gets the Native Window Handle of this Renderer
@@ -1283,23 +1279,21 @@ public:
 
 	/*!
 	*	Measures Text
-	*	\param Handle the font's handle
 	*	\param Text the text to measure
 	*	\param Parameters the text parameters to use
 	*	\return a rectangle with the text's bounds
 	*/
-	Rect MeasureText(FontHandle Handle, const std::string &Text, const TextParams &Parameters)
+	Rect MeasureText(const std::string &Text, const TextParams &Parameters)
 	{
 		return Rect();
 	};
 
 	/*!
 	*	Renders Text to the screen
-	*	\param Handle the font's handle
 	*	\param Text the text to measure
 	*	\param Parameters the text parameters to use
 	*/
-	void RenderText(FontHandle Handle, const std::string &Text, const TextParams &Parameters) {};
+	void RenderText(const std::string &Text, const TextParams &Parameters) {};
 
 	/*!
 	*	Gets the Native Window Handle of this Renderer

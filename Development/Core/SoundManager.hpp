@@ -17,6 +17,7 @@ private:
 	typedef std::map<StringID, SuperSmartPointer<Music> > MusicMap;
 	MusicMap Musics;
 
+	static uint64 SoundCounter, MusicCounter;
 public:
 	class Sound
 	{
