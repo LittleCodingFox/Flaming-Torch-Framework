@@ -246,7 +246,7 @@ namespace FlamingTorch
 
 		for(TouchMap::iterator it = Touches.begin(); it != Touches.end(); it++)
 		{
-			it->second.JustPressed = it->second.JustReleased = false;
+			it->second.Dragged = it->second.JustPressed = it->second.JustReleased = false;
 		};
 
 		Character = L'\0';
@@ -352,6 +352,8 @@ namespace FlamingTorch
 				break;
 
 			case RendererEventType::TouchDrag:
+				Touches[Event.TouchIndex].Pressed = Touches[Event.TouchIndex].Dragged = true;
+				Touches[Event.TouchIndex].DragDifference = Event.TouchPosition - Touches[Event.TouchIndex].Position;
 				Touches[Event.TouchIndex].Position = Event.TouchPosition;
 
 				break;
@@ -503,7 +505,7 @@ namespace FlamingTorch
 
 		for(TouchMap::iterator it = Touches.begin(); it != Touches.end(); it++)
 		{
-			if(it->second.JustPressed || it->second.Pressed || it->second.JustReleased)
+			if(it->second.JustPressed || it->second.Pressed || it->second.Dragged || it->second.JustReleased)
 			{
 				bool IgnoreAction = false;
 
@@ -998,7 +1000,7 @@ namespace FlamingTorch
 		return it != Contexts.end() ? it->second.Get() : NULL;
 	};
 
-	void InputCenter::AddContext(SuperSmartPointer<Context> TheContext)
+	void InputCenter::AddContext(DisposablePointer<Context> TheContext)
 	{
 		FLASSERT(TheContext.Get(), "Invalid Context!");
 

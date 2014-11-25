@@ -330,7 +330,7 @@ private:
 	SpriteVertex GeneratedGeometry[54];
 	uint32 VertexCount;
 public:
-	SuperSmartPointer<Texture> SpriteTexture;
+	DisposablePointer<Texture> SpriteTexture;
 	SpriteDrawOptions Options;
 
 	Sprite();

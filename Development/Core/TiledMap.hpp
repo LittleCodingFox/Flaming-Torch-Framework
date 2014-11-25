@@ -81,7 +81,7 @@ public:
 #endif
 	};
 
-	std::vector<SuperSmartPointer<Layer> > Layers;
+	std::vector<DisposablePointer<Layer> > Layers;
 
 	class UniqueTilesetInfo
 	{
@@ -91,8 +91,8 @@ public:
 
 #if USE_GRAPHICS
 		std::string UniqueTilesetTextureName;
-		SuperSmartPointer<Texture> UniqueTilesetTexture;
-		SuperSmartPointer<TexturePacker> UniqueTilesetTexturePacker;
+		DisposablePointer<Texture> UniqueTilesetTexture;
+		DisposablePointer<TexturePacker> UniqueTilesetTexturePacker;
 		GenericConfig UniqueTilesetConfig;
 #endif
 	}TileSet;

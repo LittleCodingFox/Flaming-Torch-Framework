@@ -254,12 +254,12 @@ public:
 	{
 	public:
 		uint8 Index;
-		Vector2 Position;
-		bool Pressed, JustPressed, JustReleased;
+		Vector2 Position, DragDifference;
+		bool Pressed, JustPressed, JustReleased, Dragged;
 
 		static InfoNameMap Names;
 
-		TouchInfo() : Index(0), Pressed(false), JustPressed(false), JustReleased(false) {};
+		TouchInfo() : Index(0), Pressed(false), JustPressed(false), JustReleased(false), Dragged(false) {};
 
 		std::string NameAsString() const;
 	};
@@ -602,7 +602,7 @@ public:
 	*	Adds an Input Context
 	*	\param TheContext the input context to add
 	*/
-	void AddContext(SuperSmartPointer<Context> TheContext);
+	void AddContext(DisposablePointer<Context> TheContext);
 
 	/*!
 	*	Enables an Input Context
@@ -629,7 +629,7 @@ private:
 	typedef std::map<StringID, Action> ActionMap;
 	ActionMap Actions;
 
-	typedef std::map<StringID, SuperSmartPointer<Context> > ContextMap;
+	typedef std::map<StringID, DisposablePointer<Context> > ContextMap;
 	ContextMap Contexts;
 
 	std::vector<StringID> EnabledContexts;

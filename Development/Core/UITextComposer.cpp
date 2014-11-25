@@ -4,7 +4,7 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
-	UITextComposer::UITextComposer(UIManager *Manager) : UIPanel("UITextComposer", Manager), LineHeight(0), IgnoreHeightBoundsValue(false)
+	UITextComposer::UITextComposer(UIManager *Manager) : UIElement("UITextComposer", Manager), LineHeight(0), IgnoreHeightBoundsValue(false)
 	{
 		OnConstructed();
 	};
@@ -21,7 +21,7 @@ namespace FlamingTorch
 		LastPosition = Vector2();
 	};
 
-	const Vector2 &UITextComposer::GetWritePosition()
+	const Vector2 &UITextComposer::GetWritePosition() const
 	{
 		return LastPosition;
 	};
@@ -31,7 +31,7 @@ namespace FlamingTorch
 		LastPosition = WritePosition;
 	};
 
-	bool UITextComposer::IgnoreHeightBounds()
+	bool UITextComposer::IgnoreHeightBounds() const
 	{
 		return IgnoreHeightBoundsValue;
 	};
@@ -60,7 +60,7 @@ namespace FlamingTorch
 			return;
 		};
 
-		Vector2 TextSize = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), Text, Params).ToFullSize();
+		Vector2 TextSize = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), Text, Params).Size();
 
 		if(!IgnoreHeightBoundsValue && LastPosition.y + Params.PositionValue.y + TextSize.y > SizeValue.y)
 			return;
@@ -110,45 +110,38 @@ namespace FlamingTorch
 
 	void UITextComposer::Update(const Vector2 &ParentPosition)
 	{
-		UIPanel::Update(ParentPosition);
+		UIElement::Update(ParentPosition);
 
-		PerformLayout();
+		Vector2 ActualPosition = ParentPosition + Position() + Offset();
 
-		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
-
-		for(uint32 i = 0; i < Children.size(); i++)
+		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
-			Children[i]->Update(ActualPosition);
+			ChildrenValue[i]->Update(ActualPosition);
 		};
 	};
 
 	void UITextComposer::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
-		PerformLayout();
+		UIElement::Draw(ParentPosition, Renderer);
 
-		UIPanel::Draw(ParentPosition, Renderer);
-
-		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
+		Vector2 ActualPosition = ParentPosition + Position() + Offset();
 
 		if(IgnoreHeightBoundsValue)
 		{
-			Vector2 ChildrenSize = this->ChildrenSize();
-
-			Renderer->StartClipping(Rect(ActualPosition.x, ActualPosition.x + SizeValue.x, ActualPosition.y, ActualPosition.y + SizeValue.y));
-
-			for(uint32 i = 0; i < Children.size(); i++)
+			for(uint32 i = 0; i < ChildrenValue.size(); i++)
 			{
 				//TODO: Maybe allow the Translation field here like in scrollbars?
-				Children[i]->Draw(ActualPosition, Renderer);
+				ChildrenValue[i]->Draw(ActualPosition, Renderer);
 			};
-
-			Renderer->FinishClipping();
 		}
 		else
 		{
-			for(uint32 i = 0; i < Children.size(); i++)
+			for (uint32 i = 0; i < ChildrenValue.size(); i++)
 			{
-				Children[i]->Draw(ActualPosition, Renderer);
+				if((ChildrenValue[i]->Position() + ChildrenValue[i]->Size() + ChildrenValue[i]->Offset()).y > Size().y)
+					break;
+
+				ChildrenValue[i]->Draw(ActualPosition, Renderer);
 			};
 		};
 	};

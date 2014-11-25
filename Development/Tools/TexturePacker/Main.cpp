@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 	Log::Instance.LogInfo(TAG, "Maximum size: %dx%d", MaxWidth, MaxHeight);
 	Log::Instance.LogInfo(TAG, "Processing '%s'", FileName.c_str());
 
-	SuperSmartPointer<FileStream> Stream(new FileStream());
+	DisposablePointer<FileStream> Stream(new FileStream());
 	GenericConfig InConfig;
 
 	if(!Stream->Open(FileName, StreamFlags::Read | StreamFlags::Text) || !InConfig.DeSerialize(Stream))
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 
 	GenericConfig::Section &AnimationsSection = InConfig.Sections["Animations"];
 
-	std::vector<SuperSmartPointer<Texture> > Frames;
+	std::vector<DisposablePointer<Texture> > Frames;
 	std::map<std::string, uint32> AnimationIndices;
 
 	Log::Instance.LogInfo(TAG, "Parsing Animations...");
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 
 		for(uint32 i = 0; i < AnimationFrames.size(); i++)
 		{
-			SuperSmartPointer<Texture> Frame = ResourceManager::Instance.GetTexture(AnimationFrames[i]);
+			DisposablePointer<Texture> Frame = ResourceManager::Instance.GetTexture(AnimationFrames[i]);
 			
 			if(!Frame)
 			{
@@ -194,7 +194,7 @@ int main(int argc, char **argv)
 		};
 	};
 
-	SuperSmartPointer<TexturePacker> Packed = TexturePacker::FromTextures(Frames, MaxWidth, MaxHeight);
+	DisposablePointer<TexturePacker> Packed = TexturePacker::FromTextures(Frames, MaxWidth, MaxHeight);
 
 	if(Packed.Get() == NULL || Packed->Indices.size() != Frames.size())
 	{
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
 		OutConfig.SetValue("Animations", it->first.c_str(), str.str().c_str());
 	};
 
-	SuperSmartPointer<FileStream> OutStream(new FileStream());
+	DisposablePointer<FileStream> OutStream(new FileStream());
 
 	if(!OutFileName.length())
 	{
@@ -275,7 +275,7 @@ int main(int argc, char **argv)
 
 	Log::Instance.LogInfo(TAG, "Testing for correct deserialization");
 
-	SuperSmartPointer<Texture> MainTexture = Packed->MainTexture;
+	DisposablePointer<Texture> MainTexture = Packed->MainTexture;
 
 	if(!OutStream->Open(OutFileNameCFG, StreamFlags::Read | StreamFlags::Text) || !OutConfig.DeSerialize(OutStream))
 	{

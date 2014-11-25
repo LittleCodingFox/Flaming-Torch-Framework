@@ -5,7 +5,7 @@ namespace FlamingTorch
 
 	ResourceManager ResourceManager::Instance;
 
-	SuperSmartPointer<Texture> ResourceManager::InvalidTexture;
+	DisposablePointer<Texture> ResourceManager::InvalidTexture;
 
 	bool ResourceManager::IsSameTexture(Texture *Self, Texture *Other)
 	{
@@ -52,13 +52,13 @@ namespace FlamingTorch
 		Cleanup();
 	};
 
-	SuperSmartPointer<Texture> ResourceManager::GetTexture(const std::string &FileName)
+	DisposablePointer<Texture> ResourceManager::GetTexture(const std::string &FileName)
 	{
 		if(!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return SuperSmartPointer<Texture>();
+			return DisposablePointer<Texture>();
 		};
 
 		StringID RealName = MakeStringID(FileName);
@@ -70,13 +70,13 @@ namespace FlamingTorch
 			Log::Instance.LogDebug(TAG, "Loading Texture '%s' (H: '0x%08x').", FileName.c_str(),
 				RealName);
 
-			SuperSmartPointer<Texture> _Texture(new Texture());
+			DisposablePointer<Texture> _Texture(new Texture());
 
 			if(!_Texture->FromFile(FileName.c_str()))
 			{
 				Log::Instance.LogErr(TAG, "Failed to load texture '%s' (H: '0x%08x').", FileName.c_str(), RealName);
 
-				return SuperSmartPointer<Texture>();
+				return DisposablePointer<Texture>();
 			};
 
 			Textures[RealName] = _Texture;
@@ -87,18 +87,18 @@ namespace FlamingTorch
 		return it->second;
 	};
 
-	SuperSmartPointer<Texture> ResourceManager::GetTexture(const Path &ThePath)
+	DisposablePointer<Texture> ResourceManager::GetTexture(const Path &ThePath)
 	{
 		return GetTexture(ThePath.FullPath());
 	};
 
-	SuperSmartPointer<Texture> ResourceManager::GetTextureFromPackage(const std::string &Directory, const std::string &FileName)
+	DisposablePointer<Texture> ResourceManager::GetTextureFromPackage(const std::string &Directory, const std::string &FileName)
 	{
 		if(!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return SuperSmartPointer<Texture>();
+			return DisposablePointer<Texture>();
 		};
 
 		StringID RealName = MakeStringID("PACKAGE:" + Directory + "_" + FileName);
@@ -110,14 +110,14 @@ namespace FlamingTorch
 			Log::Instance.LogDebug(TAG, "Loading Texture from '%s%s' (H: '0x%08x').", Directory.c_str(),
 				FileName.c_str(), RealName);
 
-			SuperSmartPointer<Texture> _Texture(new Texture());
+			DisposablePointer<Texture> _Texture(new Texture());
 
 			if(!_Texture->FromPackage(Directory, FileName))
 			{
 				Log::Instance.LogErr(TAG, "Failed to load texture '%s%s' (H: '0x%08x').", Directory.c_str(),
 					FileName.c_str(), RealName);
 
-				return SuperSmartPointer<Texture>();
+				return DisposablePointer<Texture>();
 			};
 
 			Textures[RealName] = _Texture;
@@ -128,9 +128,45 @@ namespace FlamingTorch
 		return it->second;
 	};
 
-	SuperSmartPointer<Texture> ResourceManager::GetTextureFromPackage(const Path &ThePath)
+	DisposablePointer<Texture> ResourceManager::GetTextureFromPackage(const Path &ThePath)
 	{
 		return GetTextureFromPackage(ThePath.Directory, ThePath.BaseName);
+	};
+
+	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const std::string &FileName, GenericConfig *Config)
+	{
+		if(!Config)
+			return DisposablePointer<TexturePacker>();
+
+		DisposablePointer<Texture> In = GetTexture(FileName);
+
+		if(!In)
+			return DisposablePointer<TexturePacker>();
+
+		return TexturePacker::FromConfig(In, *Config);
+	};
+
+	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const Path &ThePath, GenericConfig *Config)
+	{
+		return GetTexturePack(ThePath.FullPath(), Config);
+	};
+
+	DisposablePointer<TexturePacker> ResourceManager::GetTexturePackFromPackage(const std::string &Directory, const std::string &FileName, GenericConfig *Config)
+	{
+		return GetTexturePackFromPackage(Path(Directory + Path::PathSeparator + FileName), Config);
+	};
+
+	DisposablePointer<TexturePacker> ResourceManager::GetTexturePackFromPackage(const Path &ThePath, GenericConfig *Config)
+	{
+		if (!Config)
+			return DisposablePointer<TexturePacker>();
+
+		DisposablePointer<Texture> In = GetTextureFromPackage(ThePath);
+
+		if (!In)
+			return DisposablePointer<TexturePacker>();
+
+		return TexturePacker::FromConfig(In, *Config);
 	};
 
 #if USE_GRAPHICS
@@ -150,7 +186,7 @@ namespace FlamingTorch
 		{
 			Log::Instance.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
-			SuperSmartPointer<FileStream> TheStream(new FileStream());
+			DisposablePointer<FileStream> TheStream(new FileStream());
 
 			if(!TheStream->Open(FileName, StreamFlags::Read))
 			{
@@ -197,7 +233,7 @@ namespace FlamingTorch
 		{
 			Log::Instance.LogDebug(TAG, "Loading a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
-			SuperSmartPointer<Stream> TheStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Directory), MakeStringID(FileName));
+			DisposablePointer<Stream> TheStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Directory), MakeStringID(FileName));
 
 			if(!TheStream.Get())
 			{
@@ -264,7 +300,7 @@ namespace FlamingTorch
 
 			if(it->second->GetData().Get() && it->second->GetData()->Width() != 0 && it->second->GetData()->Height() != 0)
 			{
-				SuperSmartPointer<TextureBuffer> Buffer = it->second->GetData();
+				DisposablePointer<TextureBuffer> Buffer = it->second->GetData();
 
 				it->second->FromData(&Buffer->Data[0], it->second->Width(), it->second->Height());
 			}

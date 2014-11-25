@@ -233,9 +233,9 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	SuperSmartPointer<WorldStreamerCallback> GetWorldStreamerCallbackFromGame()
+	DisposablePointer<WorldStreamerCallback> GetWorldStreamerCallbackFromGame()
 	{
-		return SuperSmartPointer<WorldStreamerCallback>(new ScriptedWorldStreamerCallback(GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance));
+		return DisposablePointer<WorldStreamerCallback>(new ScriptedWorldStreamerCallback(GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance));
 	};
 
 	luabind::object PackageFileSystemFindDirectories(const std::string &Directory, lua_State *State)
@@ -551,7 +551,7 @@ namespace FlamingTorch
 	{
 		luabind::object Out;
 
-		SuperSmartPointer<FileStream> ScriptStream(new FileStream());
+		DisposablePointer<FileStream> ScriptStream(new FileStream());
 
 		if(!ScriptStream->Open(ScriptFileName, StreamFlags::Read | StreamFlags::Text))
 			return Out;
@@ -613,7 +613,7 @@ namespace FlamingTorch
 	{
 		luabind::object Out;
 
-		SuperSmartPointer<Stream> ScriptStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Directory), MakeStringID(FileName));
+		DisposablePointer<Stream> ScriptStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Directory), MakeStringID(FileName));
 
 		if(!ScriptStream)
 			return Out;
@@ -656,6 +656,20 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
+#	define DECLARE_UIEVENT_FUNCTION(event)\
+	LuaEventGroup GetUIElement## event ## Event(UIElement *Self)\
+	{\
+		return Self->EventScriptHandlers[UIEventType::event];\
+	};\
+	\
+	void SetUIElement## event ## Event(UIElement *Self, const LuaEventGroup &Value)\
+	{\
+		Self->EventScriptHandlers[UIEventType::event] = Value;\
+	};
+
+#define DECLARE_UIEVENT_FUNCTION_BINDING(event)\
+	.property("On" #event, &GetUIElement##event##Event, &SetUIElement##event##Event)
+
 	luabind::object GetRendererDisplayModes(lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
@@ -669,6 +683,36 @@ namespace FlamingTorch
 
 		return Out;
 	};
+
+	DECLARE_UIEVENT_FUNCTION(MouseJustPressed);
+	DECLARE_UIEVENT_FUNCTION(MousePressed);
+	DECLARE_UIEVENT_FUNCTION(MouseReleased);
+	DECLARE_UIEVENT_FUNCTION(KeyJustPressed);
+	DECLARE_UIEVENT_FUNCTION(KeyPressed);
+	DECLARE_UIEVENT_FUNCTION(KeyReleased);
+	DECLARE_UIEVENT_FUNCTION(TouchJustPressed);
+	DECLARE_UIEVENT_FUNCTION(TouchPressed);
+	DECLARE_UIEVENT_FUNCTION(TouchReleased);
+	DECLARE_UIEVENT_FUNCTION(TouchDragged);
+	DECLARE_UIEVENT_FUNCTION(Click);
+	DECLARE_UIEVENT_FUNCTION(Tap);
+	DECLARE_UIEVENT_FUNCTION(JoystickTap);
+	DECLARE_UIEVENT_FUNCTION(JoystickButtonJustPressed);
+	DECLARE_UIEVENT_FUNCTION(JoystickButtonPressed);
+	DECLARE_UIEVENT_FUNCTION(JoystickButtonReleased);
+	DECLARE_UIEVENT_FUNCTION(JoystickAxisMoved);
+	DECLARE_UIEVENT_FUNCTION(JoystickConnected);
+	DECLARE_UIEVENT_FUNCTION(JoystickDisconnected);
+	DECLARE_UIEVENT_FUNCTION(GainedFocus);
+	DECLARE_UIEVENT_FUNCTION(LostFocus);
+	DECLARE_UIEVENT_FUNCTION(MouseMoved);
+	DECLARE_UIEVENT_FUNCTION(CharacterEntered);
+	DECLARE_UIEVENT_FUNCTION(MouseEntered);
+	DECLARE_UIEVENT_FUNCTION(MouseLeft);
+	DECLARE_UIEVENT_FUNCTION(MouseOver);
+	DECLARE_UIEVENT_FUNCTION(Start);
+	DECLARE_UIEVENT_FUNCTION(Update);
+	DECLARE_UIEVENT_FUNCTION(Draw);
 
 	luabind::object GetSpriteColors(SpriteDrawOptions &Self, lua_State *State)
 	{
@@ -694,7 +738,7 @@ namespace FlamingTorch
 
 	bool UIManagerLoadLayoutsSimple(UIManager &Self, Stream *TheStream, bool Default)
 	{
-		return Self.LoadLayouts(TheStream, SuperSmartPointer<UIPanel>(), Default);
+		return Self.LoadLayouts(TheStream, DisposablePointer<UIElement>(), Default);
 	};
 
 	luabind::object GetUIManagerLayouts(UIManager &Self, lua_State *State)
@@ -709,7 +753,7 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	bool AddUIManagerLayout(UIManager &Self, SuperSmartPointer<UILayout> Layout, StringID LayoutID)
+	bool AddUIManagerLayout(UIManager &Self, DisposablePointer<UILayout> Layout, StringID LayoutID)
 	{
 		if(Self.Layouts.find(LayoutID) != Self.Layouts.end())
 			return false;
@@ -739,7 +783,7 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	luabind::object GetUIPanelChildren(UIPanel &Self, lua_State *State)
+	luabind::object GetUIElementChildren(UIElement &Self, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
 
@@ -758,7 +802,7 @@ namespace FlamingTorch
 
 	void UITextSetText(UIText &Self, const std::string &Text)
 	{
-		Self.SetText(Text, Self.ExpandHeight);
+		Self.SetText(Text);
 	};
 
 	luabind::object RenderTextFitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size, lua_State *State)
@@ -1087,7 +1131,7 @@ namespace FlamingTorch
 				],
 
 			//StreamProcessor
-			luabind::class_<StreamProcessor, SuperSmartPointer<StreamProcessor> >("StreamProcessor")
+			luabind::class_<StreamProcessor, DisposablePointer<StreamProcessor> >("StreamProcessor")
 				.def("Encode", &StreamProcessor::Encode)
 				.def("Decode", &StreamProcessor::Decode),
 
@@ -1099,7 +1143,7 @@ namespace FlamingTorch
 				.property("Key", &XORStreamProcessor::Key),
 
 			//Stream
-			luabind::class_<Stream, SuperSmartPointer<Stream> >("Stream")
+			luabind::class_<Stream, DisposablePointer<Stream> >("Stream")
 				.enum_("constants") [
 					luabind::value("Write", StreamFlags::Write),
 					luabind::value("Read", StreamFlags::Read),
@@ -1139,7 +1183,8 @@ namespace FlamingTorch
 				.def("AddPackage", &PackageFileSystemManager::AddPackage)
 				.def("RemovePackage", &PackageFileSystemManager::RemovePackage)
 				.def("GetPackage", &PackageFileSystemManager::GetPackage)
-				.def("GetFile", &PackageFileSystemManager::GetFile)
+				.def("GetFile", (DisposablePointer<Stream> (PackageFileSystemManager::*)(StringID, StringID))&PackageFileSystemManager::GetFile)
+				.def("GetFile", (DisposablePointer<Stream>(PackageFileSystemManager::*)(const Path &))&PackageFileSystemManager::GetFile)
 				.def("FindDirectories", &PackageFileSystemFindDirectories)
 				.def("FindFiles", &PackageFileSystemFindFiles),
 
@@ -1148,7 +1193,7 @@ namespace FlamingTorch
 				.def("FPS", &FPSCounter::FPS),
 
 			//TextureBuffer
-			luabind::class_<TextureBuffer, SuperSmartPointer<TextureBuffer> >("TextureBuffer")
+			luabind::class_<TextureBuffer, DisposablePointer<TextureBuffer> >("TextureBuffer")
 				.enum_("constants") [
 					luabind::value("ColorType_RGB8", ColorType::RGB8),
 					luabind::value("ColorType_RGBA8", ColorType::RGBA8)
@@ -1182,7 +1227,7 @@ namespace FlamingTorch
 				.property("Lossless", &TextureEncoderInfo::Lossless),
 
 			//Texture
-			luabind::class_<Texture, SuperSmartPointer<Texture> >("Texture")
+			luabind::class_<Texture, DisposablePointer<Texture> >("Texture")
 				.enum_("constants") [
 					luabind::value("Filtering_Nearest", TextureFiltering::Nearest),
 					luabind::value("Filtering_Linear", TextureFiltering::Linear),
@@ -1229,7 +1274,7 @@ namespace FlamingTorch
 				.property("IndexCount", &TexturePacker::IndexCount),
 
 			//TextureGroup
-			luabind::class_<TextureGroup, SuperSmartPointer<TextureGroup> >("TextureGroup")
+			luabind::class_<TextureGroup, DisposablePointer<TextureGroup> >("TextureGroup")
 				.def(luabind::constructor<uint32, uint32>())
 				.def("Add", &TextureGroup::Add)
 				.def("Get", &TextureGroup::Get),
@@ -1276,7 +1321,7 @@ namespace FlamingTorch
 				.def(luabind::constructor<>()),
 
 			//GenericConfig
-			luabind::class_<GenericConfig, SuperSmartPointer<GenericConfig> >("GenericConfig")
+			luabind::class_<GenericConfig, DisposablePointer<GenericConfig> >("GenericConfig")
 				.def(luabind::constructor<>())
 				.def("Serialize", &GenericConfig::Serialize)
 				.def("DeSerialize", &GenericConfig::DeSerialize)
@@ -1513,7 +1558,6 @@ namespace FlamingTorch
 				.def_readwrite("Top", &Rect::Top)
 				.def_readwrite("Bottom", &Rect::Bottom)
 				.property("Size", &Rect::Size)
-				.property("FullSize", &Rect::ToFullSize)
 				.property("Position", &Rect::Position)
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<const Rect &>())
@@ -1734,7 +1778,7 @@ namespace FlamingTorch
 				],
 
 			//TiledMap
-			luabind::class_<TiledMap, SuperSmartPointer<TiledMap> >("TiledMap")
+			luabind::class_<TiledMap, DisposablePointer<TiledMap> >("TiledMap")
 				.enum_("constants") [
 					luabind::value("TileOrder_North", TiledMapOrder::North),
 					luabind::value("TileOrder_Easy", TiledMapOrder::East),
@@ -1800,10 +1844,14 @@ namespace FlamingTorch
 				.def("GetFontFromPackage", (FontHandle (ResourceManager::*)(Renderer *, const std::string &, const std::string &))&ResourceManager::GetFontFromPackage)
 				.def("GetFontFromPackage", (FontHandle (ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFontFromPackage)
 #endif
-				.def("GetTexture", (SuperSmartPointer<Texture> (ResourceManager::*)(const std::string &))&ResourceManager::GetTexture)
-				.def("GetTexture", (SuperSmartPointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTexture)
-				.def("GetTextureFromPackage", (SuperSmartPointer<Texture> (ResourceManager::*)(const std::string &, const std::string &))&ResourceManager::GetTextureFromPackage)
-				.def("GetTextureFromPackage", (SuperSmartPointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTextureFromPackage)
+				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &))&ResourceManager::GetTexture)
+				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTexture)
+				.def("GetTextureFromPackage", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &, const std::string &))&ResourceManager::GetTextureFromPackage)
+				.def("GetTextureFromPackage", (DisposablePointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTextureFromPackage)
+				.def("GetTexturePack", (DisposablePointer<TexturePacker>(ResourceManager::*)(const std::string &, GenericConfig *))&ResourceManager::GetTexturePack)
+				.def("GetTexturePack", (DisposablePointer<TexturePacker>(ResourceManager::*)(const Path &, GenericConfig *))&ResourceManager::GetTexturePack)
+				.def("GetTexturePackFromPackage", (DisposablePointer<TexturePacker>(ResourceManager::*)(const std::string &, const std::string &, GenericConfig *))&ResourceManager::GetTexturePackFromPackage)
+				.def("GetTexturePackFromPackage", (DisposablePointer<TexturePacker>(ResourceManager::*)(const Path &, GenericConfig *))&ResourceManager::GetTexturePackFromPackage)
 				.def("PrepareResourcesReload", &ResourceManager::PrepareResourceReload)
 				.def("ReloadResources", &ResourceManager::ReloadResources)
 				.def("Cleanup", &ResourceManager::Cleanup)
@@ -1814,7 +1862,7 @@ namespace FlamingTorch
 				],
 
 			//ConsoleCommand
-			luabind::class_<ConsoleCommand, SuperSmartPointer<ConsoleCommand> >("ConsoleCommand")
+			luabind::class_<ConsoleCommand, DisposablePointer<ConsoleCommand> >("ConsoleCommand")
 				.def_readwrite("Name", &ConsoleCommand::Name),
 
 			//ScriptedConsoleCommand
@@ -1873,7 +1921,7 @@ namespace FlamingTorch
 					luabind::value("Status_Playing", sf::SoundSource::Playing)
 				]
 				.scope [
-					luabind::class_<SoundManager::Sound, SuperSmartPointer<SoundManager::Sound> >("Sound")
+					luabind::class_<SoundManager::Sound, DisposablePointer<SoundManager::Sound> >("Sound")
 						.def("Play", &SoundManager::Sound::Play)
 						.def("Stop", &SoundManager::Sound::Stop)
 						.def("Pause", &SoundManager::Sound::Pause)
@@ -1882,7 +1930,7 @@ namespace FlamingTorch
 						.property("Playing", &SoundManager::Sound::IsPlaying)
 						.property("Looping", &SoundManager::Sound::IsLooping, &SoundManager::Sound::SetLoop),
 
-					luabind::class_<SoundManager::Music, SuperSmartPointer<SoundManager::Music> >("Music")
+					luabind::class_<SoundManager::Music, DisposablePointer<SoundManager::Music> >("Music")
 						.def("Play", &SoundManager::Music::Play)
 						.def("Stop", &SoundManager::Music::Stop)
 						.def("Pause", &SoundManager::Music::Pause)
@@ -1998,7 +2046,7 @@ namespace FlamingTorch
 				.def("Draw", &Sprite::Draw),
 
 			//AnimatedSprite
-			luabind::class_<AnimatedSprite, Sprite, SuperSmartPointer<AnimatedSprite> >("AnimatedSprite")
+			luabind::class_<AnimatedSprite, Sprite, DisposablePointer<AnimatedSprite> >("AnimatedSprite")
 				.def_readwrite("FrameSize", &AnimatedSprite::FrameSize)
 				.def_readwrite("DefaultFrame", &AnimatedSprite::DefaultFrame)
 				.def_readwrite("Scale", &AnimatedSprite::Scale)
@@ -2295,6 +2343,7 @@ namespace FlamingTorch
 						.def_readonly("Name", &InputCenter::TouchInfo::Index)
 						.def_readonly("Position", &InputCenter::TouchInfo::Position)
 						.def_readonly("Pressed", &InputCenter::TouchInfo::Pressed)
+						.def_readonly("Dragged", &InputCenter::TouchInfo::Dragged)
 						.def_readonly("JustPressed", &InputCenter::TouchInfo::JustPressed)
 						.def_readonly("JustReleased", &InputCenter::TouchInfo::JustReleased)
 						.def("NameAsString", &InputCenter::TouchInfo::NameAsString),
@@ -2348,7 +2397,7 @@ namespace FlamingTorch
 						.property("Touch", &InputCenter::Action::Touch)
 						.def("AsString", &InputCenter::Action::AsString),
 
-					luabind::class_<InputCenter::Context, SuperSmartPointer<InputCenter::Context> >("InputContext")
+					luabind::class_<InputCenter::Context, DisposablePointer<InputCenter::Context> >("InputContext")
 						.def_readwrite("Name", &InputCenter::Context::Name)
 						.def("OnKey", &InputCenter::Context::OnKey)
 						.def("OnMouseButton", &InputCenter::Context::OnMouseButton)
@@ -2362,7 +2411,7 @@ namespace FlamingTorch
 						.def("OnGainFocus", &InputCenter::Context::OnGainFocus)
 						.def("OnLoseFocus", &InputCenter::Context::OnLoseFocus),
 
-					luabind::class_<InputCenter::ScriptedContext, InputCenter::Context, SuperSmartPointer<InputCenter::Context> >("ScriptedInputContext")
+					luabind::class_<InputCenter::ScriptedContext, InputCenter::Context, DisposablePointer<InputCenter::Context> >("ScriptedInputContext")
 						.def(luabind::constructor<const std::string &>())
 						.def_readwrite("OnKey", &InputCenter::ScriptedContext::OnKeyFunction)
 						.def_readwrite("OnMouseButton", &InputCenter::ScriptedContext::OnMouseButtonFunction)
@@ -2409,85 +2458,74 @@ namespace FlamingTorch
 				.def("GetElement", &UIManager::GetElement)
 				.property("FocusedElement", &UIManager::GetFocusedElement)
 				.property("MouseOverElement", &UIManager::GetMouseOverElement)
-				.property("Tooltip", &UIManager::GetTooltip)
-				.property("DefaultFontColor", &UIManager::GetDefaultFontColor)
-				.property("DefaultSecondaryFontColor", &UIManager::GetDefaultSecondaryFontColor)
-				.property("DefaultFontSize", &UIManager::GetDefaultFontSize)
-				.property("Renderer", &UIManager::GetOwner)
-				.property("Skin", &UIManager::GetSkin, &UIManager::SetSkin),
+				.property("Renderer", &UIManager::GetOwner),
 
-			//UIPanel
-			luabind::class_<UIPanel, SuperSmartPointer<UIPanel> >("UIPanel")
-				.def_readwrite("OnMouseJustPressed", &UIPanel::OnMouseJustPressedFunction)
-				.def_readwrite("OnMousePressed", &UIPanel::OnMousePressedFunction)
-				.def_readwrite("OnMouseReleased", &UIPanel::OnMouseReleasedFunction)
-				.def_readwrite("OnKeyJustPressed", &UIPanel::OnKeyJustPressedFunction)
-				.def_readwrite("OnKeyPressed", &UIPanel::OnKeyPressedFunction)
-				.def_readwrite("OnKeyReleased", &UIPanel::OnKeyReleasedFunction)
-				.def_readwrite("OnJoystickButtonJustPressed", &UIPanel::OnJoystickButtonJustPressedFunction)
-				.def_readwrite("OnJoystickButtonPressed", &UIPanel::OnJoystickButtonPressedFunction)
-				.def_readwrite("OnJoystickButtonReleased", &UIPanel::OnJoystickButtonReleasedFunction)
-				.def_readwrite("OnJoystickAxisMoved", &UIPanel::OnJoystickAxisMovedFunction)
-				.def_readwrite("OnJoystickConnected", &UIPanel::OnJoystickConnectedFunction)
-				.def_readwrite("OnJoystickDisconnected", &UIPanel::OnJoystickDisconnectedFunction)
-				.def_readwrite("OnMouseMoved", &UIPanel::OnMouseMovedFunction)
-				.def_readwrite("OnCharacterEntered", &UIPanel::OnCharacterEnteredFunction)
-				.def_readwrite("OnGainFocus", &UIPanel::OnGainFocusFunction)
-				.def_readwrite("OnLoseFocus", &UIPanel::OnLoseFocusFunction)
-				.def_readwrite("OnUpdate", &UIPanel::OnUpdateFunction)
-				.def_readwrite("OnDraw", &UIPanel::OnDrawFunction)
-				.def_readwrite("OnMouseEntered", &UIPanel::OnMouseEnteredFunction)
-				.def_readwrite("OnMouseOver", &UIPanel::OnMouseOverFunction)
-				.def_readwrite("OnMouseLeft", &UIPanel::OnMouseLeftFunction)
-				.def_readwrite("OnClick", &UIPanel::OnClickFunction)
-				.def_readwrite("OnDragBegin", &UIPanel::OnDragBeginFunction)
-				.def_readwrite("OnDragEnd", &UIPanel::OnDragEndFunction)
-				.def_readwrite("OnDragging", &UIPanel::OnDraggingFunction)
-				.def_readwrite("OnDrop", &UIPanel::OnDropFunction)
-				.def_readwrite("OnStart", &UIPanel::OnStartFunction)
-				.def_readwrite("Properties", &UIPanel::PropertyValues)
-				.property("RespondsToTooltips", &UIPanel::RespondsToTooltips, &UIPanel::SetRespondsToTooltips)
-				.property("TooltipsFixed", &UIPanel::TooltipsFixed, &UIPanel::SetTooltipsFixed)
-				.property("TooltipsPosition", &UIPanel::TooltipsPosition, &UIPanel::SetTooltipsPosition)
-				.def("PerformLayout", &UIPanel::PerformLayout)
-				.property("TooltipText", &UIPanel::TooltipText, &UIPanel::SetTooltipText)
-				.property("TooltipElement", &UIPanel::TooltipElement, &UIPanel::SetTooltipElement)
-				.property("BlockingInput", &UIPanel::BlockingInput, &UIPanel::SetBlockingInput)
-				.property("Draggable", &UIPanel::Draggable, &UIPanel::SetDraggable)
-				.property("Droppable", &UIPanel::Droppable, &UIPanel::SetDroppable)
-				.property("Manager", &UIPanel::Manager)
-				.property("ID", &UIPanel::ID)
-				.property("Name", &UIPanel::Name)
-				.property("ParentPosition", &UIPanel::ParentPosition)
-				.property("Visible", &UIPanel::Visible, &UIPanel::SetVisible)
-				.property("Enabled", &UIPanel::Enabled, &UIPanel::SetEnabled)
-				.property("MouseInputEnabled", &UIPanel::MouseInputEnabled, &UIPanel::SetMouseInputEnabled)
-				.property("KeyboardInputEnabled", &UIPanel::KeyboardInputEnabled, &UIPanel::SetKeyboardInputEnabled)
-				.property("JoystickInputEnabled", &UIPanel::JoystickInputEnabled, &UIPanel::SetJoystickInputEnabled)
-				.def("AddChild", &UIPanel::AddChild)
-				.def("RemoveChild", &UIPanel::RemoveChild)
-				.def_readonly("ControlName", &UIPanel::NativeType)
-				.property("Children", &GetUIPanelChildren)
-				.def("ChildrenSize", &UIPanel::ChildrenSize)
-				.property("Translation", &UIPanel::Translation)
-				.property("Parent", &UIPanel::Parent)
-				.property("Position", &UIPanel::Position, &UIPanel::SetPosition)
-				.property("Offset", &UIPanel::Offset, &UIPanel::SetOffset)
-				.property("Size", &UIPanel::Size, &UIPanel::SetSize)
-				.property("ComposedSize", &UIPanel::ComposedSize)
-				.property("Opacity", &UIPanel::Alpha, &UIPanel::SetAlpha)
-				.property("Layout", &UIPanel::Layout)
-				.property("ExtraSize", &UIPanel::ExtraSize)
-				.property("ScaledExtraSize", &UIPanel::ScaledExtraSize)
-				.property("Rotation", &UIPanel::Rotation, &UIPanel::SetRotation)
-				.def("ClearAnimations", &UIPanel::ClearAnimations)
-				.def("FadeIn", &UIPanel::FadeIn)
-				.def("FadeOut", &UIPanel::FadeOut)
-				.def("Focus", &UIPanel::Focus)
-				.def("Clear", &UIPanel::Clear),
+			//UIElement
+			luabind::class_<UIElement, DisposablePointer<UIElement> >("UIElement")
+				.enum_("constants")[
+					luabind::value("InputType_Mouse", UIInputType::Mouse),
+					luabind::value("InputType_Keyboard", UIInputType::Keyboard),
+					luabind::value("InputType_Touch", UIInputType::Touch),
+					luabind::value("InputType_Joystick", UIInputType::Joystick),
+					luabind::value("InputType_All", UIInputType::All)
+				]
+				DECLARE_UIEVENT_FUNCTION_BINDING(MouseJustPressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(MousePressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(MouseReleased)
+				DECLARE_UIEVENT_FUNCTION_BINDING(KeyJustPressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(KeyPressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(KeyReleased)
+				DECLARE_UIEVENT_FUNCTION_BINDING(TouchJustPressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(TouchPressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(TouchReleased)
+				DECLARE_UIEVENT_FUNCTION_BINDING(TouchDragged)
+				DECLARE_UIEVENT_FUNCTION_BINDING(Click)
+				DECLARE_UIEVENT_FUNCTION_BINDING(Tap)
+				DECLARE_UIEVENT_FUNCTION_BINDING(JoystickTap)
+				DECLARE_UIEVENT_FUNCTION_BINDING(JoystickButtonJustPressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(JoystickButtonPressed)
+				DECLARE_UIEVENT_FUNCTION_BINDING(JoystickButtonReleased)
+				DECLARE_UIEVENT_FUNCTION_BINDING(JoystickAxisMoved)
+				DECLARE_UIEVENT_FUNCTION_BINDING(JoystickConnected)
+				DECLARE_UIEVENT_FUNCTION_BINDING(JoystickDisconnected)
+				DECLARE_UIEVENT_FUNCTION_BINDING(GainedFocus)
+				DECLARE_UIEVENT_FUNCTION_BINDING(LostFocus)
+				DECLARE_UIEVENT_FUNCTION_BINDING(MouseMoved)
+				DECLARE_UIEVENT_FUNCTION_BINDING(CharacterEntered)
+				DECLARE_UIEVENT_FUNCTION_BINDING(MouseEntered)
+				DECLARE_UIEVENT_FUNCTION_BINDING(MouseLeft)
+				DECLARE_UIEVENT_FUNCTION_BINDING(MouseOver)
+				DECLARE_UIEVENT_FUNCTION_BINDING(Start)
+				DECLARE_UIEVENT_FUNCTION_BINDING(Update)
+				DECLARE_UIEVENT_FUNCTION_BINDING(Draw)
+				.def_readwrite("Properties", &UIElement::PropertyValues)
+				.property("RespondsToTooltips", &UIElement::RespondsToTooltips, &UIElement::SetRespondsToTooltips)
+				.property("TooltipsFixed", &UIElement::TooltipsFixed, &UIElement::SetTooltipsFixed)
+				.property("TooltipsPosition", &UIElement::TooltipsPosition, &UIElement::SetTooltipsPosition)
+				.property("TooltipElement", &UIElement::TooltipElement, &UIElement::SetTooltipElement)
+				.property("BlockingInput", &UIElement::BlockingInput, &UIElement::SetBlockingInput)
+				.property("Manager", &UIElement::Manager)
+				.property("ID", &UIElement::ID)
+				.property("Name", &UIElement::Name)
+				.property("ParentPosition", &UIElement::ParentPosition)
+				.property("Visible", &UIElement::Visible, &UIElement::SetVisible)
+				.property("Enabled", &UIElement::Enabled, &UIElement::SetEnabled)
+				.def("AddChild", &UIElement::AddChild)
+				.def("RemoveChild", &UIElement::RemoveChild)
+				.property("ControlName", &UIElement::NativeType)
+				.property("Children", &GetUIElementChildren)
+				.def("ChildrenSize", &UIElement::ChildrenSize)
+				.property("Parent", &UIElement::Parent)
+				.property("EnabledInputTypes", &UIElement::EnabledInputTypes, &UIElement::SetEnabledInputTypes)
+				.property("Position", &UIElement::Position, &UIElement::SetPosition)
+				.property("Offset", &UIElement::Offset, &UIElement::SetOffset)
+				.property("Size", &UIElement::Size, &UIElement::SetSize)
+				.property("Layout", &UIElement::Layout)
+				.def("Focus", &UIElement::Focus)
+				.def("Clear", &UIElement::Clear),
 
 			//UIGroup
-			luabind::class_<UIGroup, UIPanel>("UIGroup")
+			luabind::class_<UIGroup, UIElement>("UIGroup")
 				.enum_("constants") [
 					luabind::value("LayoutMode_None", UIGroupLayoutMode::None),
 					luabind::value("LayoutMode_Horizontal", UIGroupLayoutMode::Horizontal),
@@ -2496,34 +2534,29 @@ namespace FlamingTorch
 					luabind::value("LayoutMode_AdjustHeight", UIGroupLayoutMode::AdjustWidth),
 					luabind::value("LayoutMode_Center", UIGroupLayoutMode::Center),
 					luabind::value("LayoutMode_VerticalCenter", UIGroupLayoutMode::VerticalCenter),
-					luabind::value("LayoutMode_AdjustCloser", UIGroupLayoutMode::AdjustCloser),
-					luabind::value("LayoutMode_InvertDirection", UIGroupLayoutMode::InvertDirection),
-					luabind::value("LayoutMode_InvertX", UIGroupLayoutMode::InvertX),
-					luabind::value("LayoutMode_InvertY", UIGroupLayoutMode::InvertY)
+					luabind::value("LayoutMode_AdjustCloser", UIGroupLayoutMode::AdjustCloser)
 				]
 				.def_readwrite("LayoutMode", &UIGroup::LayoutMode),
 
 			//UILayout
-			luabind::class_<UILayout, SuperSmartPointer<UILayout> >("UILayout")
+			luabind::class_<UILayout, DisposablePointer<UILayout> >("UILayout")
 				.def("Clone", &UILayout::Clone)
-				.def("FindPanelById", &UILayout::FindPanelById)
-				.def("FindPanelByName", &UILayout::FindPanelByName)
+				.def("FindElementById", &UILayout::FindElementById)
+				.def("FindElementByName", &UILayout::FindElementByName)
 				.def_readwrite("Name", &UILayout::Name)
 				.property("Elements", &GetUILayoutElements),
 
 			//UISprite
-			luabind::class_<UISprite, UIPanel>("UISprite")
+			luabind::class_<UISprite, UIElement>("UISprite")
 				.def_readwrite("Sprite", &UISprite::TheSprite),
 
 			//UIText
-			luabind::class_<UIText, UIPanel>("UIText")
+			luabind::class_<UIText, UIElement>("UIText")
 				.property("Text", &UITextGetText, &UITextSetText)
 				.def_readwrite("TextParameters", &UIText::TextParameters),
 
 			//UITextComposer
-			luabind::class_<UITextComposer, UIPanel>("UITextComposer"),
-			//UITooltip
-			luabind::class_<UITooltip, UIPanel>("UITooltip"),
+			luabind::class_<UITextComposer, UIElement>("UITextComposer"),
 #endif
 			
 			luabind::def("MakeStringID", &MakeStringID),

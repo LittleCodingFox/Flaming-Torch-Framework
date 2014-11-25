@@ -232,7 +232,7 @@ public:
 class Stream 
 {
 protected:
-	SuperSmartPointer<StreamProcessor> Processor;
+	DisposablePointer<StreamProcessor> Processor;
 public:
 	virtual ~Stream() {};
 	/*!
@@ -284,7 +284,7 @@ public:
 	*	Sets a new stream processor to this stream
 	*	\param Processor the processor to set up
 	*/
-	void SetProcessor(SuperSmartPointer<StreamProcessor> Processor)
+	void SetProcessor(DisposablePointer<StreamProcessor> Processor)
 	{
 		this->Processor = Processor;
 	};
@@ -292,7 +292,7 @@ public:
 	/*!
 	*	Gets our active stream processor
 	*/
-	SuperSmartPointer<StreamProcessor> GetProcessor()
+	DisposablePointer<StreamProcessor> GetProcessor()
 	{
 		return Processor;
 	};
@@ -429,10 +429,10 @@ public:
 			std::string Name, DirectoryName;
 			uint64 Length, Offset;
 			//Used for reading the file's data
-			SuperSmartPointer<FileStream> Input;
+			DisposablePointer<FileStream> Input;
 		};
 
-		typedef std::map<StringID, SuperSmartPointer<FileEntry> > FileMap;
+		typedef std::map<StringID, DisposablePointer<FileEntry> > FileMap;
 		typedef std::map<StringID, FileMap> EntryMap;
 
 		sf::Mutex FileAccessMutex;
@@ -440,7 +440,7 @@ public:
 	public:
 		EntryMap Entries;
 
-		SuperSmartPointer<Stream> PackageStream;
+		DisposablePointer<Stream> PackageStream;
 		uint64 OriginalOffset;
 
 		Package() : HasBeenTampered(false), OriginalOffset(0) {};
@@ -450,10 +450,10 @@ public:
 		//When deserializing, the stream must ALWAYS be "alive" until the package is destroyed
 		bool DeSerialize(Stream *In);
 
-		bool FromStream(SuperSmartPointer<Stream> Stream);
+		bool FromStream(DisposablePointer<Stream> Stream);
 
 		//Requires the FileStream to be at position 0 and can't be accessed until we serialize
-		bool AddFile(const std::string &Directory, const std::string &Name, SuperSmartPointer<FileStream> In);
+		bool AddFile(const std::string &Directory, const std::string &Name, DisposablePointer<FileStream> In);
 		bool RemoveFile(const std::string &Directory, const std::string &Name);
 	};
 
@@ -461,7 +461,7 @@ public:
 	{
 		friend class Package;
 	public:
-		SuperSmartPointer<Stream> Source;
+		DisposablePointer<Stream> Source;
 		uint64 StartOffset, PositionValue, LengthValue;
 
 		PackageStream() : StartOffset(0), PositionValue(0), LengthValue(0) {};
@@ -480,7 +480,7 @@ private:
 	typedef std::map<StringID, FileMap> EntryMap;
 	EntryMap Files;
 
-	typedef std::map<StringID, SuperSmartPointer<Package> > PackageMap;
+	typedef std::map<StringID, DisposablePointer<Package> > PackageMap;
 	PackageMap Packages;
 
 	void ClearPackageData(Package *p);
@@ -490,7 +490,7 @@ public:
 	/*!
 	*	Creates a new empty package
 	*/
-	SuperSmartPointer<Package> NewPackage();
+	DisposablePointer<Package> NewPackage();
 
 	/*!
 	*	Loads a package into this manager
@@ -498,7 +498,7 @@ public:
 	*	\param PackageStream a Stream containing the package
 	*	\sa MakeStringID
 	*/
-	bool AddPackage(StringID ID, SuperSmartPointer<Stream> PackageStream);
+	bool AddPackage(StringID ID, DisposablePointer<Stream> PackageStream);
 	/*!
 	*	Removes a package from this manager
 	*	\param ID the ID of the package
@@ -511,7 +511,7 @@ public:
 	*	\param ID the ID of the package
 	*	\sa MakeStringID
 	*/
-	SuperSmartPointer<Package> GetPackage(StringID ID);
+	DisposablePointer<Package> GetPackage(StringID ID);
 
 	/*!
 	*	Gets a file stream
@@ -519,7 +519,14 @@ public:
 	*	\param Name the filename as the StringID
 	*	\sa MakeStringID
 	*/
-	SuperSmartPointer<Stream> GetFile(StringID Directory, StringID Name);
+	DisposablePointer<Stream> GetFile(StringID Directory, StringID Name);
+
+	/*!
+	*	Gets a file stream
+	*	\param FileName is the full path of the file
+	*	\sa MakeStringID
+	*/
+	DisposablePointer<Stream> GetFile(const Path &FileName);
 
 	/*!
 	*	Finds directories within a base

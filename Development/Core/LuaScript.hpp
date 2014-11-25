@@ -2,7 +2,7 @@
 #define LUASCRIPTTAG "LuaScript"
 
 template <typename T>
-T* get_pointer(SuperSmartPointer<T> const& p)
+T* get_pointer(DisposablePointer<T> const& p)
 {
 	return (T *)p.Get();
 };
@@ -53,11 +53,11 @@ public:
 class LuaGlobalsTracker
 {
 private:
-	SuperSmartPointer<LuaScript> ScriptInstance;
+	DisposablePointer<LuaScript> ScriptInstance;
 public:
 	std::vector<std::string> Names;
 
-	LuaGlobalsTracker(SuperSmartPointer<LuaScript> Script);
+	LuaGlobalsTracker(DisposablePointer<LuaScript> Script);
 
 	/*!
 	*	Adds a Name to the Names list
@@ -77,7 +77,7 @@ public:
 class BaseScriptableInstance 
 {
 public:
-	SuperSmartPointer<LuaScript> ScriptInstance;
+	DisposablePointer<LuaScript> ScriptInstance;
 };
 
 class LuaLib
@@ -105,9 +105,9 @@ public:
 class LuaScriptManager : public SubSystem
 {
 	friend class LuaScript;
-	std::list<SuperSmartPointer<LuaScript> > InstancedScripts;
+	std::list<DisposablePointer<LuaScript> > InstancedScripts;
 public:
-	SuperSmartPointer<FileStream> ErrorStream;
+	DisposablePointer<FileStream> ErrorStream;
 
 	static LuaScriptManager Instance;
 
@@ -120,7 +120,7 @@ public:
 		\param LibCount is how many libs we are using
 		\sa FrameworkLib
 	*/
-	SuperSmartPointer<LuaScript> CreateScript(const std::string &Code, LuaLib **Libs, uint32 LibCount);
+	DisposablePointer<LuaScript> CreateScript(const std::string &Code, LuaLib **Libs, uint32 LibCount);
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
@@ -133,7 +133,7 @@ public:
 		\param LoopScript the Script used for the main loop
 		\return 0 if we succeeded, non-0 on failure
 	*/
-	int32 PerformMainLoop(SuperSmartPointer<LuaScript> LoopScript);
+	int32 PerformMainLoop(DisposablePointer<LuaScript> LoopScript);
 };
 
 /*!

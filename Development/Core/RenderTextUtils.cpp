@@ -42,7 +42,7 @@ namespace FlamingTorch
 
 		Vector2 MeasuredText;
 
-		while(MeasureTextSimple(TheRenderer, Str, Params.FontSize(*OutFontSize)).ToFullSize().x > LengthInPixels)
+		while(MeasureTextSimple(TheRenderer, Str, Params.FontSize(*OutFontSize)).Size().x > LengthInPixels)
 		{
 			(*OutFontSize)--;
 		};
@@ -118,6 +118,9 @@ namespace FlamingTorch
 		f32 CurrentLineSize = Size.x;
 		std::stringstream Stream, PreviousStream;
 
+		Rect MeasuredRect;
+		Vector2 MeasuredSize;
+
 		for(uint32 i = 0; i < Lines.size(); i++)
 		{
 			Words = StringUtils::Split(Lines[i], ' ');
@@ -125,9 +128,9 @@ namespace FlamingTorch
 			for (uint32 j = 0; j < Words.size(); j++)
 			{
 				Stream << (j > 0 ? " " : "") << Words[j];
-
-				Rect MeasuredRect = RenderTextUtils::MeasureTextSimple(TheRenderer, Stream.str(), Params);
-				Vector2 MeasuredSize = MeasuredRect.ToFullSize();
+				
+				MeasuredRect = RenderTextUtils::MeasureTextSimple(TheRenderer, Stream.str(), Params);
+				MeasuredSize = MeasuredRect.Size();
 
 				if(MeasuredSize.x > Size.x)
 				{
@@ -148,10 +151,21 @@ namespace FlamingTorch
 
 			if (Stream.str().length())
 			{
+				if (CurrentY + MeasuredSize.y > Size.y)
+					return OutLines;
+
 				OutLines.push_back(Stream.str());
 
 				Stream.str("");
 				PreviousStream.str("");
+
+				CurrentY += MathUtils::Max(MeasuredSize.y, Params.FontSizeValue);
+			}
+			else if(CurrentY + Params.FontSizeValue <= Size.y)
+			{
+				OutLines.push_back("");
+
+				CurrentY += Params.FontSizeValue;
 			};
 		};
 

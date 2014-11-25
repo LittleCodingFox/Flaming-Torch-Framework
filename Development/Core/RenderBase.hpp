@@ -346,7 +346,7 @@ public:
 	/*!
 	*	UI Manager
 	*/
-	SuperSmartPointer<UIManager> UI;
+	DisposablePointer<UIManager> UI;
 
 	/*!
 	*	\return the Renderer Handle
@@ -665,7 +665,7 @@ public:
 	void OnGetProfilerPackets(const Profiler::PacketMap &Packets);
 #endif
 private:
-	typedef std::map<RendererHandle, SuperSmartPointer<Renderer> > RendererMap;
+	typedef std::map<RendererHandle, DisposablePointer<Renderer> > RendererMap;
 	
 	RendererMap Renderers;
 
@@ -726,7 +726,7 @@ public:
 	*	Get the active renderer
 	*	\return the Active Renderer
 	*/
-	Renderer *ActiveRenderer();
+	DisposablePointer<Renderer> ActiveRenderer();
 
 	/*!
 	*	Draws a frame (also checks input events)

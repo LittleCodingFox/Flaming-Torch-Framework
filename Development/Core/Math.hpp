@@ -654,14 +654,6 @@ public:
 	{
 		return Vector2(Left, Top);
 	};
-	
-	/*!
-	*	\return the full size of this Rect
-	*/
-	Vector2 ToFullSize() const
-	{
-		return Vector2(Right + Left, Bottom + Top);
-	};
 };
 
 /*!

@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 			};
 		};
 
-		SuperSmartPointer<FileStream> In(new FileStream());
+		DisposablePointer<FileStream> In(new FileStream());
 
 		if(!In->Open((FileSystemUtils::ActiveDirectory() + "/" + OutPackageName).c_str(), StreamFlags::Read))
 		{
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 			return 1;
 		};
 
-		SuperSmartPointer<StreamProcessor> Processor(new XORStreamProcessor());
+		DisposablePointer<StreamProcessor> Processor(new XORStreamProcessor());
 
 		if(PackageKey > 0)
 			Processor.AsDerived<XORStreamProcessor>()->Key = (uint8)PackageKey;
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 
 				FileStream Out;
 
-				SuperSmartPointer<PackageFileSystemManager::PackageStream> PIn(new PackageFileSystemManager::PackageStream());
+				DisposablePointer<PackageFileSystemManager::PackageStream> PIn(new PackageFileSystemManager::PackageStream());
 
 				PIn->Source = ThePackage.PackageStream;
 				PIn->StartOffset = fit->second->Offset;
@@ -207,13 +207,13 @@ int main(int argc, char **argv)
 			Log::Instance.LogInfo(TAG, "... %s (as %s)", RequestedDirectories[i].c_str(), TargetDirectories[i + RequestedDirectories.size()].c_str());
 		};
 
-		SuperSmartPointer<PackageFileSystemManager::Package> Package = PackageFileSystemManager::Instance.NewPackage();
+		DisposablePointer<PackageFileSystemManager::Package> Package = PackageFileSystemManager::Instance.NewPackage();
 
 		Log::Instance.LogInfo(TAG, "Adding Files to Package Info...");
 
 		for(uint32 i = 0; i < FinalFiles.size(); i++)
 		{
-			SuperSmartPointer<FileStream> Stream(new FileStream);
+			DisposablePointer<FileStream> Stream(new FileStream);
 
 			if(!Stream->Open(FinalFiles[i].first, StreamFlags::Read))
 			{
@@ -241,7 +241,7 @@ int main(int argc, char **argv)
 
 		Log::Instance.LogInfo(TAG, "Final Packing!");
 
-		SuperSmartPointer<Stream> Stream(new FileStream());
+		DisposablePointer<Stream> Stream(new FileStream());
 		FileStream *ActualStream = (FileStream *)Stream.Get();
 
 		if(!ActualStream->Open(OutPackageName, StreamFlags::Write))
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 			return 1;
 		};
 
-		SuperSmartPointer<XORStreamProcessor> Processor(new XORStreamProcessor());
+		DisposablePointer<XORStreamProcessor> Processor(new XORStreamProcessor());
 
 		if(PackageKey > 0)
 			Processor->Key = (uint8)PackageKey;

@@ -138,7 +138,7 @@ public:
 	/*!
 	*	Makes a copy of this TextureBuffer
 	*/
-	SuperSmartPointer<TextureBuffer> Clone();
+	DisposablePointer<TextureBuffer> Clone();
 	
 	/*!
 	*	Overlays a TextureBuffer with this TextureBuffer
@@ -187,7 +187,7 @@ class TexturePackerIndex
 public:
 	int32 Index, WrapMode, Filtering;
 
-	SuperSmartPointer<TexturePacker> Owner;
+	DisposablePointer<TexturePacker> Owner;
 
 	TexturePackerIndex() : Index(-1), Filtering(TextureFiltering::Nearest), WrapMode(TextureWrapMode::Clamp) {};
 
@@ -207,7 +207,7 @@ class Texture
 private:
 	Texture(const Texture &o);
 	TextureHandle HandleValue;
-	SuperSmartPointer<TextureBuffer> Buffer;
+	DisposablePointer<TextureBuffer> Buffer;
 
 	uint32 WidthValue, HeightValue, ColorTypeValue, TextureFilter, TextureWrap;
 
@@ -221,7 +221,7 @@ private:
 	TexturePackerIndex Index;
 
 #if USE_GRAPHICS
-	Renderer *Owner;
+	DisposablePointer<Renderer> Owner;
 #endif
 
 public:
@@ -243,7 +243,7 @@ public:
 	*	Loads this texture from a buffer
 	*	\param Buffer
 	*/
-	bool FromBuffer(SuperSmartPointer<TextureBuffer> Buffer);
+	bool FromBuffer(DisposablePointer<TextureBuffer> Buffer);
 	
 	/*!
 	*	Loads this texture from data
@@ -377,7 +377,7 @@ public:
 	/*!
 	*	Get the Buffer associated with this texture
 	*/
-	SuperSmartPointer<TextureBuffer> GetData() const;
+	DisposablePointer<TextureBuffer> GetData() const;
 	
 	/*!
 	*	Texture Size
@@ -403,7 +403,7 @@ public:
 	public:
 		int32 Index;
 		uint32 x, y, Width, Height;
-		SuperSmartPointer<Texture> TextureInstance;
+		DisposablePointer<Texture> TextureInstance;
 
 		SortedTexture() : Index(-1), x(0), y(0), Width(0), Height(0) {};
 	};
@@ -416,13 +416,13 @@ public:
 	/*!
 	*	Main Texture
 	*/
-	SuperSmartPointer<Texture> MainTexture;
+	DisposablePointer<Texture> MainTexture;
 
 	/*!
 	*	Gets the packing-ready texture from an index
 	*	\param Index the index of the texture to get
 	*/
-	SuperSmartPointer<Texture> GetTexture(uint32 Index);
+	DisposablePointer<Texture> GetTexture(uint32 Index);
 
 	/*!
 	*	\return the total amount of indices in this Texture Packer
@@ -438,7 +438,7 @@ public:
 	*	\param MaxWidth the maximum width of the texture
 	*	\param MaxHeight the maximum height of the texture
 	*/
-	static SuperSmartPointer<TexturePacker> FromTextures(const std::vector<SuperSmartPointer<Texture> > &Textures,
+	static DisposablePointer<TexturePacker> FromTextures(const std::vector<DisposablePointer<Texture> > &Textures,
 		uint32 MaxWidth, uint32 MaxHeight);
 
 	/*!
@@ -446,7 +446,7 @@ public:
 	*	\param MainTexture the prepacked Texture
 	*	\param Config the prepacked texture configuration
 	*/
-	static SuperSmartPointer<TexturePacker> FromConfig(SuperSmartPointer<Texture> MainTexture, GenericConfig Config);
+	static DisposablePointer<TexturePacker> FromConfig(DisposablePointer<Texture> MainTexture, const GenericConfig &Config);
 };
 
 /*!
@@ -456,9 +456,9 @@ public:
 class TextureGroup
 {
 private:
-	SuperSmartPointer<TexturePacker> PackedTexture;
+	DisposablePointer<TexturePacker> PackedTexture;
 	uint32 MaxWidth, MaxHeight;
-	std::vector<SuperSmartPointer<Texture> > InstanceTextures, StoredTextures;
+	std::vector<DisposablePointer<Texture> > InstanceTextures, StoredTextures;
 
 	void UpdateInstanceTextures();
 public:
@@ -469,11 +469,11 @@ public:
 	*	\param t the texture to add to this group
 	*	\return a texture index or -1
 	*/
-	int32 Add(SuperSmartPointer<Texture> t);
+	int32 Add(DisposablePointer<Texture> t);
 
 	/*!
 	*	Gets a texture
 	*	\param Index the texture index
 	*/
-	SuperSmartPointer<Texture> Get(int32 Index);
+	DisposablePointer<Texture> Get(int32 Index);
 };

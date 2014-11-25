@@ -465,9 +465,9 @@ namespace FlamingTorch
 		};
 	};
 
-	SuperSmartPointer<TextureBuffer> TextureBuffer::Clone()
+	DisposablePointer<TextureBuffer> TextureBuffer::Clone()
 	{
-		SuperSmartPointer<TextureBuffer> Out(new TextureBuffer());
+		DisposablePointer<TextureBuffer> Out(new TextureBuffer());
 
 		Out->ColorTypeValue = ColorTypeValue;
 		Out->WidthValue = WidthValue;
@@ -680,10 +680,6 @@ namespace FlamingTorch
 	Texture::Texture() : HandleValue(0), WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8),
 		TextureFilter(TextureFiltering::Nearest), TextureWrap(TextureWrapMode::Clamp)
 	{
-#if USE_GRAPHICS
-		Owner = NULL;
-#endif
-
 		GET_OWNER_IF_NOT_VALID();
 	};
 
@@ -703,7 +699,7 @@ namespace FlamingTorch
 		return &o == this;
 	};
 
-	SuperSmartPointer<TextureBuffer> Texture::GetData() const
+	DisposablePointer<TextureBuffer> Texture::GetData() const
 	{
 		return Buffer;
 	};
@@ -723,8 +719,6 @@ namespace FlamingTorch
 		Index.Index = -1;
 
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
-
 		if(Owner)
 			Owner->DestroyTexture(HandleValue);
 
@@ -732,7 +726,7 @@ namespace FlamingTorch
 #endif
 	};
 
-	bool Texture::FromBuffer(SuperSmartPointer<TextureBuffer> Buffer)
+	bool Texture::FromBuffer(DisposablePointer<TextureBuffer> Buffer)
 	{
 		return FromData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
 	};
@@ -995,7 +989,7 @@ namespace FlamingTorch
 		if(ActualDirectory[ActualDirectory.length() - 1] != '/')
 			ActualDirectory += "/";
 
-		SuperSmartPointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(ActualDirectory),
+		DisposablePointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(ActualDirectory),
 			MakeStringID(Name));
 
 		if(PackageStream.Get() == NULL)
@@ -1016,7 +1010,7 @@ namespace FlamingTorch
 
 		Index.Index = -1;
 
-		SuperSmartPointer<TextureBuffer> TempBuffer(new TextureBuffer());
+		DisposablePointer<TextureBuffer> TempBuffer(new TextureBuffer());
 
 		TempBuffer->CreateEmpty(Width(), Height());
 
@@ -1260,17 +1254,17 @@ namespace FlamingTorch
 		};
 	};
 
-	SuperSmartPointer<TexturePacker> TexturePacker::FromTextures(const std::vector<SuperSmartPointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
+	DisposablePointer<TexturePacker> TexturePacker::FromTextures(const std::vector<DisposablePointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
 	{
 		if(Textures.size() == 0)
-			return SuperSmartPointer<TexturePacker>();
+			return DisposablePointer<TexturePacker>();
 
-		SuperSmartPointer<TexturePacker> Out(new TexturePacker());
+		DisposablePointer<TexturePacker> Out(new TexturePacker());
 
 		for(uint32 i = 0; i < Textures.size(); i++)
 		{
 			if(Textures[i].Get() == NULL)
-				return SuperSmartPointer<TexturePacker>();
+				return DisposablePointer<TexturePacker>();
 
 			SortedTexture Texture;
 			Texture.Index = i;
@@ -1335,29 +1329,32 @@ namespace FlamingTorch
 		};
 
 		if(!Out->MainTexture->FromData(&Temp.Data[0], Width, Height))
-			return SuperSmartPointer<TexturePacker>();
+			return DisposablePointer<TexturePacker>();
 
 		return Out;
 	};
 
-	SuperSmartPointer<TexturePacker> TexturePacker::FromConfig(SuperSmartPointer<Texture> MainTexture, GenericConfig Config)
+	DisposablePointer<TexturePacker> TexturePacker::FromConfig(DisposablePointer<Texture> MainTexture, const GenericConfig &Config)
 	{
-		SuperSmartPointer<TexturePacker> Out(new TexturePacker());
+		DisposablePointer<TexturePacker> Out(new TexturePacker());
 
 		Out->MainTexture = MainTexture;
 
-		GenericConfig::Section &Animations = Config.Sections["Animations"];
+		GenericConfig::SectionMap::const_iterator Animations = Config.Sections.find("Animations");
+
+		if(Animations == Config.Sections.end())
+			return DisposablePointer<TexturePacker>();
 
 		SortedTexture Item;
 
-		for(GenericConfig::Section::ValueMap::iterator it = Animations.Values.begin(); it != Animations.Values.end(); it++)
+		for (GenericConfig::Section::ValueMap::const_iterator it = Animations->second.Values.begin(); it != Animations->second.Values.end(); it++)
 		{
 			std::vector<std::string> Pieces = StringUtils::Split(it->second.Content, '|');
 
 			for(uint32 i = 0; i < Pieces.size(); i++)
 			{
 				if(5 != sscanf(Pieces[i].c_str(), "%d,%d,%d,%d,%d", &Item.x, &Item.y, &Item.Width, &Item.Height, &Item.Index))
-					return SuperSmartPointer<TexturePacker>();
+					return DisposablePointer<TexturePacker>();
 
 				Item.TextureInstance.Reset(new Texture());
 
@@ -1374,16 +1371,16 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	SuperSmartPointer<Texture> TexturePacker::GetTexture(uint32 Index)
+	DisposablePointer<Texture> TexturePacker::GetTexture(uint32 Index)
 	{
-		return Index < Indices.size() ? Indices[Index].TextureInstance : SuperSmartPointer<Texture>();
+		return Index < Indices.size() ? Indices[Index].TextureInstance : DisposablePointer<Texture>();
 	};
 
 	TextureGroup::TextureGroup(uint32 _MaxWidth, uint32 _MaxHeight) : MaxWidth(_MaxWidth), MaxHeight(_MaxHeight)
 	{
 	};
 
-	int32 TextureGroup::Add(SuperSmartPointer<Texture> t)
+	int32 TextureGroup::Add(DisposablePointer<Texture> t)
 	{
 		if(t.Get() == NULL)
 			return -1;
@@ -1402,7 +1399,7 @@ namespace FlamingTorch
 
 		StoredTextures.push_back(t);
 
-		SuperSmartPointer<TexturePacker> Out = TexturePacker::FromTextures(StoredTextures, MaxWidth, MaxHeight);
+		DisposablePointer<TexturePacker> Out = TexturePacker::FromTextures(StoredTextures, MaxWidth, MaxHeight);
 
 		if(Out.Get() == NULL || Out->IndexCount() < StoredTextures.size())
 		{
@@ -1432,8 +1429,8 @@ namespace FlamingTorch
 		return Out->IndexCount() - 1;
 	};
 
-	SuperSmartPointer<Texture> TextureGroup::Get(int32 Index)
+	DisposablePointer<Texture> TextureGroup::Get(int32 Index)
 	{
-		return Index >= 0 && Index < (int32)InstanceTextures.size() ? InstanceTextures[Index] : SuperSmartPointer<Texture>();
+		return Index >= 0 && Index < (int32)InstanceTextures.size() ? InstanceTextures[Index] : DisposablePointer<Texture>();
 	};
 };

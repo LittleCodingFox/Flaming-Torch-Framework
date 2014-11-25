@@ -1300,7 +1300,7 @@ namespace FlamingTorch
 
 		//All packages are now at least encrypted with the default XOR key, so add a processor if missing
 		if(In->GetProcessor().Get() == NULL)
-			In->SetProcessor(SuperSmartPointer<StreamProcessor>(new XORStreamProcessor()));
+			In->SetProcessor(DisposablePointer<StreamProcessor>(new XORStreamProcessor()));
 
 		SFLASSERT(In->Read2<VersionType>(&Version));
 
@@ -1364,7 +1364,7 @@ namespace FlamingTorch
 			SFLASSERT(HeaderStream.Read2<uint64>(&Offset));
 			SFLASSERT(HeaderStream.Read2<uint64>(&Length));
 
-			SuperSmartPointer<FileEntry> Entry(new FileEntry());
+			DisposablePointer<FileEntry> Entry(new FileEntry());
 
 			Entry->DirectoryID = DirectoryID;
 			Entry->Name = NameStr;
@@ -1378,7 +1378,7 @@ namespace FlamingTorch
 		return true;
 	};
 
-	bool PackageFileSystemManager::Package::AddFile(const std::string &Directory, const std::string &Name, SuperSmartPointer<FileStream> In)
+	bool PackageFileSystemManager::Package::AddFile(const std::string &Directory, const std::string &Name, DisposablePointer<FileStream> In)
 	{
 		sf::Lock Lock(FileAccessMutex);
 
@@ -1389,7 +1389,7 @@ namespace FlamingTorch
 
 		if(eit == Entries.end() || eit->second.find(NameID) == eit->second.end())
 		{
-			SuperSmartPointer<FileEntry> &Entry = Entries[DirectoryID][NameID];
+			DisposablePointer<FileEntry> &Entry = Entries[DirectoryID][NameID];
 
 			Entry.Dispose();
 			Entry.Reset(new FileEntry());
@@ -1437,7 +1437,7 @@ namespace FlamingTorch
 		Entries.clear();
 	};
 
-	bool PackageFileSystemManager::Package::FromStream(SuperSmartPointer<Stream> Stream)
+	bool PackageFileSystemManager::Package::FromStream(DisposablePointer<Stream> Stream)
 	{
 		PackageStream.Dispose();
 		PackageStream = Stream;
@@ -1560,7 +1560,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 	};
 
-	SuperSmartPointer<PackageFileSystemManager::Package> PackageFileSystemManager::NewPackage()
+	DisposablePointer<PackageFileSystemManager::Package> PackageFileSystemManager::NewPackage()
 	{
 		FLASSERT(WasStarted, "PackageFileSystem Subsystem not started!");
 
@@ -1568,13 +1568,13 @@ namespace FlamingTorch
 		{
 			Log::Instance.LogErr(TAGMANAGER, "While calling NewPackage: Subsystem was not inited!");
 
-			return SuperSmartPointer<Package>();
+			return DisposablePointer<Package>();
 		};
 
-		return SuperSmartPointer<Package>(new Package());
+		return DisposablePointer<Package>(new Package());
 	};
 
-	bool PackageFileSystemManager::AddPackage(StringID ID, SuperSmartPointer<Stream> PackageStream)
+	bool PackageFileSystemManager::AddPackage(StringID ID, DisposablePointer<Stream> PackageStream)
 	{
 		FLASSERT(WasStarted, "PackageFileSystem Subsystem not started!");
 
@@ -1585,7 +1585,7 @@ namespace FlamingTorch
 			return false;
 		};
 
-		SuperSmartPointer<Package> ThePackage(new Package());
+		DisposablePointer<Package> ThePackage(new Package());
 
 		if(!ThePackage->FromStream(PackageStream))
 		{
@@ -1636,12 +1636,12 @@ namespace FlamingTorch
 		return true;
 	};
 	
-	SuperSmartPointer<PackageFileSystemManager::Package> PackageFileSystemManager::GetPackage(StringID ID)
+	DisposablePointer<PackageFileSystemManager::Package> PackageFileSystemManager::GetPackage(StringID ID)
 	{
 		PackageMap::iterator it = Packages.find(ID);
 
 		if(it == Packages.end() || it->second.Get() == NULL)
-			return SuperSmartPointer<Package>();
+			return DisposablePointer<Package>();
 
 		return it->second;
 	};
@@ -1664,17 +1664,17 @@ namespace FlamingTorch
 		};
 	};
 
-	SuperSmartPointer<Stream> PackageFileSystemManager::GetFile(StringID Directory, StringID Name)
+	DisposablePointer<Stream> PackageFileSystemManager::GetFile(StringID Directory, StringID Name)
 	{
 		EntryMap::iterator it = Files.find(Directory);
 
 		if(it == Files.end())
-			return SuperSmartPointer<Stream>();
+			return DisposablePointer<Stream>();
 
 		FileMap::iterator fit = it->second.find(Name);
 
 		if(fit == it->second.end())
-			return SuperSmartPointer<Stream>();
+			return DisposablePointer<Stream>();
 
 		sf::Lock Lock(fit->second.first->FileAccessMutex);
 
@@ -1685,7 +1685,12 @@ namespace FlamingTorch
 		PStream->LengthValue = fit->second.second->Length;
 		PStream->PositionValue = 0;
 
-		return SuperSmartPointer<Stream>(PStream);
+		return DisposablePointer<Stream>(PStream);
+	};
+
+	DisposablePointer<Stream> PackageFileSystemManager::GetFile(const Path &FileName)
+	{
+		return GetFile(MakeStringID(FileName.Directory), MakeStringID(FileName.BaseName));
 	};
 
 	std::vector<std::string> PackageFileSystemManager::FindDirectories(const std::string &DirectoryBasePath)

@@ -555,13 +555,13 @@ const int32 UpdateTime = 1000 / UPDATE_FPS;
 		enet_host_flush(Host);
 	};
 
-	SuperSmartPointer<GameClient> GameNetwork::GetClient(StringID ID)
+	DisposablePointer<GameClient> GameNetwork::GetClient(StringID ID)
 	{
 		ClientMap::iterator it = Clients.find(ID);
 
 		if(it == Clients.end() || it->second.Get() == NULL)
 		{
-			SuperSmartPointer<GameClient> Client(new GameClient());
+			DisposablePointer<GameClient> Client(new GameClient());
 			Clients[ID] = Client;
 
 			return Client;
@@ -570,13 +570,13 @@ const int32 UpdateTime = 1000 / UPDATE_FPS;
 		return it->second;
 	};
 
-	SuperSmartPointer<GameServer> GameNetwork::GetServer(StringID ID)
+	DisposablePointer<GameServer> GameNetwork::GetServer(StringID ID)
 	{
 		ServerMap::iterator it = Servers.find(ID);
 
 		if(it == Servers.end() || it->second.Get() == NULL)
 		{
-			SuperSmartPointer<GameServer> Server(new GameServer());
+			DisposablePointer<GameServer> Server(new GameServer());
 			Servers[ID] = Server;
 
 			return Server;

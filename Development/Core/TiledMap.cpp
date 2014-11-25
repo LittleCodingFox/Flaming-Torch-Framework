@@ -126,7 +126,7 @@ namespace FlamingTorch
 
 		for(uint32 i = 0; i < LayerCount; i++)
 		{
-			Layers.push_back(SuperSmartPointer<Layer>(new Layer()));
+			Layers.push_back(DisposablePointer<Layer>(new Layer()));
 			Layers[Layers.size() - 1]->Alpha = 1.f;
 
 			SFLASSERT(In->Read2<bool>(&Layers[Layers.size() - 1]->Visible));
@@ -401,7 +401,7 @@ namespace FlamingTorch
 				{
 					TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
 
-					SuperSmartPointer<Stream> ConfigurationStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Options.PackageDirectoriesValue[i]), MakeStringID(TileSet.UniqueTilesetTextureName + ".cfg"));
+					DisposablePointer<Stream> ConfigurationStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Options.PackageDirectoriesValue[i]), MakeStringID(TileSet.UniqueTilesetTextureName + ".cfg"));
 
 					if(!ConfigurationStream.Get() || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
 					{
@@ -433,7 +433,7 @@ namespace FlamingTorch
 
 				TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
 
-				SuperSmartPointer<Stream> ConfigurationStream(new FileStream());
+				DisposablePointer<Stream> ConfigurationStream(new FileStream());
 
 				if(!ConfigurationStream.AsDerived<FileStream>()->Open((TileSet.UniqueTilesetTextureName + ".cfg").c_str(), StreamFlags::Read | StreamFlags::Text) || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
 				{
@@ -460,7 +460,7 @@ namespace FlamingTorch
 
 			TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
 
-			SuperSmartPointer<Stream> ConfigurationStream(new FileStream());
+			DisposablePointer<Stream> ConfigurationStream(new FileStream());
 
 			if(!ConfigurationStream.AsDerived<FileStream>()->Open((TileSet.UniqueTilesetTextureName + ".cfg").c_str(), StreamFlags::Read | StreamFlags::Text) || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
 			{

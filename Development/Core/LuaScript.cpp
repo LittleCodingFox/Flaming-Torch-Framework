@@ -91,7 +91,7 @@ namespace FlamingTorch
 		};
 	};
 
-	LuaGlobalsTracker::LuaGlobalsTracker(SuperSmartPointer<LuaScript> Script) : ScriptInstance(Script) {};
+	LuaGlobalsTracker::LuaGlobalsTracker(DisposablePointer<LuaScript> Script) : ScriptInstance(Script) {};
 
 	void LuaGlobalsTracker::Add(const std::string &Name)
 	{
@@ -127,7 +127,7 @@ namespace FlamingTorch
 
 	bool LuaLoadPackage(const std::string &Name)
 	{
-		SuperSmartPointer<FileStream> Stream(new FileStream());
+		DisposablePointer<FileStream> Stream(new FileStream());
 
 		if(!Stream->Open(Name, StreamFlags::Read))
 		{
@@ -163,7 +163,7 @@ namespace FlamingTorch
 		lua_call(State, 0, 0);
 
 		luabind::module(State) [
-			luabind::class_<BaseScriptableInstance, SuperSmartPointer<BaseScriptableInstance> >("BaseScriptableInstance")
+			luabind::class_<BaseScriptableInstance, DisposablePointer<BaseScriptableInstance> >("BaseScriptableInstance")
 		];
 	};
 
@@ -191,16 +191,16 @@ namespace FlamingTorch
 		return Error;
 	};
 
-	SuperSmartPointer<LuaScript> LuaScriptManager::CreateScript(const std::string &Code, LuaLib **Libs, uint32 LibCount)
+	DisposablePointer<LuaScript> LuaScriptManager::CreateScript(const std::string &Code, LuaLib **Libs, uint32 LibCount)
 	{
 		FLASSERT(WasStarted, "Lua ScriptManager not yet started!");
 
 		if(!WasStarted)
-			return SuperSmartPointer<LuaScript>();
+			return DisposablePointer<LuaScript>();
 
 		int32 error = 0;
 
-		SuperSmartPointer<LuaScript> ScriptInstance(new LuaScript());
+		DisposablePointer<LuaScript> ScriptInstance(new LuaScript());
 
 		RegisterBase(ScriptInstance->State);
 
@@ -210,7 +210,7 @@ namespace FlamingTorch
 			{
 				ScriptInstance.Dispose();
 
-				return SuperSmartPointer<LuaScript>();
+				return DisposablePointer<LuaScript>();
 			};
 		};
 
@@ -221,7 +221,7 @@ namespace FlamingTorch
 		error = ScriptInstance->DoString(Code.c_str());
 
 		if(error != 0)
-			return SuperSmartPointer<LuaScript>();
+			return DisposablePointer<LuaScript>();
 
 		InstancedScripts.push_back(ScriptInstance);
 
@@ -299,7 +299,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 	};
 
-	int32 LuaScriptManager::PerformMainLoop(SuperSmartPointer<LuaScript> LoopScript)
+	int32 LuaScriptManager::PerformMainLoop(DisposablePointer<LuaScript> LoopScript)
 	{
 		FLASSERT(LoopScript.Get(), "Invalid Loop Script!");
 

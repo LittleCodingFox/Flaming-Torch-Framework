@@ -386,7 +386,9 @@ namespace FlamingTorch
 
 				if(Options.RotationValue != 0 && !Options.WireframeValue)
 				{
-					Vector2 ExtraSize = Options.NinePatchValue ? -ObjectSize / 2 + Options.NinePatchRectValue.ToFullSize() / 4 * Options.NinePatchScaleValue : -ObjectSize / 2;
+					//Need to invert NinePatch left/right because each element is an offset in that side, not an actual Rect
+					Vector2 ExtraSize = Options.NinePatchValue ? -ObjectSize / 2 +
+						Rect(-Options.NinePatchRectValue.Left, Options.NinePatchRectValue.Right, -Options.NinePatchRectValue.Top, Options.NinePatchRectValue.Bottom).Size() / 4 * Options.NinePatchScaleValue : -ObjectSize / 2;
 
 					for(uint32 i = 0; i < VertexCount; i++)
 					{

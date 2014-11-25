@@ -38,25 +38,31 @@ namespace FlamingTorch
 	class DisposableResource
 	{
 		template<typename othertype>
-		friend class SuperSmartPointer;
+		friend class DisposablePointer;
 	private:
 		type *ContainedObject;
+		bool WeakReference;
 
 		DisposableResource<type>(const DisposableResource<type> &);
 		DisposableResource<type> &operator=(const DisposableResource<type> &);
 	public:
 
-		DisposableResource<type>() : ContainedObject(NULL)
+		DisposableResource<type>() : ContainedObject(NULL), WeakReference(false)
 		{
 		};
 
-		explicit DisposableResource<type>(type *Object) : ContainedObject(Object)
+		explicit DisposableResource<type>(type *Object) : ContainedObject(Object), WeakReference(false)
 		{
 		};
 
 		~DisposableResource<type>()
 		{
 			Dispose();
+		};
+
+		inline void MakeWeakReference()
+		{
+			WeakReference = true;
 		};
 
 		inline type *Get()
@@ -76,36 +82,45 @@ namespace FlamingTorch
 
 		inline void Dispose()
 		{
-			if(ContainedObject)
+			if (ContainedObject)
 			{
-				type *ActualContainedObject = ContainedObject;
+				if (!WeakReference)
+				{
+					type *ActualContainedObject = ContainedObject;
 
-				ContainedObject = NULL;
+					ContainedObject = NULL;
 
-				delete ActualContainedObject;
+					delete ActualContainedObject;
+				}
+				else
+				{
+					return;
+				};
 			};
 		};
 	};
 
 	template<typename type>
-	class SuperSmartPointer : public std::shared_ptr<DisposableResource<type> >
+	class DisposablePointer : public std::shared_ptr<DisposableResource<type> >
 	{
+	private:
+		bool ReadOnly;
 	public:
-		SuperSmartPointer()
+		DisposablePointer() : ReadOnly(false)
 		{
 		};
 
-		explicit SuperSmartPointer(type *In)
+		explicit DisposablePointer(type *In) : ReadOnly(false)
 		{
 			this->reset(new DisposableResource<type>(In));
 		};
 
-		bool operator==(const SuperSmartPointer<type> &o)
+		bool operator==(const DisposablePointer<type> &o)
 		{
 			return o.Get() == Get();
 		};
 
-		bool operator!=(const SuperSmartPointer<type> &o)
+		bool operator!=(const DisposablePointer<type> &o)
 		{
 			return o.Get() != Get();
 		};
@@ -160,9 +175,19 @@ namespace FlamingTorch
 			return Get() != NULL;
 		};
 
+		inline bool IsReadOnly()
+		{
+			return ReadOnly;
+		};
+
+		inline void MakeReadOnly()
+		{
+			ReadOnly = true;
+		};
+
 		inline void Dispose()
 		{
-			if(this->get())
+			if(!ReadOnly && this->get())
 			{
 				this->get()->Dispose();
 			};
@@ -170,21 +195,24 @@ namespace FlamingTorch
 
 		inline void Reset(type *New)
 		{
+			if(ReadOnly)
+				return;
+
 			this->reset(new DisposableResource<type>(New));
 		};
 
 		template<typename OutType>
-		operator SuperSmartPointer<OutType>()
+		operator DisposablePointer<OutType>()
 		{
 			if(!Get())
-				return SuperSmartPointer<OutType>();
+				return DisposablePointer<OutType>();
 
 #if CHECK_SSP_CONVERSIONS
 			if(dynamic_cast<OutType *>(Get()) == NULL)
-				return SuperSmartPointer<OutType>();
+				return DisposablePointer<OutType>();
 #endif
 
-			return *(SuperSmartPointer<OutType> *)this;
+			return *(DisposablePointer<OutType> *)this;
 		};
 
 		template<typename OutType>
@@ -195,6 +223,14 @@ namespace FlamingTorch
 #else
 			return static_cast<OutType *>(Get());
 #endif
+		};
+
+		static DisposablePointer<type> MakeWeak(type *In)
+		{
+			DisposablePointer<type> Out(In);
+			Out.get()->MakeWeakReference();
+
+			return Out;
 		};
 	};
 

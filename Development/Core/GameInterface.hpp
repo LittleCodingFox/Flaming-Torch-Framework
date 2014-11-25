@@ -33,7 +33,7 @@ public:
 	Vector2 BaseResolution;
 	bool ErroredOnFrameUpdate, ErroredOnFixedUpdate, ErroredOnFrameBegin, ErroredOnFrameEnd, ErroredOnFrameDraw, ErroredOnResize, ErroredOnResourcesReloaded;
 
-	static SuperSmartPointer<GameInterface> Instance;
+	static DisposablePointer<GameInterface> Instance;
 
 	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
@@ -41,7 +41,7 @@ public:
 			IsMobile(FLPLATFORM_MOBILE), QuitFlag(false){};
 	virtual ~GameInterface() {};
 
-	static void SetInstance(SuperSmartPointer<GameInterface> TheInstance);
+	static void SetInstance(DisposablePointer<GameInterface> TheInstance);
 
 	/*!
 	*	Load a package from a filename
@@ -85,7 +85,7 @@ public:
 	*	Gets any script instances available for this game
 	*	Used to interact with the game's scripting or methods if you have any
 	*/
-	virtual SuperSmartPointer<LuaScript> GetScriptInstance() { return SuperSmartPointer<LuaScript>(); };
+	virtual DisposablePointer<LuaScript> GetScriptInstance() { return DisposablePointer<LuaScript>(); };
 
 #if USE_GRAPHICS
 	/*!
@@ -151,7 +151,7 @@ public:
 class ScriptedGameInterface : public GameInterface
 {
 public:
-	SuperSmartPointer<LuaScript> ScriptInstance;
+	DisposablePointer<LuaScript> ScriptInstance;
 	std::string GameNameValue;
 
 	luabind::object PreInitFunction, InitFunction, DeInitFunction, OnFixedUpdateFunction, OnFrameUpdateFunction,
@@ -174,7 +174,7 @@ public:
 
 	~ScriptedGameInterface();
 
-	SuperSmartPointer<LuaScript> GetScriptInstance()
+	DisposablePointer<LuaScript> GetScriptInstance()
 	{
 		return ScriptInstance;
 	};

@@ -84,7 +84,7 @@ public:
 
 private:
 	std::vector<ConsoleVariable> ConsoleVariables;
-	std::vector<SuperSmartPointer<ConsoleCommand> > ConsoleCommands;
+	std::vector<DisposablePointer<ConsoleCommand> > ConsoleCommands;
 
 	void HelpCommand(const std::vector<std::string> &Parameters);
 	void VersionCommand(const std::vector<std::string> &Parameters);
@@ -99,7 +99,7 @@ private:
 	void Update(uint32 Priority);
 	void Shutdown(uint32 Priority);
 public:
-	std::vector<std::string> ConsoleLog;
+	std::vector<std::string> ConsoleLog, CommandLog;
 
 	Console() : SubSystem(CONSOLE_PRIORITY) {};
 
@@ -113,7 +113,7 @@ public:
 	*	Registers a console command
 	*	\param Command the command to register
 	*/
-	void RegisterCommand(SuperSmartPointer<ConsoleCommand> Command);
+	void RegisterCommand(DisposablePointer<ConsoleCommand> Command);
 
 	/*!
 	*	Gets a console variable by name

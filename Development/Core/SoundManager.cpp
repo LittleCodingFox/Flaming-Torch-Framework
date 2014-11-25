@@ -106,49 +106,49 @@ namespace FlamingTorch
 		return TheSound.getLoop();
 	};
 
-	SuperSmartPointer<SoundManager::Sound> SoundManager::GetSound(StringID ID)
+	DisposablePointer<SoundManager::Sound> SoundManager::GetSound(StringID ID)
 	{
 		if(!WasStarted)
 		{
-			return SuperSmartPointer<Sound>();
+			return DisposablePointer<Sound>();
 		};
 
 		SoundMap::iterator it = Sounds.find(ID);
 
 		if(it == Sounds.end())
 		{
-			return SuperSmartPointer<Sound>();
+			return DisposablePointer<Sound>();
 		};
 
 		if(it->second.Get() == NULL)
 		{
 			Sounds.erase(it);
 
-			return SuperSmartPointer<Sound>();
+			return DisposablePointer<Sound>();
 		};
 
 		return it->second;
 	};
 
-	SuperSmartPointer<SoundManager::Music> SoundManager::GetMusic(StringID ID)
+	DisposablePointer<SoundManager::Music> SoundManager::GetMusic(StringID ID)
 	{
 		if(!WasStarted)
 		{
-			return SuperSmartPointer<Music>();
+			return DisposablePointer<Music>();
 		};
 
 		MusicMap::iterator it = Musics.find(ID);
 
 		if(it == Musics.end())
 		{
-			return SuperSmartPointer<Music>();
+			return DisposablePointer<Music>();
 		};
 
 		if(it->second.Get() == NULL)
 		{
 			Musics.erase(it);
 
-			return SuperSmartPointer<Music>();
+			return DisposablePointer<Music>();
 		};
 
 		return it->second;
@@ -172,7 +172,7 @@ namespace FlamingTorch
 
 		SoundBufferMap::iterator it = SoundBuffers.find(SoundID);
 
-		SuperSmartPointer<sf::SoundBuffer> Buffer;
+		DisposablePointer<sf::SoundBuffer> Buffer;
 
 		if(it != SoundBuffers.end() && it->second.Get() != NULL)
 		{
@@ -202,7 +202,7 @@ namespace FlamingTorch
 
 		SoundBuffers[SoundID] = Buffer;
 
-		SuperSmartPointer<Sound> TheSound(new Sound());
+		DisposablePointer<Sound> TheSound(new Sound());
 		TheSound->TheSound.setBuffer(*Buffer);
 
 		Sounds[SoundID] = TheSound;
@@ -217,7 +217,7 @@ namespace FlamingTorch
 		if(!WasStarted)
 			return 0xFFFFFFFF;
 
-		SuperSmartPointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(Directory, FileName);
+		DisposablePointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(Directory, FileName);
 
 		if(PackageStream.Get() == NULL)
 		{
@@ -232,7 +232,7 @@ namespace FlamingTorch
 		if(!WasStarted)
 			return 0xFFFFFFFF;
 
-		SuperSmartPointer<FileStream> Stream(new FileStream());
+		DisposablePointer<FileStream> Stream(new FileStream());
 
 		if(!Stream->Open(FileName, StreamFlags::Read))
 		{
@@ -261,7 +261,7 @@ namespace FlamingTorch
 			return sit->first;
 		};
 
-		SuperSmartPointer<Music> Out(new Music());
+		DisposablePointer<Music> Out(new Music());
 
 		Out->Data.resize((uint32)(In->Length() - In->Position()));
 
@@ -285,7 +285,7 @@ namespace FlamingTorch
 		if(!WasStarted)
 			return 0xFFFFFFFF;
 
-		SuperSmartPointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(Directory, FileName);
+		DisposablePointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(Directory, FileName);
 
 		if(PackageStream.Get() == NULL)
 		{
@@ -300,7 +300,7 @@ namespace FlamingTorch
 		if(!WasStarted)
 			return 0xFFFFFFFF;
 
-		SuperSmartPointer<FileStream> Stream(new FileStream());
+		DisposablePointer<FileStream> Stream(new FileStream());
 
 		if(!Stream->Open(FileName, StreamFlags::Read))
 		{

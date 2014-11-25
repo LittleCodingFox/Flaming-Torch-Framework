@@ -4,31 +4,32 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
-	UISprite::UISprite(UIManager *Manager) : UIPanel("UISprite", Manager)
+	UISprite::UISprite(UIManager *Manager) : UIElement("UISprite", Manager)
 	{
 		OnConstructed();
 	};
-
-	void UISprite::PerformLayout()
+	
+	const Vector2 &UISprite::Size() const
 	{
+		static Vector2 Out;
+		Out = TheSprite.Options.NinePatchValue ? SizeValue +
+			//Need to invert left/right because each element is an offset in that side, not an actual Rect
+			Rect(-TheSprite.Options.NinePatchRectValue.Left, TheSprite.Options.NinePatchRectValue.Right,
+			-TheSprite.Options.NinePatchRectValue.Top, TheSprite.Options.NinePatchRectValue.Bottom).Size() *
+			TheSprite.Options.NinePatchScaleValue : SizeValue;
+
+		return Out;
 	};
 
 	void UISprite::Update(const Vector2 &ParentPosition)
 	{
-		UIPanel::Update(ParentPosition);
+		UIElement::Update(ParentPosition);
 
-		PerformLayout();
+		Vector2 ActualPosition = ParentPosition + Position() + Offset();
 
-		Vector2 ParentSizeHalf = ComposedSize() / 2;
-		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
-
-		for(uint32 i = 0; i < Children.size(); i++)
+		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
-			Vector2 ChildrenSizeHalf = Children[i]->ComposedSize() / 2;
-			Vector2 ChildrenPosition = Children[i]->Position() - Children[i]->Translation() + Children[i]->Offset();
-
-			Children[i]->Update(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, ParentRotation()) +
-				ParentSizeHalf - ChildrenSizeHalf - ChildrenPosition);
+			ChildrenValue[i]->Update(ActualPosition);
 		};
 	};
 
@@ -36,47 +37,43 @@ namespace FlamingTorch
 	{
 		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
 
-		if(!Visible() || AlphaValue == 0 || (ActualPosition.x + ComposedSize().x < 0 ||
+		if(!Visible() || (ActualPosition.x + Size().x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
-			ActualPosition.y + ComposedSize().y < 0 || ActualPosition.y > Renderer->Size().y))
+			ActualPosition.y + Size().y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
-		Renderer->StartClipping(Rect(ActualPosition.x - 1, ActualPosition.x + ComposedSize().x + 1, ActualPosition.y - 1, ActualPosition.y + ComposedSize().y + 1));
-
-		UIPanel::Draw(ParentPosition, Renderer);
+		UIElement::Draw(ParentPosition, Renderer);
 
 		Sprite TempSprite = TheSprite;
 
 		if(TempSprite.Options.ScaleValue.x > 0 && TempSprite.Options.ScaleValue.y > 0)
 		{
-			TempSprite.Options = TempSprite.Options.Position(ActualPosition + TheSprite.Options.PositionValue + ScaledExtraSize() / 2).Color(TheSprite.Options.ColorValue * Vector4(1, 1, 1, ParentAlpha()))
-				.Rotation(ParentRotation() + TempSprite.Options.RotationValue).NinePatchScale(ExtraSizeScaleValue);
+			TempSprite.Options.Position(ActualPosition + TheSprite.Options.PositionValue);
+
+			if(TempSprite.Options.NinePatchValue)
+			{
+				TempSprite.Options.Position(TempSprite.Options.PositionValue + TheSprite.Options.NinePatchRectValue.Position() * TheSprite.Options.NinePatchScaleValue);
+			};
+
+			if(!TempSprite.Options.UsingColorsArray)
+			{
+				TempSprite.Options.Color(TheSprite.Options.ColorValue);
+			};
+
 			TempSprite.Draw(Renderer);
 		};
 
 		//We want Debug Rects to show up on top of the element... but we don't want to show it after drawing children...
 		if(Manager()->DrawUIRects || Manager()->DrawUIFocusZones)
 		{
-			Renderer->FinishClipping();
-
 			DrawUIFocusZone(ParentPosition, Renderer);
 			DrawUIRect(ParentPosition, Renderer);
-
-			Renderer->StartClipping(Rect(ActualPosition.x, ActualPosition.x + ComposedSize().x, ActualPosition.y, ActualPosition.y + ComposedSize().y));
 		};
 
-		Vector2 ParentSizeHalf = ComposedSize() / 2;
-
-		for(uint32 i = 0; i < Children.size(); i++)
+		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
-			Vector2 ChildrenSizeHalf = Children[i]->ComposedSize() / 2;
-			Vector2 ChildrenPosition = Children[i]->Position() - Children[i]->Translation() + Children[i]->Offset();
-
-			Children[i]->Draw(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, ParentRotation()) + ParentSizeHalf -
-				ChildrenSizeHalf - ChildrenPosition, Renderer);
+			ChildrenValue[i]->Draw(ActualPosition, Renderer);
 		};
-
-		Renderer->FinishClipping();
 	};
 #endif
 };

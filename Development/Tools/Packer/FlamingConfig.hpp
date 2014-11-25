@@ -12,7 +12,7 @@
 //Set this to 1 if you want a Sandbox Build (will store files on the same folder as the app)
 #define SANDBOX_BUILD 1
 
-//Set this to 1 if you're experiencing memory corruption such as double-frees related to SuperSmartPointers
+//Set this to 1 if you're experiencing memory corruption such as double-frees related to DisposablePointers
 //So it will log how each SSP is created and destroyed, and detect double creations of the same item (in debug builds)
 #if ULTIMATE_DEBUG_MODE
 #	define LOG_SSP_BEHAVIOUR 1

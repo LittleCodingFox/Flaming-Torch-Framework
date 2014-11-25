@@ -38,7 +38,7 @@ public:
 	{
 		std::string FileName;
 		Vector3 TransparentColor;
-		SuperSmartPointer<TextureBuffer> Image;
+		DisposablePointer<TextureBuffer> Image;
 		Vector2 TileSize;
 		Vector2 FrameCount;
 		void *Ptr;
@@ -48,7 +48,7 @@ public:
 		TilePropertyMap Properties;
 	};
 
-	std::map<uint32, SuperSmartPointer<TileData> > TileSets;
+	std::map<uint32, DisposablePointer<TileData> > TileSets;
 
 	uint32 Orientation;
 
@@ -68,7 +68,7 @@ public:
 		TileMap Tiles;
 	};
 
-	std::vector<SuperSmartPointer<LayerData> > Layers;
+	std::vector<DisposablePointer<LayerData> > Layers;
 
 	struct MapObject
 	{
@@ -95,7 +95,7 @@ public:
 	{
 		int32 Count = 0;
 
-		for(std::map<uint32, SuperSmartPointer<TileData> >::iterator it = TileSets.begin(); it != TileSets.end(); it++, Count++)
+		for(std::map<uint32, DisposablePointer<TileData> >::iterator it = TileSets.begin(); it != TileSets.end(); it++, Count++)
 		{
 			if(it->first == Index)
 				return Count;
@@ -106,7 +106,7 @@ public:
 
 	int32 GetTileSetFromCount(uint32 Count)
 	{
-		for(std::map<uint32, SuperSmartPointer<TileData> >::iterator it = TileSets.begin(); it != TileSets.end(); it++, Count--)
+		for(std::map<uint32, DisposablePointer<TileData> >::iterator it = TileSets.begin(); it != TileSets.end(); it++, Count--)
 		{
 			if(Count == 0)
 				return it->first;
@@ -205,7 +205,7 @@ public:
 
             if(UniqueTiles.size() != 0)
             {
-				std::vector<SuperSmartPointer<Texture> > UniqueTextures(UniqueTiles.size());
+				std::vector<DisposablePointer<Texture> > UniqueTextures(UniqueTiles.size());
 				Vector2 MaximumTileSize;
 
 				for(uint32 i = 0; i < UniqueTextures.size(); i++)
@@ -243,7 +243,7 @@ public:
                 };
 
 				//Expect 2-px offset between tiles
-				SuperSmartPointer<TexturePacker> PackedUniqueTiles = TexturePacker::FromTextures(UniqueTextures, (uint32)ImageSize.x + 2 * (UniqueTileSideCount + 1), (uint32)ImageSize.y + 2 * (UniqueTileSideCount + 1));
+				DisposablePointer<TexturePacker> PackedUniqueTiles = TexturePacker::FromTextures(UniqueTextures, (uint32)ImageSize.x + 2 * (UniqueTileSideCount + 1), (uint32)ImageSize.y + 2 * (UniqueTileSideCount + 1));
 
 				if(!PackedUniqueTiles.Get() || PackedUniqueTiles->IndexCount() != UniqueTextures.size())
 				{
@@ -542,7 +542,7 @@ int main(int argc, char **argv)
 	Log::Instance.LogInfo(TAG, "Starting version %d.%d", VERSION_MAJOR, VERSION_MINOR);
 	Log::Instance.LogInfo(TAG, "Will store compiled data to '%s'", OutFileName.c_str());
 
-	SuperSmartPointer<FileStream> Stream(new FileStream());
+	DisposablePointer<FileStream> Stream(new FileStream());
 
 	if(!Stream->Open(FileName, StreamFlags::Read | StreamFlags::Text))
 	{
@@ -555,7 +555,7 @@ int main(int argc, char **argv)
 
 	Log::Instance.LogInfo(TAG, "Parsing '%s'", FileName.c_str());
 
-	SuperSmartPointer<Tmx::Map> Map(new Tmx::Map());
+	DisposablePointer<Tmx::Map> Map(new Tmx::Map());
 
 	Map->ParseText(Stream->AsString());
 
@@ -608,7 +608,7 @@ int main(int argc, char **argv)
 
 	for(uint32 i = 0; i < Sets.size(); i++)
 	{
-		SuperSmartPointer<MapData::TileData> TileSet(new MapData::TileData());
+		DisposablePointer<MapData::TileData> TileSet(new MapData::TileData());
 		TileSet->FileName = Sets[i]->GetImage()->GetSource();
 
 		int32 Position = TileSet->FileName.rfind('/');
@@ -695,7 +695,7 @@ int main(int argc, char **argv)
 			};
 
 			std::string OutFileName = TileSet->FileName.substr(0, TileSet->FileName.rfind('.')) + "_BAKED_" + Color + ".png";
-			SuperSmartPointer<FileStream> Out(new FileStream());
+			DisposablePointer<FileStream> Out(new FileStream());
 
 			TextureEncoderInfo TEInfo;
 			TEInfo.Encoder = TextureEncoderType::PNG;
@@ -780,7 +780,7 @@ int main(int argc, char **argv)
 
 	for(uint32 i = 0; i < Layers.size(); i++)
 	{
-		SuperSmartPointer<MapData::LayerData> Layer(new MapData::LayerData);
+		DisposablePointer<MapData::LayerData> Layer(new MapData::LayerData);
 
 		Layer->Visible = Layers[i]->IsVisible();
 

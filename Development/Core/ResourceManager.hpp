@@ -8,7 +8,7 @@ private:
 	typedef std::map<StringID, FontHandle> FontMap;
 #endif
 
-	typedef std::map<StringID, SuperSmartPointer<Texture> > TextureMap;
+	typedef std::map<StringID, DisposablePointer<Texture> > TextureMap;
 	
 	TextureMap Textures;
 #if USE_GRAPHICS
@@ -24,12 +24,16 @@ public:
 	static ResourceManager Instance;
 
 	static bool IsSameTexture(Texture *Self, Texture *Other);
-	static SuperSmartPointer<Texture> InvalidTexture;
+	static DisposablePointer<Texture> InvalidTexture;
 
-	SuperSmartPointer<Texture> GetTexture(const std::string &FileName);
-	SuperSmartPointer<Texture> GetTexture(const Path &ThePath);
-	SuperSmartPointer<Texture> GetTextureFromPackage(const std::string &Directory, const std::string &FileName);
-	SuperSmartPointer<Texture> GetTextureFromPackage(const Path &ThePath);
+	DisposablePointer<Texture> GetTexture(const std::string &FileName);
+	DisposablePointer<Texture> GetTexture(const Path &ThePath);
+	DisposablePointer<Texture> GetTextureFromPackage(const std::string &Directory, const std::string &FileName);
+	DisposablePointer<Texture> GetTextureFromPackage(const Path &ThePath);
+	DisposablePointer<TexturePacker> GetTexturePack(const std::string &FileName, GenericConfig *Config);
+	DisposablePointer<TexturePacker> GetTexturePack(const Path &ThePath, GenericConfig *Config);
+	DisposablePointer<TexturePacker> GetTexturePackFromPackage(const std::string &Directory, const std::string &FileName, GenericConfig *Config);
+	DisposablePointer<TexturePacker> GetTexturePackFromPackage(const Path &ThePath, GenericConfig *Config);
 
 #if USE_GRAPHICS
 	FontHandle GetFont(Renderer *TheRenderer, const std::string &FileName);

@@ -3,7 +3,7 @@
 class SoundManager : public SubSystem
 {
 private:
-	typedef std::map<StringID, SuperSmartPointer<sf::SoundBuffer> > SoundBufferMap;
+	typedef std::map<StringID, DisposablePointer<sf::SoundBuffer> > SoundBufferMap;
 	SoundBufferMap SoundBuffers;
 
 public:
@@ -11,10 +11,10 @@ public:
 	class Music;
 
 private:
-	typedef std::map<StringID, SuperSmartPointer<Sound> > SoundMap;
+	typedef std::map<StringID, DisposablePointer<Sound> > SoundMap;
 	SoundMap Sounds;
 
-	typedef std::map<StringID, SuperSmartPointer<Music> > MusicMap;
+	typedef std::map<StringID, DisposablePointer<Music> > MusicMap;
 	MusicMap Musics;
 
 	static uint64 SoundCounter, MusicCounter;
@@ -71,8 +71,8 @@ public:
 
 	SoundManager() : SubSystem(SOUNDMANAGER_PRIORITY) {};
 
-	SuperSmartPointer<Sound> GetSound(StringID ID);
-	SuperSmartPointer<Music> GetMusic(StringID ID);
+	DisposablePointer<Sound> GetSound(StringID ID);
+	DisposablePointer<Music> GetMusic(StringID ID);
 
 	//returns 0xFFFFFFFF on failure
 	StringID SoundFromStream(Stream *In);

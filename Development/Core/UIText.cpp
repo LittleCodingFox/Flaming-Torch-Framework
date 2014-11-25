@@ -4,26 +4,19 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
-	UIText::UIText(UIManager *Manager) : UIPanel("UIText", Manager), TextAlignment(UITextAlignment::Left), ExpandHeight(false)
+	UIText::UIText(UIManager *Manager) : UIElement("UIText", Manager), TextAlignment(UITextAlignment::Left)
 	{
 		OnConstructed();
 
-		TextParameters = TextParameters.Font(Manager->GetDefaultFont()).Color(Manager->GetDefaultFontColor())
-			.SecondaryColor(Manager->GetDefaultSecondaryFontColor()).FontSize(Manager->GetDefaultFontSize());
+		TextParameters = TextParameters.FontSize(UIELEMENT_DEFAULT_FONT_SIZE);
 	};
 
-	void UIText::OnSkinChange()
-	{
-	};
-
-	void UIText::SetText(const std::string &String, bool AutoExpandHeight)
+	void UIText::SetText(const std::string &String)
 	{
 		TextValue = String;
-		std::vector<std::string> OutputStrings = RenderTextUtils::FitTextOnRect(Manager()->GetOwner(), TextValue, TextParameters, AutoExpandHeight ? Vector2(SizeValue.x, 9999999) : SizeValue);
+		std::vector<std::string> OutputStrings = RenderTextUtils::FitTextOnRect(Manager()->GetOwner(), TextValue, TextParameters, SizeValue);
 
 		Strings.resize(0);
-
-		f32 y = 0;
 
 		for(uint32 i = 0; i < OutputStrings.size(); i++)
 		{
@@ -31,32 +24,25 @@ namespace FlamingTorch
 			Info.TheString = OutputStrings[i];
 			Info.Size = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), OutputStrings[i], TextParameters);
 
-			y += Info.Size.Bottom;
-
 			Strings.push_back(Info);
-		};
-
-		if(AutoExpandHeight)
-		{
-			SizeValue.y = SizeValue.y > y ? SizeValue.y : y;
 		};
 	};
 
-	const std::string &UIText::Text()
+	const std::string &UIText::Text() const
 	{
 		return TextValue;
 	};
 
-	Vector2 UIText::TextSize()
+	Vector2 UIText::TextSize() const
 	{
 		Vector2 Size;
 
 		for(uint32 i = 0; i < Strings.size(); i++)
 		{
-			Size.y += Strings[i].Size.Bottom;
+			Size.y += (Strings[i].Size.Size().y < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Size().y);
 
-			if(Size.x < Strings[i].Size.Left)
-				Size.x = Strings[i].Size.Left;
+			if (Size.x < Strings[i].Size.Size().x)
+				Size.x = Strings[i].Size.Size().x;
 		};
 
 		return Size;
@@ -64,21 +50,19 @@ namespace FlamingTorch
 
 	void UIText::Update(const Vector2 &ParentPosition)
 	{
-		UIPanel::Update(ParentPosition);
+		UIElement::Update(ParentPosition);
 	};
 
 	void UIText::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
-		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
+		Vector2 ActualPosition = ParentPosition + Position() + Offset();
 
-		if(!Visible() || AlphaValue == 0 || (ActualPosition.x + SizeValue.x < 0 ||
+		if(!Visible() || (ActualPosition.x + Size().x < 0 ||
 			ActualPosition.x > Renderer->Size().x ||
-			ActualPosition.y + SizeValue.y < 0 || ActualPosition.y > Renderer->Size().y))
+			ActualPosition.y + Size().y < 0 || ActualPosition.y > Renderer->Size().y))
 			return;
 
-		Renderer->StartClipping(Rect(ActualPosition.x - 1, ActualPosition.x + ComposedSize().x + 1, ActualPosition.y - 1, ActualPosition.y + ComposedSize().y + 1));
-
-		UIPanel::Draw(ParentPosition, Renderer);
+		UIElement::Draw(ParentPosition, Renderer);
 
 		f32 YOffset = 0;
 
@@ -86,7 +70,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += (Strings[i].Size.Bottom + Strings[i].Size.Top);
+				YOffset += MathUtils::Max(Strings[i].Size.Size().y, TextParameters.FontSizeValue);
 			};
 
 			YOffset = MathUtils::Clamp((SizeValue.y - YOffset) / 2, 0, SizeValue.y);
@@ -95,7 +79,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += (Strings[i].Size.Bottom + Strings[i].Size.Top);
+				YOffset += MathUtils::Max(Strings[i].Size.Size().y, TextParameters.FontSizeValue);
 			};
 
 			YOffset = SizeValue.y - YOffset;
@@ -103,34 +87,31 @@ namespace FlamingTorch
 
 		f32 TextYOffset = YOffset;
 
-		Vector2 ParentSizeHalf = SizeValue / 2;
-
-		for(uint32 i = 0; i < Strings.size(); TextYOffset += Strings[i].Size.Bottom, i++)
+		for (uint32 i = 0; i < Strings.size(); TextYOffset += (Strings[i].Size.Size().y < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Size().y), i++)
 		{
-			Vector2 ChildrenSizeHalf = Strings[i].Size.ToFullSize() / 2;
+			if(TextYOffset + MathUtils::Max(Strings[i].Size.Size().y, TextParameters.FontSizeValue) > SizeValue.y)
+				break;
+
 			Vector2 ChildrenPosition;
 
 			if(TextAlignment & UITextAlignment::Center)
 			{
-				ChildrenPosition = Vector2((SizeValue.x - (Strings[i].Size.Right - Strings[i].Size.Left)) / 2, (f32)TextYOffset);
+				ChildrenPosition = Vector2((SizeValue.x - Strings[i].Size.Size().x) / 2, (f32)TextYOffset);
 			}
 			else if(TextAlignment & UITextAlignment::Right)
 			{
-				ChildrenPosition = Vector2(SizeValue.x - Strings[i].Size.Right, (f32)TextYOffset);
+				ChildrenPosition = Vector2(SizeValue.x - Strings[i].Size.Size().x, (f32)TextYOffset);
 			}
 			else
 			{
 				ChildrenPosition = Vector2(0, (f32)TextYOffset);
 			};
 
-			Vector2 FinalPosition = ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, ParentRotation()) + ParentSizeHalf - ChildrenSizeHalf;
+			Vector2 FinalPosition = ActualPosition + ChildrenPosition;
 
 			RenderTextUtils::RenderText(Renderer, Strings[i].TheString, TextParams(TextParameters).Position(FinalPosition)
-				.Color(TextParameters.TextColorValue * Vector4(1, 1, 1, ParentAlpha())).SecondaryColor(
-				TextParameters.SecondaryTextColorValue * Vector4(1, 1, 1, ParentAlpha())).Rotate(ParentRotation()));
+				.Color(TextParameters.TextColorValue).SecondaryColor(TextParameters.SecondaryTextColorValue));
 		};
-
-		Renderer->FinishClipping();
 
 		DrawUIFocusZone(ParentPosition, Renderer);
 		DrawUIRect(ParentPosition, Renderer);

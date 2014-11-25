@@ -26,17 +26,29 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
+			if (!TheGUIManager.GetFocusedElement().Get())
+				return !!TheGUIManager.GetInputBlocker().Get();
+
 			if(Key.JustPressed)
 			{
-				TheGUIManager.OnKeyJustPressedPriv(Key);
+				if(TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyJustPressed, { std::remove_const_t<InputCenter::KeyInfo *>(&Key) });
+				};
 			}
 			else if(Key.Pressed)
 			{
-				TheGUIManager.OnKeyPressedPriv(Key);
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyPressed, { std::remove_const_t<InputCenter::KeyInfo *>(&Key) });
+				};
 			}
 			else if(Key.JustReleased)
 			{
-				TheGUIManager.OnKeyReleasedPriv(Key);
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyReleased, { std::remove_const_t<InputCenter::KeyInfo *>(&Key) });
+				};
 			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -52,14 +64,37 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-			if(Touch.JustPressed || Touch.Pressed)
+			if (Touch.JustPressed)
 			{
-				TheGUIManager.OnTouchDownPriv(Touch);
+				TheGUIManager.UpdateFocusedElement(Touch.Position, UIInputType::Touch);
+
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchJustPressed, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+				};
 			}
-			//TODO: TouchDrag support
-			else if(Touch.JustReleased)
+			else if (Touch.Pressed)
 			{
-				TheGUIManager.OnTouchUpPriv(Touch);
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchPressed, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+				};
+			};
+
+			if(Touch.Dragged)
+			{
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchDragged, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+				};
+			};
+			
+			if(Touch.JustReleased)
+			{
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchReleased, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+				};
 			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -77,15 +112,26 @@ namespace FlamingTorch
 
 			if(Button.JustPressed)
 			{
-				TheGUIManager.OnMouseJustPressedPriv(Button);
+				TheGUIManager.UpdateFocusedElement(TheManager.Input.MousePosition, UIInputType::Mouse);
+
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseJustPressed, { std::remove_const_t<InputCenter::MouseButtonInfo *>(&Button) });
+				};
 			}
 			else if(Button.Pressed)
 			{
-				TheGUIManager.OnMousePressedPriv(Button);
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MousePressed, { std::remove_const_t<InputCenter::MouseButtonInfo *>(&Button) });
+				};
 			}
 			else if(Button.JustReleased)
 			{
-				TheGUIManager.OnMouseReleasedPriv(Button);
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseReleased, { std::remove_const_t<InputCenter::MouseButtonInfo *>(&Button) });
+				};
 			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -103,15 +149,24 @@ namespace FlamingTorch
 
 			if(Button.JustPressed)
 			{
-				TheGUIManager.OnJoystickButtonJustPressedPriv(Button);
+				if(TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonJustPressed, { std::remove_const_t<InputCenter::JoystickButtonInfo *>(&Button) });
+				};
 			}
 			else if(Button.Pressed)
 			{
-				TheGUIManager.OnJoystickButtonPressedPriv(Button);
+				if (TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonPressed, { std::remove_const_t<InputCenter::JoystickButtonInfo *>(&Button) });
+				};
 			}
 			else if(Button.JustReleased)
 			{
-				TheGUIManager.OnJoystickButtonReleasedPriv(Button);
+				if(TheGUIManager.GetFocusedElement().Get())
+				{
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonReleased, { std::remove_const_t<InputCenter::JoystickButtonInfo *>(&Button) });
+				};
 			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -127,7 +182,10 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-			TheGUIManager.OnJoystickAxisMovedPriv(Axis);
+			if(TheGUIManager.GetFocusedElement().Get())
+			{
+				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickAxisMoved, { std::remove_const_t<InputCenter::JoystickAxisInfo *>(&Axis) });
+			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
@@ -142,7 +200,10 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-			TheGUIManager.OnJoystickConnectedPriv(Index);
+			if(TheGUIManager.GetFocusedElement().Get())
+			{
+				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickConnected, { &Index });
+			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
@@ -155,7 +216,10 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-			TheGUIManager.OnJoystickDisconnectedPriv(Index);
+			if (TheGUIManager.GetFocusedElement().Get())
+			{
+				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickDisconnected, { &Index });
+			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
@@ -168,7 +232,10 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-			TheGUIManager.OnMouseMovePriv();
+			if (TheGUIManager.GetFocusedElement().Get())
+			{
+				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseMoved, { });
+			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
@@ -181,7 +248,10 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-			TheGUIManager.OnCharacterEnteredPriv();
+			if (TheGUIManager.GetFocusedElement().Get())
+			{
+				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::CharacterEntered, { &Character });
+			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
@@ -194,7 +264,7 @@ namespace FlamingTorch
 			RendererManager &TheManager = RendererManager::Instance;
 			UIManager &TheGUIManager = *TheManager.ActiveRenderer()->UI.Get();
 
-			//TODO
+			//TODO?
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
@@ -206,8 +276,7 @@ namespace FlamingTorch
 		void OnLoseFocus() {};
 	};
 
-	UIManager::UIManager(Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DefaultFontColor(1, 1, 1, 1),
-		DefaultSecondaryFontColor(1, 1, 1, 1), DefaultFontSize(16), MouseOverElement(NULL), DefaultFont(0), DrawUIRects(0), DrawUIFocusZones(0)
+	UIManager::UIManager(Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DrawUIRects(0), DrawUIFocusZones(0)
 	{
 		std::vector<LuaLib *> Libs;
 		Libs.push_back(&FrameworkLib::Instance);
@@ -222,19 +291,18 @@ namespace FlamingTorch
 		if(ScriptInstance.Get() == NULL)
 			ScriptInstance = LuaScriptManager::Instance.CreateScript("", &Libs[0], Libs.size());
 
-		Tooltip.Reset(new UITooltip(this));
 		RegisterInput();
 	};
 
-	SuperSmartPointer<UILayout> UIManager::GetLayout(StringID LayoutID)
+	DisposablePointer<UILayout> UIManager::GetLayout(StringID LayoutID)
 	{
 		if(Layouts.find(LayoutID) != Layouts.end())
 			return Layouts[LayoutID];
 
-		return SuperSmartPointer<UILayout>();
+		return DisposablePointer<UILayout>();
 	};
 
-	void UIManager::AddLayout(StringID LayoutID, SuperSmartPointer<UILayout> Layout)
+	void UIManager::AddLayout(StringID LayoutID, DisposablePointer<UILayout> Layout)
 	{
 		if(Layouts.find(LayoutID) != Layouts.end())
 			Layouts[LayoutID].Dispose();
@@ -248,20 +316,11 @@ namespace FlamingTorch
 		Log::Instance.LogWarn(TAG, "While parsing a layout: Value '%s' is non-null and not the expected type '%s'", Name, #type);\
 	};
 
-	void UIManager::ProcessTextProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
+	void UIManager::ProcessTextProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
-		UIText *TheText = (UIText *)Panel;
+		UIText *TheText = (UIText *)Element;
 
-		if(Property == "ExpandHeight")
-		{
-			uint32 IntValue = 0;
-
-			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
-			{
-				TheText->ExpandHeight = !!IntValue;
-			};
-		}
-		else if(Property == "Font")
+		if(Property == "Font")
 		{
 			FontHandle Handle = ResourceManager::Instance.GetFontFromPackage(Owner, Path(Value));
 
@@ -290,7 +349,7 @@ namespace FlamingTorch
 		}
 		else if(Property == "Text")
 		{
-			TheText->SetText(Value, TheText->ExpandHeight);
+			TheText->SetText(Value);
 		}
 		else if(Property == "Bold")
 		{
@@ -416,21 +475,16 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIManager::ProcessTextJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	void UIManager::ProcessTextJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
-		UIText *TheText = (UIText *)Panel;
+		UIText *TheText = (UIText *)Element;
 		Json::Value Value = Data.get("ExpandHeight", Json::Value(false));
 
-		if(Value.isBool())
-		{
-			ProcessTextProperty(Panel, "ExpandHeight", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
-		};
-
-		Value = Data.get("FontSize", Json::Value((Json::Value::Int)GetDefaultFontSize()));
+		Value = Data.get("FontSize", Json::Value((Json::Value::Int)UIELEMENT_DEFAULT_FONT_SIZE));
 
 		if(Value.isInt())
 		{
-			ProcessTextProperty(Panel, "FontSize", StringUtils::MakeIntString((uint32)Value.asInt()), ElementName, LayoutName);
+			ProcessTextProperty(Element, "FontSize", StringUtils::MakeIntString((uint32)Value.asInt()), ElementName, LayoutName);
 		}
 		else
 		{
@@ -442,7 +496,7 @@ namespace FlamingTorch
 		if(Value.isString())
 		{
 			if(Value.asString().length() > 0)
-				ProcessTextProperty(Panel, "Font", Value.asString(), ElementName, LayoutName);
+				ProcessTextProperty(Element, "Font", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -453,7 +507,7 @@ namespace FlamingTorch
 
 		if(Value.isString())
 		{
-			ProcessTextProperty(Panel, "Text", Value.asString(), ElementName, LayoutName);
+			ProcessTextProperty(Element, "Text", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -464,7 +518,7 @@ namespace FlamingTorch
 
 		if(Value.isBool())
 		{
-			ProcessTextProperty(Panel, "Bold", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
+			ProcessTextProperty(Element, "Bold", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
 		}
 		else
 		{
@@ -475,7 +529,7 @@ namespace FlamingTorch
 
 		if(Value.isBool())
 		{
-			ProcessTextProperty(Panel, "Italic", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
+			ProcessTextProperty(Element, "Italic", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
 		}
 		else
 		{
@@ -486,7 +540,7 @@ namespace FlamingTorch
 
 		if(Value.isBool())
 		{
-			ProcessTextProperty(Panel, "Underline", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
+			ProcessTextProperty(Element, "Underline", StringUtils::MakeIntString((uint32)Value.asBool()), ElementName, LayoutName);
 		}
 		else
 		{
@@ -497,7 +551,7 @@ namespace FlamingTorch
 
 		if(Value.isString())
 		{
-			ProcessTextProperty(Panel, "Alignment", Value.asString(), ElementName, LayoutName);
+			ProcessTextProperty(Element, "Alignment", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -515,7 +569,7 @@ namespace FlamingTorch
 		{
 			if(Value.asString().length())
 			{
-				ProcessTextProperty(Panel, "TextColor", Value.asString(), ElementName, LayoutName);
+				ProcessTextProperty(Element, "TextColor", Value.asString(), ElementName, LayoutName);
 			};
 		}
 		else
@@ -533,7 +587,7 @@ namespace FlamingTorch
 		{
 			if(Value.asString().length())
 			{
-				ProcessTextProperty(Panel, "SecondaryTextColor", Value.asString(), ElementName, LayoutName);
+				ProcessTextProperty(Element, "SecondaryTextColor", Value.asString(), ElementName, LayoutName);
 			};
 		}
 		else
@@ -545,7 +599,7 @@ namespace FlamingTorch
 
 		if(Value.type() == Json::stringValue)
 		{
-			ProcessTextProperty(Panel, "Border", Value.asString(), ElementName, LayoutName);
+			ProcessTextProperty(Element, "Border", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -560,7 +614,7 @@ namespace FlamingTorch
 
 		if(Value.type() == Json::stringValue)
 		{
-			ProcessTextProperty(Panel, "BorderColor", Value.asString(), ElementName, LayoutName);
+			ProcessTextProperty(Element, "BorderColor", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -568,9 +622,9 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIManager::ProcessSpriteProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
+	void UIManager::ProcessSpriteProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
-		UISprite *TheSprite = (UISprite *)Panel;
+		UISprite *TheSprite = (UISprite *)Element;
 
 		if(Property == "Path")
 		{
@@ -582,7 +636,7 @@ namespace FlamingTorch
 			}
 			else
 			{
-				SuperSmartPointer<Texture> SpriteTexture;
+				DisposablePointer<Texture> SpriteTexture;
 
 				if(FileName.find('/') == 0)
 				{
@@ -603,7 +657,7 @@ namespace FlamingTorch
 				else
 				{
 					TheSprite->TheSprite.SpriteTexture = SpriteTexture;
-					TheSprite->TheSprite.Options.Scale(Panel->Size() != Vector2() ? Panel->Size() / SpriteTexture->Size() : Vector2(1, 1));
+					TheSprite->TheSprite.Options.Scale(Element->Size() != Vector2() ? Element->Size() / SpriteTexture->Size() : Vector2(1, 1));
 					TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Linear);
 
 					if(TheSprite->Size() == Vector2())
@@ -632,23 +686,6 @@ namespace FlamingTorch
 				};
 			};
 		}
-		else if(Property == "CropTiled")
-		{
-			if(TheSprite->TheSprite.SpriteTexture.Get() == NULL)
-				return;
-
-			std::string CropTiledString = Value;
-
-			if(CropTiledString.length() && TheSprite->TheSprite.SpriteTexture.Get())
-			{
-				Vector2 FrameSize, FrameID;
-
-				sscanf(CropTiledString.c_str(), "%f, %f, %f, %f", &FrameSize.x, &FrameSize.y, &FrameID.x, &FrameID.y);
-
-				TheSprite->TheSprite.Options.Scale(FrameSize / TheSprite->TheSprite.SpriteTexture->Size()).Crop(CropMode::CropTiled,
-					Rect(FrameSize.x, FrameID.x, FrameSize.y, FrameID.y));
-			};
-		}
 		else if(Property == "NinePatch")
 		{
 			if(TheSprite->TheSprite.SpriteTexture.Get() == NULL)
@@ -664,20 +701,7 @@ namespace FlamingTorch
 					&NinePatchRect.Bottom))
 					return;
 
-				TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Panel->Size());
-				TheSprite->SelectBoxExtraSize = NinePatchRect.ToFullSize();
-			};
-		}
-		else if(Property == "NinePatchScale")
-		{
-			if(TheSprite->TheSprite.SpriteTexture.Get() == NULL)
-				return;
-
-			f32 Scale = 0;
-
-			if(1 == sscanf(Value.c_str(), "%f", &Scale))
-			{
-				TheSprite->SetExtraSizeScale(Scale);
+				TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Element->Size());
 			};
 		}
 		else if(Property == "Color")
@@ -728,13 +752,13 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIManager::ProcessSpriteJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	void UIManager::ProcessSpriteJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
 		Json::Value Value = Data.get("Path", Json::Value(""));
 
 		if(Value.isString())
 		{
-			ProcessSpriteProperty(Panel, "Path", Value.asString(), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "Path", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -745,29 +769,18 @@ namespace FlamingTorch
 
 		if(Value.isString())
 		{
-			ProcessSpriteProperty(Panel, "Filtering", Value.asString(), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "Filtering", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
 			CHECKJSONVALUE(Value, "Filtering", string);
 		};
 
-		Value = Data.get("CropTiled", Json::Value(""));
-
-		if(Value.isString())
-		{
-			ProcessSpriteProperty(Panel, "CropTiled", Value.asString(), ElementName, LayoutName);
-		}
-		else
-		{
-			CHECKJSONVALUE(Value, "CropTiled", string);
-		};
-
 		Value = Data.get("NinePatch", Json::Value(""));
 
 		if(Value.isString())
 		{
-			ProcessSpriteProperty(Panel, "NinePatch", Value.asString(), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "NinePatch", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -778,7 +791,7 @@ namespace FlamingTorch
 
 		if(Value.isDouble())
 		{
-			ProcessSpriteProperty(Panel, "NinePatchScale", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "NinePatchScale", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
 		}
 		else
 		{
@@ -789,7 +802,7 @@ namespace FlamingTorch
 
 		if(Value.isString())
 		{
-			ProcessSpriteProperty(Panel, "Colors", Value.asString(), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "Colors", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -800,7 +813,7 @@ namespace FlamingTorch
 
 		if(Value.isString())
 		{
-			ProcessSpriteProperty(Panel, "Color", Value.asString(), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "Color", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -811,7 +824,7 @@ namespace FlamingTorch
 
 		if(Value.isBool())
 		{
-			ProcessSpriteProperty(Panel, "Wireframe", Value.asBool() ? "true" : "false", ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "Wireframe", Value.asBool() ? "true" : "false", ElementName, LayoutName);
 		}
 		else
 		{
@@ -822,20 +835,20 @@ namespace FlamingTorch
 
 		if(Value.isDouble())
 		{
-			ProcessSpriteProperty(Panel, "ScaleWide", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "ScaleWide", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
 		};
 
 		Value = Data.get("ScaleTall", Json::Value(""));
 
 		if(Value.isDouble())
 		{
-			ProcessSpriteProperty(Panel, "ScaleTall", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
+			ProcessSpriteProperty(Element, "ScaleTall", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
 		};
 	};
 
-	void UIManager::ProcessGroupProperty(UIPanel *Panel, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
+	void UIManager::ProcessGroupProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
-		UIGroup *Group = (UIGroup *)Panel;
+		UIGroup *Group = (UIGroup *)Element;
 
 		if(Property == "LayoutMode")
 		{
@@ -865,39 +878,27 @@ namespace FlamingTorch
 				}
 				else if(Modes[j] == "CENTER")
 				{
-					Group->LayoutMode = UIGroupLayoutMode::Center;
+					Group->LayoutMode |= UIGroupLayoutMode::Center;
 				}
 				else if(Modes[j] == "VCENTER")
 				{
-					Group->LayoutMode = UIGroupLayoutMode::VerticalCenter;
+					Group->LayoutMode |= UIGroupLayoutMode::VerticalCenter;
 				}
 				else if(Modes[j] == "ADJUSTCLOSER")
 				{
 					Group->LayoutMode |= UIGroupLayoutMode::AdjustCloser;
-				}
-				else if(Modes[j] == "INVERTDIRECTION")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::InvertDirection;
-				}
-				else if(Modes[j] == "INVERTX")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::InvertX;
-				}
-				else if(Modes[j] == "INVERTY")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::InvertY;
 				};
 			};
 		};
 	};
 
-	void UIManager::ProcessGroupJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	void UIManager::ProcessGroupJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
 		Json::Value Value = Data.get("LayoutMode", Json::Value("None"));
 
 		if(Value.isString())
 		{
-			ProcessGroupProperty(Panel, "LayoutMode", Value.asString(), ElementName, LayoutName);
+			ProcessGroupProperty(Element, "LayoutMode", Value.asString(), ElementName, LayoutName);
 		}
 		else
 		{
@@ -1017,77 +1018,7 @@ namespace FlamingTorch
 		return Out.str();
 	};
 
-	void UIManager::ProcessCustomProperty(UIPanel *Panel, const std::string &Property, const Json::Value &Value, const std::string &ElementName,
-		const std::string &LayoutName)
-	{
-		UIPanel::PropertyMap::iterator it = Panel->Properties.find(Property);
-
-		if(it == Panel->Properties.end())
-			return;
-
-		if(it->second.SetFunction)
-		{
-			Panel->PropertySetFunctionCode << "Self.Properties[\"" << Property << "\"].Set(Self, \"" << Property << "\", ";
-
-			try
-			{
-				switch(Value.type())
-				{
-				case Json::arrayValue:
-				case Json::objectValue:
-				case Json::nullValue:
-					Panel->PropertySetFunctionCode << JsonToLuaString(Value);
-
-					break;
-
-				case Json::booleanValue:
-					Panel->PropertySetFunctionCode << Value.asBool();
-
-					break;
-
-				case Json::intValue:
-					Panel->PropertySetFunctionCode << Value.asInt();
-
-					break;
-
-				case Json::realValue:
-					Panel->PropertySetFunctionCode << Value.asDouble();
-
-					break;
-
-				case Json::stringValue:
-					Panel->PropertySetFunctionCode << "\"" << Value.asString() << "\"";
-
-					break;
-
-				case Json::uintValue:
-					Panel->PropertySetFunctionCode << Value.asUInt();
-
-					break;
-				};
-			}
-			catch(std::exception &e)
-			{
-				Log::Instance.LogWarn(TAG, "Error while setting property '%s' of Panel '%s': '%s'", Property.c_str(), Panel->Name.c_str(),
-					ElementName.c_str(), e.what());
-
-				Panel->PropertySetFunctionCode << "nil";
-			};
-
-			Panel->PropertySetFunctionCode << ")\n";
-		};
-	};
-
-	void UIManager::ProcessCustomPropertyJSON(UIPanel *Panel, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
-	{
-		for(uint32 i = 0; i < Data.size(); i++)
-		{
-			ProcessCustomProperty(Panel, Data.getMemberNames()[i], Data.type() == Json::objectValue ? Data[Data.getMemberNames()[i]] : Data[i],
-				ElementName, LayoutName);
-		};
-	};
-
-	void UIManager::CopyElementsToLayout(SuperSmartPointer<UILayout> TheLayout, const Json::Value &Elements, UIPanel *Parent, const std::string &ParentElementName, UIPanel *ParentLimit)
+	void UIManager::CopyElementsToLayout(DisposablePointer<UILayout> TheLayout, const Json::Value &Elements, UIElement *Parent, const std::string &ParentElementName, UIElement *ParentLimit)
 	{
 		if(Elements.type() != Json::arrayValue)
 			return;
@@ -1144,49 +1075,48 @@ namespace FlamingTorch
 				continue;
 			};
 
-			SuperSmartPointer<UIPanel> Panel;
+			DisposablePointer<UIElement> Element;
 
 			Control = StringUtils::ToUpperCase(Control);
 
 			if(Control == "SPRITE")
 			{
-				Panel.Reset(new UISprite(Renderer->UI));
+				Element.Reset(new UISprite(Renderer->UI));
 			}
 			else if(Control == "TEXT")
 			{
-				Panel.Reset(new UIText(Renderer->UI));
+				Element.Reset(new UIText(Renderer->UI));
 			}
 			else if(Control == "TEXTCOMPOSER")
 			{
-				Panel.Reset(new UITextComposer(Renderer->UI));
+				Element.Reset(new UITextComposer(Renderer->UI));
 			}
 			else
 			{
-				Panel.Reset(new UIGroup(Renderer->UI));
+				Element.Reset(new UIGroup(Renderer->UI));
 			};
 
-			Panel->LayoutValue = TheLayout;
-			Panel->LayoutName = ElementIDName;
+			Element->LayoutValue = TheLayout;
+			Element->LayoutNameValue = ElementIDName;
 
 			std::stringstream BaseFunctionName;
 
-			BaseFunctionName << Control << "_" << StringUtils::MakeIntString((uint32)ElementID, true) << "_";
+			BaseFunctionName << StringUtils::Replace(ElementIDName, ".", "_") << "_";
 
 			Json::Value EnabledValue = Data.get("Enabled", Json::Value(true)),
 				KeyboardInputEnabledValue = Data.get("KeyboardInput", Json::Value(true)),
 				JoystickInputEnabledValue = Data.get("JoystickInput", Json::Value(true)),
 				MouseInputEnabledValue = Data.get("MouseInput", Json::Value(true)),
 				TouchInputEnabledValue = Data.get("TouchInput", Json::Value(true)),
-				AlphaValue = Data.get("Opacity", Json::Value(1.0)),
 				VisibleValue = Data.get("Visible", Json::Value(true)),
 				BlockingInputValue = Data.get("BlockingInput", Json::Value(false)),
-				InputBlockBackgroundValue = Data.get("InputBlockBackground", Json::Value(true)),
-				DraggableValue = Data.get("Draggable", Json::Value(false)),
-				DroppableValue = Data.get("Droppable", Json::Value(false));
+				InputBlockBackgroundValue = Data.get("InputBlockBackground", Json::Value(true));
+
+			uint32 EnabledInputs = UIInputType::All;
 
 			if(EnabledValue.isBool())
 			{
-				Panel->SetEnabled(EnabledValue.asBool());
+				Element->SetEnabled(EnabledValue.asBool());
 			}
 			else
 			{
@@ -1195,7 +1125,10 @@ namespace FlamingTorch
 
 			if(KeyboardInputEnabledValue.isBool())
 			{
-				Panel->SetKeyboardInputEnabled(KeyboardInputEnabledValue.asBool());
+				if (!KeyboardInputEnabledValue.asBool())
+				{
+					EnabledInputs = EnabledInputs | ~UIInputType::Keyboard;
+				};
 			}
 			else
 			{
@@ -1204,7 +1137,10 @@ namespace FlamingTorch
 
 			if(TouchInputEnabledValue.isBool())
 			{
-				Panel->SetTouchInputEnabled(TouchInputEnabledValue.asBool());
+				if(!TouchInputEnabledValue.asBool())
+				{
+					EnabledInputs = EnabledInputs | ~UIInputType::Touch;
+				};
 			}
 			else
 			{
@@ -1213,7 +1149,10 @@ namespace FlamingTorch
 
 			if(JoystickInputEnabledValue.isBool())
 			{
-				Panel->SetJoystickInputEnabled(JoystickInputEnabledValue.asBool());
+				if (!JoystickInputEnabledValue.asBool())
+				{
+					EnabledInputs = EnabledInputs | ~UIInputType::Joystick;
+				};
 			}
 			else
 			{
@@ -1222,25 +1161,21 @@ namespace FlamingTorch
 
 			if(MouseInputEnabledValue.isBool())
 			{
-				Panel->SetMouseInputEnabled(MouseInputEnabledValue.asBool());
+				if(!MouseInputEnabledValue.asBool())
+				{
+					EnabledInputs = EnabledInputs | ~UIInputType::Mouse;
+				};
 			}
 			else
 			{
 				CHECKJSONVALUE(MouseInputEnabledValue, "MouseInput", bool);
 			};
 
-			if(AlphaValue.isDouble())
-			{
-				Panel->SetAlpha((f32)AlphaValue.asDouble());
-			}
-			else
-			{
-				CHECKJSONVALUE(AlphaValue, "Opacity", double);
-			};
+			Element->SetEnabledInputTypes(EnabledInputs);
 
 			if(VisibleValue.isBool())
 			{
-				Panel->SetVisible(VisibleValue.asBool());
+				Element->SetVisible(VisibleValue.asBool());
 			}
 			else
 			{
@@ -1249,7 +1184,7 @@ namespace FlamingTorch
 
 			if(BlockingInputValue.isBool())
 			{
-				Panel->SetBlockingInput(BlockingInputValue.asBool());
+				Element->SetBlockingInput(BlockingInputValue.asBool());
 			}
 			else
 			{
@@ -1258,32 +1193,14 @@ namespace FlamingTorch
 
 			if(InputBlockBackgroundValue.isBool())
 			{
-				Panel->SetInputBlockerBackground(InputBlockBackgroundValue.asBool());
+				Element->SetInputBlockerBackground(InputBlockBackgroundValue.asBool());
 			}
 			else
 			{
 				CHECKJSONVALUE(InputBlockBackgroundValue, "InputBlockBackground", bool);
 			};
 
-			if(DraggableValue.isBool())
-			{
-				Panel->SetDraggable(DraggableValue.asBool());
-			}
-			else
-			{
-				CHECKJSONVALUE(DraggableValue, "Draggable", bool);
-			};
-
-			if(DroppableValue.isBool())
-			{
-				Panel->SetDroppable(DroppableValue.asBool());
-			}
-			else
-			{
-				CHECKJSONVALUE(DroppableValue, "Droppable", bool);
-			};
-
-#define REGISTER_LUA_EVENT(name, extraparams)\
+#define REGISTER_LUA_EVENT(name, type, extraparams)\
 			{\
 				Value = Data.get(#name, Json::Value(""));\
 				\
@@ -1300,8 +1217,8 @@ namespace FlamingTorch
 						\
 						ScriptInstance->DoString(ComposedCode.str().c_str());\
 						\
-						Panel->name##Function.Add(luabind::globals(ScriptInstance->State)[ComposedFunctionName.str().c_str()]);\
-						Panel->GlobalsTracker.Add(ComposedFunctionName.str());\
+						Element->EventScriptHandlers[type].Add(luabind::globals(ScriptInstance->State)[ComposedFunctionName.str().c_str()]);\
+						Element->GlobalsTracker.Add(ComposedFunctionName.str());\
 					}\
 				}\
 				else\
@@ -1310,131 +1227,51 @@ namespace FlamingTorch
 				};\
 			};
 
-			REGISTER_LUA_EVENT(OnMouseJustPressed, ", Button");
-			REGISTER_LUA_EVENT(OnMousePressed, ", Button");
-			REGISTER_LUA_EVENT(OnMouseReleased, ", Button");
-			REGISTER_LUA_EVENT(OnTouchDown, ", Touch");
-			REGISTER_LUA_EVENT(OnTouchUp, ", Touch");
-			REGISTER_LUA_EVENT(OnTouchDrag, ", Touch");
-			REGISTER_LUA_EVENT(OnJoystickButtonJustPressed, ", Button");
-			REGISTER_LUA_EVENT(OnJoystickButtonPressed, ", Button");
-			REGISTER_LUA_EVENT(OnJoystickButtonReleased, ", Button");
-			REGISTER_LUA_EVENT(OnJoystickAxisMoved, ", Axis");
-			REGISTER_LUA_EVENT(OnJoystickConnected, ", Index");
-			REGISTER_LUA_EVENT(OnJoystickDisconnected, ", Index");
-			REGISTER_LUA_EVENT(OnKeyJustPressed, ", Key");
-			REGISTER_LUA_EVENT(OnKeyPressed, ", Key");
-			REGISTER_LUA_EVENT(OnKeyReleased, ", Key");
-			REGISTER_LUA_EVENT(OnMouseMoved, "");
-			REGISTER_LUA_EVENT(OnCharacterEntered, "");
-			REGISTER_LUA_EVENT(OnGainFocus, "");
-			REGISTER_LUA_EVENT(OnLoseFocus, "");
-			REGISTER_LUA_EVENT(OnUpdate, "");
-			REGISTER_LUA_EVENT(OnDraw, "");
-			REGISTER_LUA_EVENT(OnMouseEntered, "");
-			REGISTER_LUA_EVENT(OnMouseOver, "");
-			REGISTER_LUA_EVENT(OnMouseLeft, "");
-			REGISTER_LUA_EVENT(OnClick, ", Button");
-			REGISTER_LUA_EVENT(OnDragBegin, "");
-			REGISTER_LUA_EVENT(OnDragEnd, "");
-			REGISTER_LUA_EVENT(OnDragging, "");
-			REGISTER_LUA_EVENT(OnDrop, ", Target");
-			REGISTER_LUA_EVENT(OnStart, "");
+			REGISTER_LUA_EVENT(OnMouseJustPressed, UIEventType::MouseJustPressed, ", Button");
+			REGISTER_LUA_EVENT(OnMousePressed, UIEventType::MousePressed, ", Button");
+			REGISTER_LUA_EVENT(OnMouseReleased, UIEventType::MouseReleased, ", Button");
+			REGISTER_LUA_EVENT(OnTouchJustPressed, UIEventType::TouchJustPressed, ", Touch");
+			REGISTER_LUA_EVENT(OnTouchPressed, UIEventType::TouchPressed, ", Touch");
+			REGISTER_LUA_EVENT(OnTouchReleased, UIEventType::TouchReleased, ", Touch");
+			REGISTER_LUA_EVENT(OnTouchDragged, UIEventType::TouchDragged, ", Touch");
+			REGISTER_LUA_EVENT(OnJoystickButtonJustPressed, UIEventType::JoystickButtonJustPressed, ", Button");
+			REGISTER_LUA_EVENT(OnJoystickButtonPressed, UIEventType::JoystickButtonPressed, ", Button");
+			REGISTER_LUA_EVENT(OnJoystickButtonReleased, UIEventType::JoystickButtonReleased, ", Button");
+			REGISTER_LUA_EVENT(OnJoystickAxisMoved, UIEventType::JoystickAxisMoved, ", Axis");
+			REGISTER_LUA_EVENT(OnJoystickConnected, UIEventType::JoystickConnected, ", Index");
+			REGISTER_LUA_EVENT(OnJoystickDisconnected, UIEventType::JoystickDisconnected, ", Index");
+			REGISTER_LUA_EVENT(OnKeyJustPressed, UIEventType::KeyJustPressed, ", Key");
+			REGISTER_LUA_EVENT(OnKeyPressed, UIEventType::KeyPressed, ", Key");
+			REGISTER_LUA_EVENT(OnKeyReleased, UIEventType::KeyReleased, ", Key");
+			REGISTER_LUA_EVENT(OnMouseMoved, UIEventType::MouseMoved, "");
+			REGISTER_LUA_EVENT(OnCharacterEntered, UIEventType::CharacterEntered, "");
+			REGISTER_LUA_EVENT(OnGainFocus, UIEventType::GainedFocus, "");
+			REGISTER_LUA_EVENT(OnLoseFocus, UIEventType::LostFocus, "");
+			REGISTER_LUA_EVENT(OnUpdate, UIEventType::Update, "");
+			REGISTER_LUA_EVENT(OnDraw, UIEventType::Draw, "");
+			REGISTER_LUA_EVENT(OnMouseEntered, UIEventType::MouseEntered, "");
+			REGISTER_LUA_EVENT(OnMouseOver, UIEventType::MouseOver, "");
+			REGISTER_LUA_EVENT(OnMouseLeft, UIEventType::MouseLeft, "");
+			REGISTER_LUA_EVENT(OnClick, UIEventType::Click, ", Button");
+			REGISTER_LUA_EVENT(OnTap, UIEventType::Tap, ", Touch");
+			REGISTER_LUA_EVENT(OnJoystickTap, UIEventType::JoystickTap, ", Button");
+			REGISTER_LUA_EVENT(OnStart, UIEventType::Start, "");
 
-			TheLayout->Elements[MakeStringID(ElementIDName)] = Panel;
+			TheLayout->Elements[MakeStringID(ElementIDName)] = Element;
 
-			if(!Renderer->UI->AddElement(ElementID, Panel))
+			if (!Renderer->UI->AddElement(ElementID, Element))
 				return;
 
 			if(Parent)
-				Parent->AddChild(Panel);
+				Parent->AddChild(Element);
 
 			std::stringstream PositionScriptX, PositionScriptY, OffsetScriptX, OffsetScriptY, SizeScript;
 
 			Value = Data.get("Wide", Json::Value("0"));
-			std::string Temp;
 
 			if(Value.isString())
 			{
-				Temp = Value.asString();
-
-				bool Invalid = false;
-
-				int32 Offset = 0;
-
-				while(Temp.find('%', Offset) != std::string::npos)
-				{
-					int32 Index = Temp.find('%', Offset);
-
-					bool Found = false;
-
-					for(int32 j = Index - 1; j >= 0; j--)
-					{
-						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
-						{
-							Found = true;
-
-							if(j == Index - 1) //In case of modulus
-							{
-								Offset = Index + 1;
-
-								break;
-							};
-
-							std::string Percentage = Temp.substr(j, Index - Offset);
-
-							f32 Percent = 0;
-
-							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-							{
-								Percent /= 100.f;
-
-								Temp = Temp.substr(0, j) + "parent_wide * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-
-								Offset = Index;
-								Offset -= Percentage.length();
-							}
-							else
-							{
-								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-								Invalid = true;
-
-								break;
-							};
-						};
-					};
-
-					if(!Found)
-					{
-						std::string Percentage = Temp.substr(0, Index);
-
-						f32 Percent = 0;
-
-						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-						{
-							Percent /= 100.f;
-
-							Temp = "parent_wide * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-						}
-						else
-						{
-							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-							Invalid = true;
-
-							break;
-						};
-					};
-
-					if(Invalid)
-						break;
-				};
-
-				if(Invalid)
-					continue;
-
-				SizeScript << "local SizeX = " << Temp << "\n";
+				SizeScript << "local SizeX = " << Value.asString() << "\n";
 			}
 			else
 			{
@@ -1445,85 +1282,7 @@ namespace FlamingTorch
 
 			if(Value.isString())
 			{
-				Temp = Value.asString();
-
-				bool Invalid = false;
-
-				int32 Offset = 0;
-
-				while(Temp.find('%', Offset) != std::string::npos)
-				{
-					int32 Index = Temp.find('%', Offset);
-
-					bool Found = false;
-
-					for(int32 j = Index - 1; j >= 0; j--)
-					{
-						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
-						{
-							Found = true;
-
-							if(j == Index - 1) //In case of modulus
-							{
-								Offset = Index + 1;
-
-								break;
-							};
-
-							std::string Percentage = Temp.substr(j, Index - Offset);
-
-							f32 Percent = 0;
-
-							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-							{
-								Percent /= 100.f;
-
-								Temp = Temp.substr(0, j) + "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-
-								Offset = Index;
-								Offset -= Percentage.length();
-							}
-							else
-							{
-								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-								Invalid = true;
-
-								break;
-							};
-						};
-					};
-
-					if(!Found)
-					{
-						std::string Percentage = Temp.substr(0, Index);
-
-						f32 Percent = 0;
-
-						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-						{
-							Percent /= 100.f;
-
-							Temp = "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-						}
-						else
-						{
-							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-							Invalid = true;
-
-							break;
-						};
-					};
-
-					if(Invalid)
-						break;
-				};
-
-				if(Invalid)
-					continue;
-
-				SizeScript << "local SizeY = " << Temp << "\n";
+				SizeScript << "local SizeY = " << Value.asString() << "\n";
 			}
 			else
 			{
@@ -1534,87 +1293,7 @@ namespace FlamingTorch
 
 			if(Value.isString())
 			{
-				Temp = Value.asString();
-
-				bool Invalid = false;
-
-				int32 Offset = 0;
-
-				while(Temp.find('%', Offset) != std::string::npos)
-				{
-					int32 Index = Temp.find('%', Offset);
-
-					bool Found = false;
-
-					for(int32 j = Index - 1; j >= 0; j--)
-					{
-						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
-						{
-							Found = true;
-
-							if(j == Index - 1) //In case of modulus
-							{
-								Offset = Index + 1;
-
-								break;
-							};
-
-							std::string Percentage = Temp.substr(j, Index - Offset);
-
-							f32 Percent = 0;
-
-							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-							{
-								Percent /= 100.f;
-
-								Temp = Temp.substr(0, j) + "parent_wide * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-
-								Offset = Index;
-								Offset -= Percentage.length();
-							}
-							else
-							{
-								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-								Invalid = true;
-
-								break;
-							};
-
-							break;
-						};
-					};
-
-					if(!Found)
-					{
-						std::string Percentage = Temp.substr(0, Index);
-
-						f32 Percent = 0;
-
-						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-						{
-							Percent /= 100.f;
-
-							Temp = "parent_wide * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-						}
-						else
-						{
-							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-							Invalid = true;
-
-							break;
-						};
-					};
-
-					if(Invalid)
-						break;
-				};
-
-				if(Invalid)
-					continue;
-
-				PositionScriptX << "local PositionX = " << Temp << "\n";
+				PositionScriptX << "local PositionX = " << Value.asString() << "\n";
 			}
 			else
 			{
@@ -1625,85 +1304,7 @@ namespace FlamingTorch
 
 			if(Value.isString())
 			{
-				Temp = Value.asString();
-
-				bool Invalid = false;
-
-				int32 Offset = 0;
-
-				while(Temp.find('%', Offset) != std::string::npos)
-				{
-					int32 Index = Temp.find('%', Offset);
-
-					bool Found = false;
-
-					for(int32 j = Index - 1; j >= 0; j--)
-					{
-						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
-						{
-							Found = true;
-
-							if(j == Index - 1) //In case of modulus
-							{
-								Offset = Index + 1;
-
-								break;
-							};
-
-							std::string Percentage = Temp.substr(j, Index - Offset);
-
-							f32 Percent = 0;
-
-							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-							{
-								Percent /= 100.f;
-
-								Temp = Temp.substr(0, j) + "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-
-								Offset = Index;
-								Offset -= Percentage.length();
-							}
-							else
-							{
-								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-								Invalid = true;
-
-								break;
-							};
-						};
-					};
-
-					if(!Found)
-					{
-						std::string Percentage = Temp.substr(0, Index);
-
-						f32 Percent = 0;
-
-						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-						{
-							Percent /= 100.f;
-
-							Temp = "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-						}
-						else
-						{
-							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-							Invalid = true;
-
-							break;
-						};
-					};
-
-					if(Invalid)
-						break;
-				};
-
-				if(Invalid)
-					continue;
-
-				PositionScriptY << "local PositionY = " << Temp << "\n";
+				PositionScriptY << "local PositionY = " << Value.asString() << "\n";
 			}
 			else
 			{
@@ -1714,85 +1315,7 @@ namespace FlamingTorch
 
 			if(Value.isString())
 			{
-				Temp = Value.asString();
-
-				bool Invalid = false;
-
-				int32 Offset = 0;
-
-				while(Temp.find('%', Offset) != std::string::npos)
-				{
-					int32 Index = Temp.find('%', Offset);
-
-					bool Found = false;
-
-					for(int32 j = Index - 1; j >= 0; j--)
-					{
-						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
-						{
-							Found = true;
-
-							if(j == Index - 1) //In case of modulus
-							{
-								Offset = Index + 1;
-
-								break;
-							};
-
-							std::string Percentage = Temp.substr(j, Index - Offset);
-
-							f32 Percent = 0;
-
-							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-							{
-								Percent /= 100.f;
-
-								Temp = Temp.substr(0, j) + "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-
-								Offset = Index;
-								Offset -= Percentage.length();
-							}
-							else
-							{
-								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-								Invalid = true;
-
-								break;
-							};
-						};
-					};
-
-					if(!Found)
-					{
-						std::string Percentage = Temp.substr(0, Index);
-
-						f32 Percent = 0;
-
-						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-						{
-							Percent /= 100.f;
-
-							Temp = "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-						}
-						else
-						{
-							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-							Invalid = true;
-
-							break;
-						};
-					};
-
-					if(Invalid)
-						break;
-				};
-
-				if(Invalid)
-					continue;
-
-				OffsetScriptX << "local XOffset = " << Temp << "\n";
+				OffsetScriptX << "local XOffset = " << Value.asString() << "\n";
 			}
 			else
 			{
@@ -1803,115 +1326,11 @@ namespace FlamingTorch
 
 			if(Value.isString())
 			{
-				Temp = Value.asString();
-
-				bool Invalid = false;
-
-				int32 Offset = 0;
-
-				while(Temp.find('%', Offset) != std::string::npos)
-				{
-					int32 Index = Temp.find('%', Offset);
-
-					bool Found = false;
-
-					for(int32 j = Index - 1; j >= 0; j--)
-					{
-						if((Temp[j] < '0' || Temp[j] > '9') && Temp[j] != '.')
-						{
-							Found = true;
-
-							if(j == Index - 1) //In case of modulus
-							{
-								Offset = Index + 1;
-
-								break;
-							};
-
-							std::string Percentage = Temp.substr(j, Index - Offset);
-
-							f32 Percent = 0;
-
-							if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-							{
-								Percent /= 100.f;
-
-								Temp = Temp.substr(0, j) + "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-
-								Offset = Index;
-								Offset -= Percentage.length();
-							}
-							else
-							{
-								Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-								Invalid = true;
-
-								break;
-							};
-						};
-					};
-
-					if(!Found)
-					{
-						std::string Percentage = Temp.substr(0, Index);
-
-						f32 Percent = 0;
-
-						if(1 == sscanf(Percentage.c_str(), "%f", &Percent))
-						{
-							Percent /= 100.f;
-
-							Temp = "parent_tall * " + StringUtils::MakeFloatString(Percent) + Temp.substr(Index + 1);
-						}
-						else
-						{
-							Log::Instance.LogWarn(TAG, "Unable to position or size element '%s': Invalid Percentage", ElementName.c_str());
-
-							Invalid = true;
-
-							break;
-						};
-					};
-
-					if(Invalid)
-						break;
-				};
-
-				if(Invalid)
-					continue;
-
-				OffsetScriptY << "local YOffset = " << Temp << "\n";
+				OffsetScriptY << "local YOffset = " << Value.asString() << "\n";
 			}
 			else
 			{
 				CHECKJSONVALUE(Value, "YOffset", string);
-			};
-
-			Value = Data.get("ExtraSizeScale", Json::Value(1.0));
-
-			if(Value.isDouble() || Value.isInt() || Value.isUInt())
-			{
-				f32 Scale = 0;
-
-				if(Value.isDouble())
-				{
-					Scale = (f32)Value.asDouble();
-				}
-				else if(Value.isInt())
-				{
-					Scale = (f32)Value.asInt();
-				}
-				else if(Value.isUInt())
-				{
-					Scale = (f32)Value.asUInt();
-				};
-
-				Panel->SetExtraSizeScale(Scale);
-			}
-			else
-			{
-				CHECKJSONVALUE(Value, "ExtraSizeScale", number);
 			};
 
 			std::stringstream ComposedPositionFunction, ComposedSizeFunction;
@@ -1919,8 +1338,6 @@ namespace FlamingTorch
 			ComposedPositionFunction << "function " << BaseFunctionName.str() << "Position(Self, Parent, ScreenWidth, ScreenHeight)\n"
 				"local parent_wide = 0\n"
 				"local parent_tall = 0\n"
-				"local parent_extra_size_x = 0\n"
-				"local parent_extra_size_y = 0\n"
 				"local left = 0\n"
 				"local right = 0\n"
 				"local top = 0\n"
@@ -1929,22 +1346,18 @@ namespace FlamingTorch
 				"if Parent ~= nil then\n"
 				"	parent_wide = Parent.Size.x\n"
 				"	parent_tall = Parent.Size.y\n"
-				"	parent_extra_size_x = Parent.ScaledExtraSize.x\n"
-				"	parent_extra_size_y = Parent.ScaledExtraSize.y\n"
 				"else\n"
 				"	parent_wide = ScreenWidth\n"
 				"	parent_tall = ScreenHeight\n"
-				"	parent_extra_size_x = 0\n"
-				"	parent_extra_size_y = 0\n"
 				"end\n\n"
-				"left = Self.ExtraSize.x / 2\n"
-				"right = (parent_wide + parent_extra_size_x) - (Self.Size.x + Self.ScaledExtraSize.x)\n"
-				"top = Self.ExtraSize.y / 2\n"
-				"bottom = (parent_tall + parent_extra_size_y) - (Self.Size.y + Self.ScaledExtraSize.y)\n"
-				"center = ((parent_wide + parent_extra_size_x) - (Self.Size.x + Self.ScaledExtraSize.x)) / 2\n\n" <<
+				"left = 0\n"
+				"right = parent_wide - Self.Size.x\n"
+				"top = 0\n"
+				"bottom = parent_tall - Self.Size.y\n"
+				"center = (parent_wide - Self.Size.x) / 2\n\n" <<
 				PositionScriptX.str() << 
 				OffsetScriptX.str() << 
-				"center = ((parent_tall + parent_extra_size_y) - (Self.Size.y + Self.ScaledExtraSize.y)) / 2\n" <<
+				"center = (parent_tall - Self.Size.y) / 2\n" <<
 				PositionScriptY.str() << 
 				OffsetScriptY.str() << 
 				"Self.Position = Vector2(PositionX, PositionY)\n"
@@ -1965,224 +1378,71 @@ namespace FlamingTorch
 				"Self.Size = Vector2(SizeX, SizeY)\n"
 				"\nend\n";
 
-			luaL_dostring(ScriptInstance->State, ComposedPositionFunction.str().c_str());
+			ScriptInstance->DoString(ComposedPositionFunction.str().c_str());
 
-			luaL_dostring(ScriptInstance->State, ComposedSizeFunction.str().c_str());
+			ScriptInstance->DoString(ComposedSizeFunction.str().c_str());
 
-			Panel->GlobalsTracker.Add(BaseFunctionName.str() + "Position");
-			Panel->GlobalsTracker.Add(BaseFunctionName.str() + "Size");
+			Element->GlobalsTracker.Add(BaseFunctionName.str() + "Position");
+			Element->GlobalsTracker.Add(BaseFunctionName.str() + "Size");
 
-			Panel->PositionFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Position"]);
-			Panel->SizeFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Size"]);
+			LuaEventGroup PositionFunction, SizeFunction;
+			PositionFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Position"]);
+			SizeFunction.Add(luabind::globals(ScriptInstance->State)[BaseFunctionName.str() + "Size"]);
 
-			if(!Panel->PositionFunction.Members.front())
+			if (!PositionFunction.Members.size() || !PositionFunction.Members.front())
 			{
 				Log::Instance.LogWarn(TAG, "Unable to create an element '%s' due to invalid Position", ElementName.c_str());
 
+				Element.Dispose();
+
 				continue;
 			}
-			else if(!Panel->SizeFunction.Members.front())
+			else if (!SizeFunction.Members.size() || !SizeFunction.Members.front())
 			{
 				Log::Instance.LogWarn(TAG, "Unable to create an element '%s' due to invalid Size", ElementName.c_str());
+
+				Element.Dispose();
 
 				continue;
 			};
 
 			try
 			{
-				Panel->SizeFunction.Members.front()(Panel, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
+				SizeFunction.Members.front()(Element, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
 			}
 			catch(std::exception &e)
 			{
 				Log::Instance.LogWarn(TAG, "Unable to create an element '%s': Error '%s' on Size", ElementName.c_str(), e.what());
 
+				Element.Dispose();
+
 				continue;
 			};
 
 			try
 			{
-				Panel->PositionFunction.Members.front()(Panel, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
+				PositionFunction.Members.front()(Element, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
 			}
 			catch(std::exception &e)
 			{
 				Log::Instance.LogWarn(TAG, "Unable to create an element '%s': Error '%s' on Position", ElementName.c_str(), e.what());
 
+				Element.Dispose();
+
 				continue;
 			};
 
-			Value = Data.get("Properties", Json::Value());
-
-			if(Value.type() == Json::objectValue)
-			{
-				static std::stringstream PropertiesStream;
-				PropertiesStream.str("");
-
-				std::string PropertiesStreamFunctionName = "PropertyStartupDefault_" + StringUtils::PointerString(Panel.Get()) + "_" + StringUtils::Replace(ElementName, ".", "_");
-
-				Panel->GlobalsTracker.Add(PropertiesStreamFunctionName);
-
-				PropertiesStream << "function " << PropertiesStreamFunctionName << "(Self)\n";
-
-				for(uint32 j = 0; j < Value.size(); j++)
-				{
-					std::string PropertyName = Value.getMemberNames()[j];
-
-					if(Panel->Properties.find(PropertyName) != Panel->Properties.end())
-					{
-						Log::Instance.LogWarn(TAG, "Unable to add function '%s' to Panel '%s': Function already exists!", PropertyName.c_str(), ElementName.c_str());
-
-						continue;
-					};
-
-					if(Value[PropertyName].type() != Json::objectValue)
-					{
-						CHECKJSONVALUE(Value[j], ("Property '" + PropertyName + "'").c_str(), object);
-
-						continue;
-					};
-
-					UIPanel::PropertyInfo PInfo;
-
-					luabind::object LuaPropertyInfo = luabind::newtable(ScriptInstance->State);
-
-					if(Value[PropertyName]["Get"].type() == Json::stringValue)
-					{
-						static std::stringstream str;
-						str.str("");
-
-						std::string FunctionName = "PropertyGet_" + StringUtils::PointerString(Panel.Get()) + "_" +
-							StringUtils::MakeIntString(MakeStringID(PropertyName), true) + "_" + StringUtils::Replace(ElementIDName, ".", "_");
-
-						Panel->GlobalsTracker.Add(FunctionName);
-
-						str << "function " << FunctionName << "(Self, PropertyName)\n"
-							"	local Value = Self.Properties[PropertyName].Value\n	";
-
-						str << Value[PropertyName]["Get"].asString();
-
-						str << "\nend\n";
-
-						luaL_dostring(ScriptInstance->State, str.str().c_str());
-
-						PInfo.GetFunction = luabind::globals(ScriptInstance->State)[FunctionName];
-
-						LuaPropertyInfo["Get"] = PInfo.GetFunction;
-					};
-
-					if(Value[PropertyName]["Set"].type() == Json::stringValue)
-					{
-						static std::stringstream str;
-						str.str("");
-
-						std::string FunctionName = "PropertySet_" + StringUtils::PointerString(Panel.Get()) + "_" +
-							StringUtils::MakeIntString(MakeStringID(PropertyName), true) + "_" + StringUtils::Replace(ElementIDName, ".", "_");
-
-						Panel->GlobalsTracker.Add(FunctionName);
-
-						str << "function " << FunctionName << "(Self, PropertyName, Value)\n";
-
-						str << Value[PropertyName]["Set"].asString();
-
-						str << "\nend\n";
-
-						luaL_dostring(ScriptInstance->State, str.str().c_str());
-
-						PInfo.SetFunction = luabind::globals(ScriptInstance->State)[FunctionName];
-
-						LuaPropertyInfo["Set"] = PInfo.SetFunction;
-					};
-
-					//We need to account for the JSON Data Types... Strings like "false" become bool, so we must convert to lua strings anyway.
-					std::string DefaultString;
-
-					switch(Value[PropertyName]["Default"].type())
-					{
-					case Json::stringValue:
-						DefaultString = Value[PropertyName]["Default"].asString();
-
-						break;
-
-					case Json::nullValue:
-
-						break;
-
-					default:
-						DefaultString = JsonToLuaString(Value[PropertyName]["Default"]);
-
-						break;
-					};
-
-					if(DefaultString.length())
-					{
-						static std::stringstream str;
-						str.str("");
-
-						std::string FunctionName = "PropertyDefault_" + StringUtils::PointerString(Panel.Get()) + "_" +
-							StringUtils::MakeIntString(MakeStringID(PropertyName), true) + "_" + StringUtils::Replace(ElementIDName, ".", "_");
-
-						Panel->GlobalsTracker.Add(FunctionName);
-
-						str << "function " << FunctionName << "(Self, PropertyName)\n"
-							"	local Value = " << Value[PropertyName]["Default"].asString() << "\n"
-							"	if type(Value) == type(nil) then\n"
-							"		g_Log:Warn(\"While setting a Panel '\" .. Self.Name .. \"'s Value for Property '\" .. PropertyName .. \"': Value is nil!\")\n"
-							"	end\n"
-							"\n"
-							"	if Self.Properties[PropertyName].Set ~= nil then\n"
-							"		Self.Properties[PropertyName].Set(Self, PropertyName, Value)\n"
-							"	else\n"
-							"		Self.Properties[PropertyName].Value = Value\n"
-							"	end\n"
-							"end\n";
-
-						luaL_dostring(ScriptInstance->State, str.str().c_str());
-
-						PInfo.DefaultFunction = luabind::globals(ScriptInstance->State)[FunctionName];
-
-						if(PInfo.DefaultFunction)
-							PropertiesStream << FunctionName << "(Self, \"" << PropertyName << "\")\n";
-
-						LuaPropertyInfo["Default"] = PInfo.DefaultFunction;
-					};
-
-					if(!PInfo.GetFunction && !PInfo.SetFunction)
-						continue;
-
-					Panel->Properties[PropertyName] = PInfo;
-					Panel->PropertyValues[PropertyName] = LuaPropertyInfo;
-				};
-				
-				PropertiesStream << "\nend\n";
-
-				luaL_dostring(ScriptInstance->State, PropertiesStream.str().c_str());
-
-				Panel->PropertiesStartupDefaultFunction.Add(luabind::globals(ScriptInstance->State)[PropertiesStreamFunctionName]);
-			}
-			else if(Value.type() != Json::nullValue)
-			{
-				CHECKJSONVALUE(Value, "Properties", object);
-			};
-
-			std::string PropertyStartupSetFunctionName = "PropertyStartupSet_" + StringUtils::PointerString(Panel.Get());
-
-			Panel->GlobalsTracker.Add(PropertyStartupSetFunctionName);
-
-			Panel->PropertySetFunctionCode.str("");
-			Panel->PropertySetFunctionCode << "function " << PropertyStartupSetFunctionName << "(Self)\n";
-
-			ProcessCustomPropertyJSON(Panel, Data, ElementName, TheLayout->Name);
-
 			if(Control == "SPRITE")
 			{
-				ProcessSpriteJSON(Panel, Data, ElementName, TheLayout->Name);
+				ProcessSpriteJSON(Element, Data, ElementName, TheLayout->Name);
 			}
 			else if(Control == "GROUP")
 			{
-				ProcessGroupJSON(Panel, Data, ElementName, TheLayout->Name);
+				ProcessGroupJSON(Element, Data, ElementName, TheLayout->Name);
 			}
 			else if(Control == "TEXT")
 			{
-				ProcessTextJSON(Panel, Data, ElementName, TheLayout->Name);
+				ProcessTextJSON(Element, Data, ElementName, TheLayout->Name);
 			}
 			else if (Control == "TEXTCOMPOSER")
 			{
@@ -2190,7 +1450,7 @@ namespace FlamingTorch
 			}
 			else
 			{
-				SuperSmartPointer<UILayout> TargetLayout;
+				DisposablePointer<UILayout> TargetLayout;
 
 				for(LayoutMap::iterator it = Layouts.begin(); it != Layouts.end(); it++)
 				{
@@ -2220,27 +1480,21 @@ namespace FlamingTorch
 					Log::Instance.LogErr(TAG, "While processing Layout element '%s' of layout '%s': Layout '%s' not found (may not have been created already)",
 						ElementName.c_str(), TheLayout->Name.c_str(), Control.c_str());
 
-					TheLayout->Elements.erase(Panel->ID());
-					RemoveElement(Panel->ID());
+					TheLayout->Elements.erase(Element->ID());
+					RemoveElement(Element->ID());
 
 					return;
 				};
 
 				//We shouldn't override previous set sizes...
-				bool ResetPanelSize = Panel->Size() == Vector2();
+				bool ResetElementSize = Element->Size() == Vector2();
 
-				if(ResetPanelSize)
+				if(ResetElementSize)
 				{
-					Panel->SetSize(Parent ? Parent->ComposedSize() : Panel->ComposedSize());
+					Element->SetSize(Parent ? Parent->Size() : Element->Size());
 				};
 
-				SuperSmartPointer<UILayout> NewLayout = TargetLayout->Clone(Panel, ParentElementName + "." + ElementName, true);
-
-				//Probably not needed anymore?
-				if(!ResetPanelSize)
-				{
-					//Panel->SetSize(Panel->GetChildrenSize());
-				};
+				DisposablePointer<UILayout> NewLayout = TargetLayout->Clone(Element, ParentElementName + "." + ElementName, true, true);
 
 				StringID LayoutID = MakeStringID(ParentElementName + "." + ElementName + "." + NewLayout->Name);
 
@@ -2249,17 +1503,12 @@ namespace FlamingTorch
 				//Should be impossible for this to happen, but still...
 				if(it != Layouts.end())
 				{
-					Log::Instance.LogWarn(TAG, "Found duplicate layout '%s', erasing old.", (Panel->Layout()->Name + "_" + NewLayout->Name).c_str());
+					Log::Instance.LogWarn(TAG, "Found duplicate layout '%s', erasing old.", (Element->Layout()->Name + "_" + NewLayout->Name).c_str());
 
 					Layouts.erase(it);
 				};
 
 				Layouts[LayoutID] = NewLayout;
-
-				for(uint32 j = 0; j < Panel->ChildrenCount(); j++)
-				{
-					ProcessCustomPropertyJSON(Panel->Child(j), Data, Panel->Child(j)->Name, NewLayout->Name);
-				};
 
 				for(uint32 j = 0; j < Data.size(); j++)
 				{
@@ -2281,7 +1530,7 @@ namespace FlamingTorch
 						{
 							Name = Name.substr(ElementName.length() + 1);
 
-							UIPanel *TargetElement = it->second;
+							UIElement *TargetElement = it->second;
 
 							std::vector<std::string> Parts = StringUtils::Split(Name, '.');
 
@@ -2320,7 +1569,7 @@ namespace FlamingTorch
 
 							if(TargetElement != NULL)
 							{
-								std::string ControlName = StringUtils::ToUpperCase(TargetElement->NativeType);
+								std::string ControlName = StringUtils::ToUpperCase(TargetElement->NativeTypeValue);
 								std::string Property = Parts[Parts.size() - 1];
 								std::string CurrentElementID = GetStringIDString(TargetElement->ID());
 
@@ -2348,7 +1597,7 @@ namespace FlamingTorch
 								}
 								else
 								{
-									ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
+									//ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
 
 									continue;
 								};
@@ -2366,7 +1615,7 @@ namespace FlamingTorch
 									ProcessTextProperty(TargetElement, Property, FinalValue, ElementName, NewLayout->Name);
 								};
 
-								ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
+								//ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
 
 								break;
 							};
@@ -2375,40 +1624,28 @@ namespace FlamingTorch
 				};
 			};
 
-			Panel->PerformLayout();
+			Value = Data.get("TooltipElement", Json::Value(""));
 
-			Value = Data.get("TooltipText", Json::Value(""));
-
-			if(Value.isString() && Value.asString().length())
+			if (Value.isArray())
 			{
-				Panel->SetRespondsToTooltips(true);
-				Panel->SetTooltipText(Value.asString());
-			}
-			else
-			{
-				Value = Data.get("TooltipElement", Json::Value(""));
+				DisposablePointer<UIElement> TooltipGroup(new UIGroup(Renderer->UI));
+				TooltipGroup->SetVisible(false);
+				Renderer->UI->AddElement(MakeStringID(ParentElementName + "." + ElementName + "_TOOLTIPELEMENT"), TooltipGroup);
+				TheLayout->Elements[TooltipGroup->ID()] = TooltipGroup;
 
-				if(Value.isArray())
-				{
-					SuperSmartPointer<UIPanel> TooltipGroup(new UIGroup(Renderer->UI));
-					TooltipGroup->SetVisible(false);
-					Renderer->UI->AddElement(MakeStringID(ParentElementName + "." + ElementName + "_TOOLTIPELEMENT"), TooltipGroup);
-					TheLayout->Elements[TooltipGroup->ID()] = TooltipGroup;
+				CopyElementsToLayout(TheLayout, Value, TooltipGroup, ParentElementName + "." + ElementName + "_TOOLTIPELEMENT", Element);
 
-					CopyElementsToLayout(TheLayout, Value, TooltipGroup, ParentElementName + "." + ElementName + "_TOOLTIPELEMENT", Panel);
+				TooltipGroup->SetSize(TooltipGroup->ChildrenSize());
 
-					TooltipGroup->SetSize(TooltipGroup->ChildrenSize());
-
-					Panel->SetRespondsToTooltips(true);
-					Panel->SetTooltipElement(TooltipGroup);
-				};
+				Element->SetRespondsToTooltips(true);
+				Element->SetTooltipElement(TooltipGroup);
 			};
 
 			Value = Data.get("TooltipFixed", Json::Value(false));
 
 			if(Value.isBool())
 			{
-				Panel->SetTooltipsFixed(Value.asBool());
+				Element->SetTooltipsFixed(Value.asBool());
 			}
 			else
 			{
@@ -2421,6 +1658,7 @@ namespace FlamingTorch
 			{
 				if(Value.asString().length() > 0)
 				{
+					//TODO: Turn into a Script function
 					Vector2 Position;
 
 					if(2 != sscanf(Value.asString().c_str(), "%f,%f", &Position.x, &Position.y))
@@ -2430,7 +1668,7 @@ namespace FlamingTorch
 					}
 					else
 					{
-						Panel->SetTooltipsPosition(Position);
+						Element->SetTooltipsPosition(Position);
 					};
 				};
 			}
@@ -2439,65 +1677,16 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, "TooltipPosition", string);
 			};
 
-			Value = Data.get("Rotation", Json::Value(0.0));
-
-			if(Value.isDouble() || Value.isInt() || Value.isUInt())
-			{
-				f32 Angle = 0;
-
-				if(Value.isDouble())
-				{
-					Angle = (f32)Value.asDouble();
-				}
-				else if(Value.isInt())
-				{
-					Angle = (f32)Value.asInt();
-				}
-				else if(Value.isUInt())
-				{
-					Angle = (f32)Value.asUInt();
-				};
-
-				for(uint32 j = 0; j < Panel->Children.size(); j++)
-				{
-					Panel->Children[j]->SetRotation(Panel->Children[j]->Rotation() - Panel->Rotation());
-				};
-
-				Panel->SetRotation(Panel->Rotation() + MathUtils::DegToRad(Angle));
-			}
-			else
-			{
-				CHECKJSONVALUE(Value, "Rotation", number);
-			};
-
-			Value = Data.get("ContentPanel", Json::Value(false));
-
-			if(Value.isBool())
-			{
-				if(Value.asBool() && Panel->Parent() != NULL)
-				{
-					Panel->Parent()->SetContentPanel(Panel);
-				};
-			}
-			else
-			{
-				CHECKJSONVALUE(Value, "ContentPanel", bool);
-			};
-
-			Panel->PropertySetFunctionCode << "\nend\n";
-
-			Panel->AdjustSizeAndPosition(ParentLimit);
-
 			Json::Value Children = Data.get("Children", Json::Value());
 
 			if(!Children.isArray())
 				continue;
 
-			CopyElementsToLayout(TheLayout, Children, Panel->ContentPanel() ? Panel->ContentPanel() : Panel, ParentElementName + "." + ElementName, ParentLimit);
+			CopyElementsToLayout(TheLayout, Children, Element, ParentElementName + "." + ElementName, ParentLimit);
 		};
 	};
 
-	bool UIManager::LoadLayouts(Stream *In, SuperSmartPointer<UIPanel> Parent, bool DefaultLayout)
+	bool UIManager::LoadLayouts(Stream *In, DisposablePointer<UIElement> Parent, bool DefaultLayout)
 	{
 		Json::Value Root;
 		Json::Reader Reader;
@@ -2514,13 +1703,14 @@ namespace FlamingTorch
 		{
 			std::string LayoutName = Root[i].asString();
 			Json::Value Elements = Root[i + 1];
-			SuperSmartPointer<UILayout> Layout(new UILayout());
+			DisposablePointer<UILayout> Layout(new UILayout());
 			Layout->Name = LayoutName;
 			Layout->Owner = this;
 			Layout->ContainedObjects = Elements;
 			Layout->Parent = Parent;
 
-			CopyElementsToLayout(Layout, Elements, Parent, Layout->Name, Parent);
+			if (!DefaultLayout)
+				CopyElementsToLayout(Layout, Elements, Parent, Layout->Name, Parent);
 
 			StringID LayoutID = MakeStringID((Parent.Get() ? Parent->Layout()->Name + "_" : "") + LayoutName);
 
@@ -2560,12 +1750,13 @@ namespace FlamingTorch
 			DefaultLayouts.erase(DefaultLayouts.begin());
 		};
 
-		MouseOverElement = NULL;
+		MouseOverElement = DisposablePointer<UIElement>();
+		FocusedElementValue = DisposablePointer<UIElement>();
 	};
 
-	SuperSmartPointer<UIPanel> UIManager::GetInputBlocker()
+	DisposablePointer<UIElement> UIManager::GetInputBlocker()
 	{
-		SuperSmartPointer<UIPanel> Out;
+		DisposablePointer<UIElement> Out;
 
 		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
@@ -2578,9 +1769,9 @@ namespace FlamingTorch
 			if(it == Elements.end())
 				break;
 
-			if(it->second->Panel->BlockingInput() && it->second->Panel->Visible())
+			if(it->second->Element->BlockingInput() && it->second->Element->Visible())
 			{
-				Out = it->second->Panel;
+				Out = it->second->Element;
 
 				break;
 			};
@@ -2589,7 +1780,7 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	SuperSmartPointer<UIPanel> UIManager::GetMouseOverElement()
+	DisposablePointer<UIElement> UIManager::GetMouseOverElement()
 	{
 #if !FLPLATFORM_MOBILE //Mobile has no mouse over events
 		if(DrawOrderCacheDirty)
@@ -2599,20 +1790,20 @@ namespace FlamingTorch
 
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				if(it->second->Panel->Parent() == NULL)
+				if(it->second->Element->Parent().Get() == nullptr)
 				{
 					DrawOrderCache.push_back(it->second);
 				};
 			};
 		};
 
-		UIPanel *FoundElement = NULL;
+		DisposablePointer<UIElement> FoundElement;
 
-		SuperSmartPointer<UIPanel> InputBlocker = GetInputBlocker();
+		DisposablePointer<UIElement> InputBlocker = GetInputBlocker();
 
 		if(InputBlocker.Get())
 		{
-			UIPanel *p = InputBlocker;
+			DisposablePointer<UIElement> p = InputBlocker;
 			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
 		}
 		else
@@ -2621,10 +1812,10 @@ namespace FlamingTorch
 			{
 				for(uint32 j = 0; j < DrawOrderCache.size(); j++)
 				{
-					if(!DrawOrderCache[j]->Panel->MouseInputValue || DrawOrderCache[j]->DrawOrder != i)
+					if((DrawOrderCache[j]->Element->EnabledInputTypes() & UIInputType::Mouse) == 0 || DrawOrderCache[j]->DrawOrder != i)
 						continue;
 
-					UIPanel *p = DrawOrderCache[j]->Panel;
+					DisposablePointer<UIElement> p = DrawOrderCache[j]->Element;
 
 					RecursiveFindFocusedElement(Vector2(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
 
@@ -2639,28 +1830,28 @@ namespace FlamingTorch
 
 		if(MouseOverElement != FoundElement)
 		{
-			if(MouseOverElement != NULL)
-				MouseOverElement->OnMouseLeft(MouseOverElement);
+			if (MouseOverElement.Get() != nullptr)
+				MouseOverElement->OnEvent(UIEventType::MouseLeft, {});
 		}
 		else if(MouseOverElement)
 		{
-			MouseOverElement->OnMouseOver(MouseOverElement);
+			MouseOverElement->OnEvent(UIEventType::MouseOver, {});
 		};
 
 		if(FoundElement && Elements[FoundElement->ID()].Get())
 		{
 			if(MouseOverElement != FoundElement)
-				FoundElement->OnMouseEntered(FoundElement);
+				MouseOverElement->OnEvent(UIEventType::MouseEntered, {});
 
 			MouseOverElement = FoundElement;
 
-			return Elements[FoundElement->ID()]->Panel;
+			return Elements[FoundElement->ID()]->Element;
 		};
 
 		MouseOverElement = FoundElement;
 #endif
 
-		return SuperSmartPointer<UIPanel>();
+		return DisposablePointer<UIElement>();
 	};
 
 	void UIManager::Update()
@@ -2672,7 +1863,7 @@ namespace FlamingTorch
 
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				if(it->second->Panel->Parent() == NULL)
+				if(it->second->Element->Parent().Get() == nullptr)
 				{
 					DrawOrderCache.push_back(it->second);
 				};
@@ -2681,12 +1872,12 @@ namespace FlamingTorch
 
 		for(uint32 i = 0; i < DrawOrderCache.size(); i++)
 		{
-			if(DrawOrderCache[i]->Panel.Get() == NULL)
+			if(DrawOrderCache[i]->Element.Get() == nullptr)
 				continue;
 
-			if(DrawOrderCache[i]->Panel->Visible())
+			if(DrawOrderCache[i]->Element->Visible())
 			{
-				DrawOrderCache[i]->Panel->Update(Vector2());
+				DrawOrderCache[i]->Element->Update(Vector2());
 			};
 		};
 	};
@@ -2703,20 +1894,20 @@ namespace FlamingTorch
 
 			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 			{
-				if(it->second->Panel->Parent() == NULL)
+				if(it->second->Element->Parent().Get() == nullptr)
 				{
 					DrawOrderCache.push_back(it->second);
 				};
 			};
 		};
 
-		SuperSmartPointer<UIPanel> InputBlocker;
+		DisposablePointer<UIElement> InputBlocker;
 
 		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
-			if(it->second->Panel->BlockingInput() && it->second->Panel->Visible())
+			if(it->second->Element->BlockingInput() && it->second->Element->Visible())
 			{
-				InputBlocker = it->second->Panel;
+				InputBlocker = it->second->Element;
 
 				break;
 			};
@@ -2726,80 +1917,108 @@ namespace FlamingTorch
 		{
 			for(uint32 j = 0; j < DrawOrderCache.size(); j++)
 			{
-				if(DrawOrderCache[j]->Panel.Get() == NULL || DrawOrderCache[j]->DrawOrder != i || !DrawOrderCache[j]->Panel->Visible())
+				if(DrawOrderCache[j]->Element.Get() == NULL || DrawOrderCache[j]->DrawOrder != i || !DrawOrderCache[j]->Element->Visible())
 					continue;
 
-				if(DrawOrderCache[j]->Panel == InputBlocker && DrawOrderCache[j]->Panel->InputBlockerBackground())
+				if(DrawOrderCache[j]->Element == InputBlocker && DrawOrderCache[j]->Element->InputBlockerBackground())
 				{
 					Sprite BackgroundSprite;
 					BackgroundSprite.Options.Scale(Renderer->Size()).Color(Vector4(0, 0, 0, 0.3f));
 					BackgroundSprite.Draw(Renderer);
 				};
 
-				DrawOrderCache[j]->Panel->Draw(Vector2(), Renderer);
+				DrawOrderCache[j]->Element->Draw(Vector2(), Renderer);
+			};
+		};
+	};
+
+	void UIManager::UpdateFocusedElement(const Vector2 &FocusPoint, uint32 InputType)
+	{
+		if (DrawOrderCacheDirty)
+		{
+			DrawOrderCacheDirty = false;
+			DrawOrderCache.clear();
+
+			for (ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
+			{
+				if (it->second->Element->Parent().Get() == nullptr)
+				{
+					DrawOrderCache.push_back(it->second);
+				};
 			};
 		};
 
-		if(FocusedElementValue.Get() && FocusedElementValue->DraggingValue)
+		DisposablePointer<UIElement> PreviouslyFocusedElement = FocusedElementValue;
+		FocusedElementValue = DisposablePointer<UIElement>();
+
+		DisposablePointer<UIElement> FoundElement;
+
+		DisposablePointer<UIElement> InputBlocker = GetInputBlocker();
+
+		if (InputBlocker.Get())
 		{
-			FocusedElementValue->Draw(RendererManager::Instance.Input.MousePosition, Renderer);
+			DisposablePointer<UIElement> p = InputBlocker;
+			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
+		}
+		else
+		{
+			for (int32 i = DrawOrderCounter; i >= 0; i--)
+			{
+				for (uint32 j = 0; j < DrawOrderCache.size(); j++)
+				{
+					if ((DrawOrderCache[j]->Element->EnabledInputTypes() & InputType) == 0 || DrawOrderCache[j]->DrawOrder != i)
+						continue;
+
+					DisposablePointer<UIElement> p = DrawOrderCache[j]->Element;
+
+					RecursiveFindFocusedElement(Vector2(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
+
+					if (FoundElement)
+						break;
+				};
+
+				if (FoundElement)
+					break;
+			};
 		};
 
-		Tooltip->Update(RendererManager::Instance.Input.MousePosition);
-		Tooltip->Draw(RendererManager::Instance.Input.MousePosition, Renderer);
+		if (FoundElement)
+		{
+			FocusedElementValue = Elements[FoundElement->ID()]->Element;
+		};
+
+		if (PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
+		{
+			PreviouslyFocusedElement->OnEvent(UIEventType::LostFocus, {});
+		};
+
+		if (FocusedElementValue)
+		{
+			FocusedElementValue->OnEvent(UIEventType::GainedFocus, {});
+		};
 	};
 
-	void UIManager::RecursiveFindFocusedElement(const Vector2 &ParentPosition, UIPanel *p, UIPanel *&FoundElement, bool Mouse, const Vector2 &TargetPosition)
+	void UIManager::RecursiveFindFocusedElement(const Vector2 &ParentPosition, DisposablePointer<UIElement> p, DisposablePointer<UIElement> &FoundElement, bool Mouse, const Vector2 &TargetPosition)
 	{
-		if(!p->Visible() || !p->Enabled() || (Mouse && !p->MouseInputEnabled()) || (!Mouse && !p->TouchInputEnabled()))
+		if (!p->Visible() || !p->Enabled() || (Mouse && (p->EnabledInputTypes() & UIInputType::Mouse) == 0) || (!Mouse && (p->EnabledInputTypes() & UIInputType::Touch) == 0))
 			return;
 
 		static AxisAlignedBoundingBox AABB;
 
-		static RotateableRect Rectangle;
-
-		Vector2 PanelSize = p->ComposedSize();
+		Vector2 PanelSize = p->Size();
 
 		Vector2 ActualPosition = ParentPosition + p->Position() + p->Offset();
 
 		AABB.min = ActualPosition;
 		AABB.max = AABB.min + PanelSize;
 
-		Sprite TheSprite;
-		TheSprite.Options.Position(AABB.min.ToVector2()).Scale(PanelSize);
-		//TheSprite.Draw(Owner);
-
-		Rectangle.Left = AABB.min.x;
-		Rectangle.Right = AABB.max.x;
-		Rectangle.Top = AABB.min.y;
-		Rectangle.Bottom = AABB.max.y;
-		Rectangle.Rotation = p->ParentRotation();
-
-		if(Rectangle.Rotation != 0)
-		{
-			PanelSize /= 2;
-
-			Rectangle.Left += PanelSize.x;
-			Rectangle.Right += PanelSize.x;
-			Rectangle.Top += PanelSize.y;
-			Rectangle.Bottom += PanelSize.y;
-
-			PanelSize *= 2;
-		};
-
-		if(Rectangle.IsInside(TargetPosition))
+		if(AABB.IsInside(TargetPosition))
 		{
 			FoundElement = p;
 
-			Vector2 ParentSizeHalf = PanelSize / 2;
-
-			for(uint32 i = 0; i < p->Children.size(); i++)
+			for(uint32 i = 0; i < p->ChildrenValue.size(); i++)
 			{
-				Vector2 ChildrenSizeHalf = (p->Children[i]->ComposedSize()) / 2;
-				Vector2 ChildrenPosition = p->Children[i]->Position() - p->Children[i]->Translation() + p->Children[i]->Offset();
-
-				RecursiveFindFocusedElement(ActualPosition + Vector2::Rotate(ChildrenPosition - ParentSizeHalf + ChildrenSizeHalf, p->ParentRotation()) + ParentSizeHalf -
-					ChildrenSizeHalf - ChildrenPosition, p->Children[i], FoundElement, Mouse, TargetPosition);
+				RecursiveFindFocusedElement(ActualPosition, p->ChildrenValue[i], FoundElement, Mouse, TargetPosition);
 			};
 		}
 		else
@@ -2808,328 +2027,9 @@ namespace FlamingTorch
 		};
 	};
 
-	void UIManager::OnMouseJustPressedPriv(const InputCenter::MouseButtonInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(DrawOrderCacheDirty)
-		{
-			DrawOrderCacheDirty = false;
-			DrawOrderCache.clear();
-
-			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
-			{
-				if(it->second->Panel->Parent() == NULL)
-				{
-					DrawOrderCache.push_back(it->second);
-				};
-			};
-		};
-
-		SuperSmartPointer<UIPanel> PreviouslyFocusedElement = FocusedElementValue;
-		FocusedElementValue = SuperSmartPointer<UIPanel>();
-		UIPanel *FoundElement = NULL;
-
-		SuperSmartPointer<UIPanel> InputBlocker = GetInputBlocker();
-
-		if(InputBlocker.Get())
-		{
-			UIPanel *p = InputBlocker;
-			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
-		}
-		else
-		{
-			for(int32 i = DrawOrderCounter; i >= 0; i--)
-			{
-				for(uint32 j = 0; j < DrawOrderCache.size(); j++)
-				{
-					if(!DrawOrderCache[j]->Panel->MouseInputValue || DrawOrderCache[j]->DrawOrder != i)
-						continue;
-
-					UIPanel *p = DrawOrderCache[j]->Panel;
-
-					RecursiveFindFocusedElement(Vector2(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
-
-					if(FoundElement)
-						break;
-				};
-
-				if(FoundElement)
-					break;
-			};
-		};
-
-		if(FoundElement)
-		{
-			FocusedElementValue = Elements[FoundElement->ID()]->Panel;
-		};
-
-		if(PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
-		{
-			PreviouslyFocusedElement->OnLoseFocusPriv();
-		};
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnGainFocusPriv();
-		};
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnMouseJustPressedPriv(o);
-			RendererManager::Instance.Input.ConsumeInput();
-		};
-	};
-
-	void UIManager::OnTouchDownPriv(const InputCenter::TouchInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(DrawOrderCacheDirty)
-		{
-			DrawOrderCacheDirty = false;
-			DrawOrderCache.clear();
-
-			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
-			{
-				if(it->second->Panel->Parent() == NULL)
-				{
-					DrawOrderCache.push_back(it->second);
-				};
-			};
-		};
-
-		SuperSmartPointer<UIPanel> PreviouslyFocusedElement = FocusedElementValue;
-		FocusedElementValue = SuperSmartPointer<UIPanel>();
-		UIPanel *FoundElement = NULL;
-
-		SuperSmartPointer<UIPanel> InputBlocker = GetInputBlocker();
-
-		if(InputBlocker.Get())
-		{
-			UIPanel *p = InputBlocker;
-			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, false, o.Position);
-		}
-		else
-		{
-			for(int32 i = DrawOrderCounter; i >= 0; i--)
-			{
-				for(uint32 j = 0; j < DrawOrderCache.size(); j++)
-				{
-					if(!DrawOrderCache[j]->Panel->TouchInputValue || DrawOrderCache[j]->DrawOrder != i)
-						continue;
-
-					UIPanel *p = DrawOrderCache[j]->Panel;
-
-					RecursiveFindFocusedElement(Vector2(), p, FoundElement, false, o.Position);
-
-					if(FoundElement)
-						break;
-				};
-
-				if(FoundElement)
-					break;
-			};
-		};
-
-		if(FoundElement)
-		{
-			FocusedElementValue = Elements[FoundElement->ID()]->Panel;
-		};
-
-		if(PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
-		{
-			PreviouslyFocusedElement->OnLoseFocusPriv();
-		};
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnGainFocusPriv();
-		};
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnTouchDownPriv(o);
-			RendererManager::Instance.Input.ConsumeInput();
-		};
-	};
-
-	void UIManager::OnTouchUpPriv(const InputCenter::TouchInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnTouchUpPriv(o);
-			RendererManager::Instance.Input.ConsumeInput();
-		};
-	};
-
-	void UIManager::OnMousePressedPriv(const InputCenter::MouseButtonInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnMousePressedPriv(o);
-			RendererManager::Instance.Input.ConsumeInput();
-		};
-	};
-
-	void UIManager::OnMouseReleasedPriv(const InputCenter::MouseButtonInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnMouseReleasedPriv(o);
-			RendererManager::Instance.Input.ConsumeInput();
-		};
-	};
-
-	void UIManager::OnMouseMovePriv()
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnMouseMovePriv();
-		};
-
-		SuperSmartPointer<UIPanel> SelectedElement = GetMouseOverElement();
-
-		if(SelectedElement.Get() == NULL)
-		{
-			if(Tooltip->Source)
-			{
-				Tooltip->Source = SuperSmartPointer<UIPanel>();
-			}
-		}
-		else if(SelectedElement->RespondsToTooltips())
-		{
-			Tooltip->Source = SelectedElement;
-		};
-	};
-
-	void UIManager::OnKeyJustPressedPriv(const InputCenter::KeyInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnKeyJustPressedPriv(o);
-		};
-	};
-
-	void UIManager::OnKeyPressedPriv(const InputCenter::KeyInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnKeyPressedPriv(o);
-		};
-	};
-
-	void UIManager::OnKeyReleasedPriv(const InputCenter::KeyInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnKeyReleasedPriv(o);
-		};
-	};
-
-	void UIManager::OnCharacterEnteredPriv()
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnCharacterEnteredPriv();
-		};
-	};
-
-	void UIManager::OnJoystickButtonPressedPriv(const InputCenter::JoystickButtonInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnJoystickButtonPressedPriv(o);
-		};
-	};
-
-	void UIManager::OnJoystickButtonJustPressedPriv(const InputCenter::JoystickButtonInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnJoystickButtonJustPressedPriv(o);
-		};
-	};
-
-	void UIManager::OnJoystickButtonReleasedPriv(const InputCenter::JoystickButtonInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnJoystickButtonReleasedPriv(o);
-		};
-	};
-
-	void UIManager::OnJoystickAxisMovedPriv(const InputCenter::JoystickAxisInfo &o)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnJoystickAxisMovedPriv(o);
-		};
-	};
-
-	void UIManager::OnJoystickConnectedPriv(uint8 Index)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnJoystickConnectedPriv(Index);
-		};
-	};
-
-	void UIManager::OnJoystickDisconnectedPriv(uint8 Index)
-	{
-		if(RendererManager::Instance.Input.InputConsumed())
-			return;
-
-		if(FocusedElementValue)
-		{
-			FocusedElementValue->OnJoystickDisconnectedPriv(Index);
-		};
-	};
-
 	void UIManager::RegisterInput()
 	{
-		SuperSmartPointer<UIInputProcessor> Out(new UIInputProcessor());
+		DisposablePointer<UIInputProcessor> Out(new UIInputProcessor());
 		Out->Name = "GUIPROCESSOR_" + StringUtils::PointerString(this);
 
 		RendererManager::Instance.Input.AddContext(Out);
@@ -3141,7 +2041,7 @@ namespace FlamingTorch
 		RendererManager::Instance.Input.DisableContext(MakeStringID("GUIPROCESSOR_" + StringUtils::PointerString(this)));
 	};
 
-	bool UIManager::AddElement(StringID ID, SuperSmartPointer<UIPanel> Element)
+	bool UIManager::AddElement(StringID ID, DisposablePointer<UIElement> Element)
 	{
 		DrawOrderCacheDirty = true;
 
@@ -3149,7 +2049,7 @@ namespace FlamingTorch
 
 		if(it != Elements.end())
 		{
-			if(!it->second.Get() || !it->second->Panel.Get())
+			if(!it->second.Get() || !it->second->Element.Get())
 			{
 				Elements.erase(it);
 			}
@@ -3167,11 +2067,10 @@ namespace FlamingTorch
 			return false;
 
 		Elements[ID].Reset(new ElementInfo());
-		Elements[ID]->Panel = Element;
+		Elements[ID]->Element = Element;
 		Elements[ID]->DrawOrder = ++DrawOrderCounter;
 		Element->IDValue = ID;
-		Element->Name = GetStringIDString(ID);
-		Element->SetSkin(Skin);
+		Element->NameValue = GetStringIDString(ID);
 
 #if FLPLATFORM_DEBUG
 		std::string ElementID = GetStringIDString(ID);
@@ -3193,10 +2092,10 @@ namespace FlamingTorch
 
 		if(it != Elements.end())
 		{
-			SuperSmartPointer<ElementInfo> Element = it->second;
+			DisposablePointer<ElementInfo> Element = it->second;
 
-			if(Element.Get() && MouseOverElement == Element->Panel.Get())
-				MouseOverElement = NULL;
+			if(Element.Get() && MouseOverElement == Element->Element.Get())
+				MouseOverElement = DisposablePointer<UIElement>();
 
 			Elements.erase(it);
 
@@ -3214,84 +2113,32 @@ namespace FlamingTorch
 		};
 
 		FocusedElementValue.Dispose();
-		MouseOverElement = NULL;
+		MouseOverElement = DisposablePointer<UIElement>();
 	};
 
 	void UIManager::ClearFocus()
 	{
 		if(FocusedElementValue.Get())
-			FocusedElementValue->OnLoseFocusPriv();
+			FocusedElementValue->OnEvent(UIEventType::LostFocus, {});
 
-		FocusedElementValue = SuperSmartPointer<UIPanel>();
+		FocusedElementValue = DisposablePointer<UIElement>();
 	};
 
-	SuperSmartPointer<UIPanel> UIManager::GetElement(StringID ID)
+	DisposablePointer<UIElement> UIManager::GetElement(StringID ID)
 	{
 		ElementMap::iterator it = Elements.find(ID);
 
 		if(it != Elements.end())
 		{
-			return it->second->Panel;
+			return it->second->Element;
 		};
 
-		return SuperSmartPointer<UIPanel>();
+		return DisposablePointer<UIElement>();
 	};
 
-	SuperSmartPointer<UIPanel> UIManager::GetFocusedElement()
+	DisposablePointer<UIElement> UIManager::GetFocusedElement()
 	{
 		return FocusedElementValue;
-	};
-
-	UITooltip &UIManager::GetTooltip()
-	{
-		//Will always be non-null
-		return *Tooltip.Get();
-	};
-
-	void UIManager::SetSkin(SuperSmartPointer<GenericConfig> Skin)
-	{
-		this->Skin = Skin;
-
-		std::string DefaultFontColorValue = Skin->GetString("General", "DefaultFontColor");
-
-		sscanf(DefaultFontColorValue.c_str(), "%f,%f,%f,%f", &DefaultFontColor.x, &DefaultFontColor.y,
-			&DefaultFontColor.z, &DefaultFontColor.w);
-
-		std::string DefaultSecondaryFontColorValue = Skin->GetString("General", "DefaultSecondaryFontColor");
-
-		if(DefaultSecondaryFontColorValue.length())
-		{
-			sscanf(DefaultSecondaryFontColorValue.c_str(), "%f,%f,%f,%f", &DefaultSecondaryFontColor.x, &DefaultSecondaryFontColor.y,
-				&DefaultSecondaryFontColor.z, &DefaultSecondaryFontColor.w);
-		}
-		else
-		{
-			DefaultSecondaryFontColor = DefaultFontColor;
-		};
-
-		std::string DefaultFontSizeValue = Skin->GetString("General", "DefaultFontSize");
-
-		if(1 != sscanf(DefaultFontSizeValue.c_str(), "%u", &DefaultFontSize))
-		{
-			DefaultFontSize = 16;
-		};
-
-		std::string DefaultFontValue = Skin->GetString("General", "DefaultFont");
-		std::string FontDirectory = DefaultFontValue.substr(0, DefaultFontValue.rfind('/') + 1);
-		std::string FontName = DefaultFontValue.substr(DefaultFontValue.rfind('/') + 1);
-
-		if(FontDirectory.length() == 0)
-			FontDirectory = "/";
-
-		DefaultFont = ResourceManager::Instance.GetFontFromPackage(GetOwner(), FontDirectory, FontName);
-
-		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
-		{
-			if(it->second.Get() == NULL)
-				continue;
-
-			it->second->Panel->SetSkin(Skin);
-		};
 	};
 
 	UIManager::~UIManager()
@@ -3299,38 +2146,12 @@ namespace FlamingTorch
 		UnRegisterInput();
 		Clear();
 
-		Tooltip.Dispose();
 		ScriptInstance.Dispose();
 	};
 
 	Renderer *UIManager::GetOwner()
 	{
 		return Owner;
-	};
-
-	const Vector4 &UIManager::GetDefaultFontColor()
-	{
-		return DefaultFontColor;
-	};
-
-	const Vector4 &UIManager::GetDefaultSecondaryFontColor()
-	{
-		return DefaultSecondaryFontColor;
-	};
-
-	uint32 UIManager::GetDefaultFontSize()
-	{
-		return DefaultFontSize;
-	};
-
-	FontHandle UIManager::GetDefaultFont()
-	{
-		return DefaultFont;
-	};
-
-	SuperSmartPointer<GenericConfig> UIManager::GetSkin()
-	{
-		return Skin;
 	};
 #endif
 };

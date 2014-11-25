@@ -3,16 +3,16 @@ namespace FlamingTorch
 {
 #	define TAG "Main"
 
-	SuperSmartPointer<GameInterface> GameInterface::Instance;
+	DisposablePointer<GameInterface> GameInterface::Instance;
 
-	void GameInterface::SetInstance(SuperSmartPointer<GameInterface> TheInstance)
+	void GameInterface::SetInstance(DisposablePointer<GameInterface> TheInstance)
 	{
 		Instance = TheInstance;
 	};
 
 	bool GameInterface::LoadPackage(const std::string &PackageName)
 	{
-		SuperSmartPointer<Stream> TheStream(new FileStream());
+		DisposablePointer<Stream> TheStream(new FileStream());
 
 		if(!TheStream.AsDerived<FileStream>()->Open(PackageName, StreamFlags::Read))
 		{
@@ -44,10 +44,10 @@ namespace FlamingTorch
 	{
 		RendererManager::Instance.ActiveRenderer()->UI->ClearLayouts();
 
-		SuperSmartPointer<FileStream> InputStream(new FileStream());
+		DisposablePointer<FileStream> InputStream(new FileStream());
 
 		if(!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "DefaultLayout.resource", StreamFlags::Read | StreamFlags::Text) ||
-			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream, SuperSmartPointer<UIPanel>(), true))
+			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream, DisposablePointer<UIElement>(), true))
 		{
 			Log::Instance.LogErr(TAG, "Failed to reload our Default GUI Layouts!");
 
@@ -158,8 +158,8 @@ namespace FlamingTorch
 			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "/" << Stats.DrawCalls + Stats.SkippedDrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges << 
 				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\n";
 
-			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().Font(TheRenderer->UI->GetDefaultFont()).FontSize(TheRenderer->UI->GetDefaultFontSize())
-				.Color(Vector4(1, 1, 1, 1)).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
+			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(UIELEMENT_DEFAULT_FONT_SIZE).Color(Vector4(1, 1, 1, 1))
+				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
 		};
 
 		if(DevelopmentBuild)
@@ -175,10 +175,10 @@ namespace FlamingTorch
 
 			str << GameName() << " (" << GAMEINTERFACE_BUILD_TYPE << ") - " << FPSCounter::Instance.FPS() << " FPS (" << 1000.f / FPSCounter::Instance.FPS() << " ms)";
 
-			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().Font(TheRenderer->UI->GetDefaultFont()).FontSize(TheRenderer->UI->GetDefaultFontSize())
-				.Color(Vector4(1, 1, 1, 1)).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, TheRenderer->Size().y - 20.0f)));
+			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(UIELEMENT_DEFAULT_FONT_SIZE).Color(Vector4(1, 1, 1, 1))
+				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, TheRenderer->Size().y - 20.0f)));
 
-			static SuperSmartPointer<Texture> Logo;
+			static DisposablePointer<Texture> Logo;
 			static bool TriedLoadLogo = false;
 
 			if(Logo.Get() == NULL && !TriedLoadLogo)
@@ -221,7 +221,7 @@ namespace FlamingTorch
 			return 1;
 		};
 
-		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
+		DisposablePointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
 		{
@@ -352,7 +352,7 @@ namespace FlamingTorch
         };
 
 		{
-			SuperSmartPointer<Stream> ConfigurationFileStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("Config.cfg"));
+			DisposablePointer<Stream> ConfigurationFileStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("Config.cfg"));
 			GenericConfig GameConfig;
 
 			if(!ConfigurationFileStream || !GameConfig.DeSerialize(ConfigurationFileStream))
@@ -461,7 +461,7 @@ namespace FlamingTorch
 				return 1;
 			};
 
-			SuperSmartPointer<Stream> GameStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/Scripts/Game/"), MakeStringID("Game.lua"));
+			DisposablePointer<Stream> GameStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/Scripts/Game/"), MakeStringID("Game.lua"));
 
 			if(!GameStream)
 			{
@@ -572,7 +572,7 @@ namespace FlamingTorch
 			return 1;
 		};
 
-		SuperSmartPointer<Stream> AutoExecStream(new FileStream());
+		DisposablePointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
 		{

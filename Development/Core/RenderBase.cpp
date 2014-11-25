@@ -9,11 +9,17 @@ namespace FlamingTorch
 	RendererManager RendererManager::Instance;
 	bool FirstRenderer = true;
 
-	SuperSmartPointer<IRendererImplementation> DefaultImpl;
+	DisposablePointer<IRendererImplementation> DefaultImpl;
 
 	class RendererInputProcessor : public InputCenter::Context
 	{
 	public:
+		uint32 CurrentCommand;
+
+		RendererInputProcessor() : CurrentCommand(0)
+		{
+		};
+
 		bool OnKey(const InputCenter::KeyInfo &Key)
 		{
 			RendererManager &TheManager = RendererManager::Instance;
@@ -36,6 +42,56 @@ namespace FlamingTorch
 
 						break;
 
+					case InputKey::Down:
+						if (Console::Instance.CommandLog.size())
+						{
+							CurrentCommand++;
+
+							if(CurrentCommand > Console::Instance.CommandLog.size())
+							{
+								CurrentCommand = 0;
+							};
+
+							if (CurrentCommand == Console::Instance.CommandLog.size())
+							{
+								TheManager.ConsoleCursorPosition = 0;
+								TheManager.ConsoleText = "";
+							}
+							else
+							{
+								TheManager.ConsoleCursorPosition = Console::Instance.CommandLog[CurrentCommand].length();
+								TheManager.ConsoleText = Console::Instance.CommandLog[CurrentCommand];
+							};
+						};
+
+						break;
+
+					case InputKey::Up:
+						if (Console::Instance.CommandLog.size())
+						{
+							if (CurrentCommand == 0)
+							{
+								CurrentCommand = Console::Instance.CommandLog.size();
+							}
+							else
+							{
+								CurrentCommand--;
+							};
+
+							if (CurrentCommand == Console::Instance.CommandLog.size())
+							{
+								TheManager.ConsoleCursorPosition = 0;
+								TheManager.ConsoleText = "";
+							}
+							else
+							{
+								TheManager.ConsoleCursorPosition = Console::Instance.CommandLog[CurrentCommand].length();
+								TheManager.ConsoleText = Console::Instance.CommandLog[CurrentCommand];
+							};
+						};
+
+						break;
+
 					case InputKey::BackSpace:
 						if(TheManager.ConsoleCursorPosition > 0)
 						{
@@ -52,6 +108,8 @@ namespace FlamingTorch
 						if(TheManager.ConsoleText.length())
 						{
 							Console::Instance.RunConsoleCommand(TheManager.ConsoleText);
+
+							CurrentCommand = Console::Instance.CommandLog.size();
 
 							TheManager.ConsoleText.clear();
 							TheManager.ConsoleCursorPosition = 0;
@@ -170,7 +228,7 @@ namespace FlamingTorch
 
 		//Add a renderer
 		RendererHandle Out = ++Counter;
-		SuperSmartPointer<Renderer> *Info = &Renderers[Out];
+		DisposablePointer<Renderer> *Info = &Renderers[Out];
 		Info->Reset(new Renderer(new DEFAULT_RENDERER_IMPLEMENTATION()));
 		Info->Get()->HandleValue = Out;
 
@@ -194,7 +252,7 @@ namespace FlamingTorch
 
 		//Add a renderer
 		RendererHandle Out = ++Counter;
-		SuperSmartPointer<Renderer> *Info = &Renderers[Out];
+		DisposablePointer<Renderer> *Info = &Renderers[Out];
 		Info->Reset(new Renderer(new DEFAULT_RENDERER_IMPLEMENTATION()));
 		Info->Get()->HandleValue = Out;
 
@@ -226,7 +284,7 @@ namespace FlamingTorch
 
 		Active = Handle;
 
-		SuperSmartPointer<Renderer> &In = Renderers[Handle];
+		DisposablePointer<Renderer> &In = Renderers[Handle];
 		//TODO
 		//In->Window.setActive();
 	};
@@ -236,12 +294,15 @@ namespace FlamingTorch
 		return Renderers.size();
 	};
 
-	Renderer *RendererManager::ActiveRenderer()
+	DisposablePointer<Renderer> RendererManager::ActiveRenderer()
 	{
 		FLASSERT(&Instance == this, "We're not our own instance!");
 		FLASSERT(Renderers.find(Active) != Renderers.end(), "Renderer not found");
 
-		return Renderers[Active].Get();
+		DisposablePointer<Renderer> Out = Renderers[Active];
+		Out.MakeReadOnly();
+
+		return Out;
 	};
 
 #if PROFILER_ENABLED
@@ -384,8 +445,7 @@ namespace FlamingTorch
 			std::string ActualConsoleText = ConsoleText;
 			ActualConsoleText = ActualConsoleText.substr(0, ConsoleCursorPosition) + "|" + ActualConsoleText.substr(ConsoleCursorPosition);
 			TextParams Params;
-			Params.Color(Renderer->UI->GetDefaultFontColor()).SecondaryColor(Renderer->UI->GetDefaultSecondaryFontColor())
-				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, Renderer->Size().y - PROFILER_FONT_SIZE * 1.3f)).FontSize(PROFILER_FONT_SIZE);
+			Params.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, Renderer->Size().y - PROFILER_FONT_SIZE * 1.3f)).FontSize(PROFILER_FONT_SIZE);
 
 			RenderTextUtils::RenderText(Renderer, ActualConsoleText, Params);
 
@@ -750,7 +810,7 @@ namespace FlamingTorch
 
 		Input.Initialize();
 
-		SuperSmartPointer<RendererInputProcessor> TheInputProcessor(new RendererInputProcessor);
+		DisposablePointer<RendererInputProcessor> TheInputProcessor(new RendererInputProcessor);
 		TheInputProcessor->Name = "RENDERER INPUT";
 
 		Input.AddContext(TheInputProcessor);

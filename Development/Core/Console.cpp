@@ -334,32 +334,32 @@ namespace FlamingTorch
 	{
 		SUBSYSTEM_STARTUP_CHECK();
 
-		SuperSmartPointer<ConsoleCommand> VersionCommandVar(new ConsoleCommand());
+		DisposablePointer<ConsoleCommand> VersionCommandVar(new ConsoleCommand());
 		VersionCommandVar->Name = "version";
 		VersionCommandVar->Method.Connect<Console, &Console::VersionCommand>(this);
 
 		RegisterCommand(VersionCommandVar);
 
-		SuperSmartPointer<ConsoleCommand> HelpCommand(new ConsoleCommand());
+		DisposablePointer<ConsoleCommand> HelpCommand(new ConsoleCommand());
 		HelpCommand->Name = "help";
 		HelpCommand->Method.Connect<Console, &Console::HelpCommand>(this);
 
 		RegisterCommand(HelpCommand);
 
 #if USE_GRAPHICS
-		SuperSmartPointer<ConsoleCommand> BindCommand(new ConsoleCommand());
+		DisposablePointer<ConsoleCommand> BindCommand(new ConsoleCommand());
 		BindCommand->Name = "bind";
 		BindCommand->Method.Connect<Console, &Console::BindCommand>(this);
 
 		RegisterCommand(BindCommand);
 
-		SuperSmartPointer<ConsoleCommand> KeyCommand(new ConsoleCommand());
+		DisposablePointer<ConsoleCommand> KeyCommand(new ConsoleCommand());
 		KeyCommand->Name = "keys";
 		KeyCommand->Method.Connect<Console, &Console::ValidKeyCommand>(this);
 
 		RegisterCommand(KeyCommand);
 
-		SuperSmartPointer<ConsoleCommand> ScreenshotCommand(new ConsoleCommand());
+		DisposablePointer<ConsoleCommand> ScreenshotCommand(new ConsoleCommand());
 		ScreenshotCommand->Name = "screenshot";
 		ScreenshotCommand->Method.Connect<Console, &Console::ScreenshotCommand>(this);
 
@@ -411,7 +411,7 @@ namespace FlamingTorch
 		return NULL;
 	};
 
-	void Console::RegisterCommand(SuperSmartPointer<ConsoleCommand> Command)
+	void Console::RegisterCommand(DisposablePointer<ConsoleCommand> Command)
 	{
 		for(uint32 i = 0; i < ConsoleCommands.size(); i++)
 		{
@@ -458,6 +458,8 @@ namespace FlamingTorch
 
 		if(Index != std::wstring::npos)
 		{
+			CommandLog.push_back(Command);
+
 			Command = ActualConsoleText.substr(0, Index);
 
 			std::string Parameters = ActualConsoleText.substr(Index + 1);

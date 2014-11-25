@@ -21,7 +21,7 @@ namespace FlamingTorch
 		class FontInfo
 		{
 		public:
-			SuperSmartPointer<sf::Font> ActualFont;
+			DisposablePointer<sf::Font> ActualFont;
 			std::vector<uint8> Data;
 
 			uint32 ResourceSize;

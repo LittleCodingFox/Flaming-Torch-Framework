@@ -5,7 +5,7 @@ using namespace FlamingTorch;
 
 int main(int argc, char **argv)
 {
-	SuperSmartPointer<DefaultProject> InterfaceInstance(new DefaultProject());
+	DisposablePointer<DefaultProject> InterfaceInstance(new DefaultProject());
 
 	GameInterface::SetInstance(InterfaceInstance);
 

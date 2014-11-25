@@ -153,8 +153,8 @@ public:
 class GameNetwork : public SubSystem
 {
 private:
-	typedef std::map<StringID, SuperSmartPointer<GameClient> > ClientMap;
-	typedef std::map<StringID, SuperSmartPointer<GameServer> > ServerMap;
+	typedef std::map<StringID, DisposablePointer<GameClient> > ClientMap;
+	typedef std::map<StringID, DisposablePointer<GameServer> > ServerMap;
 	ClientMap Clients;
 	ServerMap Servers;
 	uint64 LastUpdateTime;
@@ -165,8 +165,8 @@ public:
 
 	~GameNetwork() {};
 
-	SuperSmartPointer<GameClient> GetClient(StringID ID);
-	SuperSmartPointer<GameServer> GetServer(StringID ID);
+	DisposablePointer<GameClient> GetClient(StringID ID);
+	DisposablePointer<GameServer> GetServer(StringID ID);
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);

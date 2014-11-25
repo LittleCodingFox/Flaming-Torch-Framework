@@ -60,7 +60,14 @@ namespace FlamingTorch
 #		include "GameInterface.hpp"
 #		include "GenericConfig.hpp"
 #		include "Sprite.hpp"
-#		include "GUI.hpp"
+#		include "UIUtils.hpp"
+#		include "UIElement.hpp"
+#		include "UIText.hpp"
+#		include "UIGroup.hpp"
+#		include "UISprite.hpp"
+#		include "UITextComposer.hpp"
+#		include "UILayout.hpp"
+#		include "UIManager.hpp"
 #	endif
 #
 #	include "Texture.hpp"

@@ -76,9 +76,9 @@ class ScriptedWorldStreamerCallback : public WorldStreamerCallback
 public:
 	luabind::object ChunkLoadFunction, ChunkUnloadFunction, ChunkCoordinateUpdateFunction, ChunkSizeFunction, ChunkNeedsLoadFunction;
 
-	SuperSmartPointer<LuaScript> ScriptInstance;
+	DisposablePointer<LuaScript> ScriptInstance;
 
-	ScriptedWorldStreamerCallback(SuperSmartPointer<LuaScript> Script) : ScriptInstance(Script)
+	ScriptedWorldStreamerCallback(DisposablePointer<LuaScript> Script) : ScriptInstance(Script)
 	{
 		if(ScriptInstance.Get())
 		{
@@ -198,7 +198,7 @@ private:
 	/*!
 	*	Loaded Chunk Cache
 	*/
-	std::vector<SuperSmartPointer<WorldChunk> > LoadedChunks;
+	std::vector<DisposablePointer<WorldChunk> > LoadedChunks;
 
 	/*!
 	*	Global Coordinate of this world

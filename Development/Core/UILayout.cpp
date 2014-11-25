@@ -19,29 +19,29 @@ namespace FlamingTorch
 		};
 	};
 
-	SuperSmartPointer<UIPanel> UILayout::FindPanelById(StringID ID)
+	DisposablePointer<UIElement> UILayout::FindElementById(StringID ID)
 	{
 		ElementMap::iterator it = Elements.find(ID);
 
 		if(it == Elements.end())
-			return SuperSmartPointer<UIPanel>();
+			return DisposablePointer<UIElement>();
 
 		return it->second;
 	};
 
-	SuperSmartPointer<UIPanel> UILayout::FindPanelByName(const std::string &Name)
+	DisposablePointer<UIElement> UILayout::FindElementByName(const std::string &Name)
 	{
 		ElementMap::iterator it = Elements.find(MakeStringID(Name));
 
 		if(it == Elements.end())
-			return SuperSmartPointer<UIPanel>();
+			return DisposablePointer<UIElement>();
 
 		return it->second;
 	};
 
-	SuperSmartPointer<UILayout> UILayout::Clone(SuperSmartPointer<UIPanel> Parent, const std::string &ParentElementName, bool ShouldDisplayParentlessElements, bool DoStartupEvents)
+	DisposablePointer<UILayout> UILayout::Clone(DisposablePointer<UIElement> Parent, const std::string &ParentElementName, bool PerformStartupEvents, bool VisibleParentlessElements)
 	{
-		SuperSmartPointer<UILayout> Out(new UILayout());
+		DisposablePointer<UILayout> Out(new UILayout());
 		Out->Name = Name;
 		Out->ContainedObjects = ContainedObjects;
 		Out->Owner = Owner;
@@ -50,65 +50,28 @@ namespace FlamingTorch
 		Owner->CopyElementsToLayout(Out, ContainedObjects, Parent, ParentElementName + "." +
 			Out->Name, Parent);
 
-		if(ShouldDisplayParentlessElements)
-			Out->DisplayParentlessElements();
+		Out->SetVisibleParentlessElements(VisibleParentlessElements);
 
-		if(DoStartupEvents)
+		if(PerformStartupEvents)
 		{
 			Out->PerformStartupEvents(NULL);
-		}
-		else
-		{
-			Out->FinalizeAllProperties(NULL);
 		};
 
 		return Out;
 	};
 
-	void UILayout::DisplayParentlessElements()
+	void UILayout::SetVisibleParentlessElements(bool Visible)
 	{
 		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
 			if(it->second->Parent() == Parent.Get())
 			{
-				it->second->SetVisible(true);
-				Parent->SetRotation(it->second->Rotation());
+				it->second->SetVisible(Visible);
 			};
 		};
 	};
 
-	void UILayout::FinalizeProperties(UIPanel *ParentElement)
-	{
-		ParentElement->Manager()->ScriptInstance->DoString(ParentElement->PropertySetFunctionCode.str().c_str());
-
-		ParentElement->PropertiesStartupSetFunction.Add(luabind::globals(ParentElement->Manager()->ScriptInstance->State)
-			["PropertyStartupSet_" + StringUtils::PointerString(ParentElement)]);
-	};
-
-	void UILayout::FinalizeAllProperties(UIPanel *ParentElement)
-	{
-		if(ParentElement)
-		{
-			for(uint32 i = 0; i < ParentElement->ChildrenCount(); i++)
-			{
-				FinalizeAllProperties(ParentElement->Child(i));
-			};
-
-			FinalizeProperties(ParentElement);
-		}
-		else
-		{
-			for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
-			{
-				if (it->second.Get() == NULL)
-					continue;
-
-				FinalizeAllProperties(it->second.Get());
-			};
-		};
-	};
-
-	void UILayout::PerformStartupEvents(UIPanel *ParentElement)
+	void UILayout::PerformStartupEvents(UIElement *ParentElement)
 	{
 		if(ParentElement)
 		{
@@ -117,11 +80,7 @@ namespace FlamingTorch
 				PerformStartupEvents(ParentElement->Child(i));
 			};
 
-			FinalizeProperties(ParentElement);
-
-			RUN_GUI_SCRIPT_EVENTS2(ParentElement->PropertiesStartupDefaultFunction, (ParentElement), ParentElement->ID());
-			RUN_GUI_SCRIPT_EVENTS2(ParentElement->PropertiesStartupSetFunction, (ParentElement), ParentElement->ID());
-			RUN_GUI_SCRIPT_EVENTS2(ParentElement->OnStartFunction, (ParentElement), ParentElement->ID());
+			ParentElement->OnEvent(UIEventType::Start, {});
 		}
 		else
 		{
