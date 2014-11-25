@@ -135,15 +135,45 @@ namespace FlamingTorch
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const std::string &FileName, GenericConfig *Config)
 	{
+		if (!WasStarted)
+		{
+			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
+
+			return DisposablePointer<TexturePacker>();
+		};
+
 		if(!Config)
 			return DisposablePointer<TexturePacker>();
 
-		DisposablePointer<Texture> In = GetTexture(FileName);
+		StringID RealName = MakeStringID(FileName + "_" + StringUtils::MakeIntString(Config->CRC()));
+		TexturePackerMap::iterator it =
+			TexturePackers.find(RealName);
 
-		if(!In)
-			return DisposablePointer<TexturePacker>();
+		if (it == TexturePackers.end() || it->second.Get() == NULL)
+		{
+			Log::Instance.LogDebug(TAG, "Loading Texture Packer '%s' (H: '0x%08x').", FileName.c_str(),
+				RealName);
 
-		return TexturePacker::FromConfig(In, *Config);
+			DisposablePointer<Texture> In = GetTexture(FileName);
+
+			if(!In)
+				return DisposablePointer<TexturePacker>();
+
+			DisposablePointer<TexturePacker> Packer = TexturePacker::FromConfig(In, *Config);
+
+			if (!Packer.Get())
+			{
+				Log::Instance.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", FileName.c_str(), RealName);
+
+				return DisposablePointer<TexturePacker>();
+			};
+
+			TexturePackers[RealName] = Packer;
+
+			return Packer;
+		};
+
+		return it->second;
 	};
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const Path &ThePath, GenericConfig *Config)
@@ -158,8 +188,45 @@ namespace FlamingTorch
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePackFromPackage(const Path &ThePath, GenericConfig *Config)
 	{
+		if (!WasStarted)
+		{
+			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
+
+			return DisposablePointer<TexturePacker>();
+		};
+
 		if (!Config)
 			return DisposablePointer<TexturePacker>();
+
+		StringID RealName = MakeStringID("PACKAGE:" + ThePath.FullPath() + "_" + StringUtils::MakeIntString(Config->CRC()));
+		TexturePackerMap::iterator it =
+			TexturePackers.find(RealName);
+
+		if (it == TexturePackers.end() || it->second.Get() == NULL)
+		{
+			Log::Instance.LogDebug(TAG, "Loading Texture Packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(),
+				RealName);
+
+			DisposablePointer<Texture> In = GetTextureFromPackage(ThePath);
+
+			if (!In)
+				return DisposablePointer<TexturePacker>();
+
+			DisposablePointer<TexturePacker> Packer = TexturePacker::FromConfig(In, *Config);
+
+			if(!Packer.Get())
+			{
+				Log::Instance.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(), RealName);
+
+				return DisposablePointer<TexturePacker>();
+			};
+
+			TexturePackers[RealName] = Packer;
+
+			return Packer;
+		};
+
+		return it->second;
 
 		DisposablePointer<Texture> In = GetTextureFromPackage(ThePath);
 
@@ -270,7 +337,7 @@ namespace FlamingTorch
 	{
 		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.use_count() == 1)
+			while(it->second.Get() == NULL || it->second.UseCount() == 1)
 			{
 				Textures.erase(it);
 				it = Textures.begin();
@@ -287,7 +354,7 @@ namespace FlamingTorch
 	{
 		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.use_count() == 1)
+			while(it->second.Get() == NULL || it->second.UseCount() == 1)
 			{
 				Textures.erase(it);
 				it = Textures.begin();
@@ -331,7 +398,7 @@ namespace FlamingTorch
 
 		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
 		{
-			while(it->second.Get() == NULL || it->second.use_count() == 1)
+			while(it->second.Get() == NULL || it->second.UseCount() == 1)
 			{
 				Textures.erase(it);
 				it = Textures.begin();
@@ -341,7 +408,19 @@ namespace FlamingTorch
 			};
 		};
 
-		uint32 CurrentObjects = Textures.size() +
+		for (TexturePackerMap::iterator it = TexturePackers.begin(); it != TexturePackers.end(); it++)
+		{
+			while(it->second.Get() == NULL || it->second.UseCount() == 1)
+			{
+				TexturePackers.erase(it);
+				it = TexturePackers.begin();
+
+				if(it == TexturePackers.end())
+					break;
+		};
+	};
+
+		uint32 CurrentObjects = Textures.size() + TexturePackers.size() + 
 #if USE_GRAPHICS
 			Fonts.size();
 #else

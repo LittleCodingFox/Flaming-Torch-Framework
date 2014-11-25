@@ -101,7 +101,7 @@ namespace FlamingTorch
 	};
 
 	template<typename type>
-	class DisposablePointer : public std::shared_ptr<DisposableResource<type> >
+	class DisposablePointer : private std::shared_ptr<DisposableResource<type> >
 	{
 	private:
 		bool ReadOnly;
@@ -115,14 +115,27 @@ namespace FlamingTorch
 			this->reset(new DisposableResource<type>(In));
 		};
 
-		bool operator==(const DisposablePointer<type> &o)
+		DisposablePointer(const DisposablePointer<type> &o) : std::shared_ptr<DisposableResource<type> >(o), ReadOnly(o.ReadOnly)
+		{
+		};
+
+		inline bool operator==(const DisposablePointer<type> &o)
 		{
 			return o.Get() == Get();
 		};
 
-		bool operator!=(const DisposablePointer<type> &o)
+		inline bool operator!=(const DisposablePointer<type> &o)
 		{
 			return o.Get() != Get();
+		};
+
+		inline DisposablePointer<type> &operator=(const DisposablePointer<type> &o)
+		{
+			std::shared_ptr<DisposableResource<type> >::operator=(*static_cast<const std::shared_ptr<DisposableResource<type> > *>(&o));
+
+			ReadOnly = o.ReadOnly;
+
+			return *this;
 		};
 
 		inline type *Get()
@@ -199,6 +212,11 @@ namespace FlamingTorch
 				return;
 
 			this->reset(new DisposableResource<type>(New));
+		};
+
+		inline uint32 UseCount() const
+		{
+			return this->use_count();
 		};
 
 		template<typename OutType>

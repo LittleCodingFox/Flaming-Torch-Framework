@@ -11,6 +11,11 @@ private:
 	typedef std::map<StringID, DisposablePointer<Texture> > TextureMap;
 	
 	TextureMap Textures;
+
+	typedef std::map<StringID, DisposablePointer<TexturePacker> > TexturePackerMap;
+
+	TexturePackerMap TexturePackers;
+
 #if USE_GRAPHICS
 	FontMap Fonts;
 #endif

@@ -1,6 +1,10 @@
 #include "FlamingCore.hpp"
 namespace FlamingTorch
 {
+	GenericConfig::GenericConfig() : CRCValue(0)
+	{
+	};
+
 	GenericConfig::Value::Value() : Type(ValueTypes::Unknown) {};
 
 	GenericConfig::IntValue::IntValue() : Value()
@@ -135,12 +139,19 @@ namespace FlamingTorch
 		return true;
 	};
 
+	uint32 GenericConfig::CRC() const
+	{
+		return CRCValue;
+	};
+
 	bool GenericConfig::DeSerialize(Stream *In)
 	{
 		FLASSERT(In, "Invalid Stream!");
 
 		if(!In)
 			return false;
+
+		CRCValue = In->CRC();
 
 		Sections.clear();
 

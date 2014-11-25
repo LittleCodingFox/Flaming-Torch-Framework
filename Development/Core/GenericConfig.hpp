@@ -53,7 +53,12 @@ public:
 
 	typedef std::map<std::string, Section> SectionMap;
 	SectionMap Sections;
+
+	uint32 CRCValue;
 public:
+
+	GenericConfig();
+
 	/*!
 	*	writes the configuration to a stream
 	*/
@@ -62,6 +67,11 @@ public:
 	*	Reads the configuration from a stream
 	*/
 	bool DeSerialize(Stream *In);
+
+	/*!
+	*	\return the CRC content of this GenericConfig
+	*/
+	uint32 CRC() const;
 
 	/*!
 	*	Gets a value

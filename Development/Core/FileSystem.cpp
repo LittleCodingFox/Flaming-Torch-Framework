@@ -646,6 +646,37 @@ namespace FlamingTorch
 		return ActualStorageDirectory;
 	};
 
+	uint32 Stream::CRC()
+	{
+		uint64 PreviousPosition = Position();
+
+		if(!Seek(0))
+			return 0;
+
+		std::vector<uint8> Buffer(STREAM_COPY_BUFFER_SIZE);
+
+		uint32 OutCRC = 0xFFFFFFFF;
+
+		for(uint64 Offset = Position(); Offset < Length();)
+		{
+			if(Length() - Position() < STREAM_COPY_BUFFER_SIZE)
+				Buffer.resize((uint32)(Length() - Position()));
+
+			SFLASSERT(Read2<uint8>(&Buffer[0], Buffer.size()));
+
+			if(Processor)
+				Processor->Encode(&Buffer[0], Buffer.size());
+
+			OutCRC = CRC32::Instance.IterateCRC(&Buffer[0], Buffer.size(), OutCRC);
+
+			Offset += Buffer.size();
+		};
+
+		Seek(PreviousPosition);
+
+		return CRC32::Instance.FinishCRCIteration(OutCRC);
+	};
+
 	std::string Stream::AsString()
 	{
 		if(Length() == 0)

@@ -332,6 +332,11 @@ public:
 	*	\param Length the amount to write to in bytes
 	*/
 	bool WriteToStream(Stream *Target, uint32 Length);
+
+	/*!
+	*	\return the CRC32 of this stream's contents
+	*/
+	uint32 CRC();
 };
 
 /*!

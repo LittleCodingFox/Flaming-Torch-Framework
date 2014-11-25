@@ -50,4 +50,19 @@ namespace FlamingTorch
 
 		return OutCRC ^ 0xFFFFFFFF;
 	};
+
+	uint32 CRC32::IterateCRC(const uint8 *Data, uint32 DataLength, uint32 PreviousCRC)
+	{
+		uint32 OutCRC = PreviousCRC;
+
+		while (DataLength--)
+			OutCRC = (OutCRC >> 8) ^ LookupTable[(OutCRC & 0xFF) ^ *Data++];
+
+		return OutCRC;
+	};
+
+	uint32 CRC32::FinishCRCIteration(uint32 PreviousCRC)
+	{
+		return PreviousCRC ^ 0xFFFFFFFF;
+	};
 };
