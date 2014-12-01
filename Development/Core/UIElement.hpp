@@ -30,6 +30,8 @@ protected:
 	typedef std::map<uint32, bool> EventErrorCacheMap;
 	EventErrorCacheMap EventErrorCache;
 
+	UIElement(const UIElement &);
+	UIElement &operator=(const UIElement &);
 public:
 	LuaEventGroup EventScriptHandlers[UIEventType::Count];
 

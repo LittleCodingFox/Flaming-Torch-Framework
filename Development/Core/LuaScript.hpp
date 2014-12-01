@@ -44,6 +44,62 @@ public:
 	*	\return the error code (0 == success)
 	*/
 	int32 DoString(const std::string &Code);
+	
+	template<typename type>
+	inline luabind::object VectorToLua(const std::vector<type> &In)
+	{
+		luabind::object Out = luabind::newtable(State);
+
+		uint32 Counter = 0;
+
+		for(std::vector<type>::const_iterator it = In.begin(); it != In.end(); it++)
+		{
+			Out[++Counter] = *it;
+		};
+
+		return Out;
+	};
+
+	template<typename type>
+	inline std::vector<type> VectorFromLua(luabind::object In)
+	{
+		std::vector<type> Out;
+
+		for (luabind::iterator it(In), end; it != end; ++it)
+		{
+			Out.push_back(ProtectedLuaCast<type>(*it));
+		};
+
+		return Out;
+	};
+
+	template<typename key, typename value>
+	inline luabind::object MapToLua(const std::map<key, value> &In)
+	{
+		luabind::object Out = luabind::newtable(State);
+
+		uint32 Counter = 0;
+
+		for (std::map<key, value>::const_iterator it = In.begin(); it != In.end(); it++)
+		{
+			Out[it->first] = it->second;
+		};
+
+		return Out;
+	};
+
+	template<typename key, typename value>
+	inline std::map<key, value> MapFromLua(luabind::object In)
+	{
+		std::map<key, value> Out;
+
+		for (luabind::iterator it(In), end; it != end; ++it)
+		{
+			Out[ProtectedLuaCast<key>(it.key())] = ProtectedLuaCast<value>(*it);
+		};
+
+		return Out;
+	};
 };
 
 /*!

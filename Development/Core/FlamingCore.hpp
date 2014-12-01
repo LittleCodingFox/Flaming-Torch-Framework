@@ -88,4 +88,5 @@ namespace FlamingTorch
 #	include "PerlinNoise.hpp"
 #	include "State.hpp"
 #	include "WorldStreamer.hpp"
+#	include "ObjectModel.hpp"
 };

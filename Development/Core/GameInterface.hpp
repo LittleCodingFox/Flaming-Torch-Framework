@@ -39,6 +39,7 @@ public:
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
 			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS),
 			IsMobile(FLPLATFORM_MOBILE), QuitFlag(false){};
+
 	virtual ~GameInterface() {};
 
 	static void SetInstance(DisposablePointer<GameInterface> TheInstance);

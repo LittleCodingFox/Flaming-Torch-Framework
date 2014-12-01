@@ -44,6 +44,11 @@ public:
 
 	virtual void Update(uint32 Priority) {};
 
+	inline bool Started()
+	{
+		return WasStarted;
+	};
+
 	//Call this to enable usage of this Subsystem before you call InitSubsystems()
 	void Register()
 	{

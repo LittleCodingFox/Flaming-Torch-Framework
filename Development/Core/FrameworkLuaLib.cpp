@@ -2603,6 +2603,8 @@ namespace FlamingTorch
 
 		Globals["g_Console"] = &Console::Instance;
 
+		ObjectModelManager::RegisterBindings(State);
+
 		return true;
 	};
 };
