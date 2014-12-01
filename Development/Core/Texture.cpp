@@ -1254,6 +1254,11 @@ namespace FlamingTorch
 		};
 	};
 
+	TexturePacker::~TexturePacker()
+	{
+		MainTexture.Dispose();
+	};
+
 	DisposablePointer<TexturePacker> TexturePacker::FromTextures(const std::vector<DisposablePointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
 	{
 		if(Textures.size() == 0)
@@ -1382,8 +1387,13 @@ namespace FlamingTorch
 
 	int32 TextureGroup::Add(DisposablePointer<Texture> t)
 	{
-		if(t.Get() == NULL)
+		FLASSERT(InstanceTextures.size() == StoredTextures.size(), "Expected equal amount of instance and stored textures");
+		FLASSERT(t.Get() != NULL, "Expected valid Texture");
+
+		if (t.Get() == NULL || InstanceTextures.size() != StoredTextures.size())
 			return -1;
+
+		bool ElementErased = false;
 
 		for(int32 i = 0; i < (int32)StoredTextures.size(); i++)
 		{
@@ -1395,13 +1405,34 @@ namespace FlamingTorch
 						return i;
 				};
 			};
+			
+			if (StoredTextures[i].Get() == nullptr || InstanceTextures[i].Get() == nullptr)
+			{
+				ElementErased = true;
+			};
+		};
+
+		if(ElementErased)
+		{
+			for(int32 i = InstanceTextures.size() - 1; i >= 0; i--)
+			{
+				if(!StoredTextures[i].Get() || !InstanceTextures[i].Get())
+				{
+					StoredTextures[i].Dispose();
+					InstanceTextures[i].Dispose();
+					StoredTextures.erase(StoredTextures.begin() + i);
+					InstanceTextures.erase(InstanceTextures.begin() + i);
+
+					continue;
+				};
+			};
 		};
 
 		StoredTextures.push_back(t);
 
 		DisposablePointer<TexturePacker> Out = TexturePacker::FromTextures(StoredTextures, MaxWidth, MaxHeight);
 
-		if(Out.Get() == NULL || Out->IndexCount() < StoredTextures.size())
+		if(Out.Get() == nullptr || Out->IndexCount() < StoredTextures.size())
 		{
 			StoredTextures.pop_back();
 
@@ -1424,6 +1455,7 @@ namespace FlamingTorch
 			InstanceTextures.push_back(Out->GetTexture(i));
 		};
 
+		PackedTexture.Dispose();
 		PackedTexture = Out;
 
 		return Out->IndexCount() - 1;

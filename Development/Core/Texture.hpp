@@ -418,6 +418,8 @@ public:
 	*/
 	DisposablePointer<Texture> MainTexture;
 
+	~TexturePacker();
+
 	/*!
 	*	Gets the packing-ready texture from an index
 	*	\param Index the index of the texture to get

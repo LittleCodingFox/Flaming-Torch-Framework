@@ -1858,7 +1858,10 @@ namespace FlamingTorch
 				.def("GetScript", &GetResourceManagerScript)
 				.def("GetScriptFromPackage", &GetResourceManagerScriptFromPackage)
 				.scope [
-					luabind::def("IsSameTexture", &ResourceManager::IsSameTexture)
+					luabind::def("IsSameTexture", &ResourceManager::IsSameTexture),
+					luabind::def("DisposeTexture", &ResourceManager::DisposeResource<Texture>),
+					luabind::def("DisposeTexturePack", &ResourceManager::DisposeResource<TexturePacker>),
+					luabind::def("DisposeFont", &ResourceManager::DisposeFont)
 				],
 
 			//ConsoleCommand

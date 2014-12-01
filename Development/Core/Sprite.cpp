@@ -202,7 +202,8 @@ namespace FlamingTorch
 				TexCoords[4] = (TexCoords[4] + Vector2(0.5f, 0.5f)) * Vector2(Options.TexCoordBorderMax.x, Options.TexCoordBorderMin.x);
 				TexCoords[5] = (TexCoords[5] + Vector2(0.5f, 0.5f)) * Options.TexCoordBorderMin;
 
-				if(SpriteTexture.Get() && SpriteTexture->GetIndex().Index != -1)
+				if(SpriteTexture.Get() && SpriteTexture->GetIndex().Index != -1 && SpriteTexture->GetIndex().Owner.Get() != nullptr &&
+					SpriteTexture->GetIndex().Owner->MainTexture.Get() != nullptr)
 				{
 					//1st: Normalize
 					{

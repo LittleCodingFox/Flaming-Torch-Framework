@@ -237,6 +237,11 @@ namespace FlamingTorch
 	};
 
 #if USE_GRAPHICS
+	void ResourceManager::DisposeFont(Renderer *TheRenderer, FontHandle Handle)
+	{
+		TheRenderer->DestroyFont(Handle);
+	};
+
 	FontHandle ResourceManager::GetFont(Renderer *TheRenderer, const std::string &FileName)
 	{
 		if(!WasStarted)
@@ -406,6 +411,9 @@ namespace FlamingTorch
 				if(it == Textures.end())
 					break;
 			};
+
+			if (it == Textures.end())
+				break;
 		};
 
 		for (TexturePackerMap::iterator it = TexturePackers.begin(); it != TexturePackers.end(); it++)
@@ -417,8 +425,11 @@ namespace FlamingTorch
 
 				if(it == TexturePackers.end())
 					break;
+			};
+
+			if (it == TexturePackers.end())
+				break;
 		};
-	};
 
 		uint32 CurrentObjects = Textures.size() + TexturePackers.size() + 
 #if USE_GRAPHICS

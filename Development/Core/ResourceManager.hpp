@@ -45,7 +45,15 @@ public:
 	FontHandle GetFont(Renderer *TheRenderer, const Path &ThePath);
 	FontHandle GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName);
 	FontHandle GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath);
+
+	static void DisposeFont(Renderer *TheRenderer, FontHandle Handle);
 #endif
+
+	template<typename type>
+	inline static void DisposeResource(DisposablePointer<type> Resource)
+	{
+		Resource.Dispose();
+	};
 
 	void PrepareResourceReload();
 	void ReloadResources();
