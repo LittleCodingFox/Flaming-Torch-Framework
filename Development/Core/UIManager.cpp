@@ -33,21 +33,21 @@ namespace FlamingTorch
 			{
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyJustPressed, { std::remove_const_t<InputCenter::KeyInfo *>(&Key) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyJustPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
 				};
 			}
 			else if(Key.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyPressed, { std::remove_const_t<InputCenter::KeyInfo *>(&Key) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
 				};
 			}
 			else if(Key.JustReleased)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyReleased, { std::remove_const_t<InputCenter::KeyInfo *>(&Key) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyReleased, { const_cast<InputCenter::KeyInfo *>(&Key) });
 				};
 			};
 
@@ -70,14 +70,14 @@ namespace FlamingTorch
 
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchJustPressed, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchJustPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				};
 			}
 			else if (Touch.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchPressed, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				};
 			};
 
@@ -85,7 +85,7 @@ namespace FlamingTorch
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchDragged, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchDragged, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				};
 			};
 			
@@ -93,7 +93,7 @@ namespace FlamingTorch
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchReleased, { std::remove_const_t<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchReleased, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				};
 			};
 
@@ -116,21 +116,21 @@ namespace FlamingTorch
 
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseJustPressed, { std::remove_const_t<InputCenter::MouseButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseJustPressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
 				};
 			}
 			else if(Button.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MousePressed, { std::remove_const_t<InputCenter::MouseButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MousePressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
 				};
 			}
 			else if(Button.JustReleased)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseReleased, { std::remove_const_t<InputCenter::MouseButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseReleased, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
 				};
 			};
 
@@ -151,21 +151,21 @@ namespace FlamingTorch
 			{
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonJustPressed, { std::remove_const_t<InputCenter::JoystickButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonJustPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
 				};
 			}
 			else if(Button.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonPressed, { std::remove_const_t<InputCenter::JoystickButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
 				};
 			}
 			else if(Button.JustReleased)
 			{
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonReleased, { std::remove_const_t<InputCenter::JoystickButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonReleased, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
 				};
 			};
 
@@ -184,7 +184,7 @@ namespace FlamingTorch
 
 			if(TheGUIManager.GetFocusedElement().Get())
 			{
-				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickAxisMoved, { std::remove_const_t<InputCenter::JoystickAxisInfo *>(&Axis) });
+				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickAxisMoved, { const_cast<InputCenter::JoystickAxisInfo *>(&Axis) });
 			};
 
 			if(TheGUIManager.GetInputBlocker().Get())

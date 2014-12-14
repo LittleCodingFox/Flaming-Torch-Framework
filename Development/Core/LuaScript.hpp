@@ -52,7 +52,7 @@ public:
 
 		uint32 Counter = 0;
 
-		for(std::vector<type>::const_iterator it = In.begin(); it != In.end(); it++)
+		for(typename std::vector<type>::const_iterator it = In.begin(); it != In.end(); it++)
 		{
 			Out[++Counter] = *it;
 		};
@@ -80,7 +80,7 @@ public:
 
 		uint32 Counter = 0;
 
-		for (std::map<key, value>::const_iterator it = In.begin(); it != In.end(); it++)
+		for (typename std::map<key, value>::const_iterator it = In.begin(); it != In.end(); it++)
 		{
 			Out[it->first] = it->second;
 		};

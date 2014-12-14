@@ -43,7 +43,7 @@ namespace FlamingTorch
 	
 	void UIElement::Update(const Vector2 &ParentPosition)
 	{
-		OnEvent(UIEventType::Update, { std::remove_const_t<Vector2 *>(&ParentPosition) });
+		OnEvent(UIEventType::Update, { const_cast<Vector2 *>(&ParentPosition) });
 	};
 
 	void UIElement::OnEventPrivate(uint32 Type, std::vector<void *> Args)
@@ -392,7 +392,7 @@ namespace FlamingTorch
 		case UIEventType::Draw:
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *, const Vector2 &>(EventScriptHandlers[Type], NameValue, 
-				!EventErrorCache[Type], this, *std::add_const_t<Vector2 *>(Args[0]));
+				!EventErrorCache[Type], this, *static_cast<const Vector2 *>(Args[0]));
 
 			break;
 		};
@@ -408,7 +408,7 @@ namespace FlamingTorch
 
 	void UIElement::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
-		OnEvent(UIEventType::Draw, { std::remove_const_t<Vector2 *>(&ParentPosition) });
+		OnEvent(UIEventType::Draw, { const_cast<Vector2 *>(&ParentPosition) });
 	};
 
 	void UIElement::DrawUIFocusZone(const Vector2 &ParentPosition, Renderer *Renderer)

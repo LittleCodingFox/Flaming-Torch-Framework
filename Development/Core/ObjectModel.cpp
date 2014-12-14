@@ -149,6 +149,7 @@ namespace FlamingTorch
 					REGISTER_TYPE(Quaternion),
 					REGISTER_TYPE(TiledMap),
 					REGISTER_TYPE(ConsoleVariable),
+#if USE_GRAPHICS
 					REGISTER_TYPE(RendererDisplayMode),
 					REGISTER_TYPE(RendererCapabilities),
 					REGISTER_TYPE(RenderCreateOptions),
@@ -161,6 +162,7 @@ namespace FlamingTorch
 					REGISTER_NAMESPACETYPE(InputCenter, JoystickButtonInfo),
 					REGISTER_NAMESPACETYPE(InputCenter, Action),
 					REGISTER_NAMESPACETYPE(InputCenter, TouchInfo),
+#endif
 					REGISTER_TYPE_PTR(int8),
 					REGISTER_TYPE_PTR(uint8),
 					REGISTER_TYPE_PTR(int16),
@@ -196,9 +198,11 @@ namespace FlamingTorch
 					REGISTER_TYPE_PTR(BoundingSphere),
 					REGISTER_TYPE_PTR(Quaternion),
 					REGISTER_TYPE_PTR(TiledMap),
-					REGISTER_TYPE_PTR(ConsoleVariable),
+#if USE_SOUND
 					REGISTER_NAMESPACETYPE_PTR(SoundManager, Sound),
 					REGISTER_NAMESPACETYPE_PTR(SoundManager, Music),
+#endif
+#if USE_GRAPHICS
 					REGISTER_TYPE_PTR(RendererDisplayMode),
 					REGISTER_TYPE_PTR(RendererCapabilities),
 					REGISTER_TYPE_PTR(RenderCreateOptions),
@@ -216,7 +220,9 @@ namespace FlamingTorch
 					REGISTER_TYPE_PTR(UIElement),
 					REGISTER_TYPE_PTR(UIGroup),
 					REGISTER_TYPE_PTR(UIText),
-					REGISTER_TYPE_PTR(UISprite)
+					REGISTER_TYPE_PTR(UISprite),
+#endif
+                    REGISTER_TYPE_PTR(ConsoleVariable)
 				]
 				.enum_("constants")
 				[
@@ -253,6 +259,7 @@ namespace FlamingTorch
 					REGISTER_TYPE_ENUM(Quaternion),
 					REGISTER_TYPE_ENUM(TiledMap),
 					REGISTER_TYPE_ENUM(ConsoleVariable),
+#if USE_GRAPHICS
 					REGISTER_TYPE_ENUM(RendererDisplayMode),
 					REGISTER_TYPE_ENUM(RendererCapabilities),
 					REGISTER_TYPE_ENUM(RenderCreateOptions),
@@ -265,6 +272,7 @@ namespace FlamingTorch
 					REGISTER_TYPE_ENUM(JoystickButtonInfo),
 					REGISTER_TYPE_ENUM(Action),
 					REGISTER_TYPE_ENUM(TouchInfo),
+#endif
 					REGISTER_TYPE_ENUMPTR(Int8),
 					REGISTER_TYPE_ENUMPTR(UInt8),
 					REGISTER_TYPE_ENUMPTR(Int16),
@@ -300,9 +308,11 @@ namespace FlamingTorch
 					REGISTER_TYPE_ENUMPTR(BoundingSphere),
 					REGISTER_TYPE_ENUMPTR(Quaternion),
 					REGISTER_TYPE_ENUMPTR(TiledMap),
-					REGISTER_TYPE_ENUMPTR(ConsoleVariable),
+#if USE_SOUND
 					REGISTER_TYPE_ENUMPTR(Sound),
 					REGISTER_TYPE_ENUMPTR(Music),
+#endif
+#if USE_GRAPHICS
 					REGISTER_TYPE_ENUMPTR(RendererDisplayMode),
 					REGISTER_TYPE_ENUMPTR(RendererCapabilities),
 					REGISTER_TYPE_ENUMPTR(RenderCreateOptions),
@@ -320,7 +330,9 @@ namespace FlamingTorch
 					REGISTER_TYPE_ENUMPTR(UIElement),
 					REGISTER_TYPE_ENUMPTR(UIGroup),
 					REGISTER_TYPE_ENUMPTR(UIText),
-					REGISTER_TYPE_ENUMPTR(UISprite)
+					REGISTER_TYPE_ENUMPTR(UISprite),
+#endif
+                 REGISTER_TYPE_ENUMPTR(ConsoleVariable)
 				]
 				.def("MakeObjectDef", &ObjectModelManager::MakeObjectDef)
 				.def("MakeObjectAttribute", &ObjectModelManager::MakeObjectAttribute),
@@ -464,6 +476,7 @@ namespace FlamingTorch
 		case ObjectAttributeType::ConsoleVariable:
 			return IsLuaType<ConsoleVariable>(Value);
 
+#if USE_GRAPHICS
 		case ObjectAttributeType::RendererDisplayMode:
 			return IsLuaType<RendererDisplayMode>(Value);
 
@@ -499,6 +512,7 @@ namespace FlamingTorch
 
 		case ObjectAttributeType::TouchInfo:
 			return IsLuaType<InputCenter::TouchInfo>(Value);
+#endif
 
 		case ObjectAttributeType::Int8Ptr:
 			return IsLuaTypePtr<int8>(Value);
@@ -608,12 +622,15 @@ namespace FlamingTorch
 		case ObjectAttributeType::ConsoleVariablePtr:
 			return IsLuaTypePtr<ConsoleVariable>(Value);
 
+#if USE_SOUND
 		case ObjectAttributeType::SoundPtr:
 			return IsLuaTypePtr<SoundManager::Sound>(Value);
 
 		case ObjectAttributeType::MusicPtr:
 			return IsLuaTypePtr<SoundManager::Music>(Value);
-
+#endif
+                
+#if USE_GRAPHICS
 		case ObjectAttributeType::RendererDisplayModePtr:
 			return IsLuaTypePtr<RendererDisplayMode>(Value);
 
@@ -667,6 +684,7 @@ namespace FlamingTorch
 
 		case ObjectAttributeType::UISpritePtr:
 			return IsLuaTypePtr<UISprite>(Value);
+#endif
 		};
 
 		return false;

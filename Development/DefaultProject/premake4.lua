@@ -42,6 +42,8 @@ solution "DefaultProject"
 			libdirs {
 				"../../Dependencies/Libs/Win32/"
 			}
+		else
+			buildoptions { "-w" }
 		end
 		
 		if os.get() == "macosx" then
@@ -90,6 +92,8 @@ solution "DefaultProject"
 					"Foundation.framework", "AppKit.framework", "IOKit.framework", "Carbon.framework",
 					"GLEW", "OpenAL.framework", "jpeg", "../../Dependencies/Libs/OSX/sndfile.framework"
 				}
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Symbols" }
@@ -125,6 +129,8 @@ solution "DefaultProject"
 					"Foundation.framework", "AppKit.framework", "IOKit.framework", "Carbon.framework",
 					"GLEW", "OpenAL.framework", "jpeg", "sndfile.framework"
 				}
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Optimize" }

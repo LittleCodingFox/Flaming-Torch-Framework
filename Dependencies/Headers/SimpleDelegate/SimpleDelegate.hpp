@@ -32,7 +32,7 @@ namespace SimpleDelegate
 
 		void operator()(Args... params)
 		{
-			for(std::vector<CallInfo>::iterator it = CallData.begin(); it != CallData.end(); it++)
+			for(typename std::vector<CallInfo>::iterator it = CallData.begin(); it != CallData.end(); it++)
 			{
 				if (it->Owner)
 				{
@@ -69,7 +69,7 @@ namespace SimpleDelegate
 
 		void Disconnect(SimpleCallback Callback)
 		{
-			for (std::vector<CallInfo>::iterator it = CallData.begin(); it != CallData.end(); it++)
+			for (typename std::vector<CallInfo>::iterator it = CallData.begin(); it != CallData.end(); it++)
 			{
 				if (it->Owner == NULL && it->Callback == Callback)
 				{
@@ -83,7 +83,7 @@ namespace SimpleDelegate
 		template<class T, void (T::*Callback)(Args...)>
 		void Disconnect(T *Owner)
 		{
-			for (std::vector<CallInfo>::iterator it = CallData.begin(); it != CallData.end(); it++)
+			for (typename std::vector<CallInfo>::iterator it = CallData.begin(); it != CallData.end(); it++)
 			{
 				if (it->Owner == Owner && it->Callback == (SimpleCallback)&MethodCaller<T, Callback>)
 				{
@@ -97,9 +97,9 @@ namespace SimpleDelegate
 		template<class T>
 		void DisconnectObject(T *Owner)
 		{
-			for (std::vector<CallInfo>::reverse_iterator it = CallData.rbegin(); it != CallData.rend(); it++)
+			for (typename std::vector<CallInfo>::reverse_iterator it = CallData.rbegin(); it != CallData.rend(); it++)
 			{
-				std::vector<CallInfo>::iterator rit = --it.base();
+				typename std::vector<CallInfo>::iterator rit = --it.base();
 
 				if (rit->Owner == Owner)
 				{

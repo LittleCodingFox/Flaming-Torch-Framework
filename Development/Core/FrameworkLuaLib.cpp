@@ -1860,8 +1860,11 @@ namespace FlamingTorch
 				.scope [
 					luabind::def("IsSameTexture", &ResourceManager::IsSameTexture),
 					luabind::def("DisposeTexture", &ResourceManager::DisposeResource<Texture>),
-					luabind::def("DisposeTexturePack", &ResourceManager::DisposeResource<TexturePacker>),
+					luabind::def("DisposeTexturePack", &ResourceManager::DisposeResource<TexturePacker>)
+#if USE_GRAPHICS
+                    ,
 					luabind::def("DisposeFont", &ResourceManager::DisposeFont)
+#endif
 				],
 
 			//ConsoleCommand
