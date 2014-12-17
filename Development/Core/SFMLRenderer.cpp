@@ -14,7 +14,7 @@ namespace FlamingTorch
 #	define BUFFER_OFFSET(x) ((char *)NULL + x)
 #	define SFML_RENDERER_VERSION_MAJOR 0
 #	define SFML_RENDERER_VERSION_MINOR 1
-#	define USE_TEXT_CACHE 1
+#	define USE_TEXT_CACHE 0
 
 	bool SFMLRendererImplementation::FirstRenderer = true;
 	uint64 SFMLRendererImplementation::TextureCounter = 0;
@@ -323,6 +323,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize)
 	{
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		VertexBufferMap::iterator it = VertexBuffers.find(Handle);
@@ -654,6 +656,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyVertexBuffer(VertexBufferHandle Handle)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		VertexBufferMap::iterator it = VertexBuffers.find(Handle);
@@ -795,6 +800,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::StartClipping(const Rect &ClippingRect)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.ClippingChanges++;
 
@@ -811,6 +819,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::FinishClipping()
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.ClippingChanges++;
 
@@ -821,6 +832,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::Clear(uint32 Buffers)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		uint32 Mask = 0;
@@ -870,8 +884,8 @@ namespace FlamingTorch
 		PreviousFrameStatsValue = FrameStatsValue;
 		FrameStatsValue.Clear();
 
-		FlushRenderText();
 		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
 
 		FrameStatsValue.TotalResources = Fonts.size() + VertexBuffers.size() + Textures.size();
 		FrameStatsValue.TotalResourceUsage = 0;
@@ -938,6 +952,8 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
 		FrameStatsValue.StateChanges++;
 
 		glViewport((GLint)x, (GLint)y, (GLsizei)Width, (GLsizei)Height);
@@ -968,6 +984,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyTexture(TextureHandle Handle)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		if(Handle == 0)
@@ -987,6 +1006,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		TextureHandle Last = LastBoundTexture;
@@ -1015,6 +1037,9 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		TextureHandle Last = LastBoundTexture;
@@ -1116,6 +1141,9 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
 	{
+		SpriteCache::Instance.Flush(Target);
+		FlushRenderText();
+
 		FrameStatsValue.StateChanges++;
 
 		if(BufferByteCount != (uint32)(Window.getSize().x * Window.getSize().y * 4))

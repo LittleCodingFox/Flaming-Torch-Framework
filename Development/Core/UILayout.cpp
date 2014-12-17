@@ -64,7 +64,7 @@ namespace FlamingTorch
 	{
 		for(ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
-			if(it->second->Parent() == Parent.Get())
+			if(it->second.Get() != NULL && it->second->Parent() == Parent.Get())
 			{
 				it->second->SetVisible(Visible);
 			};

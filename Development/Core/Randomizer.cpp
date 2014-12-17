@@ -3,6 +3,8 @@
 #include <time.h>
 namespace FlamingTorch
 {
+#	define TAG "Randomizer"
+
 	int32 RandomSeed()
 	{
 		int32 Seed = (int32)time(NULL);
@@ -15,11 +17,25 @@ namespace FlamingTorch
 
 	f32 Randomizer::RandomFloat(f32 Min, f32 Max)
 	{
+		if (Max - Min < 0)
+		{
+			Log::Instance.LogWarn(TAG, "Invalid Min/Max: (%f, %f)", Min, Max);
+
+			return 0;
+		};
+
 	    return static_cast<float>(rand()) / RAND_MAX * (Max - Min) + Min;
 	};
 
 	int32 Randomizer::RandomInt(int32 Min, int32 Max)
 	{
+		if (Max - Min < 0)
+		{
+			Log::Instance.LogWarn(TAG, "Invalid Min/Max: (%d, %d)", Min, Max);
+
+			return 0;
+		};
+
 	    return rand() % (Max - Min + 1) + Min;
 	};
 

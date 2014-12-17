@@ -1622,6 +1622,11 @@ namespace FlamingTorch
 						};
 					};
 				};
+
+				if(ResetElementSize)
+				{
+					Element->SetSize(Element->ChildrenSize());
+				};
 			};
 
 			Value = Data.get("TooltipElement", Json::Value(""));
