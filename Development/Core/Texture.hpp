@@ -86,12 +86,38 @@ class TextureBuffer
 private:
 	uint32 WidthValue, HeightValue, ColorTypeValue;
 public:
+
 	/*!
 	*	The Pixel Data of this TextureBuffer
 	*/
 	std::vector<uint8> Data;
 
 	TextureBuffer() : WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8) {};
+
+	/*!
+	*	Loads this TextureBuffer as an empty Image
+	*	\param Width the width of the image
+	*	\param Height the height of the image
+	*	\param BaseColor the Base Color of the image
+	*	\note Think of BaseColor like the Background Color that is filling the entire image
+	*/
+	static DisposablePointer<TextureBuffer> CreateFromColor(uint32 Width, uint32 Height, const Vector4 &BaseColor = Vector4());
+
+	/*!
+	*	Loads this TextureBuffer from data
+	*	\param Pixels the Pixels to read
+	*	\param Width the width of the image
+	*	\param Height the height of the image
+	*	\note Pixels should be large enough to accommodate Width x Height x 4 bytes
+	*	\note Pixels is expected to be RGBA8 Data
+	*/
+	static DisposablePointer<TextureBuffer> CreateFromData(const uint8 *Pixels, uint32 Width, uint32 Height);
+
+	/*!
+	*	Loads this TextureBuffer from a Stream
+	*	\param Stream the Stream to read from
+	*/
+	static DisposablePointer<TextureBuffer> CreateFromStream(Stream *Stream);
 
 	/*!
 	*	Loads this TextureBuffer from data
@@ -238,7 +264,50 @@ public:
 	*	Destroys this texture
 	*/
 	void Destroy();
-	
+
+	/*!
+	*	Loads this texture from a buffer
+	*	\param Buffer
+	*/
+	static DisposablePointer<Texture> CreateFromBuffer(DisposablePointer<TextureBuffer> Buffer);
+
+	/*!
+	*	Loads this texture from data
+	*	\param Pixels the Pixels to read
+	*	\param Width the width of the image
+	*	\param Height the height of the image
+	*	\note Pixels should be large enough to accommodate Width x Height x 4 bytes
+	*	\note Pixels is expected to be RGBA8 Data
+	*/
+	static DisposablePointer<Texture> CreateFromData(const uint8 *Pixels, uint32 Width, uint32 Height);
+
+	/*!
+	*	Loads this texture from a file
+	*	\param FileName is the filename to load
+	*/
+	static DisposablePointer<Texture> CreateFromFile(const std::string &FileName);
+
+	/*!
+	*	Loads this texture from a Stream
+	*	\param Stream the stream to load
+	*/
+	static DisposablePointer<Texture> CreateFromStream(Stream *Stream);
+
+	/*!
+	*	Loads this texture from a file in the package filesystem
+	*	\param Directory the directory of the file
+	*	\param Name the name of the file
+	*/
+	static DisposablePointer<Texture> CreateFromPackage(const std::string &Directory, const std::string &Name);
+
+	/*!
+	*	Creates an empty texture
+	*	\param Width the width of the texture
+	*	\param Height the height of the texture
+	*	\param RGBA whether the texture should be transparent and use RGBA pixels
+	*/
+	static DisposablePointer<Texture> CreateEmpty(uint32 Width, uint32 Height, bool RGBA = true);
+
 	/*!
 	*	Loads this texture from a buffer
 	*	\param Buffer

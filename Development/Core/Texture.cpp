@@ -367,6 +367,35 @@ namespace FlamingTorch
 		return true;
 	};
 
+	DisposablePointer<TextureBuffer> TextureBuffer::CreateFromColor(uint32 Width, uint32 Height, const Vector4 &BaseColor)
+	{
+		DisposablePointer<TextureBuffer> Out(new TextureBuffer());
+
+		Out->CreateEmpty(Width, Height, BaseColor);
+
+		return Out;
+	};
+
+	DisposablePointer<TextureBuffer> TextureBuffer::CreateFromData(const uint8 *Pixels, uint32 Width, uint32 Height)
+	{
+		DisposablePointer<TextureBuffer> Out(new TextureBuffer());
+
+		if (!Out->FromData(Pixels, Width, Height))
+			return DisposablePointer<TextureBuffer>();
+
+		return Out;
+	};
+
+	DisposablePointer<TextureBuffer> TextureBuffer::CreateFromStream(Stream *Stream)
+	{
+		DisposablePointer<TextureBuffer> Out(new TextureBuffer());
+
+		if (!Out->FromStream(Stream))
+			return DisposablePointer<TextureBuffer>();
+
+		return Out;
+	};
+
 	bool TextureBuffer::FromStream(Stream *Stream)
 	{
 		uint64 Position = Stream->Position();
@@ -687,6 +716,66 @@ namespace FlamingTorch
 	{
 		Destroy();
 		Buffer.Dispose();
+	};
+
+	DisposablePointer<Texture> Texture::CreateFromBuffer(DisposablePointer<TextureBuffer> Buffer)
+	{
+		DisposablePointer<Texture> Out(new Texture());
+
+		if (!Out->FromBuffer(Buffer))
+			return DisposablePointer<Texture>();
+
+		return Out;
+	};
+
+	DisposablePointer<Texture> Texture::CreateFromData(const uint8 *Pixels, uint32 Width, uint32 Height)
+	{
+		DisposablePointer<Texture> Out(new Texture());
+
+		if (!Out->FromData(Pixels, Width, Height))
+			return DisposablePointer<Texture>();
+
+		return Out;
+	};
+
+	DisposablePointer<Texture> Texture::CreateFromFile(const std::string &FileName)
+	{
+		DisposablePointer<Texture> Out(new Texture());
+
+		if (!Out->FromFile(FileName))
+			return DisposablePointer<Texture>();
+
+		return Out;
+	};
+
+	DisposablePointer<Texture> Texture::CreateFromStream(Stream *Stream)
+	{
+		DisposablePointer<Texture> Out(new Texture());
+
+		if (!Out->FromStream(Stream))
+			return DisposablePointer<Texture>();
+
+		return Out;
+	};
+
+	DisposablePointer<Texture> Texture::CreateFromPackage(const std::string &Directory, const std::string &Name)
+	{
+		DisposablePointer<Texture> Out(new Texture());
+
+		if (!Out->FromPackage(Directory, Name))
+			return DisposablePointer<Texture>();
+
+		return Out;
+	};
+
+	DisposablePointer<Texture> Texture::CreateEmpty(uint32 Width, uint32 Height, bool RGBA)
+	{
+		DisposablePointer<Texture> Out(new Texture());
+
+		if (!Out->CreateEmptyTexture(Width, Height, RGBA))
+			return DisposablePointer<Texture>();
+
+		return Out;
 	};
 
 	const TexturePackerIndex &Texture::GetIndex() const
@@ -1317,11 +1406,25 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Out->Indices.size(); i++)
 		{
 			uint32 MyRowSize = (Out->Indices[i].Width - 2) * 4;
+			uint32 TargetRowSize = MyRowSize;
 			uint32 xpos = (Out->Indices[i].x + 1) * 4;
 
-			for(uint32 y = 0, ypos = (Out->Indices[i].y + 1) * RowSize, ypostarget = 0; y < Out->Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
+			const Texture *t = Textures[Out->Indices[i].Index];
+
+			uint32 ExtraX = 0, ExtraY = 0;
+
+			while(t->GetIndex().Owner.Get())
 			{
-				memcpy(&Temp.Data[xpos + ypos], &Textures[Out->Indices[i].Index]->GetData()->Data[ypostarget], MyRowSize);
+				ExtraX += t->GetIndex().Owner->Indices[t->GetIndex().Index].x * 4 + t->GetIndex().Owner->Indices[t->GetIndex().Index].y * t->GetIndex().Owner->MainTexture->Width() * 4;
+
+				MyRowSize = t->GetIndex().Owner->MainTexture->Width() * 4;
+
+				t = t->GetIndex().Owner->MainTexture;
+			};
+
+			for(uint32 y = 0, ypos = (Out->Indices[i].y + 1) * RowSize, ypostarget = ExtraX; y < Out->Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
+			{
+				memcpy(&Temp.Data[xpos + ypos], &t->GetData()->Data[ypostarget], TargetRowSize);
 			};
 
 			Out->Indices[i].TextureInstance.Reset(new Texture());
