@@ -1715,6 +1715,44 @@ namespace FlamingTorch
 #endif
 	};
 
+	TextGlyphInfo SFMLRendererImplementation::GetTextGlyph(uint32 Character, const TextParams &Parameters)
+	{
+		TextGlyphInfo Out;
+
+		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
+
+		if(FontIterator == Fonts.end())
+			return Out;
+
+		sf::String str(Character);
+
+		GLCHECK();
+
+		sf::Color Border((uint8)(Parameters.BorderColorValue.x * 255),
+			(uint8)(Parameters.BorderColorValue.y * 255),
+			(uint8)(Parameters.BorderColorValue.z * 255),
+			(uint8)(Parameters.BorderColorValue.w * 255));
+
+		sf::Color ActualTextColor((uint8)(Parameters.TextColorValue.x * 255),
+			(uint8)(Parameters.TextColorValue.y * 255),
+			(uint8)(Parameters.TextColorValue.z * 255),
+			(uint8)(Parameters.TextColorValue.w * 255));
+
+		sf::Color ActualTextColor2((uint8)(Parameters.SecondaryTextColorValue.x * 255),
+			(uint8)(Parameters.SecondaryTextColorValue.y * 255),
+			(uint8)(Parameters.SecondaryTextColorValue.z * 255),
+			(uint8)(Parameters.SecondaryTextColorValue.w * 255));
+
+		const sf::Glyph &TheGlyph = FontIterator->second.ActualFont->getGlyph(Character, Parameters.FontSizeValue, !!(Parameters.StyleValue & TextStyle::Bold), ActualTextColor, ActualTextColor2, Parameters.BorderSizeValue, Border);
+
+		DisposablePointer<TextureBuffer> Pixels(TextureBuffer::CreateFromData(&TheGlyph.pixels[0], TheGlyph.textureRect.width - 2, TheGlyph.textureRect.height - 2));
+
+		Out.Pixels = Pixels;
+		Out.Advance = TheGlyph.advance;
+
+		return Out;
+	};
+
 	void SFMLRendererImplementation::FlushRenderText()
 	{
 		if(UniqueCacheStringID == 0 || TheRenderTextCache.Positions.size() == 0)

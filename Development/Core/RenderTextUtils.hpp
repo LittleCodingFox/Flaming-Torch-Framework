@@ -1,6 +1,13 @@
 #pragma once
 
 class Renderer;
+class TextureBuffer;
+
+struct TextGlyphInfo
+{
+	int32 Advance;
+	DisposablePointer<TextureBuffer> Pixels;
+};
 
 /*!
 *	Text Style

@@ -30,6 +30,7 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics/Export.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <vector>
 
 
 namespace sf
@@ -54,6 +55,7 @@ public :
     int     advance;     ///< Offset to move horizontically to the next character
     IntRect bounds;      ///< Bounding rectangle of the glyph, in coordinates relative to the baseline
     IntRect textureRect; ///< Texture coordinates of the glyph inside the font's texture
+	std::vector<Uint8> pixels; ///<Contains the pixels of this glyph
 };
 
 } // namespace sf

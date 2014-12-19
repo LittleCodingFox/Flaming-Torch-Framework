@@ -142,6 +142,13 @@ namespace FlamingTorch
 		virtual Vector2 Size() const override;
 
 		/*!
+		*	\param Character the character to get the glyph for
+		*	\param Parameters the text parameters
+		*	\return the Text Glyph Info of this glyph
+		*/
+		virtual TextGlyphInfo GetTextGlyph(uint32 Character, const TextParams &Parameters) override;
+
+		/*!
 		*	Creates a Vertex Buffer
 		*	\return a vertex buffer handle, or 0 on error
 		*/

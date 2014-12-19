@@ -221,6 +221,11 @@ namespace FlamingTorch
 	{
 		return Impl->Size();
 	};
+	
+	TextGlyphInfo Renderer::GetTextGlyph(uint32 Character, const TextParams &Parameters)
+	{
+		return Impl->GetTextGlyph(Character, Parameters);
+	};
 
 	RendererHandle RendererManager::AddRenderer(const char *Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities Caps)
 	{

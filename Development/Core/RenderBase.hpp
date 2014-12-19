@@ -389,6 +389,13 @@ public:
 	*	Render Window Size
 	*/
 	Vector2 Size() const;
+
+	/*!
+	*	\param Character the character to get the glyph for
+	*	\param Parameters the text parameters
+	*	\return the Text Glyph Info of this glyph
+	*/
+	TextGlyphInfo GetTextGlyph(uint32 Character, const TextParams &Parameters);
 	
 	/*!
 	*	Creates a Vertex Buffer
@@ -786,7 +793,14 @@ public:
 	*	Render Window Size
 	*/
 	virtual Vector2 Size() const = 0;
-	
+
+	/*!
+	*	\param Character the character to get the glyph for
+	*	\param Parameters the text parameters
+	*	\return the Text Glyph Info of this glyph
+	*/
+	virtual TextGlyphInfo GetTextGlyph(uint32 Character, const TextParams &Parameters) = 0;
+
 	/*!
 	*	Creates a Vertex Buffer
 	*	\return a vertex buffer handle, or 0 on error
@@ -1064,7 +1078,6 @@ public:
 		return std::vector<RendererDisplayMode>();
 	};
 
-
 	/*!
 	*	Render Window Size
 	*/
@@ -1072,7 +1085,19 @@ public:
 	{
 		return Vector2(1, 1);
 	};
-	
+
+	/*!
+	*	\param Character the character to get the glyph for
+	*	\param Parameters the text parameters
+	*	\return the Text Glyph Info of this glyph
+	*/
+	TextGlyphInfo GetTextGlyph(uint32 Character, const TextParams &Parameters)
+	{
+		static TextGlyphInfo Info;
+
+		return Info;
+	};
+
 	/*!
 	*	Creates a Vertex Buffer
 	*	\return a vertex buffer handle, or 0 on error
