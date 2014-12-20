@@ -2464,7 +2464,8 @@ namespace FlamingTorch
 				.def("GetElement", &UIManager::GetElement)
 				.property("FocusedElement", &UIManager::GetFocusedElement)
 				.property("MouseOverElement", &UIManager::GetMouseOverElement)
-				.property("Renderer", &UIManager::GetOwner),
+				.property("Renderer", &UIManager::GetOwner)
+				.def("DrawText", &UIManager::DrawText),
 
 			//UIElement
 			luabind::class_<UIElement, DisposablePointer<UIElement> >("UIElement")

@@ -227,6 +227,11 @@ namespace FlamingTorch
 		return Impl->GetTextGlyph(Character, Parameters);
 	};
 
+	uint32 Renderer::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
+	{
+		return Impl->GetTextKerning(Prev, Cur, Parameters);
+	};
+
 	RendererHandle RendererManager::AddRenderer(const char *Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities Caps)
 	{
 		FLASSERT(&Instance == this, "We're not our own instance!");

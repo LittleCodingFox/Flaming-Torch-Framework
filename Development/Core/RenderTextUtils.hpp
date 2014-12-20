@@ -7,6 +7,9 @@ struct TextGlyphInfo
 {
 	int32 Advance;
 	DisposablePointer<TextureBuffer> Pixels;
+	Vector2 Offset;
+
+	TextGlyphInfo() : Advance(0) {};
 };
 
 /*!

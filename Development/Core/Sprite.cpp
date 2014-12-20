@@ -207,7 +207,7 @@ namespace FlamingTorch
 				{
 					//1st: Normalize
 					{
-						Vector2 NormalizedSize = Vector2(SpriteTexture->GetIndex().Width() - 2.0f, SpriteTexture->GetIndex().Height() - 2.0f) / SpriteTexture->GetIndex().Owner->MainTexture->Size();
+						Vector2 NormalizedSize = Vector2(SpriteTexture->GetIndex().Width(), SpriteTexture->GetIndex().Height()) / SpriteTexture->GetIndex().Owner->MainTexture->Size();
 						Vector2 NormalizedPosition = Vector2((f32)SpriteTexture->GetIndex().Owner->Indices[SpriteTexture->GetIndex().Index].x + 1,
 							(f32)SpriteTexture->GetIndex().Owner->Indices[SpriteTexture->GetIndex().Index].y + 1) / SpriteTexture->GetIndex().Owner->MainTexture->Size();
 

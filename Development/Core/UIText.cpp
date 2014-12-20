@@ -70,7 +70,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += MathUtils::Max(Strings[i].Size.Size().y, TextParameters.FontSizeValue);
+				YOffset += MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue);
 			};
 
 			YOffset = MathUtils::Clamp((SizeValue.y - YOffset) / 2, 0, SizeValue.y);
@@ -79,7 +79,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += MathUtils::Max(Strings[i].Size.Size().y, TextParameters.FontSizeValue);
+				YOffset += MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue);
 			};
 
 			YOffset = SizeValue.y - YOffset;
@@ -89,7 +89,7 @@ namespace FlamingTorch
 
 		for (uint32 i = 0; i < Strings.size(); TextYOffset += (Strings[i].Size.Size().y < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Size().y), i++)
 		{
-			if(TextYOffset + MathUtils::Max(Strings[i].Size.Size().y, TextParameters.FontSizeValue) > SizeValue.y)
+			if(TextYOffset + MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue) > SizeValue.y)
 				break;
 
 			Vector2 ChildrenPosition;

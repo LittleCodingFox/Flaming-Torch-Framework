@@ -276,8 +276,163 @@ namespace FlamingTorch
 		void OnLoseFocus() {};
 	};
 
+	bool TextParamsAreSimilar(const TextParams &A, const TextParams &B)
+	{
+		return A.BorderColorValue == B.BorderColorValue && A.BorderSizeValue == B.BorderSizeValue && A.FontSizeValue == B.FontSizeValue &&
+			A.FontValue == B.FontValue && A.SecondaryTextColorValue == B.SecondaryTextColorValue && A.StyleValue == B.StyleValue &&
+			A.TextColorValue == B.TextColorValue;
+	};
+
+#define COPYOFFSET(var, type)\
+	memcpy(&Buffer[Offset], &var, sizeof(type));\
+	\
+	Offset += sizeof(type);
+
+	StringID UIManager::MakeTextResourceString(uint32 Character, const TextParams &Parameters)
+	{
+		const uint32 Size = sizeof(uint32) + sizeof(TextParams) - sizeof(f32) - sizeof(Vector2);
+		static uint8 Buffer[Size];
+
+		uint32 Offset = 0;
+
+		COPYOFFSET(Character, uint32);
+		COPYOFFSET(Parameters.BorderColorValue, Vector4);
+		COPYOFFSET(Parameters.BorderSizeValue, f32);
+		COPYOFFSET(Parameters.FontSizeValue, uint32);
+		COPYOFFSET(Parameters.FontValue, FontHandle);
+		COPYOFFSET(Parameters.SecondaryTextColorValue, Vector4);
+		COPYOFFSET(Parameters.TextColorValue, Vector4);
+		COPYOFFSET(Parameters.StyleValue, uint32);
+
+		return CRC32::Instance.CRC(Buffer, Size);
+	};
+
+	StringID UIManager::MakeTextureResourceString(const Path &FileName)
+	{
+		return MakeStringID(FileName.FullPath());
+	};
+
+	DisposablePointer<Texture> UIManager::GetUITexture(const Path &FileName)
+	{
+		StringID ID = MakeTextureResourceString(FileName);
+
+		TextureResourceMap::iterator it = TextureResources.find(ID);
+
+		if (it != TextureResources.end())
+		{
+			return it->second.InstanceTexture;
+		};
+
+		DisposablePointer<Texture> SourceTexture = ResourceManager::Instance.GetTextureFromPackage(FileName);
+
+		if (!SourceTexture.Get())
+			SourceTexture = ResourceManager::Instance.GetTexture(FileName);
+
+		if (!SourceTexture.Get())
+			return SourceTexture;
+
+		TextureResourceInfo TheResource;
+		TheResource.FileName = FileName;
+		TheResource.References = 1;
+
+		TheResource.SourceTexture = SourceTexture;
+		TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(SourceTexture));
+
+		return TheResource.InstanceTexture;
+	};
+
+	void UIManager::GetUIText(const std::string &Text, const TextParams &Parameters)
+	{
+		for (uint32 i = 0; i < Text.size(); i++)
+		{
+			if (Text[i] == ' ' || Text[i] == '\n' || Text[i] == '\r')
+				continue;
+
+			StringID ID = MakeTextResourceString(Text[i], Parameters);
+			TextResourceMap::iterator it = TextResources.find(ID);
+
+			if (it != TextResources.end())
+			{
+				it->second.References++;
+			}
+			else
+			{
+				TextResourceInfo TheResource;
+
+				TheResource.Character = Text[i];
+				TheResource.TextParameters = Parameters;
+				TheResource.References = 1;
+
+				TheResource.Info = Owner->GetTextGlyph(Text[i], Parameters);
+				TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(Texture::CreateFromBuffer(TheResource.Info.Pixels)));
+
+				TextResources[ID] = TheResource;
+			};
+		};
+	};
+
+	void UIManager::DrawText(const std::string &Text, const TextParams &Params)
+	{
+		static Sprite TheSprite;
+
+		TextParams ActualParams = Params.FontValue ? Params : TextParams(Params).Font(RenderTextUtils::DefaultFont);
+		Vector2 Position = Params.PositionValue, InitialPosition = Position;
+
+		uint32 SpaceSize = Owner->GetTextGlyph(' ', ActualParams).Advance;
+
+		GetUIText(Text, ActualParams);
+
+		for (uint32 i = 0; i < Text.length(); i++)
+		{
+			switch (Text[i])
+			{
+			case ' ':
+				Position.x = Position.x + SpaceSize;
+
+				break;
+
+			case '\n':
+				Position.x = InitialPosition.x;
+				Position.y += Params.FontSizeValue;
+
+				break;
+
+			case '\r':
+
+				break;
+
+			default:
+				{
+					StringID ID = MakeTextResourceString(Text[i], ActualParams);
+					TextResourceMap::iterator it = TextResources.find(ID);
+
+					if (i > 0)
+						Position.x += Owner->GetTextKerning(Text[i - 1], Text[i], ActualParams);
+
+					if (it != TextResources.end())
+					{
+						TheSprite.Options.Position(Position + it->second.Info.Offset);
+						TheSprite.SpriteTexture = it->second.InstanceTexture;
+
+						TheSprite.Draw(Owner);
+
+						Position.x = Position.x + it->second.Info.Advance;
+					}
+					else
+					{
+						Position.x = Position.x + SpaceSize;
+					};
+				};
+
+				break;
+			};
+		};
+	};
+
 	UIManager::UIManager(Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DrawUIRects(0), DrawUIFocusZones(0)
 	{
+		ResourcesGroup.Reset(new TextureGroup(4096, 4096));
+
 		std::vector<LuaLib *> Libs;
 		Libs.push_back(&FrameworkLib::Instance);
 
@@ -1845,7 +2000,7 @@ namespace FlamingTorch
 
 		if(FoundElement && Elements[FoundElement->ID()].Get())
 		{
-			if(MouseOverElement != FoundElement)
+			if(MouseOverElement != FoundElement && MouseOverElement.Get())
 				MouseOverElement->OnEvent(UIEventType::MouseEntered, {});
 
 			MouseOverElement = FoundElement;
@@ -1885,9 +2040,12 @@ namespace FlamingTorch
 				DrawOrderCache[i]->Element->Update(Vector2());
 			};
 		};
+
+		//TEMP: Need to fix mouseover not being calculated unless we put this here
+		GetMouseOverElement();
 	};
 
-	void UIManager::Draw(Renderer *Renderer)
+	void UIManager::Draw()
 	{
 		DrawUIRects = !!(Console::Instance.GetVariable("r_drawuirects") ? Console::Instance.GetVariable("r_drawuirects")->UIntValue : 0);
 		DrawUIFocusZones = !!(Console::Instance.GetVariable("r_drawuifocuszones") ? Console::Instance.GetVariable("r_drawuifocuszones")->UIntValue : 0);
@@ -1928,11 +2086,11 @@ namespace FlamingTorch
 				if(DrawOrderCache[j]->Element == InputBlocker && DrawOrderCache[j]->Element->InputBlockerBackground())
 				{
 					Sprite BackgroundSprite;
-					BackgroundSprite.Options.Scale(Renderer->Size()).Color(Vector4(0, 0, 0, 0.3f));
-					BackgroundSprite.Draw(Renderer);
+					BackgroundSprite.Options.Scale(Owner->Size()).Color(Vector4(0, 0, 0, 0.3f));
+					BackgroundSprite.Draw(Owner);
 				};
 
-				DrawOrderCache[j]->Element->Draw(Vector2(), Renderer);
+				DrawOrderCache[j]->Element->Draw(Vector2(), Owner);
 			};
 		};
 	};

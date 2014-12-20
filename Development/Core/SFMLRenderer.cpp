@@ -1743,14 +1743,32 @@ namespace FlamingTorch
 			(uint8)(Parameters.SecondaryTextColorValue.z * 255),
 			(uint8)(Parameters.SecondaryTextColorValue.w * 255));
 
-		const sf::Glyph &TheGlyph = FontIterator->second.ActualFont->getGlyph(Character, Parameters.FontSizeValue, !!(Parameters.StyleValue & TextStyle::Bold), ActualTextColor, ActualTextColor2, Parameters.BorderSizeValue, Border);
+		bool Bold = !!(Parameters.StyleValue & TextStyle::Bold);
+		const sf::Glyph &TheGlyph = FontIterator->second.ActualFont->getGlyph(Character, Parameters.FontSizeValue, Bold, ActualTextColor, ActualTextColor2, Parameters.BorderSizeValue, Border);
 
-		DisposablePointer<TextureBuffer> Pixels(TextureBuffer::CreateFromData(&TheGlyph.pixels[0], TheGlyph.textureRect.width - 2, TheGlyph.textureRect.height - 2));
+		if (TheGlyph.pixels.size())
+		{
+			DisposablePointer<TextureBuffer> Pixels(TextureBuffer::CreateFromData(&TheGlyph.pixels[0], TheGlyph.textureRect.width - 2, TheGlyph.textureRect.height - 2));
 
-		Out.Pixels = Pixels;
+			Out.Pixels = Pixels;
+		};
+
 		Out.Advance = TheGlyph.advance;
+		Out.Offset = Vector2(TheGlyph.bounds.left, Parameters.FontSizeValue + TheGlyph.bounds.top);
 
 		return Out;
+	};
+
+	uint32 SFMLRendererImplementation::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
+	{
+		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
+
+		if (FontIterator == Fonts.end())
+			return 0;
+
+		GLCHECK();
+
+		return FontIterator->second.ActualFont->getKerning(Prev, Cur, Parameters.FontSizeValue);
 	};
 
 	void SFMLRendererImplementation::FlushRenderText()

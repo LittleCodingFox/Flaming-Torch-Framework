@@ -1250,12 +1250,12 @@ namespace FlamingTorch
 
 	uint32 TexturePackerIndex::Width() const
 	{
-		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Width : 0;
+		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Width - 2 : 0;
 	};
 
 	uint32 TexturePackerIndex::Height() const
 	{
-		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Height : 0;
+		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Height - 2 : 0;
 	};
 
 	TextureHandle TexturePackerIndex::Handle() const
@@ -1484,8 +1484,18 @@ namespace FlamingTorch
 		return Index < Indices.size() ? Indices[Index].TextureInstance : DisposablePointer<Texture>();
 	};
 
-	TextureGroup::TextureGroup(uint32 _MaxWidth, uint32 _MaxHeight) : MaxWidth(_MaxWidth), MaxHeight(_MaxHeight)
+	TextureGroup::TextureGroup(uint32 _MaxWidth, uint32 _MaxHeight) : MaxWidth(_MaxWidth), MaxHeight(_MaxHeight), FilteringValue(TextureFiltering::Nearest)
 	{
+	};
+
+	void TextureGroup::SetFiltering(uint32 Filtering)
+	{
+		FilteringValue = Filtering;
+
+		if(PackedTexture.Get())
+		{
+			PackedTexture->MainTexture->SetTextureFiltering(Filtering);
+		};
 	};
 
 	int32 TextureGroup::Add(DisposablePointer<Texture> t)
@@ -1560,6 +1570,8 @@ namespace FlamingTorch
 
 		PackedTexture.Dispose();
 		PackedTexture = Out;
+
+		SetFiltering(FilteringValue);
 
 		return Out->IndexCount() - 1;
 	};

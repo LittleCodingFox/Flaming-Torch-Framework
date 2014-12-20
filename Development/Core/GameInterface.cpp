@@ -143,7 +143,7 @@ namespace FlamingTorch
 
 		{
 			PROFILE("Render UI", StatTypes::Rendering);
-			TheRenderer->UI->Draw(TheRenderer);
+			TheRenderer->UI->Draw();
 		};
 
 		static std::stringstream str;

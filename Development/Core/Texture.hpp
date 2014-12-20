@@ -531,9 +531,18 @@ private:
 	uint32 MaxWidth, MaxHeight;
 	std::vector<DisposablePointer<Texture> > InstanceTextures, StoredTextures;
 
+	uint32 FilteringValue;
+
 	void UpdateInstanceTextures();
 public:
 	TextureGroup(uint32 MaxWidth, uint32 MaxHeight);
+
+	inline uint32 GetFiltering()
+	{
+		return FilteringValue;
+	};
+
+	void SetFiltering(uint32 Filtering);
 
 	/*!
 	*	Adds a texture

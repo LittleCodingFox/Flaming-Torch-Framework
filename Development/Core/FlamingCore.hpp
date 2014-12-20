@@ -30,6 +30,10 @@ extern "C"
 #endif
 namespace FlamingTorch
 {
+#	undef DrawText
+#	undef CopyDirectory
+#	undef CreateDirectory
+
 	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle;
 
 #	include "MiniDump.hpp"

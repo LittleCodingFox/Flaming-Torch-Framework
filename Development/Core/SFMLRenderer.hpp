@@ -149,6 +149,14 @@ namespace FlamingTorch
 		virtual TextGlyphInfo GetTextGlyph(uint32 Character, const TextParams &Parameters) override;
 
 		/*!
+		*	\param Prev the previous character
+		*	\param Cur the current character
+		*	\param Parameters the text parameters
+		*	\return the kerning space between characters
+		*/
+		virtual uint32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters) override;
+
+		/*!
 		*	Creates a Vertex Buffer
 		*	\return a vertex buffer handle, or 0 on error
 		*/

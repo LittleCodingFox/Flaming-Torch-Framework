@@ -1,3 +1,5 @@
+class TextureGroup;
+
 /*!
 *	UI Manager
 *	Handles all input and processing and rendering of UI Elements
@@ -59,8 +61,45 @@ private:
 	void ProcessGroupProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessGroupJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 
+	StringID MakeTextResourceString(uint32 Character, const TextParams &Parameters);
+	StringID MakeTextureResourceString(const Path &FileName);
+
 	UIManager();
 	UIManager(const UIManager &);
+
+	struct TextResourceInfo
+	{
+		uint32 Character;
+		TextParams TextParameters;
+		TextGlyphInfo Info;
+
+		uint32 References;
+
+		DisposablePointer<Texture> InstanceTexture;
+
+		TextResourceInfo() : References(0), Character(0) {};
+	};
+
+	struct TextureResourceInfo
+	{
+		Path FileName;
+
+		DisposablePointer<Texture> SourceTexture, InstanceTexture;
+
+		uint32 References;
+
+		TextureResourceInfo() : References(0) {};
+	};
+
+	typedef std::map<StringID, TextResourceInfo> TextResourceMap;
+
+	TextResourceMap TextResources;
+
+	typedef std::map<StringID, TextureResourceInfo> TextureResourceMap;
+
+	TextureResourceMap TextureResources;
+
+	DisposablePointer<TextureGroup> ResourcesGroup;
 public:
 	typedef std::map<StringID, DisposablePointer<UILayout> > LayoutMap;
 	LayoutMap Layouts, DefaultLayouts;
@@ -82,7 +121,13 @@ public:
 	*	Draws all visible Elements
 	*	\param Renderer the Renderer to draw to
 	*/
-	void Draw(Renderer *Renderer);
+	void Draw();
+
+	/*!
+	*	\param Text the text string to draw
+	*	\param Params the text parameters
+	*/
+	void DrawText(const std::string &Text, const TextParams &Params);
 
 	/*!
 	*	Adds an UI element to this UI Manager
@@ -175,6 +220,18 @@ public:
 	*	\return the current Input Blocker, if any
 	*/
 	DisposablePointer<UIElement> GetInputBlocker();
+
+	/*!
+	*	\param FileName the filename of the texture
+	*	\return the loaded texture
+	*/
+	DisposablePointer<Texture> GetUITexture(const Path &FileName);
+
+	/*!
+	*	\param Text the text string to load
+	*	\param Parameters the text parameters for the string
+	*/
+	void GetUIText(const std::string &Text, const TextParams &Parameters);
 
 	/*!
 	*	Removes Focus from the focused UI Element

@@ -52,7 +52,8 @@ namespace FlamingTorch
 	{
 		PROFILE("RenderTextUtils RenderText", StatTypes::Rendering);
 
-		TheRenderer->RenderText(String, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
+		//TheRenderer->RenderText(String, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
+		TheRenderer->UI->DrawText(String, Params);
 	};
 
 	Rect RenderTextUtils::MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params)
@@ -159,7 +160,7 @@ namespace FlamingTorch
 				Stream.str("");
 				PreviousStream.str("");
 
-				CurrentY += MathUtils::Max(MeasuredSize.y, Params.FontSizeValue);
+				CurrentY += MathUtils::Max(MeasuredSize.y, (f32)Params.FontSizeValue);
 			}
 			else if(CurrentY + Params.FontSizeValue <= Size.y)
 			{
