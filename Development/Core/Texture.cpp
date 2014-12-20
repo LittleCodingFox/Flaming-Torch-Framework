@@ -1130,8 +1130,8 @@ namespace FlamingTorch
 		while (t->GetIndex().Owner.Get())
 		{
 			const TexturePacker::SortedTexture &Index = t->GetIndex().Owner->Indices[t->GetIndex().Index];
-			Out.Left += Index.x + 1;
-			Out.Top += Index.y + 1;
+			Out.Left += Index.x;
+			Out.Top += Index.y;
 
 			t = t->GetIndex().Owner->MainTexture.Get();
 		};
@@ -1278,12 +1278,12 @@ namespace FlamingTorch
 
 	uint32 TexturePackerIndex::Width() const
 	{
-		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Width - 2 : 0;
+		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Width : 0;
 	};
 
 	uint32 TexturePackerIndex::Height() const
 	{
-		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Height - 2 : 0;
+		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Height : 0;
 	};
 
 	TextureHandle TexturePackerIndex::Handle() const
@@ -1318,9 +1318,9 @@ namespace FlamingTorch
 
 		for (uint32 i = 0; i < Indices.size(); i++)
 		{
-			uint32 MyRowSize = (Indices[i].Width - 2) * 4;
+			uint32 MyRowSize = Indices[i].Width * 4;
 			uint32 TargetRowSize = MyRowSize;
-			uint32 xpos = (Indices[i].x + 1) * 4;
+			uint32 xpos = Indices[i].x * 4;
 
 			const Texture *t = Indices[i].SourceInstance;
 
@@ -1331,14 +1331,14 @@ namespace FlamingTorch
 				if (!const_cast<TexturePacker *>(t->GetIndex().Owner.Get())->Bind())
 					return false;
 
-				ExtraX += (t->GetIndex().Owner->Indices[t->GetIndex().Index].x + 1) * 4 + (t->GetIndex().Owner->Indices[t->GetIndex().Index].y + 1) * t->GetIndex().Owner->MainTexture->Width() * 4;
+				ExtraX += t->GetIndex().Owner->Indices[t->GetIndex().Index].x * 4 + t->GetIndex().Owner->Indices[t->GetIndex().Index].y * t->GetIndex().Owner->MainTexture->Width() * 4;
 
 				MyRowSize = t->GetIndex().Owner->MainTexture->Width() * 4;
 
 				t = t->GetIndex().Owner->MainTexture;
 			};
 
-			for (uint32 y = 0, ypos = (Indices[i].y + 1) * RowSize, ypostarget = ExtraX; y < Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
+			for (uint32 y = 0, ypos = Indices[i].y * RowSize, ypostarget = ExtraX; y < Indices[i].Height; y++, ypos += RowSize, ypostarget += MyRowSize)
 			{
 				memcpy(&Temp.Data[xpos + ypos], &t->GetData()->Data[ypostarget], TargetRowSize);
 			};
@@ -1350,81 +1350,6 @@ namespace FlamingTorch
 		return true;
 	};
 
-	bool SortSprites(const TexturePacker::SortedTexture &a, const TexturePacker::SortedTexture &b)
-	{
-		int32 aSize = a.Height * 1024 + a.Width;
-		int32 bSize = b.Height * 1024 + b.Width;
-
-		return bSize > aSize;
-	};
-
-	bool SortSpriteIndices(const TexturePacker::SortedTexture &a, const TexturePacker::SortedTexture &b)
-	{
-		return a.Index < b.Index;
-	};
-
-	int32 GuessSpriteWidth(const std::vector<TexturePacker::SortedTexture> &Sprites)
-	{
-		std::vector<int32> Widths;
-
-		for (uint32 i = 0; i < Sprites.size(); i++)
-		{
-			Widths.push_back(Sprites[i].Width);
-		};
-
-		std::sort(Widths.begin(), Widths.end());
-
-		int32 MaxWidth = Widths[Widths.size() - 1];
-		int32 MedianWidth = Widths[Widths.size() / 2];
-
-		int32 Width = MedianWidth * (int32)(MathUtils::Round(sqrtf((f32)Sprites.size())));
-
-		return (int32)MathUtils::Max((f32)Width, (f32)MaxWidth);
-	};
-
-	int32 FindIntersectingSprite(const std::vector<TexturePacker::SortedTexture> &Sprites, int32 Index, int32 x, int32 y)
-	{
-		int32 Width = Sprites[Index].Width;
-		int32 Height = Sprites[Index].Height;
-
-		for (int32 i = 0; i < Index; i++)
-		{
-			if (Sprites[i].x >= (uint32)(x + Width) || Sprites[i].x + (uint32)Sprites[i].Width <= (uint32)x || Sprites[i].y >= (uint32)(y + Height) ||
-				Sprites[i].y + Sprites[i].Height <= (uint32)y)
-				continue;
-
-			return i;
-		};
-
-		return -1;
-	};
-
-	void PositionSprite(const std::vector<TexturePacker::SortedTexture> &Sprites, TexturePacker::SortedTexture &Target, int32 TargetIndex, int32 TextureWidth)
-	{
-		int32 x = 0, y = 0;
-
-		for (;;)
-		{
-			int32 IntersectionIndex = FindIntersectingSprite(Sprites, TargetIndex, x, y);
-
-			if (IntersectionIndex < 0)
-			{
-				Target.x = x;
-				Target.y = y;
-
-				return;
-			};
-
-			x = Sprites[IntersectionIndex].x + Sprites[IntersectionIndex].Width;
-
-			if (x + Target.Width >(uint32)TextureWidth)
-			{
-				x = 0;
-				y++;
-			};
-		};
-	};
-
 	DisposablePointer<TexturePacker> TexturePacker::FromTextures(const std::vector<DisposablePointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
 	{
 		if(Textures.size() == 0)
@@ -1434,6 +1359,8 @@ namespace FlamingTorch
 
 		Out->Rects.Init(MaxWidth, MaxHeight);
 
+		MaxWidth = MaxHeight = 0;
+
 		for(uint32 i = 0; i < Textures.size(); i++)
 		{
 			if(Textures[i].Get() == NULL)
@@ -1441,8 +1368,25 @@ namespace FlamingTorch
 
 			SortedTexture TextureInstance;
 			TextureInstance.Index = i;
-			TextureInstance.Width = Textures[i]->Width() + 2;
-			TextureInstance.Height = Textures[i]->Height() + 2;
+
+			::Rect InstanceRect = Out->Rects.Insert(Textures[i]->Width(), Textures[i]->Height(), MaxRectsBinPack::RectBestShortSideFit);
+
+			if (InstanceRect.width < 0)
+				return DisposablePointer<TexturePacker>();
+
+			TextureInstance.x = InstanceRect.x;
+			TextureInstance.y = InstanceRect.y;
+			TextureInstance.Width = InstanceRect.width;
+			TextureInstance.Height = InstanceRect.height;
+
+			if (InstanceRect.width != Textures[i]->Width() || InstanceRect.height != Textures[i]->Height())
+				DEBUG_BREAK;
+
+			if (TextureInstance.x + TextureInstance.Width + 1 > MaxWidth)
+				MaxWidth = TextureInstance.x + TextureInstance.Width + 1;
+
+			if (TextureInstance.y + TextureInstance.Height + 1 > MaxHeight)
+				MaxHeight = TextureInstance.y + TextureInstance.Height + 1;
 
 			TextureInstance.SourceInstance = Textures[i];
 			TextureInstance.TextureInstance.Reset(new Texture());
@@ -1456,37 +1400,9 @@ namespace FlamingTorch
 			Out->Indices.push_back(TextureInstance);
 		};
 
-		std::sort(Out->Indices.begin(), Out->Indices.end(), SortSprites);
-
-		int32 Width = GuessSpriteWidth(Out->Indices), Height = 0, Size = 0;
-
-		if (Width > (int32)MaxWidth)
-			Width = (int32)MaxWidth;
-
-		for (uint32 i = 0; i < Textures.size(); i++)
-		{
-			PositionSprite(Out->Indices, Out->Indices[i], i, Width);
-
-			int32 OldHeight = Height;
-
-			Height = (int32)MathUtils::Max((f32)Height, (f32)(Out->Indices[i].y + Out->Indices[i].Height));
-
-			if (Height >(int32)MaxHeight)
-			{
-				Height = OldHeight;
-
-				Out->Indices.resize(i);
-
-				break;
-			};
-
-			Size += Out->Indices[i].Width * Out->Indices[i].Height;
-		};
-
-		std::sort(Out->Indices.begin(), Out->Indices.end(), SortSpriteIndices);
 		Out->Dirty = true;
-		Out->MaxWidth = Width;
-		Out->MaxHeight = Height;
+		Out->MaxWidth = MaxWidth;
+		Out->MaxHeight = MaxHeight;
 
 		return Out;
 	};

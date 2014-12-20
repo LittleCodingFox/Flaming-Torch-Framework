@@ -476,6 +476,8 @@ public:
 class TexturePacker
 {
 private:
+	MaxRectsBinPack Rects;
+
 	bool Dirty;
 
 	uint32 MaxWidth, MaxHeight;
