@@ -403,7 +403,7 @@ public:
 	*	\param Parameters the text parameters
 	*	\return the kerning space between characters
 	*/
-	uint32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters);
+	int32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters);
 	
 	/*!
 	*	Creates a Vertex Buffer
@@ -815,7 +815,7 @@ public:
 	*	\param Parameters the text parameters
 	*	\return the kerning space between characters
 	*/
-	virtual uint32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters) = 0;
+	virtual int32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters) = 0;
 
 	/*!
 	*	Creates a Vertex Buffer
@@ -1120,7 +1120,7 @@ public:
 	*	\param Parameters the text parameters
 	*	\return the kerning space between characters
 	*/
-	uint32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
+	int32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
 	{
 		return 0;
 	};

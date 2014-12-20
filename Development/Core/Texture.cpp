@@ -1121,6 +1121,39 @@ namespace FlamingTorch
 		return Vector4(Piece[0] / 255.f, Piece[1] / 255.f, Piece[2] / 255.f, Piece[3] / 255.f);
 	};
 
+	/*!
+	*/
+	Rect Texture::TextureRect() const
+	{
+		Rect Out(0, Width(), 0, Height());
+
+		const Texture *t = this;
+
+		while (t->GetIndex().Owner.Get())
+		{
+			const TexturePacker::SortedTexture &Index = t->GetIndex().Owner->Indices[t->GetIndex().Index];
+			Out.Left += Index.x + 1;
+			Out.Top += Index.y + 1;
+
+			t = t->GetIndex().Owner->MainTexture.Get();
+		};
+
+		return Out;
+	};
+
+	/*!
+	*/
+	DisposablePointer<Texture> Texture::BaseTexture() const
+	{
+
+		if (GetIndex().Owner.Get())
+		{
+			return GetIndex().Owner->MainTexture->BaseTexture();
+		};
+
+		return DisposablePointer<Texture>::MakeWeak(const_cast<Texture *>(this));
+	};
+
 	void Texture::Blur(uint32 Radius, uint32 Strength)
 	{
 		if(Index.Index != -1)

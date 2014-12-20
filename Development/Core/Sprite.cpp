@@ -19,23 +19,24 @@ namespace FlamingTorch
 
 	//Generates a ninepatch quad
 	void GenerateNinePatchGeometry(Vector2 *Vertices, Vector2 *TexCoords, const Vector2 &TextureSize, const Vector2 &Position, const Vector2 &Size, const Vector2 &Offset,
-		const Vector2 &SizeOverride)
+		const Vector2 &SizeOverride, Rect TextureRect)
 	{
 		static Rect NinePatchRect;
 
 		NinePatchRect = Rect(Position.x, Position.x + Size.x, Position.y, Position.y + Size.y);
 
 		Vector2 ActualSize = SizeOverride.x != -1 ? SizeOverride : Size;
+		Vector2 TexOffset(TextureRect.Left, TextureRect.Top);
 
 		Vertices[0] = Vertices[5] = Offset;
 		Vertices[1] = (Offset + Vector2(0, ActualSize.y));
 		Vertices[2] = Vertices[3] = (Offset + ActualSize);
 		Vertices[4] = (Offset + Vector2(ActualSize.x, 0));
 
-		TexCoords[0] = TexCoords[5] = NinePatchRect.Position() / TextureSize;
-		TexCoords[1] = Vector2(NinePatchRect.Left, NinePatchRect.Bottom) / TextureSize;
-		TexCoords[2] = TexCoords[3] = Vector2(NinePatchRect.Right, NinePatchRect.Bottom) / TextureSize;
-		TexCoords[4] = Vector2(NinePatchRect.Right, NinePatchRect.Top) / TextureSize;
+		TexCoords[0] = TexCoords[5] = (NinePatchRect.Position() + TexOffset) / TextureSize;
+		TexCoords[1] = Vector2(NinePatchRect.Left + TexOffset.x, NinePatchRect.Bottom + TexOffset.y) / TextureSize;
+		TexCoords[2] = TexCoords[3] = Vector2(NinePatchRect.Right + TexOffset.x, NinePatchRect.Bottom + TexOffset.y) / TextureSize;
+		TexCoords[4] = Vector2(NinePatchRect.Right + TexOffset.x, NinePatchRect.Top + TexOffset.y) / TextureSize;
 	};
 
 	Sprite::Sprite() : VertexCount(0)
@@ -202,14 +203,22 @@ namespace FlamingTorch
 				TexCoords[4] = (TexCoords[4] + Vector2(0.5f, 0.5f)) * Vector2(Options.TexCoordBorderMax.x, Options.TexCoordBorderMin.x);
 				TexCoords[5] = (TexCoords[5] + Vector2(0.5f, 0.5f)) * Options.TexCoordBorderMin;
 
-				if(SpriteTexture.Get() && SpriteTexture->GetIndex().Index != -1 && SpriteTexture->GetIndex().Owner.Get() != nullptr &&
-					SpriteTexture->GetIndex().Owner->MainTexture.Get() != nullptr)
+				Rect ActualTextureRect(0, 0, 1, 1);
+				DisposablePointer<Texture> ActualTexture;
+
+				if (SpriteTexture.Get())
+				{
+					ActualTextureRect = SpriteTexture->TextureRect();
+
+					ActualTexture = SpriteTexture->BaseTexture();
+				};
+
+				if(SpriteTexture.Get())
 				{
 					//1st: Normalize
 					{
-						Vector2 NormalizedSize = Vector2(SpriteTexture->GetIndex().Width(), SpriteTexture->GetIndex().Height()) / SpriteTexture->GetIndex().Owner->MainTexture->Size();
-						Vector2 NormalizedPosition = Vector2((f32)SpriteTexture->GetIndex().Owner->Indices[SpriteTexture->GetIndex().Index].x + 1,
-							(f32)SpriteTexture->GetIndex().Owner->Indices[SpriteTexture->GetIndex().Index].y + 1) / SpriteTexture->GetIndex().Owner->MainTexture->Size();
+						Vector2 NormalizedSize = Vector2(ActualTextureRect.Right, ActualTextureRect.Bottom) / ActualTexture->Size();
+						Vector2 NormalizedPosition = Vector2(ActualTextureRect.Left, (f32)ActualTextureRect.Top) / ActualTexture->Size();
 
 						//2nd: Multiply by size, then translate
 						for(uint32 i = 0; i < 6; i++)
@@ -298,8 +307,8 @@ namespace FlamingTorch
 
 					for(uint32 i = 0, index = 0; i < 9; i++, index += 6)
 					{
-						GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, SpriteTexture->Size(), FragmentPositions[i], FragmentSizes[i], FragmentOffsets[i],
-							FragmentSizeOverrides[i]);
+						GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, ActualTexture->Size(), FragmentPositions[i], FragmentSizes[i], FragmentOffsets[i],
+							FragmentSizeOverrides[i], ActualTextureRect);
 					};
 				};
 

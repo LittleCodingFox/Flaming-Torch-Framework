@@ -375,6 +375,15 @@ public:
 	*/
 	Vector4 GetPixel(uint32 x, uint32 y);
 
+	/*!
+	*	\return Left/Top: X, Y; Right, Bottom: Width, Height;
+	*/
+	Rect TextureRect() const;
+
+	/*!
+	*/
+	DisposablePointer<Texture> BaseTexture() const;
+
 #if USE_GRAPHICS
 	/*!
 	*	Creates a texture from the screen's contents if available

@@ -382,50 +382,57 @@ namespace FlamingTorch
 
 		GetUIText(Text, ActualParams);
 
-		for (uint32 i = 0; i < Text.length(); i++)
+		std::vector<std::string> Lines(StringUtils::Split(StringUtils::Strip(Text, '\r'), '\n'));
+
+		for (uint32 i = 0; i < Lines.size(); i++)
 		{
-			switch (Text[i])
+			for (uint32 j = 0; j < Lines[i].length(); j++)
 			{
-			case ' ':
-				Position.x = Position.x + SpaceSize;
-
-				break;
-
-			case '\n':
-				Position.x = InitialPosition.x;
-				Position.y += Params.FontSizeValue;
-
-				break;
-
-			case '\r':
-
-				break;
-
-			default:
+				switch (Lines[i][j])
 				{
-					StringID ID = MakeTextResourceString(Text[i], ActualParams);
-					TextResourceMap::iterator it = TextResources.find(ID);
+				case ' ':
+					Position.x = Position.x + SpaceSize;
 
-					if (i > 0)
-						Position.x += Owner->GetTextKerning(Text[i - 1], Text[i], ActualParams);
+					break;
 
-					if (it != TextResources.end())
+				default:
 					{
-						TheSprite.Options.Position(Position + it->second.Info.Offset);
-						TheSprite.SpriteTexture = it->second.InstanceTexture;
+						StringID ID = MakeTextResourceString(Lines[i][j], ActualParams);
+						TextResourceMap::iterator it = TextResources.find(ID);
 
-						TheSprite.Draw(Owner);
+						if (j > 0)
+							Position.x += Owner->GetTextKerning(Lines[i][j - 1], Lines[i][j], ActualParams);
 
-						Position.x = Position.x + it->second.Info.Advance;
-					}
-					else
-					{
-						Position.x = Position.x + SpaceSize;
+						if (it != TextResources.end())
+						{
+							TheSprite.Options.Position(Position + it->second.Info.Offset);
+							TheSprite.SpriteTexture = it->second.InstanceTexture;
+
+							TheSprite.Draw(Owner);
+
+#if DEBUG_UIMANAGER_DRAWTEXT
+							TheSprite.Options.Scale(Vector2(TheSprite.SpriteTexture->Size())).Color(Vector4(1, 1, 0, 1)).Wireframe(true);
+							TheSprite.SpriteTexture = DisposablePointer<Texture>();
+
+							TheSprite.Draw(Owner);
+
+							TheSprite.Options.Scale(Vector2(1, 1)).Color(Vector4(1, 1, 1, 1)).Wireframe(false);
+#endif
+
+							Position.x = Position.x + it->second.Info.Advance;
+						}
+						else
+						{
+							Position.x = Position.x + SpaceSize;
+						};
 					};
-				};
 
-				break;
+					break;
+				};
 			};
+
+			Position.x = InitialPosition.x;
+			Position.y += Params.FontSizeValue;
 		};
 	};
 
@@ -793,6 +800,8 @@ namespace FlamingTorch
 			{
 				DisposablePointer<Texture> SpriteTexture = GetUITexture(Path(FileName));
 
+				//Old method
+				/*
 				if(FileName.find('/') == 0)
 				{
 					SpriteTexture = ResourceManager::Instance.GetTextureFromPackage(FileName.substr(0, FileName.rfind('/') + 1),
@@ -803,6 +812,7 @@ namespace FlamingTorch
 				{
 					SpriteTexture = ResourceManager::Instance.GetTexture(FileName);
 				};
+				*/
 
 				if(!SpriteTexture.Get())
 				{

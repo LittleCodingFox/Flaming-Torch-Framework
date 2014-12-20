@@ -154,7 +154,7 @@ namespace FlamingTorch
 		*	\param Parameters the text parameters
 		*	\return the kerning space between characters
 		*/
-		virtual uint32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters) override;
+		virtual int32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters) override;
 
 		/*!
 		*	Creates a Vertex Buffer

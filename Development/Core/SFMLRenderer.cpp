@@ -1759,7 +1759,7 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	uint32 SFMLRendererImplementation::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
+	int32 SFMLRendererImplementation::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
 	{
 		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
 
@@ -1768,7 +1768,9 @@ namespace FlamingTorch
 
 		GLCHECK();
 
-		return FontIterator->second.ActualFont->getKerning(Prev, Cur, Parameters.FontSizeValue);
+		int32 Kerning = FontIterator->second.ActualFont->getKerning(Prev, Cur, Parameters.FontSizeValue);
+
+		return Kerning;
 	};
 
 	void SFMLRendererImplementation::FlushRenderText()

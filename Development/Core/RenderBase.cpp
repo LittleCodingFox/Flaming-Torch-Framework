@@ -227,7 +227,7 @@ namespace FlamingTorch
 		return Impl->GetTextGlyph(Character, Parameters);
 	};
 
-	uint32 Renderer::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
+	int32 Renderer::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
 	{
 		return Impl->GetTextKerning(Prev, Cur, Parameters);
 	};
