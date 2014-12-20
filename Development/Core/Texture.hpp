@@ -475,12 +475,18 @@ public:
 */
 class TexturePacker
 {
+private:
+	bool Dirty;
+
+	uint32 MaxWidth, MaxHeight;
+
 public:
 	class SortedTexture
 	{
 	public:
 		int32 Index;
 		uint32 x, y, Width, Height;
+		DisposablePointer<Texture> SourceInstance;
 		DisposablePointer<Texture> TextureInstance;
 
 		SortedTexture() : Index(-1), x(0), y(0), Width(0), Height(0) {};
@@ -496,7 +502,13 @@ public:
 	*/
 	DisposablePointer<Texture> MainTexture;
 
+	TexturePacker();
 	~TexturePacker();
+
+	/*!
+	*	Binds (and completes) this texture packer
+	*/
+	bool Bind();
 
 	/*!
 	*	Gets the packing-ready texture from an index

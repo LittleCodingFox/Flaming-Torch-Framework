@@ -208,6 +208,9 @@ namespace FlamingTorch
 
 				if (SpriteTexture.Get())
 				{
+					if (SpriteTexture->GetIndex().Owner.Get() != nullptr)
+						const_cast<TexturePacker *>(SpriteTexture.Get()->GetIndex().Owner.Get())->Bind();
+
 					ActualTextureRect = SpriteTexture->TextureRect();
 
 					ActualTexture = SpriteTexture->BaseTexture();

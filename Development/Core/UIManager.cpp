@@ -341,6 +341,33 @@ namespace FlamingTorch
 		return TheResource.InstanceTexture;
 	};
 
+	DisposablePointer<Texture> UIManager::GetUITexture(const Vector4 &Color)
+	{
+		Path ThePath("/" + StringUtils::MakeIntString(CRC32::Instance.CRC((uint8 *)&Color, sizeof(Vector4))));
+		StringID ID = MakeTextureResourceString(ThePath);
+
+		TextureResourceMap::iterator it = TextureResources.find(ID);
+
+		if (it != TextureResources.end())
+		{
+			return it->second.InstanceTexture;
+		};
+
+		DisposablePointer<Texture> SourceTexture = Texture::CreateFromBuffer(TextureBuffer::CreateFromColor(32, 32, Color));
+
+		if (!SourceTexture.Get())
+			return SourceTexture;
+
+		TextureResourceInfo TheResource;
+		TheResource.FileName = ThePath;
+		TheResource.References = 1;
+
+		TheResource.SourceTexture = SourceTexture;
+		TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(SourceTexture));
+
+		return TheResource.InstanceTexture;
+	};
+
 	void UIManager::GetUIText(const std::string &Text, const TextParams &Parameters)
 	{
 		for (uint32 i = 0; i < Text.size(); i++)
@@ -792,11 +819,7 @@ namespace FlamingTorch
 		{
 			std::string FileName = Value;
 
-			if(FileName.length() == 0)
-			{
-				TheSprite->TheSprite.Options.Scale(TheSprite->Size()).Color(Vector4());
-			}
-			else
+			if(FileName.length() != 0)
 			{
 				DisposablePointer<Texture> SpriteTexture = GetUITexture(Path(FileName));
 
@@ -877,7 +900,15 @@ namespace FlamingTorch
 
 			if(4 == sscanf(ColorString.c_str(), "%f, %f, %f, %f", &Color.x, &Color.y, &Color.z, &Color.w))
 			{
-				TheSprite->TheSprite.Options.Color(Color);
+				if (TheSprite->TheSprite.SpriteTexture.Get())
+				{
+					TheSprite->TheSprite.Options.Color(Color);
+				}
+				else
+				{
+					TheSprite->TheSprite.SpriteTexture = GetUITexture(Color);
+					TheSprite->TheSprite.Options.Scale(TheSprite->Size() / TheSprite->TheSprite.SpriteTexture->Size());
+				};
 			};
 		}
 		else if(Property == "ScaleWide")

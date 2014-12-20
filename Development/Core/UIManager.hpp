@@ -228,6 +228,12 @@ public:
 	DisposablePointer<Texture> GetUITexture(const Path &FileName);
 
 	/*!
+	*	\param Color the Color for the texture
+	*	\return the loaded texture
+	*/
+	DisposablePointer<Texture> GetUITexture(const Vector4 &Color);
+
+	/*!
 	*	\param Text the text string to load
 	*	\param Parameters the text parameters for the string
 	*/

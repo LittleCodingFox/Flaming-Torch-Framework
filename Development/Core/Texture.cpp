@@ -993,7 +993,7 @@ namespace FlamingTorch
 	void Texture::Bind()
 	{
 #if USE_GRAPHICS
-		if(Owner)
+		if (Owner)
 			Owner->BindTexture(HandleValue);
 #endif
 	};
@@ -1121,8 +1121,6 @@ namespace FlamingTorch
 		return Vector4(Piece[0] / 255.f, Piece[1] / 255.f, Piece[2] / 255.f, Piece[3] / 255.f);
 	};
 
-	/*!
-	*/
 	Rect Texture::TextureRect() const
 	{
 		Rect Out(0, Width(), 0, Height());
@@ -1141,11 +1139,8 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	/*!
-	*/
 	DisposablePointer<Texture> Texture::BaseTexture() const
 	{
-
 		if (GetIndex().Owner.Get())
 		{
 			return GetIndex().Owner->MainTexture->BaseTexture();
@@ -1301,11 +1296,65 @@ namespace FlamingTorch
 		return Owner.Get() ? Owner->MainTexture->ColorType() : 0;
 	};
 
+	TexturePacker::TexturePacker() : Dirty(false), MaxWidth(0), MaxHeight(0) {};
+
+	TexturePacker::~TexturePacker()
+	{
+		MainTexture.Dispose();
+	};
+
+	bool TexturePacker::Bind()
+	{
+		if (!Dirty)
+			return true;
+
+		Dirty = false;
+
+		MainTexture.Reset(new Texture());
+		TextureBuffer Temp;
+		Temp.CreateEmpty(MaxWidth, MaxHeight);
+
+		uint32 RowSize = MaxWidth * 4;
+
+		for (uint32 i = 0; i < Indices.size(); i++)
+		{
+			uint32 MyRowSize = (Indices[i].Width - 2) * 4;
+			uint32 TargetRowSize = MyRowSize;
+			uint32 xpos = (Indices[i].x + 1) * 4;
+
+			const Texture *t = Indices[i].SourceInstance;
+
+			uint32 ExtraX = 0, ExtraY = 0;
+
+			while (t->GetIndex().Owner.Get())
+			{
+				if (!const_cast<TexturePacker *>(t->GetIndex().Owner.Get())->Bind())
+					return false;
+
+				ExtraX += (t->GetIndex().Owner->Indices[t->GetIndex().Index].x + 1) * 4 + (t->GetIndex().Owner->Indices[t->GetIndex().Index].y + 1) * t->GetIndex().Owner->MainTexture->Width() * 4;
+
+				MyRowSize = t->GetIndex().Owner->MainTexture->Width() * 4;
+
+				t = t->GetIndex().Owner->MainTexture;
+			};
+
+			for (uint32 y = 0, ypos = (Indices[i].y + 1) * RowSize, ypostarget = ExtraX; y < Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
+			{
+				memcpy(&Temp.Data[xpos + ypos], &t->GetData()->Data[ypostarget], TargetRowSize);
+			};
+		};
+
+		if (!MainTexture->FromData(&Temp.Data[0], MaxWidth, MaxHeight))
+			return false;
+
+		return true;
+	};
+
 	bool SortSprites(const TexturePacker::SortedTexture &a, const TexturePacker::SortedTexture &b)
 	{
 		int32 aSize = a.Height * 1024 + a.Width;
 		int32 bSize = b.Height * 1024 + b.Width;
- 
+
 		return bSize > aSize;
 	};
 
@@ -1318,7 +1367,7 @@ namespace FlamingTorch
 	{
 		std::vector<int32> Widths;
 
-		for(uint32 i = 0; i < Sprites.size(); i++)
+		for (uint32 i = 0; i < Sprites.size(); i++)
 		{
 			Widths.push_back(Sprites[i].Width);
 		};
@@ -1338,9 +1387,9 @@ namespace FlamingTorch
 		int32 Width = Sprites[Index].Width;
 		int32 Height = Sprites[Index].Height;
 
-		for(int32 i = 0; i < Index; i++)
+		for (int32 i = 0; i < Index; i++)
 		{
-			if(Sprites[i].x >= (uint32)(x + Width) || Sprites[i].x + (uint32)Sprites[i].Width <= (uint32)x || Sprites[i].y >= (uint32)(y + Height) ||
+			if (Sprites[i].x >= (uint32)(x + Width) || Sprites[i].x + (uint32)Sprites[i].Width <= (uint32)x || Sprites[i].y >= (uint32)(y + Height) ||
 				Sprites[i].y + Sprites[i].Height <= (uint32)y)
 				continue;
 
@@ -1354,11 +1403,11 @@ namespace FlamingTorch
 	{
 		int32 x = 0, y = 0;
 
-		for(;;)
+		for (;;)
 		{
 			int32 IntersectionIndex = FindIntersectingSprite(Sprites, TargetIndex, x, y);
 
-			if(IntersectionIndex < 0)
+			if (IntersectionIndex < 0)
 			{
 				Target.x = x;
 				Target.y = y;
@@ -1368,17 +1417,12 @@ namespace FlamingTorch
 
 			x = Sprites[IntersectionIndex].x + Sprites[IntersectionIndex].Width;
 
-			if(x + Target.Width > (uint32)TextureWidth)
+			if (x + Target.Width >(uint32)TextureWidth)
 			{
 				x = 0;
 				y++;
 			};
 		};
-	};
-
-	TexturePacker::~TexturePacker()
-	{
-		MainTexture.Dispose();
 	};
 
 	DisposablePointer<TexturePacker> TexturePacker::FromTextures(const std::vector<DisposablePointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
@@ -1388,35 +1432,46 @@ namespace FlamingTorch
 
 		DisposablePointer<TexturePacker> Out(new TexturePacker());
 
+		Out->Rects.Init(MaxWidth, MaxHeight);
+
 		for(uint32 i = 0; i < Textures.size(); i++)
 		{
 			if(Textures[i].Get() == NULL)
 				return DisposablePointer<TexturePacker>();
 
-			SortedTexture Texture;
-			Texture.Index = i;
-			Texture.Width = Textures[i]->Width() + 2;
-			Texture.Height = Textures[i]->Height() + 2;
+			SortedTexture TextureInstance;
+			TextureInstance.Index = i;
+			TextureInstance.Width = Textures[i]->Width() + 2;
+			TextureInstance.Height = Textures[i]->Height() + 2;
 
-			Out->Indices.push_back(Texture);
+			TextureInstance.SourceInstance = Textures[i];
+			TextureInstance.TextureInstance.Reset(new Texture());
+
+			TexturePackerIndex Index;
+			Index.Index = TextureInstance.Index;
+			Index.Owner = Out;
+
+			TextureInstance.TextureInstance->SetIndex(Index);
+
+			Out->Indices.push_back(TextureInstance);
 		};
 
 		std::sort(Out->Indices.begin(), Out->Indices.end(), SortSprites);
 
 		int32 Width = GuessSpriteWidth(Out->Indices), Height = 0, Size = 0;
 
-		if(Width > (int32)MaxWidth)
+		if (Width > (int32)MaxWidth)
 			Width = (int32)MaxWidth;
 
-		for(uint32 i = 0; i < Textures.size(); i++)
+		for (uint32 i = 0; i < Textures.size(); i++)
 		{
 			PositionSprite(Out->Indices, Out->Indices[i], i, Width);
-			
+
 			int32 OldHeight = Height;
 
 			Height = (int32)MathUtils::Max((f32)Height, (f32)(Out->Indices[i].y + Out->Indices[i].Height));
 
-			if(Height > (int32)MaxHeight)
+			if (Height >(int32)MaxHeight)
 			{
 				Height = OldHeight;
 
@@ -1429,48 +1484,9 @@ namespace FlamingTorch
 		};
 
 		std::sort(Out->Indices.begin(), Out->Indices.end(), SortSpriteIndices);
-
-		Out->MainTexture.Reset(new Texture());
-		TextureBuffer Temp;
-		Temp.CreateEmpty(Width, Height);
-
-		uint32 RowSize = Width * 4;
-
-		for(uint32 i = 0; i < Out->Indices.size(); i++)
-		{
-			uint32 MyRowSize = (Out->Indices[i].Width - 2) * 4;
-			uint32 TargetRowSize = MyRowSize;
-			uint32 xpos = (Out->Indices[i].x + 1) * 4;
-
-			const Texture *t = Textures[Out->Indices[i].Index];
-
-			uint32 ExtraX = 0, ExtraY = 0;
-
-			while(t->GetIndex().Owner.Get())
-			{
-				ExtraX += t->GetIndex().Owner->Indices[t->GetIndex().Index].x * 4 + t->GetIndex().Owner->Indices[t->GetIndex().Index].y * t->GetIndex().Owner->MainTexture->Width() * 4;
-
-				MyRowSize = t->GetIndex().Owner->MainTexture->Width() * 4;
-
-				t = t->GetIndex().Owner->MainTexture;
-			};
-
-			for(uint32 y = 0, ypos = (Out->Indices[i].y + 1) * RowSize, ypostarget = ExtraX; y < Out->Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
-			{
-				memcpy(&Temp.Data[xpos + ypos], &t->GetData()->Data[ypostarget], TargetRowSize);
-			};
-
-			Out->Indices[i].TextureInstance.Reset(new Texture());
-
-			TexturePackerIndex Index;
-			Index.Index = Out->Indices[i].Index;
-			Index.Owner = Out;
-
-			Out->Indices[i].TextureInstance->SetIndex(Index);
-		};
-
-		if(!Out->MainTexture->FromData(&Temp.Data[0], Width, Height))
-			return DisposablePointer<TexturePacker>();
+		Out->Dirty = true;
+		Out->MaxWidth = Width;
+		Out->MaxHeight = Height;
 
 		return Out;
 	};
@@ -1603,8 +1619,6 @@ namespace FlamingTorch
 
 		PackedTexture.Dispose();
 		PackedTexture = Out;
-
-		SetFiltering(FilteringValue);
 
 		return Out->IndexCount() - 1;
 	};
