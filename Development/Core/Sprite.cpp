@@ -478,7 +478,7 @@ namespace FlamingTorch
 	{
 #if !DISABLE_SPRITE_CACHE
 		if(BlendingMode != CurrentBlendingMode || (TheTexture != ActiveTexture && (TheTexture == NULL || ActiveTexture == NULL || TheTexture->GetIndex().Index == -1 ||
-			TheTexture->GetIndex().Index != ActiveTexture->GetIndex().Index)))
+			TheTexture->GetIndex().Owner.Get() != ActiveTexture->GetIndex().Owner.Get())))
 #endif
 		{
 			SpriteCache::Instance.Flush(Renderer);

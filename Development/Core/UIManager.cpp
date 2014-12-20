@@ -791,7 +791,7 @@ namespace FlamingTorch
 			}
 			else
 			{
-				DisposablePointer<Texture> SpriteTexture;
+				DisposablePointer<Texture> SpriteTexture = GetUITexture(Path(FileName));
 
 				if(FileName.find('/') == 0)
 				{
