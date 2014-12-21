@@ -105,8 +105,14 @@ namespace FlamingTorch
 
 		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
 
-		if(BaseResolution != Vector2())
+		if (BaseResolution != Vector2())
+		{
 			TheRenderer->BaseResolutionValue = BaseResolution;
+		}
+		else
+		{
+			TheRenderer->BaseResolutionValue = TheRenderer->Size();
+		};
 
 		TheRenderer->OnFrameStarted.Connect<GameInterface, &GameInterface::OnFrameBegin>(this);
 		TheRenderer->OnFrameDraw.Connect<GameInterface, &GameInterface::OnFrameDraw>(this);
