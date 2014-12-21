@@ -1379,8 +1379,10 @@ namespace FlamingTorch
 			TextureInstance.Width = InstanceRect.width;
 			TextureInstance.Height = InstanceRect.height;
 
+			/*
 			if (InstanceRect.width != Textures[i]->Width() || InstanceRect.height != Textures[i]->Height())
 				DEBUG_BREAK;
+			*/
 
 			if (TextureInstance.x + TextureInstance.Width + 1 > MaxWidth)
 				MaxWidth = TextureInstance.x + TextureInstance.Width + 1;
