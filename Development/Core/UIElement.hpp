@@ -12,7 +12,7 @@ class UIElement
 	friend class UIManager;
 	friend class UILayout;
 protected:
-	bool VisibleValue, EnabledValue, RespondsToTooltipsValue, IsInputBlockerValue, DrawsInputBlockerBackgroundValue, TooltipsAreFixedValue, ClickPressed, JoystickButtonPressed;
+	bool VisibleValue, EnabledValue, RespondsToTooltipsValue, IsInputBlockerValue, DrawsInputBlockerBackgroundValue, TooltipsAreFixedValue, ClickPressed, JoystickButtonPressed, PropagatesEventsValue;
 	uint32 EnabledInputsValue;
 	Vector2 PositionValue, SizeValue, OffsetValue, TooltipPositionValue;
 	UILayout *LayoutValue;
@@ -134,6 +134,17 @@ public:
 	*	\return this element's tooltips position (relative to mouse position if not Fixed, relative to Element if Fixed)
 	*/
 	virtual const Vector2 &TooltipsPosition() const;
+
+	/*!
+	*	Sets whether this element propagates events
+	*	\param Value whether input events are propagated
+	*/
+	virtual void SetPropagatesEvents(bool Value);
+
+	/*!
+	*	\return whether this element propagates input events
+	*/
+	virtual bool PropagatesEvents() const;
 
 	/*!
 	*	Sets this element's position offset

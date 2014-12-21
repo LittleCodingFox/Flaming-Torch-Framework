@@ -1310,7 +1310,8 @@ namespace FlamingTorch
 				TouchInputEnabledValue = Data.get("TouchInput", Json::Value(true)),
 				VisibleValue = Data.get("Visible", Json::Value(true)),
 				BlockingInputValue = Data.get("BlockingInput", Json::Value(false)),
-				InputBlockBackgroundValue = Data.get("InputBlockBackground", Json::Value(true));
+				InputBlockBackgroundValue = Data.get("InputBlockBackground", Json::Value(true)),
+				PropagatesEventsValue = Data.get("PropagatesEvents", Json::Value(true));
 
 			uint32 EnabledInputs = UIInputType::All;
 
@@ -1321,6 +1322,15 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(EnabledValue, "Enabled", bool);
+			};
+
+			if (PropagatesEventsValue.isBool())
+			{
+				Element->SetPropagatesEvents(PropagatesEventsValue.asBool());
+			}
+			else
+			{
+				CHECKJSONVALUE(PropagatesEventsValue, "PropagatesEvents", bool);
 			};
 
 			if(KeyboardInputEnabledValue.isBool())

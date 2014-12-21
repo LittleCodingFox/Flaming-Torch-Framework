@@ -28,7 +28,7 @@ namespace FlamingTorch
 		ManagerValue(_Manager), VisibleValue(true),
 		EnabledValue(true), ClickPressed(false), JoystickButtonPressed(false), IsInputBlockerValue(false), TooltipsAreFixedValue(false),
 		DrawsInputBlockerBackgroundValue(true), GlobalsTracker(_Manager->ScriptInstance), RespondsToTooltipsValue(false),
-		ClickTimer(0), JoystickButtonTimer(0), IDValue(0), EnabledInputsValue(UIInputType::All)
+		ClickTimer(0), JoystickButtonTimer(0), IDValue(0), EnabledInputsValue(UIInputType::All), PropagatesEventsValue(true)
 	{
 		FLASSERT(ManagerValue != NULL, "Invalid UI Manager!");
 		FLASSERT(ManagerValue->ScriptInstance, "Invalid UI Manager Script!");
@@ -62,7 +62,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::MouseButtonInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -74,7 +74,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::MouseButtonInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -95,7 +95,7 @@ namespace FlamingTorch
 
 			ClickPressed = false;
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -107,7 +107,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::KeyInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -119,7 +119,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::KeyInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -131,7 +131,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::KeyInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -146,7 +146,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::TouchInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -158,7 +158,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::TouchInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -179,7 +179,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::TouchInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -191,7 +191,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::TouchInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -203,7 +203,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::MouseButtonInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -215,7 +215,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::TouchInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -227,7 +227,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::JoystickButtonInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -242,7 +242,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::JoystickButtonInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -254,7 +254,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::JoystickButtonInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -275,7 +275,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::JoystickButtonInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -287,7 +287,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, static_cast<const InputCenter::JoystickAxisInfo *>(Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -299,7 +299,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, *static_cast<uint8 * > (Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -311,7 +311,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 1;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, *static_cast<uint8 * > (Args[0]));
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -341,7 +341,7 @@ namespace FlamingTorch
 			FailedArgCount = Args.size() != 0;
 			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this);
 
-			if (!RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
+			if (PropagatesEvents() && !RendererManager::Instance.Input.InputConsumed() && ParentValue.Get())
 				ParentValue->OnEvent(Type, Args);
 
 			break;
@@ -503,6 +503,16 @@ namespace FlamingTorch
 		Properties.clear();
 
 		GlobalsTracker.Clear();
+	};
+
+	void UIElement::SetPropagatesEvents(bool Value)
+	{
+		PropagatesEventsValue = Value;
+	};
+
+	bool UIElement::PropagatesEvents() const
+	{
+		return PropagatesEventsValue;
 	};
 
 	void UIElement::SetInputBlockerBackground(bool Value)
