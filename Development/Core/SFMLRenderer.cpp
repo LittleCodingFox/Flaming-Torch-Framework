@@ -917,8 +917,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
-		SpriteCache::Instance.Flush(Target);
-		FlushRenderText();
+		//TODO: Should clear the sprite cache here somehow.. but we're getting a stack overflow
 
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
@@ -933,8 +932,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
-		SpriteCache::Instance.Flush(Target);
-		FlushRenderText();
+		//TODO: Should clear the sprite cache here somehow.. but we're getting a stack overflow
 
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;

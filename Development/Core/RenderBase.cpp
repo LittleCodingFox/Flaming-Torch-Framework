@@ -533,7 +533,21 @@ namespace FlamingTorch
 
 	void Renderer::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
+		Vector2 Scale = ScaleCoordinate(Vector2(1, 1));
+
+		if(Scale != Vector2())
+		{
+			PushMatrices();
+
+			SetWorldMatrix(WorldMatrix() * Matrix4x4::Scale(Vector4(Scale, 1, 1)));
+		};
+
 		Impl->RenderVertices(VertexMode, Buffer, Start, End);
+
+		if(Scale != Vector2())
+		{
+			PopMatrices();
+		};
 	};
 
 	void Renderer::Display()

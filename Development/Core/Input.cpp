@@ -340,21 +340,21 @@ namespace FlamingTorch
 
 			case RendererEventType::TouchDown:
 				Touches[Event.TouchIndex].JustPressed = Touches[Event.TouchIndex].Pressed = true;
-				Touches[Event.TouchIndex].Position = Event.TouchPosition;
+				Touches[Event.TouchIndex].Position = Event.TouchPosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
 
 				break;
 
 			case RendererEventType::TouchUp:
 				Touches[Event.TouchIndex].JustPressed = Touches[Event.TouchIndex].Pressed = false;
 				Touches[Event.TouchIndex].JustReleased = true;
-				Touches[Event.TouchIndex].Position = Event.TouchPosition;
+				Touches[Event.TouchIndex].Position = Event.TouchPosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
 
 				break;
 
 			case RendererEventType::TouchDrag:
 				Touches[Event.TouchIndex].Pressed = Touches[Event.TouchIndex].Dragged = true;
 				Touches[Event.TouchIndex].DragDifference = Event.TouchPosition - Touches[Event.TouchIndex].Position;
-				Touches[Event.TouchIndex].Position = Event.TouchPosition;
+				Touches[Event.TouchIndex].Position = Event.TouchPosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
 
 				break;
 
@@ -381,7 +381,7 @@ namespace FlamingTorch
 				break;
 
 			case RendererEventType::MouseMoved:
-				MousePosition = Event.MousePosition;
+				MousePosition = Event.MousePosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
 
 				break;
 
