@@ -199,7 +199,7 @@ namespace FlamingTorch
 			{
 				Sprite TheSprite;
 				TheSprite.SpriteTexture = Logo;
-				TheSprite.Options.Position(TheRenderer->BaseResolution() - TheRenderer->ScaleCoordinate(Logo->Size()));
+				TheSprite.Options.Position(TheRenderer->Size() - Logo->Size());
 
 				TheSprite.Draw(TheRenderer);
 			};

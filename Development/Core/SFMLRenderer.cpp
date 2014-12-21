@@ -656,7 +656,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyVertexBuffer(VertexBufferHandle Handle)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -800,7 +799,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::StartClipping(const Rect &ClippingRect)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -819,7 +817,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::FinishClipping()
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -832,7 +829,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::Clear(uint32 Buffers)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -882,7 +878,6 @@ namespace FlamingTorch
 		PreviousFrameStatsValue = FrameStatsValue;
 		FrameStatsValue.Clear();
 
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.TotalResources = Fonts.size() + VertexBuffers.size() + Textures.size();
@@ -917,7 +912,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
-		//TODO: Should clear the sprite cache here somehow.. but we're getting a stack overflow
+		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
@@ -932,7 +927,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
-		//TODO: Should clear the sprite cache here somehow.. but we're getting a stack overflow
+		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
@@ -948,7 +943,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 		FrameStatsValue.StateChanges++;
 
@@ -980,7 +974,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyTexture(TextureHandle Handle)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -1002,7 +995,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -1033,7 +1025,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -1137,7 +1128,6 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
 	{
-		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -1565,6 +1555,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::RenderText(const std::string &TheText, const TextParams &Parameters)
 	{
+		/*
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.TextureChanges++;
 
@@ -1709,6 +1700,7 @@ namespace FlamingTorch
 #else
 		FlushRenderText();
 #endif
+		*/
 	};
 
 	TextGlyphInfo SFMLRendererImplementation::GetTextGlyph(uint32 Character, const TextParams &Parameters)
@@ -1771,6 +1763,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::FlushRenderText()
 	{
+		/*
 		if(UniqueCacheStringID == 0 || TheRenderTextCache.Positions.size() == 0)
 			return;
 
@@ -1825,6 +1818,7 @@ namespace FlamingTorch
 		TheRenderTextCache.Colors.resize(0);
 		TheRenderTextCache.TexCoords.resize(0);
 		TheRenderTextCache.TheTexture = NULL;
+		*/
 	};
 
 	bool SFMLRendererImplementation::IsStateEnabled(uint32 ID) const

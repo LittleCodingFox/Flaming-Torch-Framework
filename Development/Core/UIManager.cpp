@@ -1618,7 +1618,7 @@ namespace FlamingTorch
 
 			try
 			{
-				SizeFunction.Members.front()(Element, Parent, GetOwner()->BaseResolution().x, GetOwner()->BaseResolution().y);
+				SizeFunction.Members.front()(Element, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
 			}
 			catch(std::exception &e)
 			{
@@ -1631,7 +1631,7 @@ namespace FlamingTorch
 
 			try
 			{
-				PositionFunction.Members.front()(Element, Parent, GetOwner()->BaseResolution().x, GetOwner()->BaseResolution().y);
+				PositionFunction.Members.front()(Element, Parent, GetOwner()->Size().x, GetOwner()->Size().y);
 			}
 			catch(std::exception &e)
 			{

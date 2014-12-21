@@ -528,30 +528,19 @@ namespace FlamingTorch
 
 	void Renderer::DestroyVertexBuffer(VertexBufferHandle Handle)
 	{
+		SpriteCache::Instance.Flush(this);
 		Impl->DestroyVertexBuffer(Handle);
 	};
 
 	void Renderer::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
-		Vector2 Scale = ScaleCoordinate(Vector2(1, 1));
-
-		if(Scale != Vector2())
-		{
-			PushMatrices();
-
-			SetWorldMatrix(WorldMatrix() * Matrix4x4::Scale(Vector4(Scale, 1, 1)));
-		};
-
 		Impl->RenderVertices(VertexMode, Buffer, Start, End);
-
-		if(Scale != Vector2())
-		{
-			PopMatrices();
-		};
 	};
 
 	void Renderer::Display()
 	{
+		SpriteCache::Instance.Flush(this);
+
 		Impl->Display();
 	};
 
@@ -567,6 +556,8 @@ namespace FlamingTorch
 
 	void Renderer::StartClipping(const Rect &_ClippingRect)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		//Disabled for now
 		/*
 		FLASSERT(_ClippingRect.Bottom > _ClippingRect.Top, "Expected a larger Bottom coordinate on ClippingRect");
@@ -610,6 +601,8 @@ namespace FlamingTorch
 
 	void Renderer::FinishClipping()
 	{
+		SpriteCache::Instance.Flush(this);
+
 		//Disabled for now
 		/*
 		SpriteCache::Instance.Flush(this);
@@ -659,6 +652,8 @@ namespace FlamingTorch
 
 	void Renderer::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		LastWorldMatrix = WorldMatrix;
 
 		Impl->SetWorldMatrix(WorldMatrix);
@@ -666,6 +661,8 @@ namespace FlamingTorch
 
 	void Renderer::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		LastProjectionMatrix = ProjectionMatrix;
 
 		Impl->SetProjectionMatrix(ProjectionMatrix);
@@ -673,6 +670,8 @@ namespace FlamingTorch
 
 	void Renderer::PushMatrices()
 	{
+		SpriteCache::Instance.Flush(this);
+
 		MatrixStackElement Element;
 		Element.World = LastWorldMatrix;
 		Element.Projection = LastProjectionMatrix;
@@ -684,6 +683,8 @@ namespace FlamingTorch
 	{
 		if(MatrixStack.size() == 0)
 			return;
+
+		SpriteCache::Instance.Flush(this);
 
 		const MatrixStackElement &Element = MatrixStack.back();
 
@@ -705,6 +706,8 @@ namespace FlamingTorch
 
 	void Renderer::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		Impl->SetViewport(x, y, Width, Height);
 	};
 
@@ -720,26 +723,36 @@ namespace FlamingTorch
 
 	void Renderer::DestroyTexture(TextureHandle Handle)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		Impl->DestroyTexture(Handle);
 	};
 
 	void Renderer::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		Impl->SetTextureData(Handle, Pixels, Width, Height);
 	};
 
 	void Renderer::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		Impl->SetTextureWrapMode(Handle, WrapMode);
 	};
 
 	void Renderer::SetTextureFiltering(TextureHandle Handle, uint32 Filtering)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		Impl->SetTextureFiltering(Handle, Filtering);
 	};
 
 	bool Renderer::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
 	{
+		SpriteCache::Instance.Flush(this);
+
 		return Impl->CaptureScreen(Pixels, BufferByteCount);
 	};
 
@@ -806,10 +819,12 @@ namespace FlamingTorch
 	const Vector2 &Renderer::BaseResolution() const
 	{
 		//Almost 100% sure this is Portrait... Maybe set this up as Mobile only?
+		/*
 #if FLPLATFORM_MOBILE
 		if(Size().x < Size().y)
 			return Vector2(BaseResolutionValue.y, BaseResolutionValue.x);
 #endif
+		*/
 
 		return BaseResolutionValue;
 	};
