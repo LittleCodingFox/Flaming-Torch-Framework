@@ -50,6 +50,8 @@ solution "Tools"
 		
 		if os.get() == "windows" then
 			buildoptions { "/Zm139", "/bigobj" }
+		else
+			buildoptions { "-w" }
 		end
 		
 		if os.get() == "macosx" then
@@ -81,6 +83,8 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Symbols" }
@@ -105,6 +109,8 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Optimize" }
@@ -155,6 +161,8 @@ solution "Tools"
 		
 		if os.get() == "windows" then
 			buildoptions { "/Zm139", "/bigobj" }
+		else
+			buildoptions { "-w" }
 		end
 		
 		if os.get() == "macosx" then
@@ -186,6 +194,8 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Symbols" }
@@ -210,6 +220,8 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Optimize" }
@@ -260,6 +272,8 @@ solution "Tools"
 		
 		if os.get() == "windows" then
 			buildoptions { "/Zm139", "/bigobj" }
+		else
+			buildoptions { "-w" }
 		end
 		
 		if os.get() == "macosx" then
@@ -367,6 +381,8 @@ solution "Tools"
 		
 		if os.get() == "windows" then
 			buildoptions { "/Zm139", "/bigobj" }
+		else
+			buildoptions { "-w" }
 		end
 		
 		if os.get() == "macosx" then
@@ -398,6 +414,8 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Symbols" }
@@ -422,6 +440,8 @@ solution "Tools"
 			if os.get() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
+
+				buildoptions { "-std=c++11" }
 			end
 
 			flags { "Optimize" }
