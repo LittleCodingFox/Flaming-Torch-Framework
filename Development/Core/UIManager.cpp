@@ -338,6 +338,8 @@ namespace FlamingTorch
 		TheResource.SourceTexture = SourceTexture;
 		TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(SourceTexture));
 
+		TextureResources[ID] = TheResource;
+
 		return TheResource.InstanceTexture;
 	};
 
@@ -364,6 +366,8 @@ namespace FlamingTorch
 
 		TheResource.SourceTexture = SourceTexture;
 		TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(SourceTexture));
+
+		TextureResources[ID] = TheResource;
 
 		return TheResource.InstanceTexture;
 	};
@@ -889,7 +893,7 @@ namespace FlamingTorch
 					&NinePatchRect.Bottom))
 					return;
 
-				TheSprite->TheSprite.Options.NinePatch(true, NinePatchRect).Scale(Element->Size());
+				TheSprite->TheSprite.Options.Scale(Element->Size()).NinePatch(true, NinePatchRect);
 			};
 		}
 		else if(Property == "Color")
@@ -2083,7 +2087,7 @@ namespace FlamingTorch
 		};
 
 		//TEMP: Need to fix mouseover not being calculated unless we put this here
-		GetMouseOverElement();
+		//GetMouseOverElement();
 	};
 
 	void UIManager::Draw()

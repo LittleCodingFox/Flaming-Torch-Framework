@@ -108,6 +108,22 @@ public:
 	~UIManager();
 
 	/*!
+	*	\return the active UI texture resources
+	*/
+	inline uint32 ActiveTextureResources()
+	{
+		return TextureResources.size();
+	};
+
+	/*!
+	*	\return the active UI texture resources
+	*/
+	inline uint32 ActiveTextResources()
+	{
+		return TextResources.size();
+	};
+
+	/*!
 	*	\return the Renderer that owns this UI Manager
 	*/
 	Renderer *GetOwner();

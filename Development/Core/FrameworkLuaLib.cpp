@@ -2462,10 +2462,12 @@ namespace FlamingTorch
 				.def("Clear", &UIManager::Clear)
 				.def("ClearFocus", &UIManager::ClearFocus)
 				.def("GetElement", &UIManager::GetElement)
+				.def("DrawText", &UIManager::DrawText)
+				.def("GetUITexture", (DisposablePointer<Texture> (UIManager::*)(const Path &))&UIManager::GetUITexture)
+				.def("GetUITexture", (DisposablePointer<Texture> (UIManager::*)(const Vector4 &))&UIManager::GetUITexture)
 				.property("FocusedElement", &UIManager::GetFocusedElement)
 				.property("MouseOverElement", &UIManager::GetMouseOverElement)
-				.property("Renderer", &UIManager::GetOwner)
-				.def("DrawText", &UIManager::DrawText),
+				.property("Renderer", &UIManager::GetOwner),
 
 			//UIElement
 			luabind::class_<UIElement, DisposablePointer<UIElement> >("UIElement")

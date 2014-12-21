@@ -879,8 +879,6 @@ namespace FlamingTorch
 
 		FrameStatsValue.RendererCustomMessage += " RF: D" + StringUtils::MakeIntString(RenderCaps.DepthBits) + "S" + StringUtils::MakeIntString(RenderCaps.StencilBits);
 
-		FrameStatsValue.RendererCustomMessage += " [Saved " + StringUtils::MakeIntString(SavedTextDrawcalls) + " Text Drawcalls]";
-
 		PreviousFrameStatsValue = FrameStatsValue;
 		FrameStatsValue.Clear();
 

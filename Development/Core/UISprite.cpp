@@ -12,10 +12,9 @@ namespace FlamingTorch
 	const Vector2 &UISprite::Size() const
 	{
 		static Vector2 Out;
-		Out = TheSprite.Options.NinePatchValue ? SizeValue +
-			//Need to invert left/right because each element is an offset in that side, not an actual Rect
-			Rect(-TheSprite.Options.NinePatchRectValue.Left, TheSprite.Options.NinePatchRectValue.Right,
-			-TheSprite.Options.NinePatchRectValue.Top, TheSprite.Options.NinePatchRectValue.Bottom).Size() *
+
+		Out = TheSprite.Options.NinePatchValue ? SizeValue + Vector2(TheSprite.Options.NinePatchRectValue.Left +
+			TheSprite.Options.NinePatchRectValue.Right, TheSprite.Options.NinePatchRectValue.Top + TheSprite.Options.NinePatchRectValue.Bottom) *
 			TheSprite.Options.NinePatchScaleValue : SizeValue;
 
 		return Out;

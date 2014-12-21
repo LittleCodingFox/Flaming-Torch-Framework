@@ -156,7 +156,8 @@ namespace FlamingTorch
 
 			str << "Renderer: " << Stats.RendererName << " version " << Stats.RendererVersion << " on " << CoreUtils::PlatformString() << "\n" << Stats.RendererCustomMessage << (Stats.RendererCustomMessage.length() ? "\n\n" : "\n");
 			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "/" << Stats.DrawCalls + Stats.SkippedDrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges << 
-				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\n";
+				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\nActive UI Resources: " <<
+				(TheRenderer->UI->ActiveTextResources() + TheRenderer->UI->ActiveTextureResources()) << " (" << TheRenderer->UI->ActiveTextureResources() << " Textures, " << TheRenderer->UI->ActiveTextResources() << " Glyphs)";
 
 			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(UIELEMENT_DEFAULT_FONT_SIZE).Color(Vector4(1, 1, 1, 1))
 				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
