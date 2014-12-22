@@ -27,7 +27,7 @@ public:
 	static const uint32 BaseTimeout = 1000 / MinFPS;
 	uint64 UpdateTimer;
 
-	sf::Mutex Lock;
+	std::mutex Lock;
 
 private:
 	Profiler() : SubSystem(PROFILER_PRIORITY), UpdateTimer(0) {};
@@ -53,8 +53,7 @@ private:
 	std::string NameString;
 	uint32 FragmentType;
 public:
-	ProfilerFragment(const char *Name, uint32 Type) : Start(GameClock::Instance.CurrentTime()),
-		NameString(Name), FragmentType(Type) {};
+	ProfilerFragment(const char *Name, uint32 Type);
 	~ProfilerFragment();
 
 	void ReportPercentage(uint32 Percentage);

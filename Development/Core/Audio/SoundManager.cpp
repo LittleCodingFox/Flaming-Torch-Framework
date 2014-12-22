@@ -8,102 +8,112 @@ namespace FlamingTorch
 
 	void SoundManager::Music::Play()
 	{
-		TheMusic.play();
+		Impl->PlayMusic(Handle);
 	};
 
 	void SoundManager::Music::Stop()
 	{
-		TheMusic.stop();
+		Impl->StopMusic(Handle);
 	};
 
 	void SoundManager::Music::Pause()
 	{
-		TheMusic.pause();
+		Impl->PauseMusic(Handle);
 	};
 
 	void SoundManager::Music::SetVolume(f32 Volume)
 	{
-		TheMusic.setVolume(Volume * 100);
+		Impl->SetMusicVolume(Handle, Volume);
 	};
 
 	f32 SoundManager::Music::GetVolume()
 	{
-		return TheMusic.getVolume() / 100;
+		return Impl->GetMusicVolume(Handle);
 	};
 
-	sf::Music::Status SoundManager::Music::GetStatus()
+	uint8 SoundManager::Music::GetStatus()
 	{
-		return TheMusic.getStatus();
+		return Impl->GetMusicStatus(Handle);
 	};
 
 	bool SoundManager::Music::IsPlaying()
 	{
-		return TheMusic.getStatus() == sf::Music::Playing;
+		return GetStatus() == SoundStatus::Playing;
 	};
 
 	void SoundManager::Music::SetLoop(bool Value)
 	{
-		TheMusic.setLoop(Value);
+		Impl->SetMusicLooping(Handle, Value);
 	};
 
 	bool SoundManager::Music::IsLooping()
 	{
-		return TheMusic.getLoop();
+		return Impl->MusicLooping(Handle);
 	};
 
 	void SoundManager::Music::SetPitch(f32 Pitch)
 	{
-		TheMusic.setPitch(Pitch);
+		Impl->SetMusicPitch(Handle, Pitch);
 	};
 
 	f32 SoundManager::Music::GetPitch()
 	{
-		return TheMusic.getPitch();
+		return Impl->MusicPitch(Handle);
 	};
 
 	void SoundManager::Sound::Play()
 	{
-		TheSound.play();
+		Impl->PlaySound(Handle);
 	};
 
 	void SoundManager::Sound::Stop()
 	{
-		TheSound.stop();
+		Impl->StopSound(Handle);
 	};
 
 	void SoundManager::Sound::Pause()
 	{
-		TheSound.pause();
+		Impl->PauseSound(Handle);
 	};
 
 	void SoundManager::Sound::SetVolume(f32 Volume)
 	{
-		TheSound.setVolume(Volume * 100);
+		Impl->SetSoundVolume(Handle, Volume);
 	};
 
 	f32 SoundManager::Sound::GetVolume()
 	{
-		return TheSound.getVolume() / 100;
+		return Impl->GetSoundVolume(Handle);
 	};
-	
-	sf::Sound::Status SoundManager::Sound::GetStatus()
+
+	uint8 SoundManager::Sound::GetStatus()
 	{
-		return TheSound.getStatus();
+		return Impl->GetSoundStatus(Handle);
 	};
 
 	bool SoundManager::Sound::IsPlaying()
 	{
-		return GetStatus() == sf::Sound::Playing;
+		return GetStatus() == SoundStatus::Playing;
 	};
 
-	void SoundManager::Sound::SetLoop(bool value)
+	void SoundManager::Sound::SetLoop(bool Value)
 	{
-		TheSound.setLoop(value);
+		Impl->SetSoundLooping(Handle, Value);
 	};
 
 	bool SoundManager::Sound::IsLooping()
 	{
-		return TheSound.getLoop();
+		return Impl->SoundLooping(Handle);
+	};
+
+	void SoundManager::Sound::SetPitch(f32 Pitch)
+	{
+		Impl->SetSoundPitch(Handle, Pitch);
+	};
+
+	f32 SoundManager::Sound::GetPitch()
+	{
+		return Impl->SoundPitch(Handle);
 	};
 
 	DisposablePointer<SoundManager::Sound> SoundManager::GetSound(StringID ID)
@@ -170,40 +180,17 @@ namespace FlamingTorch
 			return sit->first;
 		};
 
-		SoundBufferMap::iterator it = SoundBuffers.find(SoundID);
+		std::vector<uint8> Data((uint32)(In->Length() - In->Position()));
 
-		DisposablePointer<sf::SoundBuffer> Buffer;
-
-		if(it != SoundBuffers.end() && it->second.Get() != NULL)
-		{
-			Buffer = it->second;
-		}
-		else
-		{
-			std::vector<uint8> Data((uint32)(In->Length() - In->Position()));
-
-			if(!In->Read2<uint8>(&Data[0], Data.size()))
-				return 0xFFFFFFFF;
-
-			Buffer.Reset(new sf::SoundBuffer());
-
-			if(!Buffer->loadFromMemory(&Data[0], Data.size()))
-			{
-				return 0xFFFFFFFF;
-			};
-		};
-
-		FLASSERT(Buffer.Get(), "Invalid Sound Buffer!");
-
-		if(!Buffer.Get())
-		{
-			return 0xFFFFFFFF;
-		};
-
-		SoundBuffers[SoundID] = Buffer;
+		if(!In->Read2<uint8>(&Data[0], Data.size()))
+			return INVALID_FTGHANDLE;
 
 		DisposablePointer<Sound> TheSound(new Sound());
-		TheSound->TheSound.setBuffer(*Buffer);
+		TheSound->Impl = Impl;
+		TheSound->Handle = Impl->CreateSound(&Data[0], Data.size());
+
+		if (TheSound->Handle == INVALID_FTGHANDLE)
+			return INVALID_FTGHANDLE;
 
 		Sounds[SoundID] = TheSound;
 
@@ -263,15 +250,16 @@ namespace FlamingTorch
 
 		DisposablePointer<Music> Out(new Music());
 
-		Out->Data.resize((uint32)(In->Length() - In->Position()));
+		std::vector<uint8> Data((uint32)(In->Length() - In->Position()));
 
-		if(!In->Read2<uint8>(&Out->Data[0], Out->Data.size()))
-			return 0xFFFFFFFF;
+		if (!In->Read2<uint8>(&Data[0], Data.size()))
+			return INVALID_FTGHANDLE;
 
-		if(!Out->TheMusic.openFromMemory(&Out->Data[0], Out->Data.size()))
-		{
-			return 0xFFFFFFFF;
-		};
+		Out->Impl = Impl;
+		Out->Handle = Impl->CreateMusic(&Data[0], Data.size());
+
+		if(Out->Handle == INVALID_FTGHANDLE)
+			return INVALID_FTGHANDLE;
 
 		Musics[MusicID] = Out;
 
@@ -320,6 +308,8 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo(TAG, "SoundManager Subsystem starting..");
+
+		Impl.Reset(new DEFAULT_SOUNDMANAGER_IMPLEMENTATION());
 	};
 
 	void SoundManager::Shutdown(uint32 Priority)
@@ -346,11 +336,7 @@ namespace FlamingTorch
 			Musics.erase(Musics.begin());
 		};
 
-		while(SoundBuffers.begin() != SoundBuffers.end())
-		{
-			SoundBuffers.begin()->second.Dispose();
-			SoundBuffers.erase(SoundBuffers.begin());
-		};
+		Impl.Dispose();
 
 		SubSystem::Shutdown(Priority);
 	};

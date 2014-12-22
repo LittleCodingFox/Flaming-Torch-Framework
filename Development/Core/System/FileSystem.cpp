@@ -1226,7 +1226,7 @@ namespace FlamingTorch
 		uint64 CurrentOffset = 0;
 		uint64 StartOffset = 0;
 
-		sf::Lock Lock(FileAccessMutex);
+		std::lock_guard<std::mutex> Lock(FileAccessMutex);
 
 		std::vector<FileEntry *> EntryList;
 
@@ -1320,7 +1320,7 @@ namespace FlamingTorch
 
 	bool PackageFileSystemManager::Package::DeSerialize(Stream *In)
 	{
-		sf::Lock Lock(FileAccessMutex);
+		std::lock_guard<std::mutex> Lock(FileAccessMutex);
 
 		OriginalOffset = In->Position();
 
@@ -1411,7 +1411,7 @@ namespace FlamingTorch
 
 	bool PackageFileSystemManager::Package::AddFile(const std::string &Directory, const std::string &Name, DisposablePointer<FileStream> In)
 	{
-		sf::Lock Lock(FileAccessMutex);
+		std::lock_guard<std::mutex> Lock(FileAccessMutex);
 
 		StringID DirectoryID = MakeStringID(Directory);
 
@@ -1443,7 +1443,7 @@ namespace FlamingTorch
 
 	bool PackageFileSystemManager::Package::RemoveFile(const std::string &Directory, const std::string &Name)
 	{
-		sf::Lock Lock(FileAccessMutex);
+		std::lock_guard<std::mutex> Lock(FileAccessMutex);
 
 		StringID DirectoryID = MakeStringID(Directory);
 
@@ -1707,7 +1707,7 @@ namespace FlamingTorch
 		if(fit == it->second.end())
 			return DisposablePointer<Stream>();
 
-		sf::Lock Lock(fit->second.first->FileAccessMutex);
+		std::lock_guard<std::mutex> Lock(fit->second.first->FileAccessMutex);
 
 		PackageFileSystemManager::PackageStream *PStream = new PackageFileSystemManager::PackageStream();
 

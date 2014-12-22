@@ -9,8 +9,8 @@ solution "Tools"
 		kind "ConsoleApp"
 		language "C++"
 		files {
-			"../Core/*.hpp",
-			"../Core/*.cpp",
+			"../Core/**.hpp",
+			"../Core/**.cpp",
 			"../../Dependencies/Headers/**.hpp",
 			"Packer/**.hpp",
 			"Packer/**.cpp"
@@ -120,8 +120,8 @@ solution "Tools"
 		kind "ConsoleApp"
 		language "C++"
 		files {
-			"../Core/*.hpp",
-			"../Core/*.cpp",
+			"../Core/**.hpp",
+			"../Core/**.cpp",
 			"../../Dependencies/Headers/**.hpp",
 			"TiledConverter/**.h",
 			"TiledConverter/**.cpp"
@@ -231,8 +231,8 @@ solution "Tools"
 		kind "ConsoleApp"
 		language "C++"
 		files {
-			"../Core/*.hpp",
-			"../Core/*.cpp",
+			"../Core/**.hpp",
+			"../Core/**.cpp",
 			"../../Dependencies/Headers/**.hpp",
 			"Baker/**.h",
 			"Baker/**.cpp"
@@ -340,8 +340,8 @@ solution "Tools"
 		kind "ConsoleApp"
 		language "C++"
 		files {
-			"../Core/*.hpp",
-			"../Core/*.cpp",
+			"../Core/**.hpp",
+			"../Core/**.cpp",
 			"../../Dependencies/Headers/**.hpp",
 			"TexturePacker/**.h",
 			"TexturePacker/**.cpp"

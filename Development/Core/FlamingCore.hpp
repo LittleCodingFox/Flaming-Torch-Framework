@@ -1,9 +1,11 @@
 #include "FlamingConfig.hpp"
-#include "CoreVersion.hpp"
+#include "System/CoreVersion.hpp"
 #include <vector>
 #include <map>
 #include <list>
 #include <sstream>
+#include <thread>
+#include <mutex>
 #include "MaxRectsBinPack.h"
 #
 extern "C"
@@ -19,79 +21,64 @@ extern "C"
 #	include <luabind/out_value_policy.hpp>
 #	include <luabind/return_reference_to_policy.hpp>
 #	include <json/json.h>
-#
-#if USE_NETWORK
-#	include <enet/enet.h>
-#endif
-#
-#	include <SFML/System.hpp>
-#
-#if USE_SOUND
-#	include <SFML/Audio.hpp>
-#endif
 namespace FlamingTorch
 {
 #	undef DrawText
 #	undef CopyDirectory
 #	undef CreateDirectory
+#	define INVALID_FTGHANDLE 0
 
-	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle;
+	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle, SoundHandle, MusicHandle;
 
-#	include "MiniDump.hpp"
-#	include "SubSystem.hpp"
-#	include "Log.hpp"
-#	include "GameClock.hpp"
-#	include "StringID.hpp"
-#	include "CRC32.hpp"
-#	include "Profiler.hpp"
-#	include "FileSystem.hpp"
-#	include "Math.hpp"
-#	include "FrustumCuller.hpp"
-#	include "DijkstraField.hpp"
-#	include "FPSCounter.hpp"
-#	include "FileSystem.hpp"
-#	include "LuaScript.hpp"
-#	include "GenericConfig.hpp"
-#	include "StringUtils.hpp"
-#	include "Future.hpp"
-#	include "Randomizer.hpp"
-#	include "Camera.hpp"
-#	include "DynamicLink.hpp"
+#	include "System/MiniDump.hpp"
+#	include "System/SubSystem.hpp"
+#	include "System/Log.hpp"
+#	include "System/StringID.hpp"
+#	include "System/CRC32.hpp"
+#	include "System/Profiler.hpp"
+#	include "System/FileSystem.hpp"
+#	include "System/Math.hpp"
+#	include "System/FileSystem.hpp"
+#	include "System/GenericConfig.hpp"
+#	include "System/StringUtils.hpp"
+#	include "System/Future.hpp"
+#	include "System/Randomizer.hpp"
+#	include "System/DynamicLink.hpp"
+#	include "System/GenericConfig.hpp"
 #
-#	if USE_GRAPHICS
-#		include "Input.hpp"
-#		include "RenderTextUtils.hpp"
-#		include "RenderBase.hpp"
-#		include "GameInterface.hpp"
-#		include "GenericConfig.hpp"
-#		include "Sprite.hpp"
-#		include "UIUtils.hpp"
-#		include "UIElement.hpp"
-#		include "UIText.hpp"
-#		include "UIGroup.hpp"
-#		include "UISprite.hpp"
-#		include "UITextComposer.hpp"
-#		include "UILayout.hpp"
-#		include "UIManager.hpp"
-#	endif
+#	include "Scripting/LuaScript.hpp"
 #
-#	include "Texture.hpp"
-#	include "ResourceManager.hpp"
-#	include "TextureCollision.hpp"
-#	include "GameInterface.hpp"
-#	include "Console.hpp"
+#	include "Rendering/Texture.hpp"
 #
-#	if USE_NETWORK
-#		include "Network.hpp"
-#	endif
+#	include "System/ResourceManager.hpp"
+#	include "System/PerlinNoise.hpp"
 #
-#	if USE_SOUND
-#		include "SoundManager.hpp"
-#	endif
+#	include "Rendering/FrustumCuller.hpp"
+#	include "Rendering/FPSCounter.hpp"
+#	include "Rendering/Camera.hpp"
 #
-#	include "TiledMap.hpp"
-#	include "PerlinNoise.hpp"
-#	include "State.hpp"
-#	include "WorldStreamer.hpp"
-#	include "ObjectModel.hpp"
+#	include "Audio/SoundManager.hpp"
+#
+#	include "Rendering/Input.hpp"
+#	include "Rendering/RenderTextUtils.hpp"
+#	include "Rendering/RenderBase.hpp"
+#
+#	include "Game/GameInterface.hpp"
+#
+#	include "Rendering/Sprite.hpp"
+#	include "Rendering/TiledMap.hpp"
+#
+#	include "Rendering/UI/UIUtils.hpp"
+#	include "Rendering/UI/UIElement.hpp"
+#	include "Rendering/UI/UIText.hpp"
+#	include "Rendering/UI/UIGroup.hpp"
+#	include "Rendering/UI/UISprite.hpp"
+#	include "Rendering/UI/UITextComposer.hpp"
+#	include "Rendering/UI/UILayout.hpp"
+#	include "Rendering/UI/UIManager.hpp"
+#
+#	include "Game/GameClock.hpp"
+#	include "Game/Console.hpp"
+#	include "Game/ObjectModel.hpp"
+#
 };

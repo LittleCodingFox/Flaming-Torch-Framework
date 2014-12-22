@@ -233,11 +233,6 @@ namespace FlamingTorch
 		return Out;
 	};
 
-	DisposablePointer<WorldStreamerCallback> GetWorldStreamerCallbackFromGame()
-	{
-		return DisposablePointer<WorldStreamerCallback>(new ScriptedWorldStreamerCallback(GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance));
-	};
-
 	luabind::object PackageFileSystemFindDirectories(const std::string &Directory, lua_State *State)
 	{
 		luabind::object Out = luabind::newtable(State);
@@ -305,16 +300,6 @@ namespace FlamingTorch
 		};
 
 		Self.Data = Bytes;
-	};
-
-	WorldStreamerCallback *GetWorldStreamerCallback(WorldStreamer &Self)
-	{
-		return Self.Callback;
-	};
-
-	void SetWorldStreamerCallback(WorldStreamer &Self, WorldStreamerCallback *Target)
-	{
-		Self.Callback = Target;
 	};
 
 	lua_Number GetMathUtilsPi()
@@ -1060,36 +1045,6 @@ namespace FlamingTorch
 			luabind::class_<CRC32>("CRC32")
 				.def("CRC", &CRC32::CRC),
 
-			//DijkstraField
-			luabind::class_<DijkstraField>("DijkstraField")
-				.property("UserData", &DijkstraField::UserData)
-				.def(luabind::constructor<uint32>())
-				.def("Clear", &DijkstraField::Clear)
-				.def("ClearNodes", &DijkstraField::ClearNodes)
-				.def("AddRegionRect", &DijkstraField::AddRegionRect)
-				.def("GetNode", &DijkstraField::GetNode)
-				.def("FindPath", &DijkstraField::FindPath)
-				.def("GetValidNodesAroundPosition", &DijkstraField::GetValidNodesAroundPosition),
-
-			//DijkstraNode
-			luabind::class_<DijkstraNode>("DijkstraNode")
-				.property("Position", &DijkstraNode::Position)
-				.property("Visited", &DijkstraNode::Visited)
-				.property("Cost", &DijkstraNode::Cost)
-				.property("Edges", &DijkstraNode::Edges)
-				.property("Parent", &DijkstraNode::Parent)
-				.property("UserData", &DijkstraNode::UserData)
-				.property("Owner", &DijkstraNode::Owner),
-
-			//DijkstraEdge
-			luabind::class_<DijkstraEdge>("DijkstraEdge")
-				.enum_("constants") [
-					luabind::value("Cross", DijkstraEdgeMode::Cross),
-					luabind::value("Adjacent", DijkstraEdgeMode::Adjacent)
-				]
-				.property("Weight", &DijkstraEdge::Weight)
-				.property("Target", &DijkstraEdge::Target),
-
 			//Log
 			luabind::class_<Log, SubSystem>("Log")
 				.def("Info", &LogInfo)
@@ -1682,41 +1637,7 @@ namespace FlamingTorch
 				.property("Pi", &GetMathUtilsPi)
 				.property("Epsilon", &GetMathUtilsEpsilon),
 
-			//WorldChunk
-			luabind::class_<WorldChunk>("WorldChunk")
-				.def_readwrite("Coordinate", &WorldChunk::Coordinate)
-				.def_readwrite("GlobalCoordinate", &WorldChunk::GlobalCoordinate)
-				.def_readonly("Owner", &WorldChunk::Owner)
-				.def("UpdateCoordinate", &WorldChunk::UpdateCoordinate),
-
-			//WorldStreamerCallback
-			luabind::class_<WorldStreamerCallback>("WorldStreamerCallback")
-				.def("OnMapChunkLoad", &WorldStreamerCallback::OnMapChunkLoad)
-				.def("OnMapChunkUnload", &WorldStreamerCallback::OnMapChunkUnload)
-				.def("OnMapChunkCoordinateUpdate", &WorldStreamerCallback::OnMapChunkCoordinateUpdate)
-				.property("ChunkSize", &WorldStreamerCallback::ChunkSize)
-				.def("ChunkNeedsLoad", &WorldStreamerCallback::ChunkNeedsLoad),
-
-			//ScriptedWorldStreamerCallback
-			luabind::class_<ScriptedWorldStreamerCallback, WorldStreamerCallback>("ScriptedWorldStreamerCallback")
-				.scope [
-					luabind::def("FromGame", &GetWorldStreamerCallbackFromGame)
-				],
-
-			//WorldStreamer
-			luabind::class_<WorldStreamer>("WorldStreamer")
-				.def(luabind::constructor<>())
-				.property("Callback", &GetWorldStreamerCallback, &SetWorldStreamerCallback)
-				.def("Update", &WorldStreamer::Update)
-				.def("Reset", &WorldStreamer::Reset)
-				.def("UnloadChunk", &WorldStreamer::UnloadChunk)
-				.def("ClipUnitPosition", &WorldStreamer::ClipUnitPosition)
-				.def("GetChunkIndex", &WorldStreamer::GetChunkIndex)
-				.def("TranslateMainChunk", &WorldStreamer::TranslateMainChunk)
-				.property("WorldRadius", &WorldStreamer::GetWorldRadius, &WorldStreamer::SetWorldRadius)
-				.property("GlobalCoordinate", &WorldStreamer::GetGlobalCoordinate, &WorldStreamer::SetGlobalCoordinate),
-
-#if !FLPLATFORM_ANDROID
+#if !FLPLATFORM_MOBILE
 			//FileSystemWatcher
 			luabind::class_<FileSystemWatcher, SubSystem>("FileSystemWatcher")
 				.enum_("constants") [
@@ -1725,33 +1646,6 @@ namespace FlamingTorch
 					luabind::value("Action_Deleted", FileSystemWatcherAction::Deleted)
 				]
 				.def("WatchDirectory", &FileSystemWatcher::WatchDirectory),
-#endif
-
-#if USE_NETWORK
-			//GameClient
-			luabind::class_<GameClient>("GameClient")
-				.def("Destroy", &GameClient::Destroy)
-				.def("Initialize", &GameClient::Initialize)
-				.def("SendPacket", &GameClient::SendPacket)
-				.def("SendPacketNoQueue", &GameClient::SendPacketNoQueue),
-
-			//GameServer
-			luabind::class_<GameServer>("GameServer")
-				.def("Destroy", &GameClient::Destroy)
-				.def("Initialize", &GameClient::Initialize)
-				.def("SendPacket", &GameClient::SendPacket)
-				.def("SendPacketNoQueue", &GameClient::SendPacketNoQueue),
-
-			//GameNetwork
-			luabind::class_<GameNetwork, SubSystem>("GameNetwork")
-				.enum_("constants") [
-					luabind::value("PacketFlag_NoAlloc", ENET_PACKET_FLAG_NO_ALLOCATE),
-					luabind::value("PacketFlag_Unsequenced", ENET_PACKET_FLAG_UNSEQUENCED),
-					luabind::value("PacketFlag_UnreliableFragment", ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT),
-					luabind::value("PacketFlag_Reliable", ENET_PACKET_FLAG_RELIABLE)
-				]
-				.def("GetClient", &GameNetwork::GetClient)
-				.def("GetServer", &GameNetwork::GetServer),
 #endif
 
 			//PerlinNoise

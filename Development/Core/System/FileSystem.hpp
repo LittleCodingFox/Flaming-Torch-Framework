@@ -440,7 +440,7 @@ public:
 		typedef std::map<StringID, DisposablePointer<FileEntry> > FileMap;
 		typedef std::map<StringID, FileMap> EntryMap;
 
-		sf::Mutex FileAccessMutex;
+		std::mutex FileAccessMutex;
 		bool HasBeenTampered;
 	public:
 		EntryMap Entries;

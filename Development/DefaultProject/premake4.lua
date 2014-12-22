@@ -9,8 +9,8 @@ solution "DefaultProject"
 		kind "ConsoleApp"
 		language "C++"
 		files {
-			"../Core/*.hpp",
-			"../Core/*.cpp",
+			"../Core/**.hpp",
+			"../Core/**.cpp",
 			"Source/**.hpp",
 			"Source/**.cpp"
 		}

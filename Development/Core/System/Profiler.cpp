@@ -44,7 +44,7 @@ namespace FlamingTorch
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		sf::Lock lock(Lock);
+		std::lock_guard<std::mutex> lock(Lock);
 
 		if(GameClockDiffNoPause(UpdateTimer) >= 1000)
 		{
@@ -61,7 +61,7 @@ namespace FlamingTorch
 
 	void Profiler::ReportStat(const std::string &Name, uint32 Type, uint64 ms)
 	{
-		sf::Lock lock(Lock);
+		std::lock_guard<std::mutex> lock(Lock);
 
 		PacketMap::iterator it = Packets.find(Name);
 
@@ -107,6 +107,8 @@ namespace FlamingTorch
 		return "UNKNOWN";
 	};
 
+	ProfilerFragment::ProfilerFragment(const char *Name, uint32 Type) : Start(GameClock::Instance.CurrentTime()),
+		NameString(Name), FragmentType(Type) {};
 	ProfilerFragment::~ProfilerFragment()
 	{
 		uint64 CurrentTime = GameClock::Instance.CurrentTime();

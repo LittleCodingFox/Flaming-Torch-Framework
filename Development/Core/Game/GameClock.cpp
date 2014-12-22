@@ -133,28 +133,7 @@ namespace FlamingTorch
 
 	uint64 GameClock::CurrentTime()
 	{
-#if 1
-		static sf::Clock clock;
-		
-		return clock.getElapsedTime().asMilliseconds();
-#else
-		static bool InitedTime = false;
-		static uint64 InitialTime = 0;
-
-		if(!InitedTime)
-		{
-			InitedTime = true;
-			timeval tv;
-			gettimeofday(&tv, NULL);
-
-			InitialTime = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000;
-		};
-
-		timeval tv;
-		gettimeofday(&tv, NULL);
-
-		return (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 - InitialTime;
-#endif
+		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 	};
 
 	uint64 GameClockTime()
