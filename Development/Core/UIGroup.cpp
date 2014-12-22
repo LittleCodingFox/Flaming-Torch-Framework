@@ -21,8 +21,11 @@ namespace FlamingTorch
 
 		if (LayoutMode & UIGroupLayoutMode::Horizontal)
 		{
-			for (uint32 i = 0; i < ChildrenValue.size(); CurrentExtent += ChildrenValue[i]->Offset().x + ChildrenValue[i]->Size().x, i++)
+			for (uint32 i = 0; i < ChildrenValue.size(); CurrentExtent += ChildrenValue[i]->Visible() ? ChildrenValue[i]->Offset().x + ChildrenValue[i]->Size().x : 0, i++)
 			{
+				if (ChildrenValue[i]->Visible() == false)
+					continue;
+
 				if ((LayoutMode & UIGroupLayoutMode::AdjustWidth) && (CurrentExtent +
 					ChildrenValue[i]->Size().x + ChildrenValue[i]->Offset().x > SizeValue.x))
 				{
@@ -38,9 +41,12 @@ namespace FlamingTorch
 		}
 		else if (LayoutMode & UIGroupLayoutMode::Vertical)
 		{
-			for (uint32 i = 0; i < ChildrenValue.size(); CurrentExtent += ChildrenValue[i]->Offset().y + ChildrenValue[i]->Size().y, i++)
+			for (uint32 i = 0; i < ChildrenValue.size(); CurrentExtent += ChildrenValue[i]->Visible() ? ChildrenValue[i]->Offset().y + ChildrenValue[i]->Size().y : 0, i++)
 			{
-				if((LayoutMode & UIGroupLayoutMode::AdjustHeight) && (CurrentExtent + ChildrenValue[i]->Size().y + ChildrenValue[i]->Offset().y > SizeValue.y))
+				if (ChildrenValue[i]->Visible() == false)
+					continue;
+
+				if ((LayoutMode & UIGroupLayoutMode::AdjustHeight) && (CurrentExtent + ChildrenValue[i]->Size().y + ChildrenValue[i]->Offset().y > SizeValue.y))
 				{
 					CurrentExtent = InitialExtent;
 					CurrentPosition.x += CurrentMaxMeasurement;

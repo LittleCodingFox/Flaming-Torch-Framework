@@ -480,7 +480,7 @@ private:
 
 	bool Dirty;
 
-	uint32 MaxWidth, MaxHeight;
+	uint32 MaxWidth, MaxHeight, FilteringValue;
 
 public:
 	class SortedTexture
@@ -506,6 +506,13 @@ public:
 
 	TexturePacker();
 	~TexturePacker();
+
+	inline uint32 GetFiltering()
+	{
+		return FilteringValue;
+	};
+
+	void SetFiltering(uint32 Filtering);
 
 	/*!
 	*	Binds (and completes) this texture packer

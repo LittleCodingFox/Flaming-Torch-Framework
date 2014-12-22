@@ -109,6 +109,8 @@ void MaxRectsBinPack::Insert(std::vector<RectSize> &rects, std::vector<Rect> &ds
 		PlaceRect(bestNode);
 		rects.erase(rects.begin() + bestRectIndex);
 	}
+	
+	dst = usedRectangles;
 }
 
 void MaxRectsBinPack::PlaceRect(const Rect &node)
