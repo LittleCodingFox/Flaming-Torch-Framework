@@ -2,12 +2,12 @@
 #if USE_GRAPHICS
 
 /*!
-*	Generic Group Container which does nothing more than perform layout and update/draw children
+*	Generic Vertical Group Container which does nothing more than perform layout and update/draw children
 */
-class UIGroup : public UIElement
+class UIVerticalGroup : public UIElement
 {
 public:
-	UIGroup(UIManager *Manager);
+	UIVerticalGroup(UIManager *Manager);
 	virtual void Update(const Vector2 &ParentPosition) override;
 	virtual void Draw(const Vector2 &ParentPosition, Renderer *Renderer) override;
 };

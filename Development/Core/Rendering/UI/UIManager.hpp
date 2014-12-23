@@ -12,6 +12,8 @@ class UIManager : public BaseScriptableInstance
 	friend class UIElement;
 	friend class UIText;
 	friend class UIGroup;
+	friend class UIVerticalGroup;
+	friend class UIHorizontalGroup;
 	friend class UISprite;
 	friend class UILayout;
 	friend class UIInputProcessor;

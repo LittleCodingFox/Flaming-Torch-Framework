@@ -219,6 +219,8 @@ namespace FlamingTorch
 					REGISTER_NAMESPACETYPE_NAMED_PTR(InputCenter, Context, "InputContext"),
 					REGISTER_TYPE_PTR(UIElement),
 					REGISTER_TYPE_PTR(UIGroup),
+					REGISTER_TYPE_PTR(UIVerticalGroup),
+					REGISTER_TYPE_PTR(UIHorizontalGroup),
 					REGISTER_TYPE_PTR(UIText),
 					REGISTER_TYPE_PTR(UISprite),
 #endif
@@ -329,6 +331,8 @@ namespace FlamingTorch
 					REGISTER_TYPE_ENUMPTR(InputContext),
 					REGISTER_TYPE_ENUMPTR(UIElement),
 					REGISTER_TYPE_ENUMPTR(UIGroup),
+					REGISTER_TYPE_ENUMPTR(UIVerticalGroup),
+					REGISTER_TYPE_ENUMPTR(UIHorizontalGroup),
 					REGISTER_TYPE_ENUMPTR(UIText),
 					REGISTER_TYPE_ENUMPTR(UISprite),
 #endif
@@ -678,6 +682,12 @@ namespace FlamingTorch
 
 		case ObjectAttributeType::UIGroupPtr:
 			return IsLuaTypePtr<UIGroup>(Value);
+
+		case ObjectAttributeType::UIVerticalGroupPtr:
+			return IsLuaTypePtr<UIVerticalGroup>(Value);
+
+		case ObjectAttributeType::UIHorizontalGroupPtr:
+			return IsLuaTypePtr<UIHorizontalGroup>(Value);
 
 		case ObjectAttributeType::UITextPtr:
 			return IsLuaTypePtr<UIText>(Value);

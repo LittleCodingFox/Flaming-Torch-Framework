@@ -1048,62 +1048,10 @@ namespace FlamingTorch
 
 	void UIManager::ProcessGroupProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
-		UIGroup *Group = (UIGroup *)Element;
-
-		if(Property == "LayoutMode")
-		{
-			std::vector<std::string> Modes = StringUtils::Split(StringUtils::ToUpperCase(Value), '|');
-
-			for(uint32 j = 0; j < Modes.size(); j++)
-			{
-				if(Modes[j] == "HORIZONTAL")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::Horizontal;
-				}
-				else if(Modes[j] == "VERTICAL")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::Vertical;
-				}
-				else if(Modes[j] == "ADJUSTHEIGHT")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::AdjustHeight;
-				}
-				else if(Modes[j] == "ADJUSTWIDTH")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::AdjustWidth;
-				}
-				else if(Modes[j] == "NONE")
-				{
-					Group->LayoutMode = UIGroupLayoutMode::None;
-				}
-				else if(Modes[j] == "CENTER")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::Center;
-				}
-				else if(Modes[j] == "VCENTER")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::VerticalCenter;
-				}
-				else if(Modes[j] == "ADJUSTCLOSER")
-				{
-					Group->LayoutMode |= UIGroupLayoutMode::AdjustCloser;
-				};
-			};
-		};
 	};
 
 	void UIManager::ProcessGroupJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
-		Json::Value Value = Data.get("LayoutMode", Json::Value("None"));
-
-		if(Value.isString())
-		{
-			ProcessGroupProperty(Element, "LayoutMode", Value.asString(), ElementName, LayoutName);
-		}
-		else
-		{
-			CHECKJSONVALUE(Value, "LayoutMode", string)
-		};
 	};
 
 	std::string JsonToLuaString(const Json::Value &Value)
@@ -1291,7 +1239,15 @@ namespace FlamingTorch
 			{
 				Element.Reset(new UITextComposer(Renderer->UI));
 			}
-			else
+			else if (Control == "HORIZONTALGROUP")
+			{
+				Element.Reset(new UIHorizontalGroup(Renderer->UI));
+			}
+			else if (Control == "VERTICALGROUP")
+			{
+				Element.Reset(new UIVerticalGroup(Renderer->UI));
+			}
+			else //Should always be an UIGroup due to layouting
 			{
 				Element.Reset(new UIGroup(Renderer->UI));
 			};

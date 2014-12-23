@@ -104,6 +104,8 @@ namespace ObjectAttributeType
 		InputContextPtr,
 		UIElementPtr,
 		UIGroupPtr,
+		UIVerticalGroupPtr,
+		UIHorizontalGroupPtr,
 		UITextPtr,
 		UISpritePtr
 	};

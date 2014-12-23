@@ -2428,18 +2428,13 @@ namespace FlamingTorch
 				.def("Clear", &UIElement::Clear),
 
 			//UIGroup
-			luabind::class_<UIGroup, UIElement>("UIGroup")
-				.enum_("constants") [
-					luabind::value("LayoutMode_None", UIGroupLayoutMode::None),
-					luabind::value("LayoutMode_Horizontal", UIGroupLayoutMode::Horizontal),
-					luabind::value("LayoutMode_Vertical", UIGroupLayoutMode::Vertical),
-					luabind::value("LayoutMode_AdjustWidth", UIGroupLayoutMode::AdjustWidth),
-					luabind::value("LayoutMode_AdjustHeight", UIGroupLayoutMode::AdjustWidth),
-					luabind::value("LayoutMode_Center", UIGroupLayoutMode::Center),
-					luabind::value("LayoutMode_VerticalCenter", UIGroupLayoutMode::VerticalCenter),
-					luabind::value("LayoutMode_AdjustCloser", UIGroupLayoutMode::AdjustCloser)
-				]
-				.def_readwrite("LayoutMode", &UIGroup::LayoutMode),
+			luabind::class_<UIGroup, UIElement>("UIGroup"),
+
+			//UIHorizontalGroup
+			luabind::class_<UIHorizontalGroup, UIElement>("UIHorizontalGroup"),
+
+			//UIVerticalGroup
+			luabind::class_<UIVerticalGroup, UIElement>("UIVerticalGroup"),
 
 			//UILayout
 			luabind::class_<UILayout, DisposablePointer<UILayout> >("UILayout")
