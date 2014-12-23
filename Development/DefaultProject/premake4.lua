@@ -80,7 +80,7 @@ solution "DefaultProject"
 		
 			if os.get() == "linux" then
 				defines({ "__LINUX__" })
-				links { "GL", "GLU", "GLEW", "FlamingDependenciesd", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile" }
+				links { "GL", "GLU", "GLEW", "FlamingDependenciesd", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile", "udev" }
 
 				buildoptions { "-std=c++11" }
 			end
@@ -117,7 +117,7 @@ solution "DefaultProject"
 		
 			if os.get() == "linux" then
 				defines({ "__LINUX__" })
-				links { "GL", "GLU", "GLEW", "FlamingDependencies", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile" }
+				links { "GL", "GLU", "GLEW", "FlamingDependencies", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile", "udev" }
 
 				buildoptions { "-std=c++11" }
 			end
