@@ -122,11 +122,8 @@ solution "Dependencies"
 				"Source/SFML/SFML/Network/Unix/*.cpp",
 				"Source/SFML/SFML/System/Unix/*.cpp",
 				"Source/SFML/SFML/Window/Linux/*.cpp",
-				"Source/SFML/SFML/Window/Unix/SensorImpl.cpp",
-				"Source/SFML/SFML/Window/Unix/JoystickImpl.cpp"
+				"Source/SFML/SFML/Window/Unix/SensorImpl.cpp"
 			}
-
-			excludes { "Source/SFML/SFML/Window/Linux/JoystickImpl.*" }
 		end
  
 		configuration "Debug"

@@ -144,6 +144,11 @@ bool JoystickImpl::open(unsigned int index)
             // Retrieve the axes mapping
             ioctl(m_file, JSIOCGAXMAP, m_mapping);
 
+            // Get info
+            m_identification.name      = getJoystickName(m_file, index);
+            m_identification.vendorId  = getAttributeUint(index, "idVendor");
+            m_identification.productId = getAttributeUint(index, "idProduct");
+
             // Reset the joystick state
             m_state = JoystickState();
 
@@ -202,6 +207,13 @@ JoystickCaps JoystickImpl::getCapabilities() const
     }
 
     return caps;
+}
+
+
+////////////////////////////////////////////////////////////
+Joystick::Identification JoystickImpl::getIdentification() const
+{
+    return m_identification;
 }
 
 
