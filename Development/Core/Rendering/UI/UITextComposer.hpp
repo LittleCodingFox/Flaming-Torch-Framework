@@ -1,3 +1,5 @@
+#pragma once
+
 /*!
 *	UI Text Composer Element
 *	\note Will not autosize

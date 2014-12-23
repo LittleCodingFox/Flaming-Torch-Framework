@@ -1,3 +1,5 @@
+#pragma once
+
 /*!
 *	UI Text Element Alignment
 */

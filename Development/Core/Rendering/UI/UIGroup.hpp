@@ -1,3 +1,5 @@
+#pragma once
+
 namespace UIGroupLayoutMode
 {
 	enum UIGroupLayoutMode

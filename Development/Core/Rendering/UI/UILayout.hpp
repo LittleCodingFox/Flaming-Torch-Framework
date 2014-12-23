@@ -1,3 +1,5 @@
+#pragma once
+
 /*!
 *	UI Layout
 *	Contains Elements and can be loaded from a scheme file
