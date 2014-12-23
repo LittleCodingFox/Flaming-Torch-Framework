@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 class UIManager;
 class UILayout;
@@ -313,3 +314,4 @@ public:
 	*/
 	virtual void Focus();
 };
+#endif

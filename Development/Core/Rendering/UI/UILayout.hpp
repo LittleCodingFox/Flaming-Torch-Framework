@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 /*!
 *	UI Layout
@@ -67,3 +68,4 @@ public:
 	*/
 	DisposablePointer<UIElement> FindElementByName(const std::string &Name);
 };
+#endif

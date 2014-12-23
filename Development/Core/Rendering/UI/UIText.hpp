@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 /*!
 *	UI Text Element Alignment
@@ -73,3 +74,4 @@ public:
 	virtual void Update(const Vector2 &ParentPosition) override;
 	virtual void Draw(const Vector2 &ParentPosition, Renderer *Renderer) override;
 };
+#endif

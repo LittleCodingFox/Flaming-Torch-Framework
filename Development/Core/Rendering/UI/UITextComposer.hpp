@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 /*!
 *	UI Text Composer Element
@@ -59,3 +60,4 @@ public:
 	void Update(const Vector2 &ParentPosition);
 	void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
 };
+#endif

@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 namespace UIGroupLayoutMode
 {
@@ -27,3 +28,4 @@ public:
 	virtual void Update(const Vector2 &ParentPosition) override;
 	virtual void Draw(const Vector2 &ParentPosition, Renderer *Renderer) override;
 };
+#endif

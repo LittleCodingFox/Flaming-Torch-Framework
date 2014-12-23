@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 class TextureGroup;
 
@@ -262,3 +263,4 @@ public:
 	*/
 	void ClearFocus();
 };
+#endif

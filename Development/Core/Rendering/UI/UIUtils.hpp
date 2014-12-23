@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 /*!
 *	UI Event Types
@@ -87,3 +88,4 @@ bool RunUIScriptEvents(LuaEventGroup &Group, const std::string &ID, bool Errored
 
 	return true;
 };
+#endif
