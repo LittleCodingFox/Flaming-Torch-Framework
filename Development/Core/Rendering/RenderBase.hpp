@@ -1,4 +1,6 @@
 #pragma once
+#if USE_GRAPHICS
+
 #
 #ifdef CreateFont
 #	undef CreateFont
@@ -1045,3 +1047,4 @@ public:
 
 #include "Implementations/NULLRenderer.hpp"
 
+#endif

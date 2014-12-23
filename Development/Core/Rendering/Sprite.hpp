@@ -1,4 +1,6 @@
 #pragma once
+#if USE_GRAPHICS
+
 #define MAX_SPRITE_CACHE_SIZE 20000
 
 namespace PinningMode
@@ -386,3 +388,4 @@ public:
 	void Register(SpriteVertex *Vertices, uint32 VertexCount, Texture *TheTexture, uint32 BlendingMode, Renderer *Renderer);
 	void Flush(Renderer *Renderer);
 };
+#endif

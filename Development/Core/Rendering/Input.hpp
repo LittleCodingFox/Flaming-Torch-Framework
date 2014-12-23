@@ -1,4 +1,5 @@
 #pragma once
+#if USE_GRAPHICS
 
 /*!
 *	Input Action Type Enumeration
@@ -646,3 +647,4 @@ private:
 	void FireAction(const TouchInfo &Touch);
 	void FireAction(f32 MouseScrollDelta);
 };
+#endif
