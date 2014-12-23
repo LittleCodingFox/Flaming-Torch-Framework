@@ -38,9 +38,9 @@ namespace FlamingTorch
 #	include "System/Profiler.hpp"
 #	include "System/FileSystem.hpp"
 #	include "System/Math.hpp"
-#	include "System/FileSystem.hpp"
 #	include "System/GenericConfig.hpp"
 #	include "System/StringUtils.hpp"
+#	include "Game/GameClock.hpp"
 #	include "System/Future.hpp"
 #	include "System/Randomizer.hpp"
 #	include "System/DynamicLink.hpp"
@@ -77,7 +77,6 @@ namespace FlamingTorch
 #	include "Rendering/UI/UILayout.hpp"
 #	include "Rendering/UI/UIManager.hpp"
 #
-#	include "Game/GameClock.hpp"
 #	include "Game/Console.hpp"
 #	include "Game/ObjectModel.hpp"
 #
