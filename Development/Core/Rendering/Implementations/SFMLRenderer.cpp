@@ -6,7 +6,7 @@
 
 namespace FlamingTorch
 {
-#	if USE_SFML_RENDERER
+#	if USE_GRAPHICS && USE_SFML_RENDERER
 #	include "SFMLRenderer.hpp"
 #	define TAG "SFMLRenderer"
 #	define GLCHECK() { int32 error = glGetError(); if(error != GL_NO_ERROR) { FLASSERT(0, "GL Error %08x!", error); } }

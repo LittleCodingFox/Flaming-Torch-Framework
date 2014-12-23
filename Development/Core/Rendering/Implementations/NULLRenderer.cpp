@@ -1,4 +1,5 @@
 #include "FlamingCore.hpp"
+#if USE_GRAPHICS
 namespace FlamingTorch
 {
 	bool NULLRendererImplementation::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
@@ -141,3 +142,4 @@ namespace FlamingTorch
 
 	void NULLRendererImplementation::ReportSkippedDrawCall() {};
 };
+#endif
