@@ -133,6 +133,9 @@ solution "Dependencies"
 			targetsuffix "d"
 			
 			defines({ "DEBUG" })
+			
+			targetdir("../Binaries/FlamingDependencies/Debug/")
+			objdir("../Temp/FlamingDependencies/Debug/")
 		
 			if os.get() == "windows" then
 				excludes { "Source/SimpleFileWatcher/FileWatcherLinux.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
@@ -164,7 +167,10 @@ solution "Dependencies"
  
 		configuration "Release"
 			defines({ "NDEBUG" })
-		
+			
+			targetdir("../Binaries/FlamingDependencies/Release/")
+			objdir("../Temp/FlamingDependencies/Release/")
+				
 			if os.get() == "windows" then
 				excludes { "Source/SimpleFileWatcher/FileWatcherLinux.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
 				defines({ "_WIN32", "WIN32" })
@@ -211,25 +217,3 @@ solution "Dependencies"
 			excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherLinux.cpp" }
 			defines({ "NDEBUG", "__APPLE__", "__MACOSX__" })
 			flags { "Optimize" }
-
--- From http://industriousone.com/topic/how-get-current-configuration
--- iterate over all solutions
-for sln in premake.solution.each() do
-   -- iterate over all projects in the solution
-	for pi = 1, #sln.projects do
-		-- make this the active project
-		prj = sln.projects[pi]
-		project(prj.name)
- 
-		-- iterate over all configurations
-		for ci = 1, #sln.configurations do
-			-- make this the active configuration
-			cfgname = sln.configurations[ci]
-			configuration(cfgname)
- 
-			-- do my custom stuff
-			targetdir(path.join(prj.basedir, "../Binaries/" .. prj.name .. "/" .. cfgname))
-			objdir(path.join(prj.basedir, "../Temp/" .. prj.name .. "/" .. cfgname))
-		end
-	end
-end
