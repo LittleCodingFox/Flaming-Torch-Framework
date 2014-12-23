@@ -687,6 +687,8 @@ namespace FlamingTorch
 
 		AsBuffer(&str[0], (uint32)Length());
 
+		str = StringUtils::Strip(str, '\r');
+
 		//Remove all extra 0's
 		for(int32 i = str.length() - 1; i >= 0; i--)
 		{
@@ -912,22 +914,12 @@ namespace FlamingTorch
 			FLASSERT(0, "Invalid Stream Flags!");
 		};
 
-		if(Flags & StreamFlags::Text)
-		{
-			Mode[1] = 't';
-		}
-		else
-		{
-			Mode[1] = 'b';
-		};
+		//Text mode isn't reliable anymore
+		Mode[1] = 'b';
 
 		if(!Handle)
 		{
-#ifdef FLPLATFORM_WINDOWS
-			fopen_s((FILE**) &Handle, name.c_str(), Mode);
-#else
 			Handle = fopen(name.c_str(), Mode);
-#endif
 		};
 
 		_Length = 0;

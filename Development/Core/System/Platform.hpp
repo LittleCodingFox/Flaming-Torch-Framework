@@ -20,6 +20,7 @@
 #	define FLPLATFORM_ANDROID 1
 #	define FLPLATFORM_MOBILE 1
 #else
+#	define FLPLATFORM_ANDROID 0
 #	define FLPLATFORM_MOBILE 0
 #endif
 

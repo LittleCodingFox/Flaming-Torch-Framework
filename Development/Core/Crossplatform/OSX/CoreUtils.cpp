@@ -1,5 +1,6 @@
 #include "FlamingCore.hpp"
 #if FLPLATFORM_MACOSX
+#include <sys/utsname.h>
 
 namespace FlamingTorch
 {
@@ -15,6 +16,13 @@ namespace FlamingTorch
 
 	int32 CoreUtils::RunProgram(const std::string &_ExePath, const std::string &Parameters, const std::string &WorkingDirectory)
 	{
+		Log::Instance.LogDebug("Core", "Running Program '%s' with arguments '%s' (WD: '%s')", ExePath.c_str(), Parameters.c_str(),
+			WorkingDirectory.c_str());
+
+		std::string CommandString = "\"" + ExePath + "\" " + Parameters;
+
+		system(CommandString.c_str());
+
 		return 0;
 	};
 

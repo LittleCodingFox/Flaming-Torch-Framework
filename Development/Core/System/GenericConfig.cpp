@@ -155,8 +155,8 @@ namespace FlamingTorch
 
 		Sections.clear();
 
-		std::string str = StringUtils::Strip(In->AsString(), '\r');
-		std::vector<std::string> Lines = StringUtils::Split(str, '\n');
+		std::string str = In->AsString();
+		std::vector<std::string> Lines = StringUtils::Split(StringUtils::Strip(str, '\r'), '\n');
 
 		std::string ActiveSection;
 
