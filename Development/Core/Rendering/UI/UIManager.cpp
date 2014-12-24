@@ -1614,6 +1614,14 @@ namespace FlamingTorch
 			{
 				//Do nothing for now
 			}
+			else if (Control == "HORIZONTALGROUP")
+			{
+				//Do nothing for now
+			}
+			else if (Control == "VERTICALGROUP")
+			{
+				//Do nothing for now
+			}
 			else
 			{
 				DisposablePointer<UILayout> TargetLayout;
