@@ -912,6 +912,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
+		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -927,6 +928,7 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
+		SpriteCache::Instance.Flush(Target);
 		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
@@ -1555,7 +1557,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::RenderText(const std::string &TheText, const TextParams &Parameters)
 	{
-		/*
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.TextureChanges++;
 
@@ -1700,7 +1701,6 @@ namespace FlamingTorch
 #else
 		FlushRenderText();
 #endif
-		*/
 	};
 
 	TextGlyphInfo SFMLRendererImplementation::GetTextGlyph(uint32 Character, const TextParams &Parameters)

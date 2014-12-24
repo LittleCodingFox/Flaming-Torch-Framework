@@ -1,5 +1,6 @@
 #include "FlamingCore.hpp"
 #if FLPLATFORM_ANDROID
+#include <sys/utsname.h>
 
 namespace FlamingTorch
 {

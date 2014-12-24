@@ -59,7 +59,16 @@ GLOBAL_INCLUDES := $(LOCAL_PATH_DEPENDENCIES_FOLDER)/Headers/ \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/Source/ \
 			$(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/
 
-CORE_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/*.cpp)
+CORE_SOURCES := $(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Audio/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Audio/Implementations/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Crossplatform/Android/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Game/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Rendering/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Rendering/Implementations/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Rendering/UI/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/Scripting/*.cpp)\
+		$(wildcard $(LOCAL_PATH_MINUS_ONE_LEVEL)/../Core/System/*.cpp)
 
 LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES -D__ANDROID__ -D__unix__ -DSFML_OPENGL_ES -DSFML_WINDOW_EXPORTS -DSFML_SYSTEM_EXPORTS -DSFML_NETWORK_EXPORTS -DSFML_GRAPHICS_EXPORTS -DSFML_AUDIO_EXPORTS -DGLEW_STATIC -DUNICODE -DFT2_BUILD_LIBRARY
 LOCAL_CPP_FLAGS := -std=c++0x
