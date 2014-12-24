@@ -902,7 +902,16 @@ namespace FlamingTorch
 
 		SavedTextDrawcalls = 0;
 
-		Window.display();
+		//Android workaround for black screen
+                Window.pushGLStates();
+                Window.display();
+                Window.popGLStates();
+
+                TextureHandle PreviousTexture = LastBoundTexture;
+
+                BindTexture((TextureHandle)0);
+
+                BindTexture(PreviousTexture);
 	};
 
 	const RendererFrameStats &SFMLRendererImplementation::FrameStats() const
