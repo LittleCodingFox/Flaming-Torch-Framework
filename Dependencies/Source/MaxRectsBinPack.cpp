@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <cassert>
+#include <cstring>
 #include <algorithm>
 
 #include "MaxRectsBinPack.h"

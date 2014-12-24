@@ -125,6 +125,10 @@ solution "Dependencies"
 				"Source/SFML/SFML/Window/Unix/SensorImpl.cpp"
 			}
 		end
+
+		if os.get() == "linux" or os.get() == "macosx" then
+			buildoptions { "-std=c++11" }
+		end
  
 		configuration "Debug"
 			targetsuffix "d"
@@ -156,8 +160,6 @@ solution "Dependencies"
 				includedirs {
 					"Source/SFML/Headers/libsndfile/osx/"
 				}
-		
-				buildoptions { "-std=c++0x" }
 			end
 
 			flags { "Symbols" }
@@ -190,8 +192,6 @@ solution "Dependencies"
 				includedirs {
 					"Source/SFML/Headers/libsndfile/osx/"
 				}
-		
-				buildoptions { "-std=c++0x" }
 			end
 
 			flags { "Optimize" }
