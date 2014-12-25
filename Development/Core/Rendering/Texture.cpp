@@ -1123,7 +1123,7 @@ namespace FlamingTorch
 
 	Rect Texture::TextureRect() const
 	{
-		Rect Out(0, Width(), 0, Height());
+		Rect Out(0, (f32)Width(), 0, (f32)Height());
 
 		const Texture *t = this;
 

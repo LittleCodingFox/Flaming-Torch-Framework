@@ -503,19 +503,19 @@ namespace FlamingTorch
 	{
 		bool Result = false;
 
-		Rect ScreenRect(0, Width, 0, Height);
+		Rect ScreenRect(0, (f32)Width, 0, (f32)Height);
 
 		if (PlatformInfo::ResolutionOverrideWidth > 0)
 		{
-			ScreenRect.Right = PlatformInfo::ResolutionOverrideWidth;
-			ScreenRect.Bottom = PlatformInfo::ResolutionOverrideHeight;
+			ScreenRect.Right = (f32)PlatformInfo::ResolutionOverrideWidth;
+			ScreenRect.Bottom = (f32)PlatformInfo::ResolutionOverrideHeight;
 		};
 
 		ScreenRect = PlatformInfo::RotateScreen(ScreenRect);
 
 		Vector2 ScreenSize = PlatformInfo::ScreenSize(ScreenRect);
 
-		Result = Impl->Create(Title, ScreenSize.x, ScreenSize.y, Style, ExpectedCaps);
+		Result = Impl->Create(Title, (uint32)ScreenSize.x, (uint32)ScreenSize.y, Style, ExpectedCaps);
 
 		if(Result)
 		{

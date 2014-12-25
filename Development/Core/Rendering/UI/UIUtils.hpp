@@ -77,7 +77,7 @@ bool RunUIScriptEvents(LuaEventGroup &Group, const std::string &ID, bool Errored
 			{
 				(*it)(Parameters...);
 			}
-			catch (std::exception &e)
+			catch (std::exception &)
 			{
 				Log::Instance.LogInfo("UIManager", "Scripting Exception on UI Element '%s'", ID.c_str()); 
 
