@@ -81,7 +81,6 @@ namespace FlamingTorch
 		static uint8 ScreenOrientation(const Rect &In);
 		static Rect ToNorthRotation(const Rect &In);
 		static Vector2 ScreenSize(const Rect &In);
-		static Vector2 RotateCoord(const Vector2 &v);
 		static f32 ScreenRotationValue();
 	};
 
