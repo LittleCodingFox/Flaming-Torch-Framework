@@ -43,8 +43,9 @@ namespace FlamingTorch
 	typedef float f32;
 	typedef double f64;
 
-	void LibWarning(unsigned int Line, const char* FileName,
-		const char* Function, const char* Variable, const char *Message, ...);
+	class Rect;
+	class Vector2;
+	typedef uint32 VersionType;
 
 	namespace PlatformType
 	{
@@ -55,20 +56,34 @@ namespace FlamingTorch
 		};
 	};
 
+	namespace ScreenRotation
+	{
+		enum ScreenRotation
+		{
+			North = 0, //!<Default
+			South, //!<Vertical Flipped
+			East, //!<90 degree right
+			West //!<90 degree left
+		};
+	};
+
 	class PlatformInfo
 	{
 	public:
-		static PlatformInfo Instance;
+		static uint8 PlatformType;
 
-		uint8 PlatformType;
+		static uint8 ScreenRotation;
 
-		uint32 ResolutionOverrideWidth, ResolutionOverrideHeight;
+		static uint32 ResolutionOverrideWidth;
+		static uint32 ResolutionOverrideHeight;
 
-		PlatformInfo();
+		static Rect RotateScreen(const Rect &In);
+		static uint8 ScreenOrientation(const Rect &In);
+		static Rect ToNorthRotation(const Rect &In);
+		static Vector2 ScreenSize(const Rect &In);
+		static Vector2 RotateCoord(const Vector2 &v);
+		static f32 ScreenRotationValue();
 	};
-
-	typedef uint32 VersionType;
-	class Rect;
 
 	/*!
 	*	Core Utilities
@@ -167,4 +182,7 @@ namespace FlamingTorch
 		*/
 		static Rect GetDesktopWorkArea();
 	};
+
+	void LibWarning(unsigned int Line, const char* FileName,
+		const char* Function, const char* Variable, const char *Message, ...);
 };

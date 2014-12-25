@@ -26,7 +26,6 @@ public:
 	bool FirstFrame;
 	bool DevelopmentBuild;
 	bool IsGUISandbox;
-	bool IsMobile;
 	bool QuitFlag;
 	bool GraphicsEnabled;
 	uint32 UpdateRateValue, FrameRateValue;
@@ -37,8 +36,7 @@ public:
 
 	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
-			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS),
-			IsMobile(PlatformInfo::Instance.PlatformType == PlatformType::Mobile), QuitFlag(false){};
+			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS), QuitFlag(false){};
 
 	virtual ~GameInterface() {};
 
@@ -140,13 +138,13 @@ public:
 	*	\param argc the argument count
 	*	\param argv the argument values
 	*/
-	virtual int32 Run(int32 argc, char **argv) = 0;
+	virtual int32 Run(int32 argc, char **argv);
 };
 
 class NativeGameInterface : public GameInterface
 {
 public:
-	int32 Run(int32 argc, char **argv);
+	int32 Run(int32 argc, char **argv) override;
 };
 
 class ScriptedGameInterface : public GameInterface
@@ -159,39 +157,38 @@ public:
 		OnFrameBeginFunction, OnFrameEndFunction, OnFrameDrawFunction, OnResizeFunction, OnResourcesReloadedFunction,
 		ShouldQuitFunction;
 
-	const std::string &GameName()
-	{
-		return GameNameValue;
-	};
-
-	int32 FixedUpdateRate()
-	{
-		return UpdateRateValue;
-	};
-
 	ScriptedGameInterface() : GameNameValue("Game")
 	{
 	};
 
 	~ScriptedGameInterface();
 
-	DisposablePointer<LuaScript> GetScriptInstance()
+	const std::string &GameName() override
+	{
+		return GameNameValue;
+	};
+
+	int32 FixedUpdateRate() override
+	{
+		return UpdateRateValue;
+	};
+
+	DisposablePointer<LuaScript> GetScriptInstance() override
 	{
 		return ScriptInstance;
 	};
 
 #if USE_GRAPHICS
-	void OnFrameBegin(Renderer *TheRenderer);
-	void OnFrameDraw(Renderer *TheRenderer);
-	void OnFrameEnd(Renderer *TheRenderer);
-	void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height);
-	void OnResourcesReloaded(Renderer *TheRenderer);
+	void OnFrameBegin(Renderer *TheRenderer) override;
+	void OnFrameDraw(Renderer *TheRenderer) override;
+	void OnFrameEnd(Renderer *TheRenderer) override;
+	void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height) override;
+	void OnResourcesReloaded(Renderer *TheRenderer) override;
 #endif
 
-	void OnFixedUpdate();
-	void OnFrameUpdate();
-	bool ShouldQuit();
+	void OnFixedUpdate() override;
+	void OnFrameUpdate() override;
+	bool ShouldQuit() override;
 
-	int32 Run(int32 argc, char **argv);
+	int32 Run(int32 argc, char **argv) override;
 };
-

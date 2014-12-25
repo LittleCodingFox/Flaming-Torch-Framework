@@ -125,20 +125,27 @@ namespace FlamingTorch
 #if FLPLATFORM_ANDROID
 			ExtensionsAvailable = false;
 #else
-			GLenum err = glewInit();
-
-			if(GLEW_OK != err)
+			if (PlatformInfo::PlatformType == PlatformType::Mobile)
 			{
-				Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
-					glewGetErrorString(err));
-
 				ExtensionsAvailable = false;
 			}
 			else
 			{
-				ExtensionsAvailable = true;
-				//Disabled for now
-				//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
+				GLenum err = glewInit();
+
+				if (GLEW_OK != err)
+				{
+					Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
+						glewGetErrorString(err));
+
+					ExtensionsAvailable = false;
+				}
+				else
+				{
+					ExtensionsAvailable = true;
+					//Disabled for now
+					//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
+				};
 			};
 #endif
 
@@ -232,20 +239,27 @@ namespace FlamingTorch
 #if FLPLATFORM_ANDROID
 			ExtensionsAvailable = false;
 #else
-			GLenum err = glewInit();
-
-			if(GLEW_OK != err)
+			if (PlatformInfo::PlatformType == PlatformType::Mobile)
 			{
-				Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
-					glewGetErrorString(err));
-
 				ExtensionsAvailable = false;
 			}
 			else
 			{
-				ExtensionsAvailable = true;
-				//Disabled for now
-				//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
+				GLenum err = glewInit();
+
+				if (GLEW_OK != err)
+				{
+					Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
+						glewGetErrorString(err));
+
+					ExtensionsAvailable = false;
+				}
+				else
+				{
+					ExtensionsAvailable = true;
+					//Disabled for now
+					//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
+				};
 			};
 #endif
 

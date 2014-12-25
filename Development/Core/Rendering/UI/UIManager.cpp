@@ -1961,7 +1961,7 @@ namespace FlamingTorch
 
 	DisposablePointer<UIElement> UIManager::GetMouseOverElement()
 	{
-		if (PlatformInfo::Instance.PlatformType == PlatformType::Mobile)
+		if (PlatformInfo::PlatformType == PlatformType::Mobile)
 			return DisposablePointer<UIElement>();
 
 		if(DrawOrderCacheDirty)

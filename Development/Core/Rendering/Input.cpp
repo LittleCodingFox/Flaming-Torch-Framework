@@ -319,7 +319,7 @@ namespace FlamingTorch
 					MouseButtons[i].JustReleased = true;
 				};
 
-				if(PlatformInfo::Instance.PlatformType == PlatformType::Mobile)
+				if(PlatformInfo::PlatformType == PlatformType::Mobile)
 					HasFocus = false;
 
 				break;
@@ -331,7 +331,7 @@ namespace FlamingTorch
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
 				};
 
-				if(PlatformInfo::Instance.PlatformType == PlatformType::Mobile)
+				if(PlatformInfo::PlatformType == PlatformType::Mobile)
 					HasFocus = true;
 
 				break;

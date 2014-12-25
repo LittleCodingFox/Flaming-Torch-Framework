@@ -132,14 +132,87 @@ namespace FlamingTorch
 		return TheRenderer;
 	};
 
+	int32 GameInterface::Run(int32 argc, char **argv)
+	{
+		uint32 OverrideWidth = 0, OverrideHeight = 0;
+
+		for(int32 i = 1; i < argc; i++)
+		{
+			std::string argument(argv[i]);
+
+			if (argument == "-w" && i + 1 < argc)
+			{
+				if (1 != sscanf(argv[i + 1], "%u", &OverrideWidth))
+				{
+					OverrideWidth = 0;
+				};
+			}
+			else if (argument == "-h" && i + 1 < argc)
+			{
+				if (1 != sscanf(argv[i + 1], "%u", &OverrideHeight))
+				{
+					OverrideHeight = 0;
+				};
+			}
+			else if (argument == "-mobile")
+			{
+				PlatformInfo::PlatformType = PlatformType::Mobile;
+			}
+			else if (argument.find("-sr") == 0)
+			{
+				char c = argument[strlen("-sr")];
+
+				switch (c)
+				{
+				case 'n':
+					PlatformInfo::ScreenRotation = ScreenRotation::North;
+
+					break;
+
+				case 's':
+					PlatformInfo::ScreenRotation = ScreenRotation::South;
+
+					break;
+
+				case 'w':
+					PlatformInfo::ScreenRotation = ScreenRotation::West;
+
+					break;
+
+				case 'e':
+					PlatformInfo::ScreenRotation = ScreenRotation::East;
+
+					break;
+
+				default:
+					Log::Instance.LogWarn(TAG, "Unknown rotation ID '%c'", c);
+				};
+			}
+			else if (argument == "-pc")
+			{
+				PlatformInfo::PlatformType = PlatformType::PC;
+			};
+		};
+
+		if (OverrideWidth > 0 && OverrideHeight > 0)
+		{
+			PlatformInfo::ResolutionOverrideWidth = OverrideWidth;
+			PlatformInfo::ResolutionOverrideHeight = OverrideHeight;
+		};
+
+		return 0;
+	};
+
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer)
 	{
 		bool PushOrtho = TheRenderer->MatrixStackSize() == 0;
 
 		if(PushOrtho)
 		{
+			Rect ScreenRect(PlatformInfo::RotateScreen(Rect(0, TheRenderer->Size().x, TheRenderer->Size().y, 0)));
+
 			TheRenderer->PushMatrices();
-			TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, TheRenderer->Size().x, TheRenderer->Size().y, 0, -1, 1));
+			TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(ScreenRect.Left, ScreenRect.Right, ScreenRect.Bottom, ScreenRect.Top, -1, 1));
 		};
 
 		{
@@ -214,6 +287,8 @@ namespace FlamingTorch
 
 	int32 NativeGameInterface::Run(int32 argc, char **argv)
 	{
+		GameInterface::Run(argc, argv);
+
 		FirstFrame = true;
 		InitSubsystems();
 
@@ -290,7 +365,7 @@ namespace FlamingTorch
 			};
 
 #if USE_GRAPHICS
-			if(IsMobile && !RendererManager::Instance.Input.HasFocus)
+			if(PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
 #endif
 		};
@@ -332,6 +407,7 @@ namespace FlamingTorch
 
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
 	{
+		GameInterface::Run(argc, argv);
 		FirstFrame = true;
 		PackageFileSystemManager::Instance.Register();
 
@@ -648,7 +724,7 @@ namespace FlamingTorch
 			};
 
 #if USE_GRAPHICS
-			if(IsMobile && !RendererManager::Instance.Input.HasFocus)
+			if (PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
 #endif
 		};

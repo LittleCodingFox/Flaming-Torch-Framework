@@ -97,6 +97,11 @@ namespace FlamingTorch
 		return ConsoleVariable(Name, Value);
 	};
 
+	uint8 GetPlatformInfoType()
+	{
+		return PlatformInfo::PlatformType;
+	};
+
 	bool LuaGameClockMayPerformFixedStepStep(GameClock &)
 	{
 		return GameClock::Instance.MayPerformFixedStepStep();
@@ -1312,7 +1317,6 @@ namespace FlamingTorch
 				.def_readwrite("FrameRate", &GameInterface::FrameRateValue)
 				.def_readwrite("DevelopmentBuild", &GameInterface::DevelopmentBuild)
 				.def_readwrite("IsGUISandbox", &GameInterface::IsGUISandbox)
-				.def_readonly("IsMobile", &GameInterface::IsMobile)
 				.def_readonly("GraphicsEnabled", &GameInterface::GraphicsEnabled)
 				.def_readonly("FirstFrame", &GameInterface::FirstFrame)
 				.def_readwrite("QuitFlag", &GameInterface::QuitFlag)
@@ -1320,6 +1324,25 @@ namespace FlamingTorch
 				.def("CreateRenderer", &GameInterface::CreateRenderer)
 #endif
 				.def("LoadPackage", &GameInterface::LoadPackage),
+
+			//PlatformInfo
+			luabind::class_<PlatformInfo>("PlatformInfo")
+				.enum_("constants")[
+					luabind::value("PlatformType_PC", PlatformType::PC),
+					luabind::value("PlatformType_Mobile", PlatformType::Mobile),
+					luabind::value("ScreenRotation_North", ScreenRotation::North),
+					luabind::value("ScreenRotation_South", ScreenRotation::South),
+					luabind::value("ScreenRotation_East", ScreenRotation::East),
+					luabind::value("ScreenRotation_West", ScreenRotation::West)
+				]
+				.scope [
+					luabind::def("RotateScreen", &PlatformInfo::RotateScreen),
+					luabind::def("ScreenOrientation", &PlatformInfo::ScreenOrientation),
+					luabind::def("ToNorthRotation", &PlatformInfo::ToNorthRotation),
+					luabind::def("ScreenRotationValue", &PlatformInfo::ScreenRotationValue),
+					luabind::def("ScreenSize", &PlatformInfo::ScreenSize),
+					luabind::def("PlatformType", &GetPlatformInfoType)
+				],
 
 			//LuaScript
 			luabind::class_<LuaScript>("LuaScript"),

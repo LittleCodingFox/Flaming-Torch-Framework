@@ -42,7 +42,7 @@ GameInitialize = function(Arguments)
 		return false
 	end
 
-	Renderer.Camera:SetOrtho(Rect(0, Renderer.Size.x, 0, Renderer.Size.y), -1, 1)
+	Renderer.Camera:SetOrtho(PlatformInfo.RotateScreen(Rect(0, Renderer.Size.x, 0, Renderer.Size.y)), -1, 1)
 	
 	LogoSprite.Texture = LogoTexture
 	

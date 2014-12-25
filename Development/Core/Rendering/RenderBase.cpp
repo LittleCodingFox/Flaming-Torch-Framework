@@ -344,7 +344,7 @@ namespace FlamingTorch
 			};
 		};
 
-		if(!Input.HasFocus && PlatformInfo::Instance.PlatformType == PlatformType::Mobile)
+		if(!Input.HasFocus && PlatformInfo::PlatformType == PlatformType::Mobile)
 			return ReturnValue;
 
 		Renderer *Renderer = ActiveRenderer();
@@ -369,8 +369,10 @@ namespace FlamingTorch
 
 		if(PushOrtho)
 		{
+			Rect ScreenRect(PlatformInfo::RotateScreen(Rect(0, Renderer->Size().x, Renderer->Size().y, 0)));
+
 			Renderer->PushMatrices();
-			Renderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, Renderer->Size().x, Renderer->Size().y, 0, -1, 1));
+			Renderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(ScreenRect.Left, ScreenRect.Right, ScreenRect.Bottom, ScreenRect.Top, -1, 1));
 		};
 
 #if PROFILER_ENABLED
@@ -501,14 +503,19 @@ namespace FlamingTorch
 	{
 		bool Result = false;
 
-		if (PlatformInfo::Instance.ResolutionOverrideWidth > 0)
+		Rect ScreenRect(0, Width, 0, Height);
+
+		if (PlatformInfo::ResolutionOverrideWidth > 0)
 		{
-			Result = Impl->Create(Title, PlatformInfo::Instance.ResolutionOverrideWidth, PlatformInfo::Instance.ResolutionOverrideHeight, Style, ExpectedCaps);
-		}
-		else
-		{
-			Result = Impl->Create(Title, Width, Height, Style, ExpectedCaps);
+			ScreenRect.Right = PlatformInfo::ResolutionOverrideWidth;
+			ScreenRect.Bottom = PlatformInfo::ResolutionOverrideHeight;
 		};
+
+		ScreenRect = PlatformInfo::RotateScreen(ScreenRect);
+
+		Vector2 ScreenSize = PlatformInfo::ScreenSize(ScreenRect);
+
+		Result = Impl->Create(Title, ScreenSize.x, ScreenSize.y, Style, ExpectedCaps);
 
 		if(Result)
 		{
