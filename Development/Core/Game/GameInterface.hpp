@@ -38,7 +38,7 @@ public:
 	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
 			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS),
-			IsMobile(FLPLATFORM_MOBILE), QuitFlag(false){};
+			IsMobile(PlatformInfo::Instance.PlatformType == PlatformType::Mobile), QuitFlag(false){};
 
 	virtual ~GameInterface() {};
 

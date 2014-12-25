@@ -344,10 +344,8 @@ namespace FlamingTorch
 			};
 		};
 
-#if FLPLATFORM_MOBILE
-		if(!Input.HasFocus)
+		if(!Input.HasFocus && PlatformInfo::Instance.PlatformType == PlatformType::Mobile)
 			return ReturnValue;
-#endif
 
 		Renderer *Renderer = ActiveRenderer();
 
@@ -501,7 +499,16 @@ namespace FlamingTorch
 
 	bool Renderer::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
-		bool Result = Impl->Create(Title, Width, Height, Style, ExpectedCaps);
+		bool Result = false;
+
+		if (PlatformInfo::Instance.ResolutionOverrideWidth > 0)
+		{
+			Result = Impl->Create(Title, PlatformInfo::Instance.ResolutionOverrideWidth, PlatformInfo::Instance.ResolutionOverrideHeight, Style, ExpectedCaps);
+		}
+		else
+		{
+			Result = Impl->Create(Title, Width, Height, Style, ExpectedCaps);
+		};
 
 		if(Result)
 		{

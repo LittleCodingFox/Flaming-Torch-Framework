@@ -319,9 +319,8 @@ namespace FlamingTorch
 					MouseButtons[i].JustReleased = true;
 				};
 
-#if FLPLATFORM_MOBILE
-				HasFocus = false;
-#endif
+				if(PlatformInfo::Instance.PlatformType == PlatformType::Mobile)
+					HasFocus = false;
 
 				break;
 
@@ -332,29 +331,28 @@ namespace FlamingTorch
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
 				};
 
-#if FLPLATFORM_MOBILE
-				HasFocus = true;
-#endif
+				if(PlatformInfo::Instance.PlatformType == PlatformType::Mobile)
+					HasFocus = true;
 
 				break;
 
 			case RendererEventType::TouchDown:
 				Touches[Event.TouchIndex].JustPressed = Touches[Event.TouchIndex].Pressed = true;
-				Touches[Event.TouchIndex].Position = Event.TouchPosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
+				Touches[Event.TouchIndex].Position = Event.TouchPosition;
 
 				break;
 
 			case RendererEventType::TouchUp:
 				Touches[Event.TouchIndex].JustPressed = Touches[Event.TouchIndex].Pressed = false;
 				Touches[Event.TouchIndex].JustReleased = true;
-				Touches[Event.TouchIndex].Position = Event.TouchPosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
+				Touches[Event.TouchIndex].Position = Event.TouchPosition;
 
 				break;
 
 			case RendererEventType::TouchDrag:
 				Touches[Event.TouchIndex].Pressed = Touches[Event.TouchIndex].Dragged = true;
 				Touches[Event.TouchIndex].DragDifference = Event.TouchPosition - Touches[Event.TouchIndex].Position;
-				Touches[Event.TouchIndex].Position = Event.TouchPosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
+				Touches[Event.TouchIndex].Position = Event.TouchPosition;
 
 				break;
 
@@ -381,7 +379,7 @@ namespace FlamingTorch
 				break;
 
 			case RendererEventType::MouseMoved:
-				MousePosition = Event.MousePosition / TheRenderer->ScaleCoordinate(Vector2(1, 1));
+				MousePosition = Event.MousePosition;
 
 				break;
 

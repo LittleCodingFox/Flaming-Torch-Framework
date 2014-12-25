@@ -1751,7 +1751,7 @@ namespace FlamingTorch
 		};
 
 		Out.Advance = TheGlyph.advance;
-		Out.Offset = Vector2(TheGlyph.bounds.left, Parameters.FontSizeValue + TheGlyph.bounds.top);
+		Out.Offset = Vector2((f32)TheGlyph.bounds.left, (f32)Parameters.FontSizeValue + TheGlyph.bounds.top);
 
 		return Out;
 	};

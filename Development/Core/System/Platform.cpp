@@ -12,6 +12,17 @@
 #include <stdarg.h>
 namespace FlamingTorch
 {
+	PlatformInfo PlatformInfo::Instance;
+
+	PlatformInfo::PlatformInfo() : ResolutionOverrideWidth(0), ResolutionOverrideHeight(0)
+	{
+#if FLPLATFORM_MOBILE
+		PlatformType = PlatformType::Mobile;
+#else
+		PlatformType = PlatformType::PC;
+#endif
+	};
+
 #if FLPLATFORM_WINDOWS
 	void PrintStack()
 	{

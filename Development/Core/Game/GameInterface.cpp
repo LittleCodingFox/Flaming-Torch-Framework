@@ -513,7 +513,7 @@ namespace FlamingTorch
 		{
 			Success = ProtectedLuaCast<bool>(PreInitFunction());
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			Instance.Dispose();
 
@@ -559,7 +559,7 @@ namespace FlamingTorch
 
 			Success = ProtectedLuaCast<bool>(InitFunction(Arguments));
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			Instance.Dispose();
 
@@ -659,7 +659,7 @@ namespace FlamingTorch
 			{
 				ProtectedLuaCast<bool>(DeInitFunction());
 			}
-			catch(std::exception &e)
+			catch(std::exception &)
 			{
 				Instance.Dispose();
 
@@ -704,7 +704,7 @@ namespace FlamingTorch
 		{
 			OnFrameBeginFunction(TheRenderer);
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			ErroredOnFrameBegin = true;
 		};
@@ -721,7 +721,7 @@ namespace FlamingTorch
 		{
 			OnFrameDrawFunction(TheRenderer);
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			ErroredOnFrameDraw = true;
 		};
@@ -738,7 +738,7 @@ namespace FlamingTorch
 		{
 			OnFrameEndFunction(TheRenderer);
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			ErroredOnFrameEnd = true;
 		};
@@ -757,7 +757,7 @@ namespace FlamingTorch
 		{
 			OnResizeFunction(TheRenderer, Width, Height);
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			ErroredOnResize = true;
 		};
@@ -774,7 +774,7 @@ namespace FlamingTorch
 		{
 			OnResourcesReloadedFunction(TheRenderer);
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			ErroredOnResourcesReloaded = true;
 		};
@@ -792,7 +792,7 @@ namespace FlamingTorch
 		{
 			OnFixedUpdateFunction();
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			ErroredOnFixedUpdate = true;
 		};
@@ -809,7 +809,7 @@ namespace FlamingTorch
 		{
 			OnFrameUpdateFunction();
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			ErroredOnFrameUpdate = true;
 		};
@@ -823,7 +823,7 @@ namespace FlamingTorch
 		{
 			return ProtectedLuaCast<bool>(ShouldQuitFunction()) || QuitFlag;
 		}
-		catch(std::exception &e)
+		catch(std::exception &)
 		{
 			return true;
 		};

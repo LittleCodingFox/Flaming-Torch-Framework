@@ -30,6 +30,7 @@ namespace FlamingTorch
 
 	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle, SoundHandle, MusicHandle;
 
+#	include "System/DisposablePointer.hpp"
 #	include "System/MiniDump.hpp"
 #	include "System/SubSystem.hpp"
 #	include "System/Log.hpp"
