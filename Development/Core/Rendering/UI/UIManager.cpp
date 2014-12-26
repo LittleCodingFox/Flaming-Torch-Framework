@@ -902,7 +902,23 @@ namespace FlamingTorch
 
 			Vector4 Color;
 
-			if(4 == sscanf(ColorString.c_str(), "%f, %f, %f, %f", &Color.x, &Color.y, &Color.z, &Color.w))
+			bool GotColor = false;
+
+			if (ColorString.length())
+			{
+				if (ColorString[0] == '#')
+				{
+					Color = MathUtils::ColorFromHTML(ColorString);
+
+					GotColor = true;
+				}
+				else if (4 == sscanf(ColorString.c_str(), "%f, %f, %f, %f", &Color.x, &Color.y, &Color.z, &Color.w))
+				{
+					GotColor = true;
+				};
+			};
+
+			if (GotColor)
 			{
 				if (TheSprite->TheSprite.SpriteTexture.Get())
 				{
