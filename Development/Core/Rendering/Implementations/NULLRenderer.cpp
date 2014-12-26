@@ -56,6 +56,20 @@ namespace FlamingTorch
 		return 1;
 	};
 
+	FrameBufferHandle NULLRendererImplementation::CreateFrameBuffer(const FrameBufferCreationInfo &Info)
+	{
+		return 1;
+	};
+
+	void NULLRendererImplementation::BindFrameBuffer(FrameBufferHandle Handle) {};
+
+	bool NULLRendererImplementation::IsFrameBufferValid(FrameBufferHandle Handle)
+	{
+		return true;
+	};
+
+	void NULLRendererImplementation::DestroyFrameBuffer(FrameBufferHandle Handle) {};
+
 	void NULLRendererImplementation::SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize) {};
 
 	void NULLRendererImplementation::DestroyVertexBuffer(VertexBufferHandle Handle) {};

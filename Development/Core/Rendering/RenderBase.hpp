@@ -109,6 +109,8 @@ class IRendererImplementation;
 #include "RendererFrameStats.hpp"
 #include "RendererDisplayMode.hpp"
 #include "RendererCapabilities.hpp"
+#include "ScenePass.hpp"
+#include "FrameBufferCreationInfo.hpp"
 #include "Renderer.hpp"
 #include "RendererManager.hpp"
 #include "IRendererImplementation.hpp"

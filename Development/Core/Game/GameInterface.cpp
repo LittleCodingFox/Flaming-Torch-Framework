@@ -203,8 +203,11 @@ namespace FlamingTorch
 		return 0;
 	};
 
-	void GameInterface::OnFrameEnd(Renderer *TheRenderer)
+	void GameInterface::OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass)
 	{
+		if (ScenePass != SCENEPASS_END)
+			return;
+
 		bool PushOrtho = TheRenderer->MatrixStackSize() == 0;
 
 		if(PushOrtho)
@@ -769,7 +772,7 @@ namespace FlamingTorch
 		return value;
 
 #if USE_GRAPHICS
-	void ScriptedGameInterface::OnFrameBegin(Renderer *TheRenderer)
+	void ScriptedGameInterface::OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass)
 	{
 		if(ErroredOnFrameBegin)
 			return;
@@ -786,7 +789,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void ScriptedGameInterface::OnFrameDraw(Renderer *TheRenderer)
+	void ScriptedGameInterface::OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass)
 	{
 		if(ErroredOnFrameDraw)
 			return;
@@ -803,7 +806,7 @@ namespace FlamingTorch
 		};
 	};
 
-	void ScriptedGameInterface::OnFrameEnd(Renderer *TheRenderer)
+	void ScriptedGameInterface::OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass)
 	{
 		if(ErroredOnFrameEnd)
 			return;
@@ -819,7 +822,7 @@ namespace FlamingTorch
 			ErroredOnFrameEnd = true;
 		};
 
-		GameInterface::OnFrameEnd(TheRenderer);
+		GameInterface::OnFrameEnd(TheRenderer, ScenePass);
 	};
 
 	void ScriptedGameInterface::OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height)

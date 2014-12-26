@@ -91,6 +91,31 @@ public:
 	virtual void DestroyVertexBuffer(VertexBufferHandle Handle) = 0;
 
 	/*!
+	*	Creates a Frame Buffer
+	*	\param Info the creation info for the buffer
+	*	\return a FrameBufferHandle or INVALID_FTGHANDLE
+	*/
+	virtual FrameBufferHandle CreateFrameBuffer(const FrameBufferCreationInfo &Info) = 0;
+
+	/*!
+	*	\param Handle the FrameBufferHandle to bind
+	*	\return whether Handle is valid
+	*/
+	virtual bool IsFrameBufferValid(FrameBufferHandle Handle) = 0;
+
+	/*!
+	*	Binds a FrameBuffer for rendering
+	*	\param Handle the FrameBufferHandle to bind
+	*/
+	virtual void BindFrameBuffer(FrameBufferHandle Handle) = 0;
+
+	/*!
+	*	Destroys a Frame Buffer
+	*	\param Handle the FrameBufferHandle to destroy
+	*/
+	virtual void DestroyFrameBuffer(FrameBufferHandle Handle) = 0;
+
+	/*!
 	*	Render vertices
 	*	\param VertexMode one of VertexModes::*
 	*	\param Buffer is the handle of the Vertex Buffer

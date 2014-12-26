@@ -1,4 +1,7 @@
 #if USE_GRAPHICS
+
+#	define SCENEPASS_END "END"
+
 /*!
 *	Renderer is a rendering class that takes care of windowing and OpenGL Contexts
 */
@@ -27,6 +30,7 @@ private:
 	Matrix4x4 LastWorldMatrix, LastProjectionMatrix;
 
 	std::vector<Rect> ClippingStack;
+	std::vector<DisposablePointer<ScenePass> > ScenePasses;
 public:
 	Camera RenderCamera;
 
@@ -34,8 +38,9 @@ public:
 	*	OnFrameStarted should be used to do stuff before we render the main frame such as clearing the screen
 	*	OnFrameEnded should be used to draw stuff after the frame has ended, such as our HUD
 	*	OnFrameDraw should be used for drawing the main content of the frame
+	*	\note the ScenePass might have a hardcoded name of END, which means it will display its contents on the screen afterwards
 	*/
-	SimpleDelegate::SimpleDelegate<Renderer *> OnFrameStarted, OnFrameEnded, OnFrameDraw;
+	SimpleDelegate::SimpleDelegate<Renderer *, const std::string &> OnFrameStarted, OnFrameEnded, OnFrameDraw;
 
 	/*!
 	*	OnResized should be used to reset your camera and projection matrix
@@ -58,6 +63,18 @@ public:
 	*	\return the Renderer Handle
 	*/
 	RendererHandle Handle() const;
+
+	/*!
+	*	Adds a scene pass
+	*	\param Name the name of the scene pass to add
+	*/
+	void AddScenePass(const std::string &Name);
+
+	/*!
+	*	Removes a scene pass
+	*	\param Name the name of the scene pass to remove
+	*/
+	void RemoveScenePass(const std::string &Name);
 
 	/*!
 	*	Creates a renderer from a Window Handle
@@ -113,7 +130,7 @@ public:
 	
 	/*!
 	*	Creates a Vertex Buffer
-	*	\return a vertex buffer handle, or 0 on error
+	*	\return a vertex buffer handle, or INVALID_FTGHANDLE on error
 	*/
 	VertexBufferHandle CreateVertexBuffer();
 
@@ -139,6 +156,31 @@ public:
 	*	\param Handle the handle of the vertex buffer to destroy
 	*/
 	void DestroyVertexBuffer(VertexBufferHandle Handle);
+
+	/*!
+	*	Creates a Frame Buffer
+	*	\param Info the creation info for the buffer
+	*	\return a FrameBufferHandle or INVALID_FTGHANDLE
+	*/
+	FrameBufferHandle CreateFrameBuffer(const FrameBufferCreationInfo &Info);
+
+	/*!
+	*	\param Handle the FrameBufferHandle to bind
+	*	\return whether Handle is valid
+	*/
+	bool IsFrameBufferValid(FrameBufferHandle Handle);
+
+	/*!
+	*	Binds a FrameBuffer for rendering
+	*	\param Handle the FrameBufferHandle to bind
+	*/
+	void BindFrameBuffer(FrameBufferHandle Handle);
+
+	/*!
+	*	Destroys a Frame Buffer
+	*	\param Handle the FrameBufferHandle to destroy
+	*/
+	void DestroyFrameBuffer(FrameBufferHandle Handle);
 
 	/*!
 	*	Render vertices

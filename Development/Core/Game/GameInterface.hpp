@@ -103,20 +103,23 @@ public:
 	/*!
 	*	Called when a frame begins
 	*	\param TheRenderer the renderer to use for rendering
+	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameBegin(Renderer *TheRenderer) {};
+	virtual void OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass) {};
 
 	/*!
 	*	Called when a frame is drawn
 	*	\param TheRenderer the renderer to use for rendering
+	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameDraw(Renderer *TheRenderer) {};
+	virtual void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass) {};
 
 	/*!
 	*	Called when a frame ends
 	*	\param TheRenderer the renderer to use for rendering
+	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameEnd(Renderer *TheRenderer);
+	virtual void OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass);
 
 	/*!
 	*	Called when a renderer resizes
@@ -179,9 +182,9 @@ public:
 	};
 
 #if USE_GRAPHICS
-	void OnFrameBegin(Renderer *TheRenderer) override;
-	void OnFrameDraw(Renderer *TheRenderer) override;
-	void OnFrameEnd(Renderer *TheRenderer) override;
+	void OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass) override;
+	void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass) override;
+	void OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass) override;
 	void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height) override;
 	void OnResourcesReloaded(Renderer *TheRenderer) override;
 #endif

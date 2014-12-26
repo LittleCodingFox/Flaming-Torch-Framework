@@ -20,6 +20,11 @@ namespace FlamingTorch
 	uint64 SFMLRendererImplementation::TextureCounter = 0;
 	uint64 SFMLRendererImplementation::FontCounter = 0;
 	uint64 SFMLRendererImplementation::VertexBufferCounter = 0;
+	uint64 SFMLRendererImplementation::FrameBufferCounter = 0;
+	bool SFMLRendererImplementation::ExtensionsAvailable = false;
+	bool SFMLRendererImplementation::SupportsVBOs = false;
+	bool SFMLRendererImplementation::SupportsFBOs = false;
+	GLint SFMLRendererImplementation::MaximumTextureSize = 0;
 
 	uint8 VertexBufferDataElementSizes[VertexElementDataType::Count] = {
 		sizeof(f32),
@@ -48,13 +53,12 @@ namespace FlamingTorch
 		Log::Instance.LogInfo(TAG, "   Vendor: %s", glGetString(GL_VENDOR));
 		Log::Instance.LogInfo(TAG, "   Version: %s", glGetString(GL_VERSION));
 
-#if !FLPLATFORM_ANDROID
-		int t, t2, t3;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &t);
+		int32 t, t2, t3;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &SFMLRendererImplementation::MaximumTextureSize);
 
 		GLCHECK();
 
-		Log::Instance.LogInfo(TAG, "   Max Texture Size: %d", t);
+		Log::Instance.LogInfo(TAG, "   Max Texture Size: %d", SFMLRendererImplementation::MaximumTextureSize);
 
 		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &t);
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &t2);
@@ -69,10 +73,9 @@ namespace FlamingTorch
 		GLCHECK();
 
 		Log::Instance.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
-#endif
 	};
 
-	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), SupportsVBOs(false), ExtensionsAvailable(false), LastBoundVBO(0), 
+	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), LastBoundVBO(0), 
 		UniqueCacheStringID(0), SavedTextDrawcalls(0), BorderlessWindowMode(false)
 	{
 		FrameStatsValue.RendererName = "SFML";
@@ -143,6 +146,7 @@ namespace FlamingTorch
 				else
 				{
 					ExtensionsAvailable = true;
+					SupportsFBOs = !!glewIsSupported("GL_ARB_framebuffer_object");
 					//Disabled for now
 					//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
 				};
@@ -257,6 +261,7 @@ namespace FlamingTorch
 				else
 				{
 					ExtensionsAvailable = true;
+					SupportsFBOs = !!glewIsSupported("GL_ARB_framebuffer_object");
 					//Disabled for now
 					//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
 				};
@@ -271,6 +276,122 @@ namespace FlamingTorch
 		glDisable(GL_DEPTH_TEST);
 
 		return true;
+	};
+
+	FrameBufferHandle SFMLRendererImplementation::CreateFrameBuffer(const FrameBufferCreationInfo &Info)
+	{
+		if (!ExtensionsAvailable || !SupportsFBOs || Info.Size.x <= 0 || Info.Size.y <= 0)
+			return INVALID_FTGHANDLE;
+
+		for (uint32 i = 0; i < Info.ColorBuffers.size(); i++)
+		{
+			if (Info.ColorBuffers[i].Get() == NULL || Info.ColorBuffers[i]->Size() != Info.Size || !IsTextureHandleValid(Info.ColorBuffers[i]->Handle()))
+				return INVALID_FTGHANDLE;
+		};
+
+		DisposablePointer<FrameBufferInfo> FBInfo(new FrameBufferInfo());
+
+		GLCHECK();
+
+		glGenFramebuffers(1, &FBInfo->GLID);
+
+		GLCHECK();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, FBInfo->GLID);
+
+		GLCHECK();
+
+		std::vector<GLuint> DrawBuffers;
+		TextureHandle PreviousHandle = LastBoundTexture;
+
+		BindTexture((TextureHandle)0);
+
+		for (uint32 i = 0; i < Info.ColorBuffers.size(); i++)
+		{
+			BindTexture(Info.ColorBuffers[i]->Handle());
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, Textures[Info.ColorBuffers[i]->Handle()].GLID, 0);
+
+			GLCHECK();
+
+			DrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+		};
+
+		BindTexture(PreviousHandle);
+
+		glGenRenderbuffers(1, &FBInfo->RenderBufferID);
+
+		GLCHECK();
+
+		glBindRenderbuffer(GL_RENDERBUFFER, FBInfo->RenderBufferID);
+
+		GLCHECK();
+
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Info.Size.x, Info.Size.y);
+
+		GLCHECK();
+
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, FBInfo->RenderBufferID);
+
+		GLCHECK();
+
+		glDrawBuffers(DrawBuffers.size(), &DrawBuffers[0]);
+
+		GLCHECK();
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			glDeleteRenderbuffers(1, &FBInfo->RenderBufferID);
+			glDeleteFramebuffers(1, &FBInfo->GLID);
+
+			return INVALID_FTGHANDLE;
+		};
+
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		FrameBuffers[++FrameBufferCounter] = FBInfo;
+
+		return FrameBufferCounter;
+	};
+
+	bool SFMLRendererImplementation::IsFrameBufferValid(FrameBufferHandle Handle)
+	{
+		FrameBufferMap::iterator it = FrameBuffers.find(Handle);
+
+		return it != FrameBuffers.end();
+	};
+
+	void SFMLRendererImplementation::BindFrameBuffer(FrameBufferHandle Handle)
+	{
+		if (!IsFrameBufferValid(Handle))
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			return;
+		};
+
+		glBindFramebuffer(GL_FRAMEBUFFER, FrameBuffers[Handle]->GLID);
+	};
+
+	void SFMLRendererImplementation::DestroyFrameBuffer(FrameBufferHandle Handle)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		if (!IsFrameBufferValid(Handle))
+			return;
+
+		FrameBufferMap::iterator it = FrameBuffers.find(Handle);
+
+		glDeleteRenderbuffers(1, &it->second->RenderBufferID);
+		glDeleteFramebuffers(1, &it->second->GLID);
+
+		FrameBuffers.erase(it);
 	};
 
 	const RendererCapabilities &SFMLRendererImplementation::Capabilities() const
@@ -917,15 +1038,15 @@ namespace FlamingTorch
 		SavedTextDrawcalls = 0;
 
 		//Android workaround for black screen
-                Window.pushGLStates();
-                Window.display();
-                Window.popGLStates();
+		Window.pushGLStates();
+		Window.display();
+		Window.popGLStates();
 
-                TextureHandle PreviousTexture = LastBoundTexture;
+		TextureHandle PreviousTexture = LastBoundTexture;
 
-                BindTexture((TextureHandle)0);
+		BindTexture((TextureHandle)0);
 
-                BindTexture(PreviousTexture);
+		BindTexture(PreviousTexture);
 	};
 
 	const RendererFrameStats &SFMLRendererImplementation::FrameStats() const

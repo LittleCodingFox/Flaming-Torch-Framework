@@ -14,8 +14,11 @@ namespace FlamingTorch
 	private:
 		static bool FirstRenderer;
 
-		static uint64 TextureCounter, FontCounter, VertexBufferCounter;
+		static uint64 TextureCounter, FontCounter, VertexBufferCounter, FrameBufferCounter;
+		static bool SupportsVBOs, ExtensionsAvailable, SupportsFBOs;
 	public:
+		static GLint MaximumTextureSize;
+
 		RendererFrameStats FrameStatsValue, PreviousFrameStatsValue;
 
 		class FontInfo
@@ -35,6 +38,14 @@ namespace FlamingTorch
 		public:
 			uint32 GLID;
 			uint32 Width, Height;
+		};
+
+		class FrameBufferInfo
+		{
+		public:
+			uint32 GLID, RenderBufferID;
+
+			FrameBufferCreationInfo CreationInfo;
 		};
 
 		class VertexBufferInfo
@@ -63,7 +74,6 @@ namespace FlamingTorch
 
 		sf::RenderWindow Window;
 		TextureHandle LastBoundTexture;
-		bool SupportsVBOs, ExtensionsAvailable;
 		uint32 LastBoundVBO;
 
 		StringID UniqueCacheStringID;
@@ -78,6 +88,9 @@ namespace FlamingTorch
 
 		typedef std::map<VertexBufferHandle, VertexBufferInfo> VertexBufferMap;
 		VertexBufferMap VertexBuffers;
+
+		typedef std::map<FrameBufferHandle, DisposablePointer<FrameBufferInfo> > FrameBufferMap;
+		FrameBufferMap FrameBuffers;
 
 		typedef std::map<uint32, bool> GLStatesMap;
 		GLStatesMap GLStates;
@@ -184,6 +197,31 @@ namespace FlamingTorch
 		*	\param Handle the handle of the vertex buffer to destroy
 		*/
 		virtual void DestroyVertexBuffer(VertexBufferHandle Handle) override;
+
+		/*!
+		*	Creates a Frame Buffer
+		*	\param Info the creation info for the buffer
+		*	\return a FrameBufferHandle or INVALID_FTGHANDLE
+		*/
+		virtual FrameBufferHandle CreateFrameBuffer(const FrameBufferCreationInfo &Info) override;
+
+		/*!
+		*	\param Handle the FrameBufferHandle to bind
+		*	\return whether Handle is valid
+		*/
+		bool IsFrameBufferValid(FrameBufferHandle Handle) override;
+
+		/*!
+		*	Binds a FrameBuffer for rendering
+		*	\param Handle the FrameBufferHandle to bind
+		*/
+		virtual void BindFrameBuffer(FrameBufferHandle Handle) override;
+
+		/*!
+		*	Destroys a Frame Buffer
+		*	\param Handle the FrameBufferHandle to destroy
+		*/
+		virtual void DestroyFrameBuffer(FrameBufferHandle Handle) override;
 
 		/*!
 		*	Render vertices

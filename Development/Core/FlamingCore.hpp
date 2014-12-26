@@ -28,7 +28,7 @@ namespace FlamingTorch
 #	undef CreateDirectory
 #	define INVALID_FTGHANDLE 0
 
-	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle, SoundHandle, MusicHandle;
+	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle, SoundHandle, MusicHandle, FrameBufferHandle;
 
 #	include "System/DisposablePointer.hpp"
 #	include "System/MiniDump.hpp"

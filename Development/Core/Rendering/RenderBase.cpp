@@ -349,19 +349,32 @@ namespace FlamingTorch
 
 		Renderer *Renderer = ActiveRenderer();
 
+		for (uint32 i = 0; i <= Renderer->ScenePasses.size(); i++)
 		{
-			PROFILE("Render FrameStart", StatTypes::Rendering);
-			Renderer->OnFrameStarted(Renderer);
-		};
+			if (i < Renderer->ScenePasses.size())
+			{
+				Renderer->ScenePasses[i]->Bind(Renderer);
+			};
 
-		{
-			PROFILE("Render FrameDraw", StatTypes::Rendering);
-			Renderer->OnFrameDraw(Renderer);
-		};
+			{
+				PROFILE("Render FrameStart", StatTypes::Rendering);
+				Renderer->OnFrameStarted(Renderer, i == Renderer->ScenePasses.size() ? SCENEPASS_END : Renderer->ScenePasses[i]->GetName());
+			};
 
-		{
-			PROFILE("Render FrameEnd", StatTypes::Rendering);
-			Renderer->OnFrameEnded(Renderer);
+			{
+				PROFILE("Render FrameDraw", StatTypes::Rendering);
+				Renderer->OnFrameDraw(Renderer, i == Renderer->ScenePasses.size() ? SCENEPASS_END : Renderer->ScenePasses[i]->GetName());
+			};
+
+			{
+				PROFILE("Render FrameEnd", StatTypes::Rendering);
+				Renderer->OnFrameEnded(Renderer, i == Renderer->ScenePasses.size() ? SCENEPASS_END : Renderer->ScenePasses[i]->GetName());
+			};
+
+			if (i < Renderer->ScenePasses.size())
+			{
+				Renderer->ScenePasses[i]->Unbind(Renderer);
+			};
 		};
 
 		//TODO: Optimize this to prevent doing it twice per frame on dev mode?
@@ -525,6 +538,39 @@ namespace FlamingTorch
 		return Result;
 	};
 
+	void Renderer::AddScenePass(const std::string &Name)
+	{
+		for (uint32 i = 0; i < ScenePasses.size(); i++)
+		{
+			if (ScenePasses[i]->Name == Name)
+			{
+				Log::Instance.LogWarn(TAG, "Unable to add scene pass '%s': Already found", Name.c_str());
+
+				return;
+			};
+		};
+
+		DisposablePointer<ScenePass> Out(new ScenePass());
+		Out->Name = Name;
+
+		ScenePasses.push_back(Out);
+	};
+
+	void Renderer::RemoveScenePass(const std::string &Name)
+	{
+		for (uint32 i = 0; i < ScenePasses.size(); i++)
+		{
+			if (ScenePasses[i]->Name == Name)
+			{
+				ScenePasses[i].Dispose();
+
+				ScenePasses.erase(ScenePasses.begin() + i);
+
+				return;
+			};
+		};
+	};
+
 	VertexBufferHandle Renderer::CreateVertexBuffer()
 	{
 		return Impl->CreateVertexBuffer();
@@ -544,6 +590,26 @@ namespace FlamingTorch
 	{
 		SpriteCache::Instance.Flush(this);
 		Impl->DestroyVertexBuffer(Handle);
+	};
+
+	FrameBufferHandle Renderer::CreateFrameBuffer(const FrameBufferCreationInfo &Info)
+	{
+		return Impl->CreateFrameBuffer(Info);
+	};
+
+	bool Renderer::IsFrameBufferValid(FrameBufferHandle Handle)
+	{
+		return Impl->IsFrameBufferValid(Handle);
+	};
+
+	void Renderer::BindFrameBuffer(FrameBufferHandle Handle)
+	{
+		Impl->BindFrameBuffer(Handle);
+	};
+
+	void Renderer::DestroyFrameBuffer(FrameBufferHandle Handle)
+	{
+		Impl->DestroyFrameBuffer(Handle);
 	};
 
 	void Renderer::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
@@ -906,6 +972,28 @@ namespace FlamingTorch
 
 	RendererManager::RendererManager() : SubSystem(RENDERERMANAGER_PRIORITY), ShowProfiler(false), ShowConsole(false),
 		ConsoleCursorPosition(0), ConsoleLogOffset(0) {};
+
+	ScenePass::ScenePass() : FrameBuffer(INVALID_FTGHANDLE)
+	{
+	};
+
+	ScenePass::~ScenePass()
+	{
+	};
+
+	void ScenePass::Bind(Renderer *TheRenderer)
+	{
+		TheRenderer->BindFrameBuffer(FrameBuffer);
+	};
+
+	void ScenePass::Unbind(Renderer *TheRenderer)
+	{
+		TheRenderer->BindFrameBuffer(INVALID_FTGHANDLE);
+	};
+
+	void ScenePass::Draw(Renderer *TheRenderer)
+	{
+	};
 
 #	endif
 };
