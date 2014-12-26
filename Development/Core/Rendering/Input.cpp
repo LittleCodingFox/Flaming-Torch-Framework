@@ -350,7 +350,7 @@ namespace FlamingTorch
 				break;
 
 			case RendererEventType::TouchDrag:
-				Touches[Event.TouchIndex].Pressed = Touches[Event.TouchIndex].Dragged = true;
+				Touches[Event.TouchIndex].Dragged = true;
 				Touches[Event.TouchIndex].DragDifference = Event.TouchPosition - Touches[Event.TouchIndex].Position;
 				Touches[Event.TouchIndex].Position = Event.TouchPosition;
 

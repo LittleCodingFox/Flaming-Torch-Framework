@@ -2141,7 +2141,7 @@ namespace FlamingTorch
 		if (InputBlocker.Get())
 		{
 			DisposablePointer<UIElement> p = InputBlocker;
-			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
+			RecursiveFindFocusedElement(p->ParentPosition(), p, FoundElement, InputType == UIInputType::Mouse, FocusPoint);
 		}
 		else
 		{
@@ -2149,12 +2149,12 @@ namespace FlamingTorch
 			{
 				for (uint32 j = 0; j < DrawOrderCache.size(); j++)
 				{
-					if ((DrawOrderCache[j]->Element->EnabledInputTypes() & InputType) == 0 || DrawOrderCache[j]->DrawOrder != i)
+					if (DrawOrderCache[j]->Element->Visible() == false || (DrawOrderCache[j]->Element->EnabledInputTypes() & InputType) == 0 || DrawOrderCache[j]->DrawOrder != i)
 						continue;
 
 					DisposablePointer<UIElement> p = DrawOrderCache[j]->Element;
 
-					RecursiveFindFocusedElement(Vector2(), p, FoundElement, true, RendererManager::Instance.Input.MousePosition);
+					RecursiveFindFocusedElement(Vector2(), p, FoundElement, InputType == UIInputType::Mouse, FocusPoint);
 
 					if (FoundElement)
 						break;

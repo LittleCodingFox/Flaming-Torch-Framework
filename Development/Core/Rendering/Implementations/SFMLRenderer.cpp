@@ -1522,17 +1522,17 @@ namespace FlamingTorch
 			case sf::Event::MouseMoved:
 				if (PlatformInfo::PlatformType == PlatformType::Mobile)
 				{
-					Out.Type = RendererEventType::TouchDrag;
-
 					for (uint32 i = 0; i < InputMouseButton::Count; i++)
 					{
 						if (RendererManager::Instance.Input.MouseButtons[i].Pressed)
 						{
+							Out.Type = RendererEventType::TouchDrag;
 							Out.TouchIndex = i;
+							Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+
+							break;
 						};
 					};
-
-					Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
 				}
 				else
 				{
@@ -1556,7 +1556,7 @@ namespace FlamingTorch
 				{
 					Out.Type = RendererEventType::TouchDown;
 					Out.TouchIndex = Event.mouseButton.button;
-					Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+					Out.TouchPosition = Vector2((f32)Event.mouseButton.x, (f32)Event.mouseButton.y);
 				}
 				else
 				{
@@ -1571,7 +1571,7 @@ namespace FlamingTorch
 				{
 					Out.Type = RendererEventType::TouchUp;
 					Out.TouchIndex = Event.mouseButton.button;
-					Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+					Out.TouchPosition = Vector2((f32)Event.mouseButton.x, (f32)Event.mouseButton.y);
 				}
 				else
 				{
