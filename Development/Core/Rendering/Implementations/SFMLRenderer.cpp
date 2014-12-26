@@ -329,7 +329,7 @@ namespace FlamingTorch
 
 		GLCHECK();
 
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Info.Size.x, Info.Size.y);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, (GLsizei)Info.Size.x, (GLsizei)Info.Size.y);
 
 		GLCHECK();
 
@@ -1520,26 +1520,64 @@ namespace FlamingTorch
 				return true;
 
 			case sf::Event::MouseMoved:
-				Out.Type = RendererEventType::MouseMoved;
-				Out.MousePosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+				if (PlatformInfo::PlatformType == PlatformType::Mobile)
+				{
+					Out.Type = RendererEventType::TouchDrag;
+
+					for (uint32 i = 0; i < InputMouseButton::Count; i++)
+					{
+						if (RendererManager::Instance.Input.MouseButtons[i].Pressed)
+						{
+							Out.TouchIndex = i;
+						};
+					};
+
+					Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+				}
+				else
+				{
+					Out.Type = RendererEventType::MouseMoved;
+					Out.MousePosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+				};
 
 				return true;
 
 			case sf::Event::MouseWheelMoved:
-				Out.Type = RendererEventType::MouseDeltaMoved;
-				Out.MouseDelta = (f32)Event.mouseWheel.delta;
+				if (PlatformInfo::PlatformType == PlatformType::PC)
+				{
+					Out.Type = RendererEventType::MouseDeltaMoved;
+					Out.MouseDelta = (f32)Event.mouseWheel.delta;
+				};
 
 				return true;
 
 			case sf::Event::MouseButtonPressed:
-				Out.Type = RendererEventType::MouseButtonPressed;
-				Out.MouseButtonIndex = Event.mouseButton.button;
+				if (PlatformInfo::PlatformType == PlatformType::Mobile)
+				{
+					Out.Type = RendererEventType::TouchDown;
+					Out.TouchIndex = Event.mouseButton.button;
+					Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+				}
+				else
+				{
+					Out.Type = RendererEventType::MouseButtonPressed;
+					Out.MouseButtonIndex = Event.mouseButton.button;
+				};
 
 				return true;
 
 			case sf::Event::MouseButtonReleased:
-				Out.Type = RendererEventType::MouseButtonReleased;
-				Out.MouseButtonIndex = Event.mouseButton.button;
+				if (PlatformInfo::PlatformType == PlatformType::Mobile)
+				{
+					Out.Type = RendererEventType::TouchUp;
+					Out.TouchIndex = Event.mouseButton.button;
+					Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
+				}
+				else
+				{
+					Out.Type = RendererEventType::MouseButtonReleased;
+					Out.MouseButtonIndex = Event.mouseButton.button;
+				};
 
 				return true;
 
