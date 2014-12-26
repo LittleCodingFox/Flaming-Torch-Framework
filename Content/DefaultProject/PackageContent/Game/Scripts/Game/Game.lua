@@ -9,7 +9,7 @@ GamePreInitialize = function()
 	g_RendererManager:Register()
 	g_Console:Register()
 	
-	if Game.IsMobile == false then
+	if PlatformInfo.PlatformType() == PlatformInfo.PlatformType_PC then
 		g_FileSystemWatcher:Register()
 	end
 	
