@@ -221,7 +221,43 @@ namespace FlamingTorch
 	{
 		return Impl->Size();
 	};
-	
+
+	void Renderer::RenderLines(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, const Vector3 &p4, uint32 Steps, const Vector4 &Color)
+	{
+		static std::vector<VertexColorVertex> Geometry;
+		Geometry.resize(0);
+
+		f32 tStep = 1 / (f32)Steps;
+
+		VertexColorVertex Vertex;
+		Vertex.Color = Color;
+
+		for (f32 t = 0; t <= 1; t += tStep)
+		{
+			Vertex.Position = MathUtils::BezierInterpolate4(p1, p2, p3, p4, t);
+			Geometry.push_back(Vertex);
+
+			if (t > 0 && t != 1)
+				Geometry.push_back(Vertex);
+		};
+
+		if (!IsVertexBufferHandleValid(LineBuffer))
+		{
+			LineBuffer = CreateVertexBuffer();
+		};
+
+		if (!IsVertexBufferHandleValid(LineBuffer))
+			return;
+
+		SpriteCache::Instance.Flush(this);
+
+		BindTexture((TextureHandle)0);
+
+		SetVertexBufferData(LineBuffer, VertexDetailsMode::Mixed, VertexColorFormat, sizeof(VertexColorFormat) / sizeof(VertexColorFormat[0]), &Geometry[0], Geometry.size() * sizeof(VertexColorVertex));
+
+		RenderVertices(VertexModes::Lines, LineBuffer, 0, Geometry.size());
+	};
+
 	TextGlyphInfo Renderer::GetTextGlyph(uint32 Character, const TextParams &Parameters)
 	{
 		return Impl->GetTextGlyph(Character, Parameters);
@@ -490,7 +526,7 @@ namespace FlamingTorch
 		return ReturnValue;
 	};
 
-	Renderer::Renderer(IRendererImplementation *_Impl) : Impl(_Impl), HandleValue(0)
+	Renderer::Renderer(IRendererImplementation *_Impl) : Impl(_Impl), HandleValue(0), LineBuffer(0)
 	{
 		FLASSERT(Impl, "Invalid Implementation!");
 

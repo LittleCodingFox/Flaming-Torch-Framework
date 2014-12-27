@@ -63,6 +63,17 @@ struct VertexElementDescriptor
 	uint8 DataType; //!<One of VertexElementDataType::*
 };
 
+struct VertexColorVertex
+{
+	Vector3 Position;
+	Vector4 Color;
+};
+
+static VertexElementDescriptor VertexColorFormat[] = {
+	{ 0, VertexElementType::Position, VertexElementDataType::Float3 },
+	{ sizeof(Vector3), VertexElementType::Color, VertexElementDataType::Float4 }
+};
+
 /*!
 *	Renderer Vertex Modes namespace
 */

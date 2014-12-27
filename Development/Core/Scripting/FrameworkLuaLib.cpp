@@ -2053,6 +2053,7 @@ namespace FlamingTorch
 				.def("SetMousePosition", &Renderer::SetMousePosition)
 				.def("SetFrameRate", &Renderer::SetFrameRate)
 				.def("ScaleCoordinate", &Renderer::ScaleCoordinate)
+				.def("RenderLines", &Renderer::RenderLines)
 				.property("BaseResolution", &Renderer::BaseResolution),
 				
 			//RenderTextUtils
@@ -2357,6 +2358,7 @@ namespace FlamingTorch
 				.def("GetAction", &InputCenter::GetAction)
 				.def_readonly("HasFocus", &InputCenter::HasFocus)
 				.def_readonly("MousePosition", &InputCenter::MousePosition)
+				.def_readonly("MouseMovement", &InputCenter::MouseMovement)
 				.def("InputConsumed", &InputCenter::InputConsumed)
 				.def("ConsumeInput", &InputCenter::ConsumeInput)
 				.def("RegisterAction", &InputCenter::RegisterAction)
@@ -2370,6 +2372,7 @@ namespace FlamingTorch
 			luabind::class_<UIManager>("UIManager")
 				.def("AddElement", &UIManager::AddElement)
 				.def("RemoveElement", &UIManager::RemoveElement)
+				.def("InstanceLayout", &UIManager::InstanceLayout)
 				.def("LoadLayouts", &UIManager::LoadLayouts)
 				.def("LoadLayouts", &UIManagerLoadLayoutsSimple)
 				.property("Layouts", &GetUIManagerLayouts)

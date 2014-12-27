@@ -920,13 +920,11 @@ namespace FlamingTorch
 
 			if (GotColor)
 			{
-				if (TheSprite->TheSprite.SpriteTexture.Get())
+				TheSprite->TheSprite.Options.Color(Color);
+
+				if (TheSprite->TheSprite.SpriteTexture.Get() == NULL)
 				{
-					TheSprite->TheSprite.Options.Color(Color);
-				}
-				else
-				{
-					TheSprite->TheSprite.SpriteTexture = GetUITexture(Color);
+					TheSprite->TheSprite.SpriteTexture = GetUITexture(Vector4(1, 1, 1, 1));
 					TheSprite->TheSprite.Options.Scale(TheSprite->Size() / TheSprite->TheSprite.SpriteTexture->Size());
 				};
 			};
@@ -1309,7 +1307,7 @@ namespace FlamingTorch
 			{
 				if (!KeyboardInputEnabledValue.asBool())
 				{
-					EnabledInputs = EnabledInputs | ~UIInputType::Keyboard;
+					EnabledInputs = EnabledInputs & ~UIInputType::Keyboard;
 				};
 			}
 			else
@@ -1321,7 +1319,7 @@ namespace FlamingTorch
 			{
 				if(!TouchInputEnabledValue.asBool())
 				{
-					EnabledInputs = EnabledInputs | ~UIInputType::Touch;
+					EnabledInputs = EnabledInputs & ~UIInputType::Touch;
 				};
 			}
 			else
@@ -1333,7 +1331,7 @@ namespace FlamingTorch
 			{
 				if (!JoystickInputEnabledValue.asBool())
 				{
-					EnabledInputs = EnabledInputs | ~UIInputType::Joystick;
+					EnabledInputs = EnabledInputs & ~UIInputType::Joystick;
 				};
 			}
 			else
@@ -1345,7 +1343,7 @@ namespace FlamingTorch
 			{
 				if(!MouseInputEnabledValue.asBool())
 				{
-					EnabledInputs = EnabledInputs | ~UIInputType::Mouse;
+					EnabledInputs = EnabledInputs & ~UIInputType::Mouse;
 				};
 			}
 			else
@@ -1931,6 +1929,33 @@ namespace FlamingTorch
 		return true;
 	};
 
+	bool UIManager::InstanceLayout(const std::string &Name, DisposablePointer<UIElement> Parent)
+	{
+		StringID LayoutID = MakeStringID(Name);
+
+		LayoutMap::iterator it = DefaultLayouts.find(LayoutID);
+
+		if (it == DefaultLayouts.end())
+		{
+			it = Layouts.find(LayoutID);
+
+			if (it == Layouts.end())
+			{
+				Log::Instance.LogWarn(TAG, "Unable to find layout '%s' for instancing", Name.c_str());
+
+				return false;
+			};
+		};
+
+		std::string LayoutName = Parent->Name() + StringUtils::MakeIntString(Parent->ChildrenCount() + 1, false);
+
+		DisposablePointer<UILayout> Layout = it->second->Clone(Parent, LayoutName, true, true);
+
+		Layouts[MakeStringID(LayoutName)] = Layout;
+
+		return true;
+	};
+
 	void UIManager::ClearLayouts()
 	{
 		while(Layouts.begin() != Layouts.end())
@@ -2037,8 +2062,10 @@ namespace FlamingTorch
 
 		if(FoundElement && Elements[FoundElement->ID()].Get())
 		{
-			if(MouseOverElement != FoundElement && MouseOverElement.Get())
-				MouseOverElement->OnEvent(UIEventType::MouseEntered, {});
+			if (MouseOverElement != FoundElement)
+			{
+				FoundElement->OnEvent(UIEventType::MouseEntered, {});
+			};
 
 			MouseOverElement = FoundElement;
 
@@ -2078,7 +2105,7 @@ namespace FlamingTorch
 		};
 
 		//TEMP: Need to fix mouseover not being calculated unless we put this here
-		//GetMouseOverElement();
+		GetMouseOverElement();
 	};
 
 	void UIManager::Draw()
@@ -2189,9 +2216,11 @@ namespace FlamingTorch
 		if (PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
 		{
 			PreviouslyFocusedElement->OnEvent(UIEventType::LostFocus, {});
-		};
 
-		if (FocusedElementValue)
+			if (FocusedElementValue.Get())
+				FocusedElementValue->OnEvent(UIEventType::GainedFocus, {});
+		}
+		else if (PreviouslyFocusedElement.Get() == nullptr && FocusedElementValue)
 		{
 			FocusedElementValue->OnEvent(UIEventType::GainedFocus, {});
 		};
@@ -2254,7 +2283,7 @@ namespace FlamingTorch
 			}
 			else
 			{
-				Log::Instance.LogWarn(TAG, "Failed to add Element 0x%08x: Duplicate ID 0x%08x", Element.Get(), ID);
+				Log::Instance.LogWarn(TAG, "Failed to add Element 0x%08x (%s): Duplicate ID 0x%08x (%s)", Element.Get(), Element->Name().c_str(), ID, GetStringIDString(ID).c_str());
 
 				return false;
 			};

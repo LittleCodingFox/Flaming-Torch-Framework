@@ -31,6 +31,8 @@ private:
 
 	std::vector<Rect> ClippingStack;
 	std::vector<DisposablePointer<ScenePass> > ScenePasses;
+
+	VertexBufferHandle LineBuffer;
 public:
 	Camera RenderCamera;
 
@@ -112,6 +114,15 @@ public:
 	*	Render Window Size
 	*/
 	Vector2 Size() const;
+
+	/*!
+	*	Renders a Bezier Line
+	*	\param p1 the first control point
+	*	\param p2 the second control point
+	*	\param p3 the third control point
+	*	\param p4 the fourth control point
+	*/
+	void RenderLines(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, const Vector3 &p4, uint32 Steps, const Vector4 &Color = Vector4(1, 1, 1, 1));
 
 	/*!
 	*	\param Character the character to get the glyph for

@@ -196,6 +196,13 @@ public:
 	bool LoadLayouts(Stream *In, DisposablePointer<UIElement> Parent = DisposablePointer<UIElement>(), bool DefaultLayouts = false);
 
 	/*!
+	*	Instances a layout by name
+	*	\param Name the layout's name
+	*	\param Parent the layout's parent
+	*/
+	bool InstanceLayout(const std::string &Name, DisposablePointer<UIElement> Parent = DisposablePointer<UIElement>());
+
+	/*!
 	*	Gets a Layout from an ID
 	*	\param LayoutID the Layout ID as a StringID
 	*	\return the layout, or empty
