@@ -63,6 +63,8 @@ private:
 	void ProcessTextJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessSpriteProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessSpriteJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessButtonProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
+	void ProcessButtonJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessGroupProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName);
 	void ProcessGroupJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName);
 
@@ -105,9 +107,14 @@ private:
 	TextureResourceMap TextureResources;
 
 	DisposablePointer<TextureGroup> ResourcesGroup;
+
+	DisposablePointer<GenericConfig> SkinValue;
 public:
 	typedef std::map<StringID, DisposablePointer<UILayout> > LayoutMap;
 	LayoutMap Layouts, DefaultLayouts;
+	Vector4 DefaultTextColor, DefaultTextSecondaryColor;
+	uint32 DefaultTextFontSize;
+	FontHandle DefaultFontHandle;
 
 	UIManager(Renderer *TheOwner);
 	~UIManager();
@@ -271,5 +278,16 @@ public:
 	*	Removes Focus from the focused UI Element
 	*/
 	void ClearFocus();
+
+	/*!
+	*	Sets the UI's Skin
+	*	\param Skin the new Skin
+	*/
+	void SetSkin(DisposablePointer<GenericConfig> Skin);
+
+	/*!
+	*	Gets the UI's Skin
+	*/
+	DisposablePointer<GenericConfig> GetSkin() const;
 };
 #endif

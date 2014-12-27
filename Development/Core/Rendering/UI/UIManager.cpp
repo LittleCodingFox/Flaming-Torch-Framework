@@ -250,7 +250,8 @@ namespace FlamingTorch
 
 			if (TheGUIManager.GetFocusedElement().Get())
 			{
-				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::CharacterEntered, { &Character });
+				char c = (char)Character;
+				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::CharacterEntered, { &c });
 			};
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -815,6 +816,30 @@ namespace FlamingTorch
 		};
 	};
 
+	void UIManager::ProcessButtonProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
+	{
+		UIButton *TheButton = (UIButton *)Element;
+
+		if (Property == "Caption")
+		{
+			TheButton->SetCaption(Value);
+		};
+	};
+
+	void UIManager::ProcessButtonJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
+	{
+		Json::Value Value = Data.get("Caption", Json::Value(""));
+
+		if (Value.isString())
+		{
+			ProcessButtonProperty(Element, "Caption", Value.asString(), ElementName, LayoutName);
+		}
+		else
+		{
+			CHECKJSONVALUE(Value, "Caption", string);
+		};
+	};
+
 	void UIManager::ProcessSpriteProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
 		UISprite *TheSprite = (UISprite *)Element;
@@ -1261,6 +1286,10 @@ namespace FlamingTorch
 			{
 				Element.Reset(new UIVerticalGroup(Renderer->UI));
 			}
+			else if (Control == "BUTTON")
+			{
+				Element.Reset(new UIButton(Renderer->UI));
+			}
 			else //Should always be an UIGroup due to layouting
 			{
 				Element.Reset(new UIGroup(Renderer->UI));
@@ -1424,7 +1453,7 @@ namespace FlamingTorch
 			REGISTER_LUA_EVENT(OnKeyPressed, UIEventType::KeyPressed, ", Key");
 			REGISTER_LUA_EVENT(OnKeyReleased, UIEventType::KeyReleased, ", Key");
 			REGISTER_LUA_EVENT(OnMouseMoved, UIEventType::MouseMoved, "");
-			REGISTER_LUA_EVENT(OnCharacterEntered, UIEventType::CharacterEntered, "");
+			REGISTER_LUA_EVENT(OnCharacterEntered, UIEventType::CharacterEntered, ", Character");
 			REGISTER_LUA_EVENT(OnGainFocus, UIEventType::GainedFocus, "");
 			REGISTER_LUA_EVENT(OnLoseFocus, UIEventType::LostFocus, "");
 			REGISTER_LUA_EVENT(OnUpdate, UIEventType::Update, "");
@@ -1635,6 +1664,17 @@ namespace FlamingTorch
 			else if (Control == "VERTICALGROUP")
 			{
 				//Do nothing for now
+			}
+			else if (Control == "BUTTON")
+			{
+				UIButton *TheButton = Element.AsDerived<UIButton>();
+
+				Vector2 Size(TheButton->TheSprite.Options.NinePatchRectValue.Left + TheButton->TheSprite.Options.NinePatchRectValue.Right,
+					TheButton->TheSprite.Options.NinePatchRectValue.Top + TheButton->TheSprite.Options.NinePatchRectValue.Bottom);
+
+				TheButton->TheSprite.Options.Scale(Element->Size() - Size);
+
+				ProcessButtonJSON(Element, Data, ElementName, TheLayout->Name);
 			}
 			else
 			{
@@ -2300,6 +2340,9 @@ namespace FlamingTorch
 		Element->IDValue = ID;
 		Element->NameValue = GetStringIDString(ID);
 
+		if (SkinValue.Get())
+			Element->SetSkin(SkinValue);
+
 #if FLPLATFORM_DEBUG
 		std::string ElementID = GetStringIDString(ID);
 
@@ -2380,6 +2423,60 @@ namespace FlamingTorch
 	Renderer *UIManager::GetOwner()
 	{
 		return Owner;
+	};
+
+	void UIManager::SetSkin(DisposablePointer<GenericConfig> Skin)
+	{
+		SkinValue = Skin;
+
+		Path DefaultFontPath = Path(Skin->GetString("General", "DefaultFont", "/DefaultFont.ttf"));
+
+		DefaultFontHandle = ResourceManager::Instance.GetFontFromPackage(Owner, DefaultFontPath);
+
+		if (DefaultFontHandle == INVALID_FTGHANDLE)
+		{
+			DefaultFontHandle = ResourceManager::Instance.GetFont(Owner, DefaultFontPath);
+		};
+
+		if (1 != sscanf(Skin->GetString("General", "DefaultFontSize", "12").c_str(), "%u", &DefaultTextFontSize))
+		{
+			DefaultTextFontSize = 12;
+		};
+
+		Vector4 Color = MathUtils::ColorFromHTML(Skin->GetString("General", "BackgroundColor", "#00000000"));
+
+		glClearColor(Color.x, Color.y, Color.z, Color.w);
+
+		Color = MathUtils::ColorFromHTML(Skin->GetString("General", "DefaultFontColor", "#FFFFFFFF"));
+
+		if (Color.w == 0)
+			Color = Vector4(1, 1, 1, 1);
+
+		DefaultTextColor = DefaultTextSecondaryColor = Color;
+
+		Color = MathUtils::ColorFromHTML(Skin->GetString("General", "DefaultSecondaryFontColor", "#FFFFFFFF"));
+
+		if (Color.w == 0)
+		{
+			DefaultTextSecondaryColor = DefaultTextColor;
+		}
+		else
+		{
+			DefaultTextSecondaryColor = Color;
+		};
+
+		for (ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
+		{
+			if (!it->second.Get() || !it->second->Element.Get())
+				continue;
+
+			it->second->Element->SetSkin(SkinValue);
+		};
+	};
+
+	DisposablePointer<GenericConfig> UIManager::GetSkin() const
+	{
+		return SkinValue;
 	};
 #endif
 };

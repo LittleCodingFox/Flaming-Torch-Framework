@@ -33,6 +33,8 @@ protected:
 	typedef std::map<uint32, bool> EventErrorCacheMap;
 	EventErrorCacheMap EventErrorCache;
 
+	DisposablePointer<GenericConfig> SkinValue;
+
 	UIElement(const UIElement &);
 	UIElement &operator=(const UIElement &);
 public:
@@ -104,6 +106,12 @@ public:
 	*	\return Whether this element respondes to Tooltips
 	*/
 	virtual bool RespondsToTooltips() const;
+
+	/*!
+	*	Sets this element's UI Skin
+	*	\param Skin the new Skin
+	*/
+	virtual void SetSkin(DisposablePointer<GenericConfig> Skin);
 
 	/*!
 	*	Sets whether this Element, as an Input Blocker, draws a background over the screen

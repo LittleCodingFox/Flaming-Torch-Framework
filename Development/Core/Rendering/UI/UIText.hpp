@@ -71,6 +71,7 @@ public:
 		return Strings;
 	};
 
+	virtual void SetSkin(DisposablePointer<GenericConfig> Skin) override;
 	virtual void Update(const Vector2 &ParentPosition) override;
 	virtual void Draw(const Vector2 &ParentPosition, Renderer *Renderer) override;
 };

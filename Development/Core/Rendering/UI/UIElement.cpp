@@ -40,7 +40,12 @@ namespace FlamingTorch
 
 		OnEvent.Connect<UIElement, &UIElement::OnEventPrivate>(this);
 	};
-	
+
+	void UIElement::SetSkin(DisposablePointer<GenericConfig> Skin)
+	{
+		SkinValue = Skin;
+	};
+
 	void UIElement::Update(const Vector2 &ParentPosition)
 	{
 		OnEvent(UIEventType::Update, { const_cast<Vector2 *>(&ParentPosition) });
@@ -350,8 +355,14 @@ namespace FlamingTorch
 			if ((EnabledInputsValue & UIInputType::Keyboard) == 0 || !EnabledValue)
 				return;
 
-			FailedArgCount = Args.size() != 1;
-			EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, *static_cast<wchar_t *>(Args[0]));
+			{
+				std::string Temp;
+				Temp.resize(1);
+				Temp[0] = *static_cast<char *>(Args[0]);
+
+				FailedArgCount = Args.size() != 1;
+				EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *, std::string>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, Temp);
+			};
 
 			break;
 
