@@ -2,10 +2,11 @@
 #if USE_GRAPHICS
 
 /*!
-*	UI Sprite Element
+*	UI Button Element
 */
 class UIButton : public UISprite
 {
+protected:
 	DisposablePointer<Texture> Normal, Down, Over;
 	std::string Caption;
 	bool MouseDown, MouseOver;
@@ -13,7 +14,7 @@ class UIButton : public UISprite
 	Vector4 FontColor;
 	Vector2 LabelOffset;
 
-	void PrivOnEvent(uint32 EventType, std::vector<void *> Arguments);
+	virtual void PrivOnEvent(uint32 EventType, std::vector<void *> Arguments);
 public:
 
 	UIButton(UIManager *Manager);

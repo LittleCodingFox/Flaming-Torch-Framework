@@ -1290,6 +1290,10 @@ namespace FlamingTorch
 			{
 				Element.Reset(new UIButton(Renderer->UI));
 			}
+			else if (Control == "TEXTBOX")
+			{
+				Element.Reset(new UITextBox(Renderer->UI));
+			}
 			else //Should always be an UIGroup due to layouting
 			{
 				Element.Reset(new UIGroup(Renderer->UI));
@@ -1675,6 +1679,17 @@ namespace FlamingTorch
 				TheButton->TheSprite.Options.Scale(Element->Size() - Size);
 
 				ProcessButtonJSON(Element, Data, ElementName, TheLayout->Name);
+			}
+			else if (Control == "TEXTBOX")
+			{
+				UITextBox *TheTextBox = Element.AsDerived<UITextBox>();
+
+				Vector2 Size(TheTextBox->TheSprite.Options.NinePatchRectValue.Left + TheTextBox->TheSprite.Options.NinePatchRectValue.Right,
+					TheTextBox->TheSprite.Options.NinePatchRectValue.Top + TheTextBox->TheSprite.Options.NinePatchRectValue.Bottom);
+
+				TheTextBox->TheSprite.Options.Scale(Element->Size() - Size);
+
+				//TODO: Props
 			}
 			else
 			{

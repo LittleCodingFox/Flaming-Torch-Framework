@@ -62,6 +62,13 @@ namespace FlamingTorch
 
 	void UIButton::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
+		Vector2 ActualPosition = ParentPosition + PositionValue + OffsetValue;
+
+		if (!Visible() || (ActualPosition.x + Size().x < 0 ||
+			ActualPosition.x > Renderer->Size().x ||
+			ActualPosition.y + Size().y < 0 || ActualPosition.y > Renderer->Size().y))
+			return;
+
 		if (MouseDown && Down.Get())
 		{
 			TheSprite.SpriteTexture = Down;
@@ -82,7 +89,7 @@ namespace FlamingTorch
 
 		f32 Size = RenderTextUtils::MeasureTextSimple(Renderer, Caption, Parameters).Right;
 
-		RenderTextUtils::RenderText(Renderer, Caption, TextParams(Parameters).Position(ParentPosition + PositionValue + LabelOffset + TheSprite.Options.NinePatchRectValue.Position() + Vector2((SizeValue.x - Size) / 2, 0)));
+		RenderTextUtils::RenderText(Renderer, Caption, TextParams(Parameters).Position(ActualPosition + LabelOffset + TheSprite.Options.NinePatchRectValue.Position() + Vector2((SizeValue.x - Size) / 2, 0)));
 	};
 
 	void UIButton::SetCaption(const std::string &Caption)

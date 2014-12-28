@@ -77,6 +77,7 @@ namespace FlamingTorch
 #	include "Rendering/UI/UIVerticalGroup.hpp"
 #	include "Rendering/UI/UISprite.hpp"
 #	include "Rendering/UI/UIButton.hpp"
+#	include "Rendering/UI/UITextBox.hpp"
 #	include "Rendering/UI/UITextComposer.hpp"
 #	include "Rendering/UI/UILayout.hpp"
 #	include "Rendering/UI/UIManager.hpp"
