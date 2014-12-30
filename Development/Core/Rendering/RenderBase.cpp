@@ -422,6 +422,8 @@ namespace FlamingTorch
 
 			Renderer->PushMatrices();
 			Renderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(ScreenRect.Left, ScreenRect.Right, ScreenRect.Bottom, ScreenRect.Top, -1, 1));
+			Renderer->SetWorldMatrix(Matrix4x4());
+			Renderer->SetViewport(0, 0, Renderer->Size().x, Renderer->Size().y);
 		};
 
 #if PROFILER_ENABLED
@@ -534,6 +536,30 @@ namespace FlamingTorch
 			return;
 
 		Impl->Target = this;
+	};
+
+	void Renderer::ScreenResizedTransforms(Rect &Viewport, Matrix4x4 &Projection, Matrix4x4 &World)
+	{
+		f32 TargetAspectRatio = BaseResolutionValue.x / BaseResolutionValue.y;
+
+		Vector2 RealSizeValue(Size());
+		Vector2 SizeValue(RealSizeValue.x, RealSizeValue.x / TargetAspectRatio + 0.5f);
+
+		if (SizeValue.y > RealSizeValue.y)
+		{
+			SizeValue = Vector2(RealSizeValue.y * TargetAspectRatio + 0.5f, RealSizeValue.y);
+		};
+
+		Viewport.Left = MathUtils::Round((RealSizeValue.x - SizeValue.x) / 2.f);
+		Viewport.Top = MathUtils::Round((RealSizeValue.y - SizeValue.y) / 2.f);
+		Viewport.Right = Viewport.Left + SizeValue.x;
+		Viewport.Bottom = Viewport.Top + SizeValue.y;
+
+		Projection = Matrix4x4::OrthoMatrixRH(0, RealSizeValue.x, RealSizeValue.y, 0, -1, 1);
+
+		Vector2 Scale(RealSizeValue.x / BaseResolutionValue.x, RealSizeValue.y / BaseResolutionValue.y);
+		
+		World = Matrix4x4::Scale(Vector4(Scale, 1, 1));
 	};
 
 	bool Renderer::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
@@ -791,6 +817,7 @@ namespace FlamingTorch
 		MatrixStackElement Element;
 		Element.World = LastWorldMatrix;
 		Element.Projection = LastProjectionMatrix;
+		Element.Viewport = LastViewport;
 
 		MatrixStack.push_back(Element);
 	};
@@ -806,6 +833,7 @@ namespace FlamingTorch
 
 		SetWorldMatrix(Element.World);
 		SetProjectionMatrix(Element.Projection);
+		SetViewport(Element.Viewport.Left, Element.Viewport.Top, Element.Viewport.Right - Element.Viewport.Left, Element.Viewport.Bottom - Element.Viewport.Top);
 
 		MatrixStack.pop_back();
 	};
@@ -822,6 +850,8 @@ namespace FlamingTorch
 
 	void Renderer::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
+		LastViewport = Rect(x, x + Width, y, y + Height);
+
 		SpriteCache::Instance.Flush(this);
 
 		Impl->SetViewport(x, y, Width, Height);

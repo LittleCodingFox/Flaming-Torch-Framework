@@ -216,6 +216,8 @@ namespace FlamingTorch
 
 			TheRenderer->PushMatrices();
 			TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(ScreenRect.Left, ScreenRect.Right, ScreenRect.Bottom, ScreenRect.Top, -1, 1));
+			TheRenderer->SetWorldMatrix(Matrix4x4());
+			TheRenderer->SetViewport(0, 0, TheRenderer->Size().x, TheRenderer->Size().y);
 		};
 
 		{
@@ -259,7 +261,7 @@ namespace FlamingTorch
 			str << GameName() << " (" << GAMEINTERFACE_BUILD_TYPE << ") - " << FPSCounter::Instance.FPS() << " FPS (" << 1000.f / FPSCounter::Instance.FPS() << " ms)";
 
 			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(UIELEMENT_DEFAULT_FONT_SIZE).Color(Vector4(1, 1, 1, 1))
-				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, TheRenderer->BaseResolution().y - 20.0f)));
+				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, TheRenderer->Size().y - 20.0f)));
 
 			static DisposablePointer<Texture> Logo;
 			static bool TriedLoadLogo = false;

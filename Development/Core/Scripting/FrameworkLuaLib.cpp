@@ -2054,6 +2054,7 @@ namespace FlamingTorch
 				.def("SetFrameRate", &Renderer::SetFrameRate)
 				.def("ScaleCoordinate", &Renderer::ScaleCoordinate)
 				.def("RenderLines", &Renderer::RenderLines)
+				.def("ScreenResizedTransforms", &Renderer::ScreenResizedTransforms)
 				.property("BaseResolution", &Renderer::BaseResolution),
 				
 			//RenderTextUtils

@@ -23,11 +23,13 @@ private:
 	struct MatrixStackElement
 	{
 		Matrix4x4 World, Projection;
+		Rect Viewport;
 	};
 
 	std::vector<MatrixStackElement> MatrixStack;
 
 	Matrix4x4 LastWorldMatrix, LastProjectionMatrix;
+	Rect LastViewport;
 
 	std::vector<Rect> ClippingStack;
 	std::vector<DisposablePointer<ScenePass> > ScenePasses;
@@ -262,6 +264,15 @@ public:
 	*	Gets the current projection matrix
 	*/
 	const Matrix4x4 &ProjectionMatrix();
+
+	/*!
+	*	Gets the screen resized transforms of this renderer for screen-independent rendering
+	*	\param Viewport the Viewport we'll be using
+	*	\param Projection the Projection Matrix
+	*	\param World the World Matrix
+	*	\note Works with BaseResolution for stretching!
+	*/
+	void ScreenResizedTransforms(Rect &Viewport, Matrix4x4 &Projection, Matrix4x4 &World);
 
 	/*!
 	*	Sets the current viewport

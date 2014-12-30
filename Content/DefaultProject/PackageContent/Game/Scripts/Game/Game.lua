@@ -41,8 +41,6 @@ GameInitialize = function(Arguments)
 	if LogoTexture == nil then
 		return false
 	end
-
-	Renderer.Camera:SetOrtho(PlatformInfo.RotateScreen(Rect(0, Renderer.Size.x, 0, Renderer.Size.y)), -1, 1)
 	
 	LogoSprite.Texture = LogoTexture
 	
@@ -54,13 +52,15 @@ GameInitialize = function(Arguments)
 	end
 	
 	Renderer.UI.Skin = SkinConfig
+	
+	GameResize(Renderer, Renderer.Size.x, Renderer.Size.y)
 
 	return true
 end
 
 GameFrameBegin = function(Renderer)
 	Renderer:Clear(RendererManager.Clear_Color)
-	Renderer.Camera:BeginTransforms(Renderer)
+--	Renderer.Camera:BeginTransforms(Renderer)
 end
 
 GameFrameDraw = function(Renderer)
@@ -68,12 +68,20 @@ GameFrameDraw = function(Renderer)
 end
 
 GameFrameEnd = function(Renderer)
-	Renderer.Camera:EndTransforms(Renderer)
+--	Renderer.Camera:EndTransforms(Renderer)
 end
 
 GameResize = function(Renderer, Width, Height)
-	Renderer:SetViewport(0, 0, Width, Height)
-	Renderer.Camera:SetOrtho(Rect(0, Width, 0, Height), -1, 1)
+	local Viewport = Rect()
+	local Projection = Matrix4x4()
+	local World = Matrix4x4()
+
+	Renderer:ScreenResizedTransforms(Viewport, Projection, World)
+	
+	Renderer:SetViewport(Viewport.Left, Viewport.Top, Viewport.Size.x, Viewport.Size.y)
+	
+	Renderer.ProjectionMatrix = Projection
+	Renderer.WorldMatrix = World
 end
 
 GameResourcesReloaded = function(Renderer)
