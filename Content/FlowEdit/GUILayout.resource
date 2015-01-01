@@ -1,4 +1,74 @@
 [
+	"TextBox": [
+		"Content": {
+			"Control": "Sprite",
+			"Wide": "parent_wide - 6",
+			"Tall": "parent_tall - 6",
+			"XOffset": "3",
+			"YOffset": "3",
+			"Wireframe": true,
+			"Color": "#000000",
+			"Visible": false,
+			
+			"Children": [
+				"Text": {
+					"Control": "Text",
+					"Wide": "parent_wide - 3",
+					"Tall": "parent_tall - 3",
+					"Text": "Cheesecakes",
+					"FontSize": 14,
+					"XOffset": "3",
+					"OnGainFocus": "
+						EditingText = Self
+						EditingTextString = Self.Text
+						EditingCursorOffset = 0
+						EditingCursorPosition = 0
+					",
+					"OnLoseFocus": "
+						EditingText = nil
+					",
+					"OnDraw": "
+						if EditingText ~= nil and EditingText.ID == Self.ID then
+							Self.Manager:DrawText(\"|\", RenderTextUtils.TextParams():Position(Self.ParentPosition +
+								Vector2(EditingCursorOffset, 0)):FontSize(14))
+						end
+					",
+					"OnCharacterEntered": "
+						Self.Text = Self.Text .. Character
+						EditingCursorPosition = EditingCursorPosition + 1
+						EditingCursorOffset = EditingCursorOffset +
+							RenderTextUtils.MeasureTextSimple(Self.Manager.Renderer, Character, RenderTextUtils.TextParams():FontSize(14)).Right
+					",
+					"OnMouseJustPressed": "
+						local PreviousOffset = 0
+						
+						for i = 1, string.len(Self.Text) do
+							local Size = RenderTextUtils.MeasureTextSimple(Self.Manager.Renderer, Self.Text:sub(1, i),
+								RenderTextUtils.TextParams():FontSize(14))
+							
+							if Size.Right >= g_Input.MousePosition.x - Self.ParentPosition.x then
+								EditingCursorOffset = PreviousOffset
+								
+								EditingCursorPosition = i - 1
+								
+								break
+							elseif i == string.len(Self.Text) then
+								EditingCursorOffset = Size.Right
+								
+								EditingCursorPosition = i
+							else
+								PreviousOffset = Size.Right
+							end
+						end
+						
+						if string.len(Self.Text) == 0 then
+							EditingCursorOffset = 0
+						end
+					"
+				}
+			]
+		}
+	],
 	"NodeRow": [
 		"Content": {
 			"Control": "Group",
