@@ -206,6 +206,8 @@ int main(int argc, char **argv)
 		return 1;
 	};
 
+	Packed->Bind();
+
 	GenericConfig OutConfig;
 
 	//Write the animation data

@@ -31,6 +31,77 @@ namespace FlamingTorch
 		return true;
 	};
 
+	int32 GameInterface::Run(int32 argc, char **argv)
+	{
+		uint32 OverrideWidth = 0, OverrideHeight = 0;
+
+		for (int32 i = 1; i < argc; i++)
+		{
+			std::string argument(argv[i]);
+
+			if (argument == "-w" && i + 1 < argc)
+			{
+				if (1 != sscanf(argv[i + 1], "%u", &OverrideWidth))
+				{
+					OverrideWidth = 0;
+				};
+			}
+			else if (argument == "-h" && i + 1 < argc)
+			{
+				if (1 != sscanf(argv[i + 1], "%u", &OverrideHeight))
+				{
+					OverrideHeight = 0;
+				};
+			}
+			else if (argument == "-mobile")
+			{
+				PlatformInfo::PlatformType = PlatformType::Mobile;
+			}
+			else if (argument.find("-sr") == 0)
+			{
+				char c = argument[strlen("-sr")];
+
+				switch (c)
+				{
+				case 'n':
+					PlatformInfo::ScreenRotation = ScreenRotation::North;
+
+					break;
+
+				case 's':
+					PlatformInfo::ScreenRotation = ScreenRotation::South;
+
+					break;
+
+				case 'w':
+					PlatformInfo::ScreenRotation = ScreenRotation::West;
+
+					break;
+
+				case 'e':
+					PlatformInfo::ScreenRotation = ScreenRotation::East;
+
+					break;
+
+				default:
+					Log::Instance.LogWarn(TAG, "Unknown rotation ID '%c'", c);
+				};
+			}
+			else if (argument == "-pc")
+			{
+				PlatformInfo::PlatformType = PlatformType::PC;
+			};
+		};
+
+		if (OverrideWidth > 0 && OverrideHeight > 0)
+		{
+			PlatformInfo::ResolutionOverrideWidth = OverrideWidth;
+			PlatformInfo::ResolutionOverrideHeight = OverrideHeight;
+		};
+
+		return 0;
+	};
+
 #if USE_GRAPHICS
 #	if !FLPLATFORM_ANDROID
 	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
@@ -130,77 +201,6 @@ namespace FlamingTorch
 		TheRenderer->SetViewport(0, 0, RendererSize.x, RendererSize.y);
 
 		return TheRenderer;
-	};
-
-	int32 GameInterface::Run(int32 argc, char **argv)
-	{
-		uint32 OverrideWidth = 0, OverrideHeight = 0;
-
-		for(int32 i = 1; i < argc; i++)
-		{
-			std::string argument(argv[i]);
-
-			if (argument == "-w" && i + 1 < argc)
-			{
-				if (1 != sscanf(argv[i + 1], "%u", &OverrideWidth))
-				{
-					OverrideWidth = 0;
-				};
-			}
-			else if (argument == "-h" && i + 1 < argc)
-			{
-				if (1 != sscanf(argv[i + 1], "%u", &OverrideHeight))
-				{
-					OverrideHeight = 0;
-				};
-			}
-			else if (argument == "-mobile")
-			{
-				PlatformInfo::PlatformType = PlatformType::Mobile;
-			}
-			else if (argument.find("-sr") == 0)
-			{
-				char c = argument[strlen("-sr")];
-
-				switch (c)
-				{
-				case 'n':
-					PlatformInfo::ScreenRotation = ScreenRotation::North;
-
-					break;
-
-				case 's':
-					PlatformInfo::ScreenRotation = ScreenRotation::South;
-
-					break;
-
-				case 'w':
-					PlatformInfo::ScreenRotation = ScreenRotation::West;
-
-					break;
-
-				case 'e':
-					PlatformInfo::ScreenRotation = ScreenRotation::East;
-
-					break;
-
-				default:
-					Log::Instance.LogWarn(TAG, "Unknown rotation ID '%c'", c);
-				};
-			}
-			else if (argument == "-pc")
-			{
-				PlatformInfo::PlatformType = PlatformType::PC;
-			};
-		};
-
-		if (OverrideWidth > 0 && OverrideHeight > 0)
-		{
-			PlatformInfo::ResolutionOverrideWidth = OverrideWidth;
-			PlatformInfo::ResolutionOverrideHeight = OverrideHeight;
-		};
-
-		return 0;
 	};
 
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass)
