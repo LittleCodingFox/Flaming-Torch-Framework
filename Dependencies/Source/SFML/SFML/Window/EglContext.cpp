@@ -80,7 +80,7 @@ m_context (EGL_NO_CONTEXT),
 m_surface (EGL_NO_SURFACE),
 m_config  (NULL)
 {
-    // Get the intialized EGL display
+    // Get the initialized EGL display
     m_display = getInitializedDisplay();
 
     // Get the best EGL config matching the default video settings
@@ -118,7 +118,7 @@ m_config  (NULL)
 
 #endif
 
-    // Get the intialized EGL display
+    // Get the initialized EGL display
     m_display = getInitializedDisplay();
     
     // Get the best EGL config matching the requested video settings
@@ -148,7 +148,7 @@ m_config  (NULL)
 ////////////////////////////////////////////////////////////
 EglContext::~EglContext()
 {
-    // Desactive the current context
+    // Deactivate the current context
     EGLContext currentContext = eglCheck(eglGetCurrentContext());
 
     if (currentContext == m_context)
@@ -235,12 +235,13 @@ EGLConfig EglContext::getBestConfig(EGLDisplay display, unsigned int bitsPerPixe
 {
     // Set our video settings constraint
     const EGLint attributes[] = {
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-		EGL_BLUE_SIZE, 8,
-		EGL_GREEN_SIZE, 8,
-		EGL_RED_SIZE, 8,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
-		EGL_NONE
+        EGL_BUFFER_SIZE, bitsPerPixel,
+        EGL_DEPTH_SIZE, settings.depthBits,
+        EGL_STENCIL_SIZE, settings.stencilBits,
+        EGL_SAMPLE_BUFFERS, settings.antialiasingLevel,
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+        EGL_NONE
     };
     
     EGLint configCount;
@@ -257,7 +258,7 @@ EGLConfig EglContext::getBestConfig(EGLDisplay display, unsigned int bitsPerPixe
 ////////////////////////////////////////////////////////////
 XVisualInfo EglContext::selectBestVisual(::Display* XDisplay, unsigned int bitsPerPixel, const ContextSettings& settings)
 {
-    // Get the intialized EGL display
+    // Get the initialized EGL display
     EGLDisplay display = getInitializedDisplay();
     
     // Get the best EGL config matching the default video settings

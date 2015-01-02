@@ -29,6 +29,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Audio/Export.hpp>
+#include <SFML/Audio/AlResource.hpp>
 #include <SFML/System/Vector3.hpp>
 
 
@@ -38,7 +39,7 @@ namespace sf
 /// \brief Base class defining a sound's properties
 ///
 ////////////////////////////////////////////////////////////
-class SFML_AUDIO_API SoundSource
+class SFML_AUDIO_API SoundSource : AlResource
 {
 public:
 
@@ -130,7 +131,7 @@ public:
     /// \brief Make the sound's position relative to the listener or absolute
     ///
     /// Making a sound relative to the listener will ensure that it will always
-    /// be played the same way regardless the position of the listener.
+    /// be played the same way regardless of the position of the listener.
     /// This can be useful for non-spatialized sounds, sounds that are
     /// produced by the listener, or sounds attached to it.
     /// The default value is false (position is absolute).
@@ -244,7 +245,7 @@ protected:
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
-    /// This constructor is meant ot be called by derived classes only.
+    /// This constructor is meant to be called by derived classes only.
     ///
     ////////////////////////////////////////////////////////////
     SoundSource();

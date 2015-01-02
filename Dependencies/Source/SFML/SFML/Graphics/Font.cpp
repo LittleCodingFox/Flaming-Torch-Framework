@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2013 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -141,7 +141,7 @@ m_library  (NULL),
 m_face     (NULL),
 m_streamRec(NULL),
 m_refCount (NULL),
-m_info	   ()
+m_info     ()
 {
 
 }
@@ -202,6 +202,7 @@ bool Font::loadFromFile(const std::string& filename)
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
     {
         err() << "Failed to load font \"" << filename << "\" (failed to set the Unicode character set)" << std::endl;
+        FT_Done_Face(face);
         return false;
     }
 
@@ -241,10 +242,11 @@ bool Font::loadFromMemory(const void* data, std::size_t sizeInBytes)
         return false;
     }
 
-    // Select the unicode character map
+    // Select the Unicode character map
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
     {
         err() << "Failed to load font from memory (failed to set the Unicode character set)" << std::endl;
+        FT_Done_Face(face);
         return false;
     }
 
@@ -300,13 +302,16 @@ bool Font::loadFromStream(InputStream& stream)
     if (FT_Open_Face(static_cast<FT_Library>(m_library), &args, 0, &face) != 0)
     {
         err() << "Failed to load font from stream (failed to create the font face)" << std::endl;
+        delete rec;
         return false;
     }
 
-    // Select the unicode character map
+    // Select the Unicode character map
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
     {
         err() << "Failed to load font from stream (failed to set the Unicode character set)" << std::endl;
+        FT_Done_Face(face);
+        delete rec;
         return false;
     }
 
@@ -415,9 +420,11 @@ Font& Font::operator =(const Font& right)
 
     std::swap(m_library,     temp.m_library);
     std::swap(m_face,        temp.m_face);
+    std::swap(m_streamRec,   temp.m_streamRec);
+    std::swap(m_refCount,    temp.m_refCount);
+    std::swap(m_info,        temp.m_info);
     std::swap(m_pages,       temp.m_pages);
     std::swap(m_pixelBuffer, temp.m_pixelBuffer);
-    std::swap(m_refCount,    temp.m_refCount);
 
     return *this;
 }
@@ -539,7 +546,7 @@ Glyph Font::loadGlyph(Uint32 codePoint, unsigned int characterSize, bool bold, c
     if (bold && !outline)
     {
         FT_Bitmap_Embolden(static_cast<FT_Library>(m_library), &bitmap, weight, weight);
-	}
+    }
 
 	// Compute the glyph's advance offset
     glyph.advance = glyphDesc->advance.x >> 16;
@@ -548,10 +555,11 @@ Glyph Font::loadGlyph(Uint32 codePoint, unsigned int characterSize, bool bold, c
 
     int width  = bitmap.width;
     int height = bitmap.rows;
+
     if ((width > 0) && (height > 0))
     {
         // Leave a small padding around characters, so that filtering doesn't
-        // pollute them with pixels from neighbours
+        // pollute them with pixels from neighbors
         const unsigned int padding = 1;
 
         // Get the glyphs page corresponding to the character size
@@ -761,7 +769,7 @@ IntRect Font::findGlyphRect(Page& page, unsigned int width, unsigned int height)
     if (!row)
     {
         int rowHeight = height + height / 10;
-        while (page.nextRow + rowHeight >= page.texture.getSize().y)
+        while ((page.nextRow + rowHeight >= page.texture.getSize().y) || (width >= page.texture.getSize().x))
         {
             // Not enough space: resize the texture if possible
             unsigned int textureWidth  = page.texture.getSize().x;
@@ -810,7 +818,23 @@ bool Font::setCurrentSize(unsigned int characterSize) const
 
     if (currentSize != characterSize)
     {
-        return FT_Set_Pixel_Sizes(face, 0, characterSize) == 0;
+        FT_Error result = FT_Set_Pixel_Sizes(face, 0, characterSize);
+
+        if (result == FT_Err_Invalid_Pixel_Size)
+        {
+            // In the case of bitmap fonts, resizing can
+            // fail if the requested size is not available
+            if (!FT_IS_SCALABLE(face))
+            {
+                err() << "Failed to set bitmap font size to " << characterSize << std::endl;
+                err() << "Available sizes are: ";
+                for (int i = 0; i < face->num_fixed_sizes; ++i)
+                    err() << face->available_sizes[i].height << " ";
+                err() << std::endl;
+            }
+        }
+
+        return result == FT_Err_Ok;
     }
     else
     {

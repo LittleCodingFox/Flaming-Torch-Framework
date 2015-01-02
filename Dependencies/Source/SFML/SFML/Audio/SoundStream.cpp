@@ -274,17 +274,21 @@ void SoundStream::streamData()
             m_isStreaming = false;
             return;
         }
+    }
 
-        // Create the buffers
-        alCheck(alGenBuffers(BufferCount, m_buffers));
-        for (int i = 0; i < BufferCount; ++i)
-            m_endBuffers[i] = false;
+    // Create the buffers
+    alCheck(alGenBuffers(BufferCount, m_buffers));
+    for (int i = 0; i < BufferCount; ++i)
+        m_endBuffers[i] = false;
 
-        // Fill the queue
-        requestStop = fillQueue();
+    // Fill the queue
+    requestStop = fillQueue();
 
-        // Play the sound
-        alCheck(alSourcePlay(m_source));
+    // Play the sound
+    alCheck(alSourcePlay(m_source));
+
+    {
+        Lock lock(m_threadMutex);
 
         // Check if the thread was launched Paused
         if (m_threadStartState == Paused)
@@ -315,7 +319,7 @@ void SoundStream::streamData()
             }
         }
 
-        // Get the number of buffers that have been processed (ie. ready for reuse)
+        // Get the number of buffers that have been processed (i.e. ready for reuse)
         ALint nbProcessed = 0;
         alCheck(alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &nbProcessed));
 
@@ -381,7 +385,7 @@ void SoundStream::streamData()
     // Stop the playback
     alCheck(alSourceStop(m_source));
 
-    // Unqueue any buffer left in the queue
+    // Dequeue any buffer left in the queue
     clearQueue();
 
     // Delete the buffers
@@ -460,7 +464,7 @@ void SoundStream::clearQueue()
     ALint nbQueued;
     alCheck(alGetSourcei(m_source, AL_BUFFERS_QUEUED, &nbQueued));
 
-    // Unqueue them all
+    // Dequeue them all
     ALuint buffer;
     for (ALint i = 0; i < nbQueued; ++i)
         alCheck(alSourceUnqueueBuffers(m_source, 1, &buffer));

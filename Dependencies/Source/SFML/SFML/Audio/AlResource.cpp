@@ -25,70 +25,54 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/System/Unix/ThreadImpl.hpp>
-#include <SFML/System/Thread.hpp>
-#include <iostream>
-#include <cassert>
+#include <SFML/Audio/AlResource.hpp>
+#include <SFML/Audio/AudioDevice.hpp>
+#include <SFML/System/Mutex.hpp>
+#include <SFML/System/Lock.hpp>
+
+
+namespace
+{
+    // OpenAL resources counter and its mutex
+    unsigned int count = 0;
+    sf::Mutex mutex;
+
+    // The audio device is instantiated on demand rather than at global startup,
+    // which solves a lot of weird crashes and errors.
+    // It is destroyed when it is no longer needed.
+    sf::priv::AudioDevice* globalDevice;
+}
 
 
 namespace sf
 {
-namespace priv
-{
 ////////////////////////////////////////////////////////////
-ThreadImpl::ThreadImpl(Thread* owner) :
-m_isActive(true)
+AlResource::AlResource()
 {
-    m_isActive = pthread_create(&m_thread, NULL, &ThreadImpl::entryPoint, owner) == 0;
+    // Protect from concurrent access
+    Lock lock(mutex);
 
-    if (!m_isActive)
-        std::cerr << "Failed to create thread" << std::endl;
+    // If this is the very first resource, trigger the global device initialization
+    if (count == 0)
+        globalDevice = new priv::AudioDevice;
+
+    // Increment the resources counter
+    count++;
 }
 
 
 ////////////////////////////////////////////////////////////
-void ThreadImpl::wait()
+AlResource::~AlResource()
 {
-    if (m_isActive)
-    {
-        assert(pthread_equal(pthread_self(), m_thread) == 0); // A thread cannot wait for itself!
-        pthread_join(m_thread, NULL);
-    }
+    // Protect from concurrent access
+    Lock lock(mutex);
+
+    // Decrement the resources counter
+    count--;
+
+    // If there's no more resource alive, we can destroy the device
+    if (count == 0)
+        delete globalDevice;
 }
-
-
-////////////////////////////////////////////////////////////
-void ThreadImpl::terminate()
-{
-    if (m_isActive)
-    {
-        #ifndef SFML_SYSTEM_ANDROID
-            pthread_cancel(m_thread);
-        #else
-            // See http://stackoverflow.com/questions/4610086/pthread-cancel-al
-            pthread_kill(m_thread, SIGUSR1);
-        #endif
-    }
-}
-
-
-////////////////////////////////////////////////////////////
-void* ThreadImpl::entryPoint(void* userData)
-{
-    // The Thread instance is stored in the user data
-    Thread* owner = static_cast<Thread*>(userData);
-
-    #ifndef SFML_SYSTEM_ANDROID
-        // Tell the thread to handle cancel requests immediately
-        pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-    #endif
-
-    // Forward to the owner
-    owner->run();
-
-    return NULL;
-}
-
-} // namespace priv
 
 } // namespace sf

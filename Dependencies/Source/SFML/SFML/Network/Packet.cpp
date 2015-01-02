@@ -438,14 +438,14 @@ Packet& Packet::operator <<(Int64 data)
     // to network byte order (big endian) manually
     Uint8 toWrite[] =
     {
-        (Uint8)((data >> 56) & 0xFF),
-        (Uint8)((data >> 48) & 0xFF),
-        (Uint8)((data >> 40) & 0xFF),
-        (Uint8)((data >> 32) & 0xFF),
-        (Uint8)((data >> 24) & 0xFF),
-        (Uint8)((data >> 16) & 0xFF),
-        (Uint8)((data >>  8) & 0xFF),
-        (Uint8)((data      ) & 0xFF)
+        static_cast<Uint8>((data >> 56) & 0xFF),
+        static_cast<Uint8>((data >> 48) & 0xFF),
+        static_cast<Uint8>((data >> 40) & 0xFF),
+        static_cast<Uint8>((data >> 32) & 0xFF),
+        static_cast<Uint8>((data >> 24) & 0xFF),
+        static_cast<Uint8>((data >> 16) & 0xFF),
+        static_cast<Uint8>((data >>  8) & 0xFF),
+        static_cast<Uint8>((data      ) & 0xFF)
     };
     append(&toWrite, sizeof(toWrite));
     return *this;
@@ -459,14 +459,14 @@ Packet& Packet::operator <<(Uint64 data)
     // to network byte order (big endian) manually
     Uint8 toWrite[] =
     {
-        (Uint8)((data >> 56) & 0xFF),
-        (Uint8)((data >> 48) & 0xFF),
-        (Uint8)((data >> 40) & 0xFF),
-        (Uint8)((data >> 32) & 0xFF),
-        (Uint8)((data >> 24) & 0xFF),
-        (Uint8)((data >> 16) & 0xFF),
-        (Uint8)((data >>  8) & 0xFF),
-        (Uint8)((data      ) & 0xFF)
+        static_cast<Uint8>((data >> 56) & 0xFF),
+        static_cast<Uint8>((data >> 48) & 0xFF),
+        static_cast<Uint8>((data >> 40) & 0xFF),
+        static_cast<Uint8>((data >> 32) & 0xFF),
+        static_cast<Uint8>((data >> 24) & 0xFF),
+        static_cast<Uint8>((data >> 16) & 0xFF),
+        static_cast<Uint8>((data >>  8) & 0xFF),
+        static_cast<Uint8>((data      ) & 0xFF)
     };
     append(&toWrite, sizeof(toWrite));
     return *this;

@@ -59,7 +59,7 @@ public:
     /// doesn't store its own copy of the texture, but rather keeps
     /// a pointer to the one that you passed to this function.
     /// If the source texture is destroyed and the shape tries to
-    /// use it, the behaviour is undefined.
+    /// use it, the behavior is undefined.
     /// \a texture can be NULL to disable texturing.
     /// If \a resetRect is true, the TextureRect property of
     /// the shape is automatically adjusted to the size of the new
@@ -193,7 +193,7 @@ public:
     /// \see getPoint
     ///
     ////////////////////////////////////////////////////////////
-    virtual unsigned int getPointCount() const = 0;
+    virtual std::size_t getPointCount() const = 0;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get a point of the shape
@@ -210,7 +210,7 @@ public:
     /// \see getPointCount
     ///
     ////////////////////////////////////////////////////////////
-    virtual Vector2f getPoint(unsigned int index) const = 0;
+    virtual Vector2f getPoint(std::size_t index) const = 0;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the local bounding rectangle of the entity
@@ -252,7 +252,7 @@ protected:
     /// \brief Recompute the internal geometry of the shape
     ///
     /// This function must be called by the derived class everytime
-    /// the shape's points change (ie. the result of either
+    /// the shape's points change (i.e. the result of either
     /// getPointCount or getPoint is different).
     ///
     ////////////////////////////////////////////////////////////
