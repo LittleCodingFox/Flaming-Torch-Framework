@@ -38,37 +38,37 @@ namespace FlamingTorch
 	luabind::object GetObjectDefTags(ObjectDef &Self)
 	{
 		return GameInterface::Instance->GetScriptInstance()->VectorToLua<std::string>(Self.Tags);
-	};
+	}
 
 	void SetObjectDefTags(ObjectDef &Self, luabind::object Value)
 	{
 		Self.Tags = GameInterface::Instance->GetScriptInstance()->VectorFromLua<std::string>(Value);
-	};
+	}
 
 	luabind::object GetObjectDefLayers(ObjectDef &Self)
 	{
 		return GameInterface::Instance->GetScriptInstance()->VectorToLua<std::string>(Self.Layers);
-	};
+	}
 
 	void SetObjectDefLayers(ObjectDef &Self, luabind::object Value)
 	{
 		Self.Layers = GameInterface::Instance->GetScriptInstance()->VectorFromLua<std::string>(Value);
-	};
+	}
 
 	luabind::object GetObjectDefGroups(ObjectDef &Self)
 	{
 		return GameInterface::Instance->GetScriptInstance()->VectorToLua<std::string>(Self.Groups);
-	};
+	}
 
 	void SetObjectDefGroups(ObjectDef &Self, luabind::object Value)
 	{
 		Self.Groups = GameInterface::Instance->GetScriptInstance()->VectorFromLua<std::string>(Value);
-	};
+	}
 	
 	luabind::object GetObjectDefAttributes(ObjectDef &Self)
 	{
 		return GameInterface::Instance->GetScriptInstance()->VectorToLua<DisposablePointer<ObjectAttribute> >(Self.Attributes);
-	};
+	}
 
 	void AddObjectDefAttribute(ObjectDef &Self, DisposablePointer<ObjectAttribute> Attribute)
 	{
@@ -76,10 +76,10 @@ namespace FlamingTorch
 		{
 			if (*it == Attribute)
 				return;
-		};
+		}
 
 		Self.Attributes.push_back(Attribute);
-	};
+	}
 
 	luabind::object GetObjectAttributeValue(ObjectAttribute &Self)
 	{
@@ -92,10 +92,10 @@ namespace FlamingTorch
 		}
 		catch (luabind::error &)
 		{
-		};
+		}
 
 		return luabind::object();
-	};
+	}
 
 	void SetObjectAttributeValue(ObjectAttribute &Self, luabind::object Value)
 	{
@@ -108,8 +108,8 @@ namespace FlamingTorch
 		}
 		catch (luabind::error &)
 		{
-		};
-	};
+		}
+	}
 
 	bool ObjectModelManager::RegisterBindings(lua_State *State)
 	{
@@ -364,12 +364,12 @@ namespace FlamingTorch
 		Globals["g_ObjectModel"] = &ObjectModelManager::Instance;
 
 		return true;
-	};
+	}
 
 	bool ObjectAttribute::IsValid() const
 	{
 		return IsValid(Value);
-	};
+	}
 
 	bool ObjectAttribute::IsValid(luabind::object Value) const
 	{
@@ -695,10 +695,10 @@ namespace FlamingTorch
 		case ObjectAttributeType::UISpritePtr:
 			return IsLuaTypePtr<UISprite>(Value);
 #endif
-		};
+		}
 
 		return false;
-	};
+	}
 
 	DisposablePointer<ObjectDef> ObjectModelManager::MakeObjectDef(const std::string &Name)
 	{
@@ -715,7 +715,7 @@ namespace FlamingTorch
 		ObjectDefs[ObjectDefCounter] = Out;
 		
 		return Out;
-	};
+	}
 
 	DisposablePointer<ObjectAttribute> ObjectModelManager::MakeObjectAttribute(const std::string &Name)
 	{
@@ -733,7 +733,7 @@ namespace FlamingTorch
 		ObjectAttributes[ObjectAttributesCounter] = Out;
 
 		return Out;
-	};
+	}
 
 	void ObjectModelManager::Clear()
 	{
@@ -744,14 +744,14 @@ namespace FlamingTorch
 		{
 			ObjectDefs.begin()->second.Dispose();
 			ObjectDefs.erase(ObjectDefs.begin());
-		};
+		}
 
 		while (ObjectAttributes.size())
 		{
 			ObjectAttributes.begin()->second.Dispose();
 			ObjectAttributes.erase(ObjectAttributes.begin());
-		};
-	};
+		}
+	}
 
 	void ObjectModelManager::StartUp(uint32 Priority)
 	{
@@ -762,7 +762,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo(TAG, "Initializing ObjectModel...");
-	};
+	}
 
 	void ObjectModelManager::Shutdown(uint32 Priority)
 	{
@@ -771,12 +771,12 @@ namespace FlamingTorch
 		SubSystem::Shutdown(Priority);
 
 		Log::Instance.LogInfo(TAG, "Terminating ObjectModel...");
-	};
+	}
 
 	void ObjectModelManager::Update(uint32 Priority)
 	{
 		SubSystem::Update(Priority);
 
 		SUBSYSTEM_PRIORITY_CHECK();
-	};
-};
+	}
+}

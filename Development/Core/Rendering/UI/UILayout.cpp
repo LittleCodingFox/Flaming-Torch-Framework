@@ -13,11 +13,11 @@ namespace FlamingTorch
 				Owner->RemoveElement(Elements.begin()->first);
 
 				Elements.begin()->second.Dispose();
-			};
+			}
 
 			Elements.erase(Elements.begin());
-		};
-	};
+		}
+	}
 
 	DisposablePointer<UIElement> UILayout::FindElementById(StringID ID)
 	{
@@ -27,7 +27,7 @@ namespace FlamingTorch
 			return DisposablePointer<UIElement>();
 
 		return it->second;
-	};
+	}
 
 	DisposablePointer<UIElement> UILayout::FindElementByName(const std::string &Name)
 	{
@@ -37,7 +37,7 @@ namespace FlamingTorch
 			return DisposablePointer<UIElement>();
 
 		return it->second;
-	};
+	}
 
 	DisposablePointer<UILayout> UILayout::Clone(DisposablePointer<UIElement> Parent, const std::string &ParentElementName, bool PerformStartupEvents, bool VisibleParentlessElements)
 	{
@@ -55,10 +55,10 @@ namespace FlamingTorch
 		if(PerformStartupEvents)
 		{
 			Out->PerformStartupEvents(NULL);
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	void UILayout::SetVisibleParentlessElements(bool Visible)
 	{
@@ -67,9 +67,9 @@ namespace FlamingTorch
 			if(it->second.Get() != NULL && it->second->Parent() == Parent.Get())
 			{
 				it->second->SetVisible(Visible);
-			};
-		};
-	};
+			}
+		}
+	}
 
 	void UILayout::PerformStartupEvents(UIElement *ParentElement)
 	{
@@ -78,7 +78,7 @@ namespace FlamingTorch
 			for(uint32 i = 0; i < ParentElement->ChildrenCount(); i++)
 			{
 				PerformStartupEvents(ParentElement->Child(i));
-			};
+			}
 
 			ParentElement->OnEvent(UIEventType::Start, {});
 		}
@@ -90,8 +90,8 @@ namespace FlamingTorch
 					continue;
 
 				PerformStartupEvents(it->second.Get());
-			};
-		};
-	};
+			}
+		}
+	}
 #endif
-};
+}

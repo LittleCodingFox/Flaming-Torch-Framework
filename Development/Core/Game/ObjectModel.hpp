@@ -109,7 +109,7 @@ namespace ObjectAttributeType
 		UITextPtr,
 		UISpritePtr
 	};
-};
+}
 
 template<typename type>
 bool IsLuaType(luabind::object o)
@@ -121,10 +121,10 @@ bool IsLuaType(luabind::object o)
 	catch (std::exception &)
 	{
 		return false;
-	};
+	}
 
 	return true;
-};
+}
 
 template<typename type>
 bool IsLuaTypePtr(luabind::object o)
@@ -136,10 +136,10 @@ bool IsLuaTypePtr(luabind::object o)
 	catch (std::exception &)
 	{
 		return false;
-	};
+	}
 
 	return true;
-};
+}
 
 class ObjectAttribute
 {
@@ -182,7 +182,7 @@ public:
 	
 	ObjectModelManager() : SubSystem(OBJECTMODEL_PRIORITY), ObjectAttributesCounter(0), ObjectDefCounter(0), ObjectCounter(0)
 	{
-	};
+	}
 
 	static bool RegisterBindings(lua_State *State);
 

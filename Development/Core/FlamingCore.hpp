@@ -45,7 +45,6 @@ namespace FlamingTorch
 #	include "System/Future.hpp"
 #	include "System/Randomizer.hpp"
 #	include "System/DynamicLink.hpp"
-#	include "System/GenericConfig.hpp"
 #
 #	include "Scripting/LuaScript.hpp"
 #
@@ -85,4 +84,4 @@ namespace FlamingTorch
 #	include "Game/Console.hpp"
 #	include "Game/ObjectModel.hpp"
 #
-};
+}

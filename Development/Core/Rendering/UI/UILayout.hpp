@@ -32,7 +32,7 @@ public:
 	*/
 	DisposablePointer<UIElement> Parent;
 
-	UILayout() : Owner(NULL) {};
+	UILayout() : Owner(NULL) {}
 	~UILayout();
 
 	/*!

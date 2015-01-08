@@ -7,7 +7,7 @@ class IRendererImplementation
 public:
 	Renderer *Target;
 
-	virtual ~IRendererImplementation() {};
+	virtual ~IRendererImplementation() {}
 
 	/*!
 	*	Creates a renderer from a Window Handle

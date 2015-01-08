@@ -129,7 +129,31 @@ solution "Dependencies"
 		if os.get() == "linux" or os.get() == "macosx" then
 			buildoptions { "-std=c++11" }
 		end
- 
+		
+		if os.get() == "windows" then
+			excludes { "Source/SimpleFileWatcher/FileWatcherLinux.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
+			defines({ "_WIN32", "WIN32" })
+
+			files {
+				"Source/SFML/SFML/Network/Win32/*.cpp",
+				"Source/SFML/SFML/System/Win32/*.cpp",
+				"Source/SFML/SFML/Window/Win32/*.cpp"
+			}
+
+			includedirs {
+				"Source/SFML/Headers/libsndfile/windows/"
+			}
+		end
+		
+		if os.get() == "linux" then
+			excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
+			defines({ "__LINUX__" })
+
+			includedirs {
+				"Source/SFML/Headers/libsndfile/osx/"
+			}
+		end
+		
 		configuration "Debug"
 			targetsuffix "d"
 			
@@ -137,30 +161,6 @@ solution "Dependencies"
 			
 			targetdir("../Binaries/FlamingDependencies/Debug/")
 			objdir("../Temp/FlamingDependencies/Debug/")
-		
-			if os.get() == "windows" then
-				excludes { "Source/SimpleFileWatcher/FileWatcherLinux.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
-				defines({ "_WIN32", "WIN32" })
-
-				files {
-					"Source/SFML/SFML/Network/Win32/*.cpp",
-					"Source/SFML/SFML/System/Win32/*.cpp",
-					"Source/SFML/SFML/Window/Win32/*.cpp"
-				}
-
-				includedirs {
-					"Source/SFML/Headers/libsndfile/windows/"
-				}
-			end
-		
-			if os.get() == "linux" then
-				excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
-				defines({ "__LINUX__" })
-
-				includedirs {
-					"Source/SFML/Headers/libsndfile/osx/"
-				}
-			end
 
 			flags { "Symbols" }
  
@@ -169,30 +169,6 @@ solution "Dependencies"
 			
 			targetdir("../Binaries/FlamingDependencies/Release/")
 			objdir("../Temp/FlamingDependencies/Release/")
-				
-			if os.get() == "windows" then
-				excludes { "Source/SimpleFileWatcher/FileWatcherLinux.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
-				defines({ "_WIN32", "WIN32" })
-
-				includedirs {
-					"Source/SFML/Headers/libsndfile/windows/"
-				}
-
-				files {
-					"Source/SFML/SFML/Network/Win32/*.cpp",
-					"Source/SFML/SFML/System/Win32/*.cpp",
-					"Source/SFML/SFML/Window/Win32/*.cpp"
-				}
-			end
-		
-			if os.get() == "linux" then
-				excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
-				defines({ "__LINUX__" })
-
-				includedirs {
-					"Source/SFML/Headers/libsndfile/osx/"
-				}
-			end
 
 			flags { "Optimize" }
 		

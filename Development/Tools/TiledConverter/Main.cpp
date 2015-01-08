@@ -243,7 +243,7 @@ public:
                 };
 
 				//Expect 2-px offset between tiles
-				DisposablePointer<TexturePacker> PackedUniqueTiles = TexturePacker::FromTextures(UniqueTextures, (uint32)ImageSize.x + 2 * (UniqueTileSideCount + 1), (uint32)ImageSize.y + 2 * (UniqueTileSideCount + 1));
+				DisposablePointer<TexturePacker> PackedUniqueTiles = TexturePacker::FromTextures(UniqueTextures, (uint32)ImageSize.x + 2 * (UniqueTileSideCount + 1), (uint32)ImageSize.y + 2 * (UniqueTileSideCount + 1), DEFAULT_TEXTURE_PADDING);
 
 				if(!PackedUniqueTiles.Get() || PackedUniqueTiles->IndexCount() != UniqueTextures.size())
 				{

@@ -10,7 +10,7 @@ namespace TiledMapOrientationMode
 		Orthogonal, //!<Orthogonal Orientation
 		Isometric //!<Isometric Orientation
 	};
-};
+}
 
 /*!
 *	Tiled Map Order
@@ -24,7 +24,7 @@ namespace TiledMapOrder
 		South, //!<Rotated 180 degrees
 		West //!<Rotated 270 degrees
 	};
-};
+}
 
 /*!
 *	Tiled Map Init Options class
@@ -35,12 +35,12 @@ public:
 	std::vector<std::string> PackageDirectoriesValue;
 	bool FromPackageValue;
 
-	TiledMapInitOptions() : FromPackageValue(false) {};
-	TiledMapInitOptions &FromPackage(bool value) { FromPackageValue = value; return *this; };
+	TiledMapInitOptions() : FromPackageValue(false) {}
+	TiledMapInitOptions &FromPackage(bool value) { FromPackageValue = value; return *this; }
 	TiledMapInitOptions &AdditionalPackageDirectory(const std::string &Directory)
 	{ 
 		PackageDirectoriesValue.push_back(Directory); return *this;
-	};
+	}
 };
 
 /*!

@@ -12,7 +12,7 @@ namespace FlamingTorch
 			return "Linux";
 		
 		return std::string(Info.sysname) + " " + Info.version + " " + Info.release;
-	};
+	}
 
 	int32 CoreUtils::RunProgram(const std::string &_ExePath, const std::string &Parameters, const std::string &WorkingDirectory)
 	{
@@ -26,11 +26,11 @@ namespace FlamingTorch
 		system(CommandString.c_str());
 
 		return 0;
-	};
+	}
 
 	Rect CoreUtils::GetDesktopWorkArea()
 	{
-	};
-};
+	}
+}
 
 #endif

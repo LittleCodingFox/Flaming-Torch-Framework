@@ -17,7 +17,7 @@ namespace FlamingTorch
 		Manager = (UIManager *)ManagerAddr;
 
 		Manager->RemoveElement(ID);
-	};
+	}
 
 	class UIInputProcessor : public InputCenter::Context
 	{
@@ -34,30 +34,30 @@ namespace FlamingTorch
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyJustPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
-				};
+				}
 			}
 			else if(Key.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
-				};
+				}
 			}
 			else if(Key.JustReleased)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyReleased, { const_cast<InputCenter::KeyInfo *>(&Key) });
-				};
-			};
+				}
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
+			}
 
 			return TheManager.Input.InputConsumed();
-		};
+		}
 
 		bool OnTouch(const InputCenter::TouchInfo &Touch)
 		{
@@ -71,39 +71,39 @@ namespace FlamingTorch
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchJustPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
-				};
+				}
 			}
 			else if (Touch.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
-				};
-			};
+				}
+			}
 
 			if(Touch.Dragged)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchDragged, { const_cast<InputCenter::TouchInfo *>(&Touch) });
-				};
-			};
+				}
+			}
 			
 			if(Touch.JustReleased)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchReleased, { const_cast<InputCenter::TouchInfo *>(&Touch) });
-				};
-			};
+				}
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
+			}
 
 			return TheManager.Input.InputConsumed();
-		};
+		}
 
 		bool OnMouseButton(const InputCenter::MouseButtonInfo &Button)
 		{
@@ -117,30 +117,30 @@ namespace FlamingTorch
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseJustPressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
-				};
+				}
 			}
 			else if(Button.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MousePressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
-				};
+				}
 			}
 			else if(Button.JustReleased)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseReleased, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
-				};
-			};
+				}
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
+			}
 
 			return TheManager.Input.InputConsumed();
-		};
+		}
 
 		bool OnJoystickButton(const InputCenter::JoystickButtonInfo &Button)
 		{
@@ -152,30 +152,30 @@ namespace FlamingTorch
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonJustPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
-				};
+				}
 			}
 			else if(Button.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
-				};
+				}
 			}
 			else if(Button.JustReleased)
 			{
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
 					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonReleased, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
-				};
-			};
+				}
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
+			}
 
 			return TheManager.Input.InputConsumed();
-		};
+		}
 		
 		bool OnJoystickAxis(const InputCenter::JoystickAxisInfo &Axis)
 		{
@@ -185,15 +185,15 @@ namespace FlamingTorch
 			if(TheGUIManager.GetFocusedElement().Get())
 			{
 				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickAxisMoved, { const_cast<InputCenter::JoystickAxisInfo *>(&Axis) });
-			};
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
+			}
 
 			return TheManager.Input.InputConsumed();
-		};
+		}
 
 		void OnJoystickConnected(uint8 Index)
 		{
@@ -203,13 +203,13 @@ namespace FlamingTorch
 			if(TheGUIManager.GetFocusedElement().Get())
 			{
 				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickConnected, { &Index });
-			};
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
-		};
+			}
+		}
 
 		void OnJoystickDisconnected(uint8 Index)
 		{
@@ -219,13 +219,13 @@ namespace FlamingTorch
 			if (TheGUIManager.GetFocusedElement().Get())
 			{
 				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickDisconnected, { &Index });
-			};
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
-		};
+			}
+		}
 
 		void OnMouseMove(const Vector3 &Position)
 		{
@@ -235,13 +235,13 @@ namespace FlamingTorch
 			if (TheGUIManager.GetFocusedElement().Get())
 			{
 				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseMoved, { });
-			};
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
-		};
+			}
+		}
 
 		void OnCharacterEntered(wchar_t Character)
 		{
@@ -252,13 +252,13 @@ namespace FlamingTorch
 			{
 				char c = (char)Character;
 				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::CharacterEntered, { &c });
-			};
+			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
-		};
+			}
+		}
 
 		void OnAction(const InputCenter::Action &TheAction)
 		{
@@ -270,11 +270,11 @@ namespace FlamingTorch
 			if(TheGUIManager.GetInputBlocker().Get())
 			{
 				TheManager.Input.ConsumeInput();
-			};
-		};
+			}
+		}
 
-		void OnGainFocus() {};
-		void OnLoseFocus() {};
+		void OnGainFocus() {}
+		void OnLoseFocus() {}
 	};
 
 	bool TextParamsAreSimilar(const TextParams &A, const TextParams &B)
@@ -282,7 +282,7 @@ namespace FlamingTorch
 		return A.BorderColorValue == B.BorderColorValue && A.BorderSizeValue == B.BorderSizeValue && A.FontSizeValue == B.FontSizeValue &&
 			A.FontValue == B.FontValue && A.SecondaryTextColorValue == B.SecondaryTextColorValue && A.StyleValue == B.StyleValue &&
 			A.TextColorValue == B.TextColorValue;
-	};
+	}
 
 #define COPYOFFSET(var, type)\
 	memcpy(&Buffer[Offset], &var, sizeof(type));\
@@ -306,12 +306,12 @@ namespace FlamingTorch
 		COPYOFFSET(Parameters.StyleValue, uint32);
 
 		return CRC32::Instance.CRC(Buffer, Size);
-	};
+	}
 
 	StringID UIManager::MakeTextureResourceString(const Path &FileName)
 	{
 		return MakeStringID(FileName.FullPath());
-	};
+	}
 
 	DisposablePointer<Texture> UIManager::GetUITexture(const Path &FileName)
 	{
@@ -322,7 +322,7 @@ namespace FlamingTorch
 		if (it != TextureResources.end())
 		{
 			return it->second.InstanceTexture;
-		};
+		}
 
 		DisposablePointer<Texture> SourceTexture = ResourceManager::Instance.GetTextureFromPackage(FileName);
 
@@ -342,7 +342,7 @@ namespace FlamingTorch
 		TextureResources[ID] = TheResource;
 
 		return TheResource.InstanceTexture;
-	};
+	}
 
 	DisposablePointer<Texture> UIManager::GetUITexture(const Vector4 &Color)
 	{
@@ -354,7 +354,7 @@ namespace FlamingTorch
 		if (it != TextureResources.end())
 		{
 			return it->second.InstanceTexture;
-		};
+		}
 
 		DisposablePointer<Texture> SourceTexture = Texture::CreateFromBuffer(TextureBuffer::CreateFromColor(32, 32, Color));
 
@@ -371,7 +371,7 @@ namespace FlamingTorch
 		TextureResources[ID] = TheResource;
 
 		return TheResource.InstanceTexture;
-	};
+	}
 
 	void UIManager::GetUIText(const std::string &Text, const TextParams &Parameters)
 	{
@@ -399,9 +399,9 @@ namespace FlamingTorch
 				TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(Texture::CreateFromBuffer(TheResource.Info.Pixels)));
 
 				TextResources[ID] = TheResource;
-			};
-		};
-	};
+			}
+		}
+	}
 
 	void UIManager::DrawText(const std::string &Text, const TextParams &Params)
 	{
@@ -456,17 +456,17 @@ namespace FlamingTorch
 						else
 						{
 							Position.x = Position.x + SpaceSize;
-						};
-					};
+						}
+					}
 
 					break;
-				};
-			};
+				}
+			}
 
 			Position.x = InitialPosition.x;
 			Position.y += Params.FontSizeValue;
-		};
-	};
+		}
+	}
 
 	UIManager::UIManager(Renderer *TheOwner) : Owner(TheOwner), DrawOrderCounter(0), DrawOrderCacheDirty(false), DrawUIRects(0), DrawUIFocusZones(0)
 	{
@@ -480,13 +480,13 @@ namespace FlamingTorch
 			Libs.push_back(GameInterface::Instance);
 
 			ScriptInstance = GameInterface::Instance->GetScriptInstance();
-		};
+		}
 
 		if(ScriptInstance.Get() == NULL)
 			ScriptInstance = LuaScriptManager::Instance.CreateScript("", &Libs[0], Libs.size());
 
 		RegisterInput();
-	};
+	}
 
 	DisposablePointer<UILayout> UIManager::GetLayout(StringID LayoutID)
 	{
@@ -494,7 +494,7 @@ namespace FlamingTorch
 			return Layouts[LayoutID];
 
 		return DisposablePointer<UILayout>();
-	};
+	}
 
 	void UIManager::AddLayout(StringID LayoutID, DisposablePointer<UILayout> Layout)
 	{
@@ -502,13 +502,13 @@ namespace FlamingTorch
 			Layouts[LayoutID].Dispose();
 
 		Layouts[LayoutID] = Layout;
-	};
+	}
 
 #define CHECKJSONVALUE(Value, Name, type)\
 	if(!Value.isNull())\
 	{\
 		Log::Instance.LogWarn(TAG, "While parsing a layout: Value '%s' is non-null and not the expected type '%s'", Name, #type);\
-	};
+	}
 
 	void UIManager::ProcessTextProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
@@ -527,8 +527,8 @@ namespace FlamingTorch
 					Log::Instance.LogWarn(TAG, "Unable to load font '%s'", Value.c_str());
 
 					return;
-				};
-			};
+				}
+			}
 
 			TheText->TextParameters.Font(Handle);
 		}
@@ -539,7 +539,7 @@ namespace FlamingTorch
 			if(1 == sscanf(Value.c_str(), "%u", &FontSize))
 			{
 				TheText->TextParameters.FontSize(FontSize);
-			};
+			}
 		}
 		else if(Property == "Text")
 		{
@@ -558,8 +558,8 @@ namespace FlamingTorch
 				else
 				{
 					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Bold;
-				};
-			};
+				}
+			}
 		}
 		else if(Property == "Italic")
 		{
@@ -574,8 +574,8 @@ namespace FlamingTorch
 				else
 				{
 					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Italic;
-				};
-			};
+				}
+			}
 		}
 		else if(Property == "Underline")
 		{
@@ -590,8 +590,8 @@ namespace FlamingTorch
 				else
 				{
 					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Underline;
-				};
-			};
+				}
+			}
 		}
 		else if(Property == "Alignment")
 		{
@@ -622,8 +622,8 @@ namespace FlamingTorch
 				else if(Fragments[j] == "BOTTOM")
 				{
 					Alignment |= UITextAlignment::Bottom;
-				};
-			};
+				}
+			}
 
 			if(Fragments.size() == 0)
 				Alignment = UITextAlignment::Left;
@@ -666,8 +666,8 @@ namespace FlamingTorch
 				return;
 
 			TheText->TextParameters.BorderColorValue = Color;
-		};
-	};
+		}
+	}
 
 	void UIManager::ProcessTextJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
@@ -683,7 +683,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "FontSize", int);
-		};
+		}
 
 		Value = Data.get("Font", Json::Value(""));
 
@@ -695,7 +695,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Font", string);
-		};
+		}
 
 		Value = Data.get("Text", Json::Value(""));
 
@@ -706,7 +706,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Text", string);
-		};
+		}
 
 		Value = Data.get("Bold", Json::Value(false));
 
@@ -717,7 +717,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Bold", string);
-		};
+		}
 
 		Value = Data.get("Italic", Json::Value(false));
 
@@ -728,7 +728,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Italic", string);
-		};
+		}
 
 		Value = Data.get("Underline", Json::Value(false));
 
@@ -739,7 +739,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Underline", string);
-		};
+		}
 
 		Value = Data.get("Alignment", Json::Value(""));
 
@@ -750,7 +750,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Alignment", string);
-		};
+		}
 
 		static std::stringstream str;
 		str.str("");
@@ -764,12 +764,12 @@ namespace FlamingTorch
 			if(Value.asString().length())
 			{
 				ProcessTextProperty(Element, "TextColor", Value.asString(), ElementName, LayoutName);
-			};
+			}
 		}
 		else
 		{
 			CHECKJSONVALUE(Value, "TextColor", string);
-		};
+		}
 
 		str.str("");
 		str << TheText->TextParameters.SecondaryTextColorValue.x << "," << TheText->TextParameters.SecondaryTextColorValue.y << "," <<
@@ -782,12 +782,12 @@ namespace FlamingTorch
 			if(Value.asString().length())
 			{
 				ProcessTextProperty(Element, "SecondaryTextColor", Value.asString(), ElementName, LayoutName);
-			};
+			}
 		}
 		else
 		{
 			CHECKJSONVALUE(Value, "SecondaryTextColor", string);
-		};
+		}
 
 		Value = Data.get("Border", Json::Value("0"));
 
@@ -798,7 +798,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Border", string);
-		};
+		}
 
 		str.str("");
 		str << TheText->TextParameters.BorderColorValue.x << "," << TheText->TextParameters.BorderColorValue.y << "," << TheText->TextParameters.BorderColorValue.z << "," <<
@@ -813,8 +813,8 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "BorderColor", string);
-		};
-	};
+		}
+	}
 
 	void UIManager::ProcessButtonProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
@@ -823,8 +823,8 @@ namespace FlamingTorch
 		if (Property == "Caption")
 		{
 			TheButton->SetCaption(Value);
-		};
-	};
+		}
+	}
 
 	void UIManager::ProcessButtonJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
@@ -837,8 +837,8 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Caption", string);
-		};
-	};
+		}
+	}
 
 	void UIManager::ProcessSpriteProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
@@ -858,12 +858,12 @@ namespace FlamingTorch
 				{
 					SpriteTexture = ResourceManager::Instance.GetTextureFromPackage(FileName.substr(0, FileName.rfind('/') + 1),
 						FileName.substr(FileName.rfind('/') + 1));
-				};
+				}
 
 				if(!SpriteTexture.Get())
 				{
 					SpriteTexture = ResourceManager::Instance.GetTexture(FileName);
-				};
+				}
 				*/
 
 				if(!SpriteTexture.Get())
@@ -880,9 +880,9 @@ namespace FlamingTorch
 					if(TheSprite->Size() == Vector2())
 					{
 						TheSprite->SetSize(SpriteTexture->Size());
-					};
-				};
-			};
+					}
+				}
+			}
 		}
 		else if(Property == "Filtering")
 		{
@@ -900,8 +900,8 @@ namespace FlamingTorch
 				else if(StringUtils::ToUpperCase(Temp) == "NEAREST")
 				{
 					TheSprite->TheSprite.SpriteTexture->SetTextureFiltering(TextureFiltering::Nearest);
-				};
-			};
+				}
+			}
 		}
 		else if(Property == "NinePatch")
 		{
@@ -919,7 +919,7 @@ namespace FlamingTorch
 					return;
 
 				TheSprite->TheSprite.Options.Scale(Element->Size()).NinePatch(true, NinePatchRect);
-			};
+			}
 		}
 		else if(Property == "Color")
 		{
@@ -940,8 +940,8 @@ namespace FlamingTorch
 				else if (4 == sscanf(ColorString.c_str(), "%f, %f, %f, %f", &Color.x, &Color.y, &Color.z, &Color.w))
 				{
 					GotColor = true;
-				};
-			};
+				}
+			}
 
 			if (GotColor)
 			{
@@ -951,8 +951,8 @@ namespace FlamingTorch
 				{
 					TheSprite->TheSprite.SpriteTexture = GetUITexture(Vector4(1, 1, 1, 1));
 					TheSprite->TheSprite.Options.Scale(TheSprite->Size() / TheSprite->TheSprite.SpriteTexture->Size());
-				};
-			};
+				}
+			}
 		}
 		else if(Property == "ScaleWide")
 		{
@@ -981,15 +981,15 @@ namespace FlamingTorch
 			{
 				if(4 != sscanf(Elements[i].c_str(), "%f,%f,%f,%f", &Colors[i].x, &Colors[i].y, &Colors[i].z, &Colors[i].w))
 					return;
-			};
+			}
 
 			TheSprite->TheSprite.Options.Colors(Colors[0], Colors[1], Colors[2], Colors[3]);
 		}
 		else if(Property == "Wireframe")
 		{
 			TheSprite->TheSprite.Options.Wireframe(Value == "true");
-		};
-	};
+		}
+	}
 
 	void UIManager::ProcessSpriteJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
@@ -1002,7 +1002,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Path", string);
-		};
+		}
 
 		Value = Data.get("Filtering", Json::Value("LINEAR"));
 
@@ -1013,7 +1013,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Filtering", string);
-		};
+		}
 
 		Value = Data.get("NinePatch", Json::Value(""));
 
@@ -1024,7 +1024,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "NinePatch", string)
-		};
+		}
 
 		Value = Data.get("NinePatchScale", Json::Value(1.0));
 
@@ -1035,7 +1035,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "NinePatchScale", double);
-		};
+		}
 
 		Value = Data.get("Colors", Json::Value("1,1,1,1"));
 
@@ -1046,7 +1046,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Colors", string)
-		};
+		}
 
 		Value = Data.get("Color", Json::Value(""));
 
@@ -1057,7 +1057,7 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Color", string)
-		};
+		}
 
 		Value = Data.get("Wireframe", Json::Value(false));
 
@@ -1068,30 +1068,30 @@ namespace FlamingTorch
 		else
 		{
 			CHECKJSONVALUE(Value, "Wireframe", bool)
-		};
+		}
 
 		Value = Data.get("ScaleWide", Json::Value(""));
 
 		if(Value.isDouble())
 		{
 			ProcessSpriteProperty(Element, "ScaleWide", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
-		};
+		}
 
 		Value = Data.get("ScaleTall", Json::Value(""));
 
 		if(Value.isDouble())
 		{
 			ProcessSpriteProperty(Element, "ScaleTall", StringUtils::MakeFloatString((f32)Value.asDouble()), ElementName, LayoutName);
-		};
-	};
+		}
+	}
 
 	void UIManager::ProcessGroupProperty(UIElement *Element, const std::string &Property, const std::string &Value, const std::string &ElementName, const std::string &LayoutName)
 	{
-	};
+	}
 
 	void UIManager::ProcessGroupJSON(UIElement *Element, const Json::Value &Data, const std::string &ElementName, const std::string &LayoutName)
 	{
-	};
+	}
 
 	std::string JsonToLuaString(const Json::Value &Value)
 	{
@@ -1141,8 +1141,8 @@ namespace FlamingTorch
 					Out << Value[i].asUInt();
 
 					break;
-				};
-			};
+				}
+			}
 
 			Out << " }";
 
@@ -1194,16 +1194,16 @@ namespace FlamingTorch
 					Out << "\"" << Value.getMemberNames()[i] << "\" = " << Value[Value.getMemberNames()[i]].asUInt();
 
 					break;
-				};
-			};
+				}
+			}
 
 			Out << "}";
 
 			break;
-		};
+		}
 
 		return Out.str();
-	};
+	}
 
 	void UIManager::CopyElementsToLayout(DisposablePointer<UILayout> TheLayout, const Json::Value &Elements, UIElement *Parent, const std::string &ParentElementName, UIElement *ParentLimit)
 	{
@@ -1225,7 +1225,7 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, str.str().c_str(), string);
 
 				continue;
-			};
+			}
 
 			std::string ElementName = Value.asString();
 			std::string ElementIDName = ParentElementName + "." + ElementName;
@@ -1242,7 +1242,7 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, str.str().c_str(), object);
 
 				continue;
-			};
+			}
 
 			Value = Data.get("Control", Json::Value());
 
@@ -1251,7 +1251,7 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, "Control", string);
 
 				continue;
-			};
+			}
 
 			std::string Control = Value.asString();
 
@@ -1260,7 +1260,7 @@ namespace FlamingTorch
 				Log::Instance.LogWarn(TAG, "Unable to add widget '%s' on layout '%s' due to missing 'Control' property", ElementName.c_str(), TheLayout->Name.c_str());
 
 				continue;
-			};
+			}
 
 			DisposablePointer<UIElement> Element;
 
@@ -1297,7 +1297,7 @@ namespace FlamingTorch
 			else //Should always be an UIGroup due to layouting
 			{
 				Element.Reset(new UIGroup(Renderer->UI));
-			};
+			}
 
 			Element->LayoutValue = TheLayout;
 			Element->LayoutNameValue = ElementIDName;
@@ -1325,7 +1325,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(EnabledValue, "Enabled", bool);
-			};
+			}
 
 			if (PropagatesEventsValue.isBool())
 			{
@@ -1334,55 +1334,55 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(PropagatesEventsValue, "PropagatesEvents", bool);
-			};
+			}
 
 			if(KeyboardInputEnabledValue.isBool())
 			{
 				if (!KeyboardInputEnabledValue.asBool())
 				{
 					EnabledInputs = EnabledInputs & ~UIInputType::Keyboard;
-				};
+				}
 			}
 			else
 			{
 				CHECKJSONVALUE(KeyboardInputEnabledValue, "KeyboardInput", bool);
-			};
+			}
 
 			if(TouchInputEnabledValue.isBool())
 			{
 				if(!TouchInputEnabledValue.asBool())
 				{
 					EnabledInputs = EnabledInputs & ~UIInputType::Touch;
-				};
+				}
 			}
 			else
 			{
 				CHECKJSONVALUE(TouchInputEnabledValue, "TouchInput", bool);
-			};
+			}
 
 			if(JoystickInputEnabledValue.isBool())
 			{
 				if (!JoystickInputEnabledValue.asBool())
 				{
 					EnabledInputs = EnabledInputs & ~UIInputType::Joystick;
-				};
+				}
 			}
 			else
 			{
 				CHECKJSONVALUE(JoystickInputEnabledValue, "JoystickInput", bool);
-			};
+			}
 
 			if(MouseInputEnabledValue.isBool())
 			{
 				if(!MouseInputEnabledValue.asBool())
 				{
 					EnabledInputs = EnabledInputs & ~UIInputType::Mouse;
-				};
+				}
 			}
 			else
 			{
 				CHECKJSONVALUE(MouseInputEnabledValue, "MouseInput", bool);
-			};
+			}
 
 			Element->SetEnabledInputTypes(EnabledInputs);
 
@@ -1393,7 +1393,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(VisibleValue, "Visible", bool);
-			};
+			}
 
 			if(BlockingInputValue.isBool())
 			{
@@ -1402,7 +1402,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(BlockingInputValue, "BlockingInput", bool);
-			};
+			}
 
 			if(InputBlockBackgroundValue.isBool())
 			{
@@ -1411,7 +1411,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(InputBlockBackgroundValue, "InputBlockBackground", bool);
-			};
+			}
 
 #define REGISTER_LUA_EVENT(name, type, extraparams)\
 			{\
@@ -1437,8 +1437,8 @@ namespace FlamingTorch
 				else\
 				{\
 					CHECKJSONVALUE(Value, #name, string);\
-				};\
-			};
+				}\
+			}
 
 			REGISTER_LUA_EVENT(OnMouseJustPressed, UIEventType::MouseJustPressed, ", Button");
 			REGISTER_LUA_EVENT(OnMousePressed, UIEventType::MousePressed, ", Button");
@@ -1489,7 +1489,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(Value, "Wide", string);
-			};
+			}
 
 			Value = Data.get("Tall", Json::Value("0"));
 
@@ -1500,7 +1500,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(Value, "Tall", string);
-			};
+			}
 
 			Value = Data.get("Xpos", Json::Value("0"));
 
@@ -1511,7 +1511,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(Value, "Xpos", string);
-			};
+			}
 
 			Value = Data.get("Ypos", Json::Value("0"));
 
@@ -1522,7 +1522,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(Value, "Ypos", string);
-			};
+			}
 
 			Value = Data.get("XOffset", Json::Value("0"));
 
@@ -1533,7 +1533,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(Value, "XOffset", string);
-			};
+			}
 
 			Value = Data.get("YOffset", Json::Value("0"));
 
@@ -1544,7 +1544,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(Value, "YOffset", string);
-			};
+			}
 
 			std::stringstream ComposedPositionFunction, ComposedSizeFunction;
 
@@ -1617,7 +1617,7 @@ namespace FlamingTorch
 				Element.Dispose();
 
 				continue;
-			};
+			}
 
 			try
 			{
@@ -1630,7 +1630,7 @@ namespace FlamingTorch
 				Element.Dispose();
 
 				continue;
-			};
+			}
 
 			try
 			{
@@ -1643,7 +1643,7 @@ namespace FlamingTorch
 				Element.Dispose();
 
 				continue;
-			};
+			}
 
 			if(Control == "SPRITE")
 			{
@@ -1702,8 +1702,8 @@ namespace FlamingTorch
 						TargetLayout = it->second;
 
 						break;
-					};
-				};
+					}
+				}
 
 				if(TargetLayout.Get() == NULL)
 				{
@@ -1714,9 +1714,9 @@ namespace FlamingTorch
 							TargetLayout = it->second;
 
 							break;
-						};
-					};
-				};
+						}
+					}
+				}
 
 				if(TargetLayout.Get() == NULL)
 				{
@@ -1727,7 +1727,7 @@ namespace FlamingTorch
 					RemoveElement(Element->ID());
 
 					return;
-				};
+				}
 
 				//We shouldn't override previous set sizes...
 				bool ResetElementSize = Element->Size() == Vector2();
@@ -1735,7 +1735,7 @@ namespace FlamingTorch
 				if(ResetElementSize)
 				{
 					Element->SetSize(Parent ? Parent->Size() : Element->Size());
-				};
+				}
 
 				DisposablePointer<UILayout> NewLayout = TargetLayout->Clone(Element, ParentElementName + "." + ElementName, true, true);
 
@@ -1749,7 +1749,7 @@ namespace FlamingTorch
 					Log::Instance.LogWarn(TAG, "Found duplicate layout '%s', erasing old.", (Element->Layout()->Name + "_" + NewLayout->Name).c_str());
 
 					Layouts.erase(it);
-				};
+				}
 
 				Layouts[LayoutID] = NewLayout;
 
@@ -1798,17 +1798,17 @@ namespace FlamingTorch
 											TargetElement = TargetElement->Child(l);
 
 											break;
-										};
-									};
+										}
+									}
 
 									if(!Found)
 									{
 										TargetElement = NULL;
 
 										break;
-									};
-								};
-							};
+									}
+								}
+							}
 
 							if(TargetElement != NULL)
 							{
@@ -1843,7 +1843,7 @@ namespace FlamingTorch
 									//ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
 
 									continue;
-								};
+								}
 
 								if(ControlName == "UISPRITE")
 								{
@@ -1856,21 +1856,21 @@ namespace FlamingTorch
 								else if(ControlName == "UITEXT")
 								{
 									ProcessTextProperty(TargetElement, Property, FinalValue, ElementName, NewLayout->Name);
-								};
+								}
 
 								//ProcessCustomProperty(TargetElement, Property, Value, ElementName, NewLayout->Name);
 
 								break;
-							};
-						};
-					};
-				};
+							}
+						}
+					}
+				}
 
 				if(ResetElementSize)
 				{
 					Element->SetSize(Element->ChildrenSize());
-				};
-			};
+				}
+			}
 
 			Value = Data.get("TooltipElement", Json::Value(""));
 
@@ -1887,7 +1887,7 @@ namespace FlamingTorch
 
 				Element->SetRespondsToTooltips(true);
 				Element->SetTooltipElement(TooltipGroup);
-			};
+			}
 
 			Value = Data.get("TooltipFixed", Json::Value(false));
 
@@ -1898,7 +1898,7 @@ namespace FlamingTorch
 			else
 			{
 				CHECKJSONVALUE(Value, "TooltipFixed", bool);
-			};
+			}
 
 			Value = Data.get("TooltipPosition", Json::Value(""));
 
@@ -1917,13 +1917,13 @@ namespace FlamingTorch
 					else
 					{
 						Element->SetTooltipsPosition(Position);
-					};
-				};
+					}
+				}
 			}
 			else
 			{
 				CHECKJSONVALUE(Value, "TooltipPosition", string);
-			};
+			}
 
 			Json::Value Children = Data.get("Children", Json::Value());
 
@@ -1931,8 +1931,8 @@ namespace FlamingTorch
 				continue;
 
 			CopyElementsToLayout(TheLayout, Children, Element, ParentElementName + "." + ElementName, ParentLimit);
-		};
-	};
+		}
+	}
 
 	bool UIManager::LoadLayouts(Stream *In, DisposablePointer<UIElement> Parent, bool DefaultLayout)
 	{
@@ -1945,7 +1945,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "Failed to parse a GUI layout resource: %s", Reader.getFormatedErrorMessages().c_str());
 
 			return false;
-		};
+		}
 
 		for(uint32 i = 0; i < Root.size(); i+=2)
 		{
@@ -1971,18 +1971,18 @@ namespace FlamingTorch
 				Log::Instance.LogWarn(TAG, "Found duplicate layout '%s' in %s, erasing old.", LayoutName.c_str(), DefaultLayout ? "Default Layouts" : "Layouts");
 
 				TargetLayoutMap.erase(it);
-			};
+			}
 
 			TargetLayoutMap[LayoutID] = Layout;
 
 			if(!DefaultLayout)
 			{
 				Layout->PerformStartupEvents(NULL);
-			};
-		};
+			}
+		}
 
 		return true;
-	};
+	}
 
 	bool UIManager::InstanceLayout(const std::string &Name, DisposablePointer<UIElement> Parent)
 	{
@@ -1999,8 +1999,8 @@ namespace FlamingTorch
 				Log::Instance.LogWarn(TAG, "Unable to find layout '%s' for instancing", Name.c_str());
 
 				return false;
-			};
-		};
+			}
+		}
 
 		std::string LayoutName = Parent->Name() + StringUtils::MakeIntString(Parent->ChildrenCount() + 1, false);
 
@@ -2009,7 +2009,7 @@ namespace FlamingTorch
 		Layouts[MakeStringID(LayoutName)] = Layout;
 
 		return true;
-	};
+	}
 
 	void UIManager::ClearLayouts()
 	{
@@ -2017,17 +2017,17 @@ namespace FlamingTorch
 		{
 			Layouts.begin()->second.Dispose();
 			Layouts.erase(Layouts.begin());
-		};
+		}
 
 		while(DefaultLayouts.begin() != DefaultLayouts.end())
 		{
 			DefaultLayouts.begin()->second.Dispose();
 			DefaultLayouts.erase(DefaultLayouts.begin());
-		};
+		}
 
 		MouseOverElement = DisposablePointer<UIElement>();
 		FocusedElementValue = DisposablePointer<UIElement>();
-	};
+	}
 
 	DisposablePointer<UIElement> UIManager::GetInputBlocker()
 	{
@@ -2039,7 +2039,7 @@ namespace FlamingTorch
 			{
 				Elements.erase(it);
 				it = Elements.begin();
-			};
+			}
 
 			if(it == Elements.end())
 				break;
@@ -2049,11 +2049,11 @@ namespace FlamingTorch
 				Out = it->second->Element;
 
 				break;
-			};
-		};
+			}
+		}
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<UIElement> UIManager::GetMouseOverElement()
 	{
@@ -2070,9 +2070,9 @@ namespace FlamingTorch
 				if(it->second->Element->Parent().Get() == nullptr)
 				{
 					DrawOrderCache.push_back(it->second);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		DisposablePointer<UIElement> FoundElement;
 
@@ -2098,12 +2098,12 @@ namespace FlamingTorch
 
 					if(FoundElement)
 						break;
-				};
+				}
 
 				if(FoundElement)
 					break;
-			};
-		};
+			}
+		}
 
 		if(MouseOverElement != FoundElement)
 		{
@@ -2113,24 +2113,24 @@ namespace FlamingTorch
 		else if(MouseOverElement)
 		{
 			MouseOverElement->OnEvent(UIEventType::MouseOver, {});
-		};
+		}
 
 		if(FoundElement && Elements[FoundElement->ID()].Get())
 		{
 			if (MouseOverElement != FoundElement)
 			{
 				FoundElement->OnEvent(UIEventType::MouseEntered, {});
-			};
+			}
 
 			MouseOverElement = FoundElement;
 
 			return Elements[FoundElement->ID()]->Element;
-		};
+		}
 
 		MouseOverElement = FoundElement;
 
 		return DisposablePointer<UIElement>();
-	};
+	}
 
 	void UIManager::Update()
 	{
@@ -2144,9 +2144,9 @@ namespace FlamingTorch
 				if(it->second->Element->Parent().Get() == nullptr)
 				{
 					DrawOrderCache.push_back(it->second);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		for(uint32 i = 0; i < DrawOrderCache.size(); i++)
 		{
@@ -2156,12 +2156,12 @@ namespace FlamingTorch
 			if(DrawOrderCache[i]->Element->Visible())
 			{
 				DrawOrderCache[i]->Element->Update(Vector2());
-			};
-		};
+			}
+		}
 
 		//TEMP: Need to fix mouseover not being calculated unless we put this here
 		GetMouseOverElement();
-	};
+	}
 
 	void UIManager::Draw()
 	{
@@ -2178,9 +2178,9 @@ namespace FlamingTorch
 				if(it->second->Element->Parent().Get() == nullptr)
 				{
 					DrawOrderCache.push_back(it->second);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		DisposablePointer<UIElement> InputBlocker;
 
@@ -2191,8 +2191,8 @@ namespace FlamingTorch
 				InputBlocker = it->second->Element;
 
 				break;
-			};
-		};
+			}
+		}
 
 		for(uint32 i = 0; i <= DrawOrderCounter; i++)
 		{
@@ -2206,12 +2206,12 @@ namespace FlamingTorch
 					Sprite BackgroundSprite;
 					BackgroundSprite.Options.Scale(Owner->Size()).Color(Vector4(0, 0, 0, 0.3f));
 					BackgroundSprite.Draw(Owner);
-				};
+				}
 
 				DrawOrderCache[j]->Element->Draw(Vector2(), Owner);
-			};
-		};
-	};
+			}
+		}
+	}
 
 	void UIManager::UpdateFocusedElement(const Vector2 &FocusPoint, uint32 InputType)
 	{
@@ -2225,9 +2225,9 @@ namespace FlamingTorch
 				if (it->second->Element->Parent().Get() == nullptr)
 				{
 					DrawOrderCache.push_back(it->second);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		DisposablePointer<UIElement> PreviouslyFocusedElement = FocusedElementValue;
 		FocusedElementValue = DisposablePointer<UIElement>();
@@ -2256,17 +2256,17 @@ namespace FlamingTorch
 
 					if (FoundElement)
 						break;
-				};
+				}
 
 				if (FoundElement)
 					break;
-			};
-		};
+			}
+		}
 
 		if (FoundElement)
 		{
 			FocusedElementValue = Elements[FoundElement->ID()]->Element;
-		};
+		}
 
 		if (PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
 		{
@@ -2278,8 +2278,8 @@ namespace FlamingTorch
 		else if (PreviouslyFocusedElement.Get() == nullptr && FocusedElementValue)
 		{
 			FocusedElementValue->OnEvent(UIEventType::GainedFocus, {});
-		};
-	};
+		}
+	}
 
 	void UIManager::RecursiveFindFocusedElement(const Vector2 &ParentPosition, DisposablePointer<UIElement> p, DisposablePointer<UIElement> &FoundElement, bool Mouse, const Vector2 &TargetPosition)
 	{
@@ -2302,13 +2302,13 @@ namespace FlamingTorch
 			for(uint32 i = 0; i < p->ChildrenValue.size(); i++)
 			{
 				RecursiveFindFocusedElement(ActualPosition, p->ChildrenValue[i], FoundElement, Mouse, TargetPosition);
-			};
+			}
 		}
 		else
 		{
 			//Log::Instance.LogDebug(TAG, "Failed Focus Test on '%s'", p->Name.c_str());
-		};
-	};
+		}
+	}
 
 	void UIManager::RegisterInput()
 	{
@@ -2317,12 +2317,12 @@ namespace FlamingTorch
 
 		RendererManager::Instance.Input.AddContext(Out);
 		RendererManager::Instance.Input.EnableContext(MakeStringID(Out->Name));
-	};
+	}
 
 	void UIManager::UnRegisterInput()
 	{
 		RendererManager::Instance.Input.DisableContext(MakeStringID("GUIPROCESSOR_" + StringUtils::PointerString(this)));
-	};
+	}
 
 	bool UIManager::AddElement(StringID ID, DisposablePointer<UIElement> Element)
 	{
@@ -2341,8 +2341,8 @@ namespace FlamingTorch
 				Log::Instance.LogWarn(TAG, "Failed to add Element 0x%08x (%s): Duplicate ID 0x%08x (%s)", Element.Get(), Element->Name().c_str(), ID, GetStringIDString(ID).c_str());
 
 				return false;
-			};
-		};
+			}
+		}
 
 		FLASSERT(Element->ManagerValue == this, "Found Element from another UI Manager!");
 
@@ -2364,11 +2364,11 @@ namespace FlamingTorch
 		if(ElementID.length())
 		{
 			ElementIDs[ElementID] = ID;
-		};
+		}
 #endif
 
 		return true;
-	};
+	}
 
 	void UIManager::RemoveElement(StringID ID)
 	{
@@ -2386,8 +2386,8 @@ namespace FlamingTorch
 			Elements.erase(it);
 
 			Element.Dispose();
-		};
-	};
+		}
+	}
 
 	void UIManager::Clear()
 	{
@@ -2396,11 +2396,11 @@ namespace FlamingTorch
 		while(Elements.begin() != Elements.end())
 		{
 			Elements.begin()->second.Dispose();
-		};
+		}
 
 		FocusedElementValue.Dispose();
 		MouseOverElement = DisposablePointer<UIElement>();
-	};
+	}
 
 	void UIManager::ClearFocus()
 	{
@@ -2408,7 +2408,7 @@ namespace FlamingTorch
 			FocusedElementValue->OnEvent(UIEventType::LostFocus, {});
 
 		FocusedElementValue = DisposablePointer<UIElement>();
-	};
+	}
 
 	DisposablePointer<UIElement> UIManager::GetElement(StringID ID)
 	{
@@ -2417,15 +2417,15 @@ namespace FlamingTorch
 		if(it != Elements.end())
 		{
 			return it->second->Element;
-		};
+		}
 
 		return DisposablePointer<UIElement>();
-	};
+	}
 
 	DisposablePointer<UIElement> UIManager::GetFocusedElement()
 	{
 		return FocusedElementValue;
-	};
+	}
 
 	UIManager::~UIManager()
 	{
@@ -2433,12 +2433,12 @@ namespace FlamingTorch
 		Clear();
 
 		ScriptInstance.Dispose();
-	};
+	}
 
 	Renderer *UIManager::GetOwner()
 	{
 		return Owner;
-	};
+	}
 
 	void UIManager::SetSkin(DisposablePointer<GenericConfig> Skin)
 	{
@@ -2451,12 +2451,12 @@ namespace FlamingTorch
 		if (DefaultFontHandle == INVALID_FTGHANDLE)
 		{
 			DefaultFontHandle = ResourceManager::Instance.GetFont(Owner, DefaultFontPath);
-		};
+		}
 
 		if (1 != sscanf(Skin->GetString("General", "DefaultFontSize", "12").c_str(), "%u", &DefaultTextFontSize))
 		{
 			DefaultTextFontSize = 12;
-		};
+		}
 
 		Vector4 Color = MathUtils::ColorFromHTML(Skin->GetString("General", "BackgroundColor", "#00000000"));
 
@@ -2478,7 +2478,7 @@ namespace FlamingTorch
 		else
 		{
 			DefaultTextSecondaryColor = Color;
-		};
+		}
 
 		for (ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
 		{
@@ -2486,12 +2486,12 @@ namespace FlamingTorch
 				continue;
 
 			it->second->Element->SetSkin(SkinValue);
-		};
-	};
+		}
+	}
 
 	DisposablePointer<GenericConfig> UIManager::GetSkin() const
 	{
 		return SkinValue;
-	};
+	}
 #endif
-};
+}

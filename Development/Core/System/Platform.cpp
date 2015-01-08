@@ -49,10 +49,10 @@ namespace FlamingTorch
 
 		default:
 			return Temp;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	uint8 PlatformInfo::ScreenOrientation(const Rect &In)
 	{
@@ -83,10 +83,10 @@ namespace FlamingTorch
 
 			if (In.Left < In.Bottom)
 				return ScreenRotation::East;
-		};
+		}
 
 		return 0xFF;
-	};
+	}
 
 	f32 PlatformInfo::ScreenRotationValue()
 	{
@@ -95,7 +95,7 @@ namespace FlamingTorch
 		if (PlatformType == PlatformType::Mobile)
 		{
 			Degrees = -90;
-		};
+		}
 
 		switch (ScreenRotation)
 		{
@@ -113,10 +113,10 @@ namespace FlamingTorch
 			Degrees += 270;
 
 			break;
-		};
+		}
 
 		return MathUtils::DegToRad(Degrees);
-	};
+	}
 
 	Rect PlatformInfo::ToNorthRotation(const Rect &In)
 	{
@@ -130,7 +130,7 @@ namespace FlamingTorch
 		else if (In.Right > PrevMax)
 		{
 			PrevMax = In.Right;
-		};
+		}
 
 		if (In.Top > Max)
 		{
@@ -140,7 +140,7 @@ namespace FlamingTorch
 		else if (In.Top > PrevMax)
 		{
 			PrevMax = In.Top;
-		};
+		}
 
 		if (In.Bottom > Max)
 		{
@@ -150,19 +150,19 @@ namespace FlamingTorch
 		else if (In.Bottom > PrevMax)
 		{
 			PrevMax = In.Bottom;
-		};
+		}
 
 		Rect Out = PlatformType == PlatformType::Mobile ? Rect(0, PrevMax, 0, Max) : Rect(0, Max, 0, PrevMax);
 
 		return Out;
-	};
+	}
 
 	Vector2 PlatformInfo::ScreenSize(const Rect &In)
 	{
 		Vector2 Out(In.Left > In.Right ? In.Left : In.Right, In.Top > In.Bottom ? In.Top : In.Bottom);
 
 		return Out;
-	};
+	}
 
 #if FLPLATFORM_WINDOWS
 	void PrintStack()
@@ -187,10 +187,10 @@ namespace FlamingTorch
 			SymGetLineFromAddr64(Process, (DWORD64)Stack[i], &Displacement, &Line);
 
 			Log::Instance.LogInfo("Core", "%d: %s:%d", Frames - i - 3, Line.FileName, Line.LineNumber);
-		};
+		}
 
 		SymCleanup(Process);
-	};
+	}
 #elif !ANDROID
 	void PrintStack()
 	{
@@ -204,15 +204,15 @@ namespace FlamingTorch
 		for(uint16 i = 0; i < Frames - 2; i++ )
 		{
 			Log::Instance.LogInfo("Core", "%d: %s", Frames - i - 3, Strings[i]);
-		};
+		}
 		
 		free(Strings);
-	};
+	}
 #else
 	void PrintStack()
 	{
 		Log::Instance.LogInfo("Core", "Stack Unavailable");
-	};
+	}
 #endif
 
 	void LibWarning(unsigned int Line, const char* FileName,
@@ -233,5 +233,5 @@ namespace FlamingTorch
 #if FLPLATFORM_DEBUG
 		DEBUG_BREAK;
 #endif
-	};
-};
+	}
+}

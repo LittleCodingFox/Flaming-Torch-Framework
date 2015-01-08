@@ -37,11 +37,11 @@ namespace FlamingTorch
 		TexCoords[1] = Vector2(NinePatchRect.Left + TexOffset.x, NinePatchRect.Bottom + TexOffset.y) / TextureSize;
 		TexCoords[2] = TexCoords[3] = Vector2(NinePatchRect.Right + TexOffset.x, NinePatchRect.Bottom + TexOffset.y) / TextureSize;
 		TexCoords[4] = Vector2(NinePatchRect.Right + TexOffset.x, NinePatchRect.Top + TexOffset.y) / TextureSize;
-	};
+	}
 
 	Sprite::Sprite() : VertexCount(0)
 	{
-	};
+	}
 
 	void Sprite::Draw(Renderer *Renderer)
 	{
@@ -65,12 +65,12 @@ namespace FlamingTorch
 			for(uint32 i = 0; i < 8; i++)
 			{
 				Vertices[i].Position = Vector2::Rotate(Vertices[i].Position, Options.RotationValue) + ObjectSizeHalf + Options.PositionValue;
-			};
+			}
 
 			if(!Renderer->IsVertexBufferHandleValid(SpriteVertexBuffer))
 			{
 				SpriteVertexBuffer = Renderer->CreateVertexBuffer();
-			};
+			}
 
 			if(!SpriteVertexBuffer)
 				return;
@@ -119,7 +119,7 @@ namespace FlamingTorch
 					Colors[1] = Options.ColorsValue[1];
 					Colors[2] = Colors[3] = Options.ColorsValue[2];
 					Colors[4] = Options.ColorsValue[3];
-				};
+				}
 
 				NinePatchColors[0] = Options.ColorValue;
 				NinePatchColors[1] = Options.ColorValue;
@@ -194,7 +194,7 @@ namespace FlamingTorch
 					TexCoords[3] = Vector2::Rotate(TexCoords[3], Options.TexCoordRotation);
 					TexCoords[4] = Vector2::Rotate(TexCoords[4], Options.TexCoordRotation);
 					TexCoords[5] = Vector2::Rotate(TexCoords[5], Options.TexCoordRotation);
-				};
+				}
 
 				TexCoords[0] = (TexCoords[0] + Vector2(0.5f, 0.5f)) * Options.TexCoordBorderMin;
 				TexCoords[1] = (TexCoords[1] + Vector2(0.5f, 0.5f)) * Vector2(Options.TexCoordBorderMin.x, Options.TexCoordBorderMax.y);
@@ -214,7 +214,7 @@ namespace FlamingTorch
 					ActualTextureRect = SpriteTexture->TextureRect();
 
 					ActualTexture = SpriteTexture->BaseTexture();
-				};
+				}
 
 				if(SpriteTexture.Get())
 				{
@@ -228,9 +228,9 @@ namespace FlamingTorch
 						{
 							TexCoords[i] *= NormalizedSize;
 							TexCoords[i] += NormalizedPosition;
-						};
-					};
-				};
+						}
+					}
+				}
 
 				Vector2 *VerticesTarget = Options.NinePatchValue ? NinePatchVertices : Vertices, *TexCoordTarget = Options.NinePatchValue ? NinePatchTexCoords : TexCoords;
 				Vector4 *ColorsTarget = Options.NinePatchValue ? NinePatchColors : Colors;
@@ -245,15 +245,15 @@ namespace FlamingTorch
 						{
 							VerticesTarget[i] *= SpriteTexture->Size();
 							VerticesTarget[i] *= Options.ScaleValue;
-						};
+						}
 					}
 					else
 					{
 						for(uint32 i = 0; i < VertexCount; i++)
 						{
 							VerticesTarget[i] *= Options.ScaleValue;
-						};
-					};
+						}
+					}
 				}
 				else
 				{
@@ -312,8 +312,8 @@ namespace FlamingTorch
 					{
 						GenerateNinePatchGeometry(VerticesTarget + index, TexCoordTarget + index, ActualTexture->Size(), FragmentPositions[i], FragmentSizes[i], FragmentOffsets[i],
 							FragmentSizeOverrides[i], ActualTextureRect);
-					};
-				};
+					}
+				}
 
 				if(Options.FlipX || Options.FlipY)
 				{
@@ -326,21 +326,21 @@ namespace FlamingTorch
 
 						if(VerticesTarget[i].y > Max.y)
 							Max.y = VerticesTarget[i].y;
-					};
+					}
 
 					for(uint32 i = 0; i < VertexCount; i++)
 					{
 						if(Options.FlipX)
 						{
 							VerticesTarget[i].x = Max.x - VerticesTarget[i].x;
-						};
+						}
 
 						if(Options.FlipY)
 						{
 							VerticesTarget[i].y = Max.y - VerticesTarget[i].y;
-						};
-					};
-				};
+						}
+					}
+				}
 
 				Vector2 PinningTranslation;
 
@@ -353,7 +353,7 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < VertexCount; i++)
 				{
 					ObjectAABB.Calculate(VerticesTarget[i]);
-				};
+				}
 
 				ObjectSize = (ObjectAABB.max - ObjectAABB.min).ToVector2();
 
@@ -395,7 +395,7 @@ namespace FlamingTorch
 					PinningTranslation = -Vector2(ObjectSize.x, ObjectSize.y);
 
 					break;
-				};
+				}
 
 				if(Options.RotationValue != 0 && !Options.WireframeValue)
 				{
@@ -407,15 +407,15 @@ namespace FlamingTorch
 					{
 						VerticesTarget[i] = Vector2::Rotate(VerticesTarget[i] + ExtraSize, Options.RotationValue) - ExtraSize;
 						VerticesTarget[i] += PinningTranslation + Options.OffsetValue + Options.PositionValue;
-					};
+					}
 				}
 				else
 				{
 					for(uint32 i = 0; i < VertexCount; i++)
 					{
 						VerticesTarget[i] += PinningTranslation + Options.OffsetValue + Options.PositionValue;
-					};
-				};
+					}
+				}
 
 				if(!Options.NinePatchValue && Options.CropModeValue != CropMode::None)
 				{
@@ -434,8 +434,8 @@ namespace FlamingTorch
 							{
 								TexCoordTarget[i] *= NormalizedSize;
 								TexCoordTarget[i] += NormalizedPosition;
-							};
-						};
+							}
+						}
 
 						break;
 					case CropMode::CropNormalized:
@@ -443,7 +443,7 @@ namespace FlamingTorch
 						{
 							TexCoordTarget[i] *= Options.CropRectValue.Size();
 							TexCoordTarget[i] += Options.CropRectValue.Position();
-						};
+						}
 
 						break;
 					case CropMode::CropTiled:
@@ -457,20 +457,20 @@ namespace FlamingTorch
 							{
 								TexCoordTarget[i] *= OneFrame;
 								TexCoordTarget[i] += BaseFrame;
-							};
-						};
+							}
+						}
 
 						break;
-					};
-				};
+					}
+				}
 
 				if(Options.TexCoordPosition != Vector2())
 				{
 					for(uint32 i = 0; i < VertexCount; i++)
 					{
 						TexCoordTarget[i] += Options.TexCoordPosition;
-					};
-				};
+					}
+				}
 
 				SpriteVertex *Out = &GeneratedGeometry[0];
 
@@ -479,12 +479,12 @@ namespace FlamingTorch
 					Out->Position = VerticesTarget[i];
 					Out->TexCoord = TexCoordTarget[i];
 					Out->Color = ColorsTarget[i];
-				};
-			};
+				}
+			}
 
 			SpriteCache::Instance.Register(GeneratedGeometry, VertexCount, SpriteTexture, Options.BlendingModeValue, Renderer);
-		};
-	};
+		}
+	}
 
 	void SpriteCache::Register(SpriteVertex *Vertices, uint32 VertexCount, Texture *TheTexture, uint32 BlendingMode, Renderer *Renderer)
 	{
@@ -494,7 +494,7 @@ namespace FlamingTorch
 #endif
 		{
 			SpriteCache::Instance.Flush(Renderer);
-		};
+		}
 
 		Renderer->ReportSkippedDrawCall();
 
@@ -509,7 +509,7 @@ namespace FlamingTorch
 
 		ActiveTexture = TheTexture;
 		CurrentBlendingMode = BlendingMode;
-	};
+	}
 
 	void SpriteCache::Flush(Renderer *Renderer)
 	{
@@ -523,7 +523,7 @@ namespace FlamingTorch
 		if(!Renderer->IsVertexBufferHandleValid(SpriteVertexBuffer))
 		{
 			SpriteVertexBuffer = Renderer->CreateVertexBuffer();
-		};
+		}
 
 		if(!SpriteVertexBuffer)
 			return;
@@ -536,77 +536,6 @@ namespace FlamingTorch
 
 		CurrentCachePosition = 0;
 		ActiveTexture = NULL;
-	};
-
-	void AnimatedSprite::AddAnimation(const std::string &Name, const std::vector<Vector2> &Frames)
-	{
-		StringID NameID = MakeStringID(Name);
-
-		FLASSERT(Animations.find(NameID) == Animations.end(), "Duplicated animation found!");
-
-		if(Animations.find(NameID) != Animations.end())
-			return;
-
-		Animations[NameID].Frames = Frames;
-	};
-
-	void AnimatedSprite::SetAnimation(const std::string &Name, bool Repeats)
-	{
-		StringID NameID = MakeStringID(Name);
-
-		if(Animations.find(NameID) == Animations.end())
-		{
-			CurrentAnimation = NULL;
-			LastFrameUpdate = 0;
-
-			return;
-		};
-
-		CurrentAnimation = &Animations[NameID];
-		CurrentAnimation->Repeating = Repeats;
-		LastFrameUpdate = 0;
-	};
-
-	void AnimatedSprite::Update()
-	{
-		if(LastFrameUpdate == 0)
-		{
-			LastFrameUpdate = GameClockTime();
-
-			if(CurrentAnimation != NULL && CurrentAnimation->Frames.size())
-			{
-				CurrentAnimation->CurrentFrame = 0;
-			};
-
-			Vector2 Frame = CurrentAnimation != NULL && CurrentAnimation->Frames.size() ?
-				CurrentAnimation->Frames[CurrentAnimation->CurrentFrame] : DefaultFrame;
-
-			Options = Options.Crop(CropMode::CropTiled, Rect(FrameSize.x, Frame.x, FrameSize.y, Frame.y));
-
-			if(SpriteTexture.Get())
-			{
-				Options = Options.Scale(FrameSize / SpriteTexture->Size() * Scale);
-			};
-		};
-
-		if(CurrentAnimation != NULL && CurrentAnimation->Frames.size() && GameClockDiff(LastFrameUpdate) > FrameInterval)
-		{
-			LastFrameUpdate = GameClockTime() - (GameClockTime() - LastFrameUpdate - FrameInterval);
-
-			CurrentAnimation->CurrentFrame++;
-
-			if(CurrentAnimation->CurrentFrame >= CurrentAnimation->Frames.size())
-				CurrentAnimation->CurrentFrame = CurrentAnimation->Repeating ? 0 : CurrentAnimation->Frames.size() - 1;
-
-			Vector2 Frame = CurrentAnimation->Frames[CurrentAnimation->CurrentFrame];
-
-			Options = Options.Crop(CropMode::CropTiled, Rect(FrameSize.x, Frame.x, FrameSize.y, Frame.y));
-		};
-	};
-
-	void AnimatedSprite::StopAnimation()
-	{
-		CurrentAnimation = NULL;
-	};
+	}
 #endif
-};
+}

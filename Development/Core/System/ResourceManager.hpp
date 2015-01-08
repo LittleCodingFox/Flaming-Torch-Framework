@@ -20,7 +20,7 @@ private:
 	FontMap Fonts;
 #endif
 
-	ResourceManager() : SubSystem(RESOURCEMANAGER_PRIORITY) {};
+	ResourceManager() : SubSystem(RESOURCEMANAGER_PRIORITY) {}
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
@@ -53,7 +53,7 @@ public:
 	inline static void DisposeResource(DisposablePointer<type> Resource)
 	{
 		Resource.Dispose();
-	};
+	}
 
 	void PrepareResourceReload();
 	void ReloadResources();

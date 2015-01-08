@@ -7,7 +7,7 @@ namespace FlamingTorch
 	UIGroup::UIGroup(UIManager *Manager) : UIElement("UIGroup", Manager)
 	{
 		OnConstructed();
-	};
+	}
 
 	void UIGroup::Update(const Vector2 &ParentPosition)
 	{
@@ -18,8 +18,8 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
 			ChildrenValue[i]->Update(ActualPosition);
-		};
-	};
+		}
+	}
 
 	void UIGroup::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -37,12 +37,12 @@ namespace FlamingTorch
 		{
 			DrawUIFocusZone(ParentPosition, Renderer);
 			DrawUIRect(ParentPosition, Renderer);
-		};
+		}
 
 		for (uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
 			ChildrenValue[i]->Draw(ActualPosition, Renderer);
-		};
-	};
+		}
+	}
 #endif
-};
+}

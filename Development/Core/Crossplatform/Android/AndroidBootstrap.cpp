@@ -70,7 +70,7 @@ void* main(ActivityStates* states)
 		LOGE("Unable to attach JVM");
 
 		return NULL;
-	};
+	}
 
 	LOGE("Main Loop starting!");
 

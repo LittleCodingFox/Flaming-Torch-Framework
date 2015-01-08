@@ -18,7 +18,7 @@ namespace InputActionType
 		TouchDrag, //!<Touch Drag Action
 		Sequence //!<Sequence Action
 	};
-};
+}
 
 /*!
 *	Input Keys Enumeration
@@ -131,7 +131,7 @@ namespace InputKey
         Pause, //!< The Pause key
 		Count
 	};
-};
+}
 
 /*!
 *	Input Mouse Buttons Enumeration
@@ -148,7 +148,7 @@ namespace InputMouseButton
         XButton2, //!< The second extra mouse button
 		Count
 	};
-};
+}
 
 /*!
 *	Input Joystick Axis Enumeration
@@ -168,7 +168,7 @@ namespace InputJoystickAxis
         PovY, //!< The Y axis of the point-of-view hat
 		Count
 	};
-};
+}
 
 class Renderer;
 
@@ -197,7 +197,7 @@ public:
 		static InfoNameMap Names;
 
 		KeyInfo() : Name(0), Alt(false), Control(false), Shift(false),
-			Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false) {};
+			Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false) {}
 
 		std::string NameAsString() const;
 	};
@@ -213,7 +213,7 @@ public:
 
 		static InfoNameMap Names;
 
-		MouseButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false), Name(0) {};
+		MouseButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false), Name(0) {}
 
 		std::string NameAsString() const;
 	};
@@ -227,7 +227,7 @@ public:
 		uint8 Name, JoystickIndex;
 		bool Pressed, JustPressed, JustReleased, FirstPress;
 
-		JoystickButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false), Name(0) {};
+		JoystickButtonInfo() : Pressed(false), JustPressed(false), JustReleased(false), FirstPress(false), Name(0) {}
 
 		std::string NameAsString() const;
 	};
@@ -243,7 +243,7 @@ public:
 
 		static InfoNameMap Names;
 
-		JoystickAxisInfo() : Name(0), JoystickIndex(0), Position(0) {};
+		JoystickAxisInfo() : Name(0), JoystickIndex(0), Position(0) {}
 
 		std::string NameAsString() const;
 	};
@@ -260,7 +260,7 @@ public:
 
 		static InfoNameMap Names;
 
-		TouchInfo() : Index(0), Pressed(false), JustPressed(false), JustReleased(false), Dragged(false) {};
+		TouchInfo() : Index(0), Pressed(false), JustPressed(false), JustReleased(false), Dragged(false) {}
 
 		std::string NameAsString() const;
 	};
@@ -294,7 +294,7 @@ public:
 		uint8 CurrentSequenceIndex;
 
 		Action() : Type(InputActionType::Keyboard), Index(0), SecondaryIndex(0), MaxTimeBetweenSequenceKeyPresses(0),
-			LastSequenceTime(0), CurrentSequenceIndex(0), PositiveValues(false) {};
+			LastSequenceTime(0), CurrentSequenceIndex(0), PositiveValues(false) {}
 		KeyInfo *Key() const;
 		MouseButtonInfo *MouseButton() const;
 		JoystickButtonInfo *JoystickButton() const;
@@ -311,7 +311,7 @@ public:
 	public:
 		std::string Name;
 
-		virtual ~Context() {};
+		virtual ~Context() {}
 		//Return true to stop propagating
 		virtual bool OnKey(const KeyInfo &Key) = 0;
 		//Return true to stop propagating
@@ -338,12 +338,12 @@ public:
 			OnJoystickConnectedFunction, OnJoystickDisconnectedFunction, OnMouseMoveFunction, OnCharacterEnteredFunction,
 			OnActionFunction, OnGainFocusFunction, OnLoseFocusFunction, OnTouchFunction;
 
-		ScriptedContext() {};
+		ScriptedContext() {}
 
 		ScriptedContext(const std::string &_Name)
 		{
 			Name = _Name;
-		};
+		}
 
 		bool OnKey(const KeyInfo &Key)
 		{
@@ -356,11 +356,11 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnKey: Scripting Error: " + e.what());
-				};
-			};
+				}
+			}
 
 			return false;
-		};
+		}
 
 		bool OnMouseButton(const MouseButtonInfo &Button)
 		{
@@ -373,11 +373,11 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnMouseButton: Scripting Error: " + e.what());
-				};
-			};
+				}
+			}
 
 			return false;
-		};
+		}
 
 		bool OnTouch(const TouchInfo &Touch)
 		{
@@ -390,11 +390,11 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnTouch: Scripting Error: " + e.what());
-				};
-			};
+				}
+			}
 
 			return false;
-		};
+		}
 
 		bool OnJoystickButton(const JoystickButtonInfo &Button)
 		{
@@ -407,11 +407,11 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickButton: Scripting Error: " + e.what());
-				};
-			};
+				}
+			}
 
 			return false;
-		};
+		}
 
 		bool OnJoystickAxis(const JoystickAxisInfo &Axis)
 		{
@@ -424,11 +424,11 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickAxis: Scripting Error: " + e.what());
-				};
-			};
+				}
+			}
 
 			return false;
-		};
+		}
 
 		void OnJoystickConnected(uint8 Index)
 		{
@@ -441,9 +441,9 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickConnected: Scripting Error: " + e.what());
-				};
-			};
-		};
+				}
+			}
+		}
 
 		void OnJoystickDisconnected(uint8 Index)
 		{
@@ -456,9 +456,9 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickDisconnected: Scripting Error: " + e.what());
-				};
-			};
-		};
+				}
+			}
+		}
 
 		void OnMouseMove(const Vector3 &Position)
 		{
@@ -471,9 +471,9 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnMouseMove: Scripting Error: " + e.what());
-				};
-			};
-		};
+				}
+			}
+		}
 
 		void OnCharacterEntered(wchar_t Character)
 		{
@@ -486,9 +486,9 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnCharacterEntered: Scripting Error: " + e.what());
-				};
-			};
-		};
+				}
+			}
+		}
 
 		void OnAction(const Action &TheAction)
 		{
@@ -501,9 +501,9 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnAction: Scripting Error: " + e.what());
-				};
-			};
-		};
+				}
+			}
+		}
 
 		void OnGainFocus()
 		{
@@ -516,9 +516,9 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnGainFocus: Scripting Error: " + e.what());
-				};
-			};
-		};
+				}
+			}
+		}
 
 		void OnLoseFocus()
 		{
@@ -531,9 +531,9 @@ public:
 				catch(std::exception &e)
 				{
 					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnLoseFocus: Scripting Error: " + e.what());
-				};
-			};
-		};
+				}
+			}
+		}
 	};
 
 	/*!
@@ -624,7 +624,7 @@ public:
 	void ClearContexts()
 	{
 		Contexts.clear();
-	};
+	}
 
 private:
 	typedef std::map<StringID, Action> ActionMap;

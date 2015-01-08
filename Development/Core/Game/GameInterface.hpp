@@ -10,7 +10,7 @@ struct RenderCreateOptions
 	void *WindowHandle;
 	RendererCapabilities Caps;
 
-	RenderCreateOptions() : Style(RendererWindowStyle::Default), WindowHandle(NULL), FrameRate(0), Width(0), Height(0) {};
+	RenderCreateOptions() : Style(RendererWindowStyle::Default), WindowHandle(NULL), FrameRate(0), Width(0), Height(0) {}
 };
 #endif
 
@@ -36,9 +36,9 @@ public:
 
 	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
-			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS), QuitFlag(false){};
+			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS), QuitFlag(false){}
 
-	virtual ~GameInterface() {};
+	virtual ~GameInterface() {}
 
 	static void SetInstance(DisposablePointer<GameInterface> TheInstance);
 
@@ -54,7 +54,7 @@ public:
 	/*!
 	*	Register any scripting bindings here
 	*/
-	virtual bool Register(lua_State *State) { return true; };
+	virtual bool Register(lua_State *State) { return true; }
 
 	virtual int32 FixedUpdateRate() = 0;
 	/*!
@@ -62,29 +62,29 @@ public:
 	*	\param argc argument count
 	*	\param argv argument values
 	*/
-	virtual bool Initialize(int32 argc, char **argv) { return true; };
+	virtual bool Initialize(int32 argc, char **argv) { return true; }
 	/*!
 	*	Run your cleanup code here
 	*/
-	virtual bool DeInitialize() { return true; };
+	virtual bool DeInitialize() { return true; }
 	/*!
 	*	Run your fixed step update code here
 	*/
-	virtual void OnFixedUpdate() {};
+	virtual void OnFixedUpdate() {}
 	/*!
 	*	Run your frame update code here
 	*/
-	virtual void OnFrameUpdate() {};
+	virtual void OnFrameUpdate() {}
 	/*!
 	*	Whether we should quit
 	*/
-	virtual bool ShouldQuit() { return QuitFlag; };
+	virtual bool ShouldQuit() { return QuitFlag; }
 
 	/*!
 	*	Gets any script instances available for this game
 	*	Used to interact with the game's scripting or methods if you have any
 	*/
-	virtual DisposablePointer<LuaScript> GetScriptInstance() { return DisposablePointer<LuaScript>(); };
+	virtual DisposablePointer<LuaScript> GetScriptInstance() { return DisposablePointer<LuaScript>(); }
 
 #if USE_GRAPHICS
 	/*!
@@ -105,14 +105,14 @@ public:
 	*	\param TheRenderer the renderer to use for rendering
 	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass) {};
+	virtual void OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass) {}
 
 	/*!
 	*	Called when a frame is drawn
 	*	\param TheRenderer the renderer to use for rendering
 	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass) {};
+	virtual void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass) {}
 
 	/*!
 	*	Called when a frame ends
@@ -127,13 +127,13 @@ public:
 	*	\param Width the new width
 	*	\param Height the new height
 	*/
-	virtual void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height) {};
+	virtual void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height) {}
 
 	/*!
 	*	Called when resources have been reloaded
 	*	\param TheRenderer the renderer to use for rendering
 	*/
-	virtual void OnResourcesReloaded(Renderer *TheRenderer) {};
+	virtual void OnResourcesReloaded(Renderer *TheRenderer) {}
 #endif
 
 	/*!
@@ -162,24 +162,24 @@ public:
 
 	ScriptedGameInterface() : GameNameValue("Game")
 	{
-	};
+	}
 
 	~ScriptedGameInterface();
 
 	const std::string &GameName() override
 	{
 		return GameNameValue;
-	};
+	}
 
 	int32 FixedUpdateRate() override
 	{
 		return UpdateRateValue;
-	};
+	}
 
 	DisposablePointer<LuaScript> GetScriptInstance() override
 	{
 		return ScriptInstance;
-	};
+	}
 
 #if USE_GRAPHICS
 	void OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass) override;

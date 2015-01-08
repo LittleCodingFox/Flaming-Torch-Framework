@@ -29,14 +29,14 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "While reading a FTI Image: Invalid ID for this file!");
 
 			return false;
-		};
+		}
 
 		if(HDR.Version != CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR))
 		{
 			Log::Instance.LogErr(TAG, "While reading a FTI Image: Invalid Version for this file!");
 			
 			return false;
-		};
+		}
 
 		Width = HDR.Width;
 		Height = HDR.Height;
@@ -45,7 +45,7 @@ namespace FlamingTorch
 		Data.resize(Width * Height * (ColorTypeValue == ColorType::RGB8 ? 3 : 4));
 
 		return In->Read2<uint8>(&Data[0], Data.size());
-	};
+	}
 
 	bool WriteFTI(Stream *Out, uint32 &Width, uint32 &Height, uint32 &ColorTypeValue, const std::vector<uint8> &Data)
 	{
@@ -59,7 +59,7 @@ namespace FlamingTorch
 		SFLASSERT(Out->Write2<FTIHeader>(&HDR));
 
 		return Data.size() && Out->Write2<uint8>(&Data[0], Data.size());
-	};
+	}
 
 	bool LoadWebP(Stream *In, uint32 &Width, uint32 &Height, std::vector<uint8> &Data)
 	{
@@ -74,7 +74,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@LoadWebP: Failed to load a webP stream due to invalid decoder");
 
 			return false;
-		};
+		}
 
 		VP8StatusCode status = VP8_STATUS_OK;
 		size_t data_size = 0;
@@ -95,7 +95,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@LoadWebP: Unable to decode animated webP");
 
 			return false;
-		};
+		}
 
 		status = WebPDecode(&FeatureData[0], Length, &config);
 
@@ -116,17 +116,17 @@ namespace FlamingTorch
 				Data[i + 1] = RGB[index + 1];
 				Data[i + 2] = RGB[index + 2];
 				Data[i + 3] = 255;
-			};
+			}
 		}
 		else
 		{
 			memcpy(&Data[0], RGB, sizeof(uint8) * Data.size());
-		};
+		}
 
 		WebPFreeDecBuffer(output_buffer);
 
 		return true;
-	};
+	}
 
 	static int WebPStreamWriter(const uint8_t* data, size_t data_size, const WebPPicture* const pic)
 	{
@@ -149,7 +149,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to init picture/config");
 			
 			return false;
-		};
+		}
 
 		config.quality = (f32)Quality;
 		config.lossless = Lossless ? 1 : 0;
@@ -166,7 +166,7 @@ namespace FlamingTorch
 				"@WriteWebP: Failed to write a webP stream: Failed to init validate config or alloc picture");
 			
 			return false;
-		};
+		}
 
 		if(!WebPPictureImportRGBA(&picture, &Data[0], Data.size() / Height))
 		{
@@ -174,7 +174,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to import RGBA");
 
 			return false;
-		};
+		}
 
 		if(TargetWidth != 0 && TargetHeight != 0)
 		{
@@ -187,32 +187,32 @@ namespace FlamingTorch
 					Width, Height, TargetWidth, TargetHeight);
 
 				return false;
-			};
-		};
+			}
+		}
 
 		if(!WebPEncode(&config, &picture))
 		{
 			Log::Instance.LogErr(TAGBUFFER, "@WriteWebP: Failed to encode the final picture");
 			
 			return false;
-		};
+		}
 
 		return true;
-	};
+	}
 
 	void PNGReadFromStream(png_structp ptr, png_bytep dest, png_size_t len)
 	{
 		Stream *t = (Stream *)png_get_io_ptr(ptr);
 		t->Read(dest, sizeof(uint8), len);
-	};
+	}
 
 	void PNGWriteToStream(png_structp ptr, png_bytep dest, png_size_t len)
 	{
 		Stream *t = (Stream *)png_get_io_ptr(ptr);
 		t->Write(dest, sizeof(uint8), len);
-	};
+	}
 
-	void PNGDummyFlush(png_structp ptr) {};
+	void PNGDummyFlush(png_structp ptr) {}
 
 	bool LoadPNG(png_structp png_ptr, png_infop info_ptr, uint32 &Width, uint32 &Height, std::vector<uint8> &Data)
 	{
@@ -241,14 +241,14 @@ namespace FlamingTorch
 			else
 			{
 				ColorType = PNG_COLOR_TYPE_RGB;
-			};
+			}
 		}
 		//If we have grayscale, check whether grayscale-alpha and convert it to RGB
 		else if(ColorType == PNG_COLOR_TYPE_GA || ColorType == PNG_COLOR_TYPE_GRAY)
 		{
 			png_set_gray_to_rgb(png_ptr);
 			ColorType = ColorType == PNG_COLOR_TYPE_GA ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB;
-		};
+		}
 
 		Data.resize(Width * Height * sizeof(uint8[4]));
 
@@ -262,13 +262,13 @@ namespace FlamingTorch
 
 				for (uint32 i = 0; i < Height; i++, DataPtr += Size) {
 					png_read_row(png_ptr, DataPtr, NULL);
-				};
+				}
 
 				png_destroy_read_struct(&png_ptr, &info_ptr,  NULL);
 				png_destroy_info_struct(png_ptr, &info_ptr);
 
 				return true;
-			};
+			}
 
 		case PNG_COLOR_TYPE_RGB:
 			{
@@ -286,14 +286,14 @@ namespace FlamingTorch
 						DataPtr[index + 1] = Row[j + 1];
 						DataPtr[index + 2] = Row[j + 2];
 						DataPtr[index + 3] = 255;
-					};
-				};
+					}
+				}
 
 				png_destroy_read_struct(&png_ptr, &info_ptr,  NULL);
 				png_destroy_info_struct(png_ptr, &info_ptr);
 
 				return true;
-			};
+			}
 
 		default:
 			png_destroy_read_struct(&png_ptr, &info_ptr,  NULL);
@@ -303,8 +303,8 @@ namespace FlamingTorch
 			
 
 			return false;
-		};
-	};
+		}
+	}
 
 	bool WritePNG(Stream *Out, uint32 Width, uint32 Height, const std::vector<uint8> &Data)
 	{
@@ -320,7 +320,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@WritePNG: Failed to write a PNG stream: Failed to init PNG");
 			
 			return false;
-		};
+		}
 
 		pnginfo = png_create_info_struct(pngstruct);
 
@@ -331,7 +331,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@WritePNG: Failed to write a PNG stream: Failed to init PNG");
 
 			return false;
-		};
+		}
 
 		png_set_write_fn(pngstruct, Out, PNGWriteToStream, PNGDummyFlush);
 
@@ -354,7 +354,7 @@ namespace FlamingTorch
 		for(uint32 y = 0, index = 0; y < Height; y++, index += Size)
 		{
 			RowPtrs[y] = (uint8*)&Data[index];
-		};
+		}
 
 		//Send the rows and write the PNG
 		png_set_rows(pngstruct, pnginfo, &RowPtrs[0]);
@@ -365,7 +365,7 @@ namespace FlamingTorch
 		png_destroy_info_struct(pngstruct, &pnginfo);
 
 		return true;
-	};
+	}
 
 	DisposablePointer<TextureBuffer> TextureBuffer::CreateFromColor(uint32 Width, uint32 Height, const Vector4 &BaseColor)
 	{
@@ -374,7 +374,7 @@ namespace FlamingTorch
 		Out->CreateEmpty(Width, Height, BaseColor);
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<TextureBuffer> TextureBuffer::CreateFromData(const uint8 *Pixels, uint32 Width, uint32 Height)
 	{
@@ -384,7 +384,7 @@ namespace FlamingTorch
 			return DisposablePointer<TextureBuffer>();
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<TextureBuffer> TextureBuffer::CreateFromStream(Stream *Stream)
 	{
@@ -394,7 +394,7 @@ namespace FlamingTorch
 			return DisposablePointer<TextureBuffer>();
 
 		return Out;
-	};
+	}
 
 	bool TextureBuffer::FromStream(Stream *Stream)
 	{
@@ -407,7 +407,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr("TextureBuffer", "Unable to init PNG");
 
 			return false;
-		};
+		}
 
 		png_infop info_ptr = png_create_info_struct(png_ptr);
 
@@ -419,7 +419,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr("TextureBuffer", "Unable to init PNG");
 
 			return false;
-		};
+		}
 
 		png_set_read_fn(png_ptr, (png_voidp)Stream, PNGReadFromStream);
 
@@ -430,7 +430,7 @@ namespace FlamingTorch
 			Log::Instance.LogInfo("TextureBuffer", "Unable to read texture signature");
 
 			return false;
-		};
+		}
 
 		Stream->Seek(Position);
 
@@ -449,7 +449,7 @@ namespace FlamingTorch
 				Log::Instance.LogErr("TextureBuffer", "Unable to read Stream '0x%08x' as a PNG.", Stream);
 
 				return false;
-			};
+			}
 		}
 		else
 		{
@@ -464,12 +464,12 @@ namespace FlamingTorch
 					Log::Instance.LogWarn("TextureBuffer", "Unable to read Stream '0x%08x' as a webP or FTI.", Stream);
 
 					return false;
-				};
-			};
-		};
+				}
+			}
+		}
 
 		return true;
-	};
+	}
 
 	void TextureBuffer::CreateEmpty(uint32 Width, uint32 Height, const Vector4 &BaseColor)
 	{
@@ -485,14 +485,15 @@ namespace FlamingTorch
 
 		Data.resize(Width * Height * 4);
 
+		//Memset would be faster, right? We can convert Components to a uint32
 		for(uint32 i = 0; i < Data.size(); i+=4)
 		{
 			Data[i] = Components[0];
 			Data[i + 1] = Components[1];
 			Data[i + 2] = Components[2];
 			Data[i + 3] = Components[3];
-		};
-	};
+		}
+	}
 
 	DisposablePointer<TextureBuffer> TextureBuffer::Clone()
 	{
@@ -504,7 +505,7 @@ namespace FlamingTorch
 		Out->Data = Data;
 
 		return Out;
-	};
+	}
 
 	inline uint8 SingleOverlay(uint8 Base, uint8 Blend)
 	{
@@ -515,7 +516,7 @@ namespace FlamingTorch
 		f32 BaseFloat = Base / 255.f, BlendFloat = Blend / 255.f;
 
 		return (uint8)((BaseFloat < 0.5f ? (2.0f * BaseFloat * BlendFloat) : (1.0f - 2.0f * (1.0f - BaseFloat) * (1.0f - BlendFloat))) * 255.f);
-	};
+	}
 
 	bool TextureBuffer::Overlay(TextureBuffer *Other)
 	{
@@ -536,11 +537,11 @@ namespace FlamingTorch
 				MyPixels[0] = SingleOverlay(MyPixels[0], TheirPixels[0]);
 				MyPixels[1] = SingleOverlay(MyPixels[1], TheirPixels[1]);
 				MyPixels[2] = SingleOverlay(MyPixels[2], TheirPixels[2]);
-			};
-		};
+			}
+		}
 
 		return true;
-	};
+	}
 
 	bool TextureBuffer::Blend(uint32 X, uint32 Y, TextureBuffer *Other)
 	{
@@ -577,12 +578,12 @@ namespace FlamingTorch
 					MyPixels[0] = (MyPixels[0] * TheirPixels[0]) >> 8;
 					MyPixels[1] = (MyPixels[1] * TheirPixels[1]) >> 8;
 					MyPixels[2] = (MyPixels[2] * TheirPixels[2]) >> 8;
-				};
-			};
-		};
+				}
+			}
+		}
 
 		return true;
-	};
+	}
 
 	bool TextureBuffer::Multiply(TextureBuffer *Other)
 	{
@@ -603,11 +604,11 @@ namespace FlamingTorch
 				MyPixels[0] = (MyPixels[0] * TheirPixels[0]) >> 8;
 				MyPixels[1] = (MyPixels[1] * TheirPixels[1]) >> 8;
 				MyPixels[2] = (MyPixels[2] * TheirPixels[2]) >> 8;
-			};
-		};
+			}
+		}
 
 		return true;
-	};
+	}
 
 	bool TextureBuffer::FromData(const uint8 *Pixels, uint32 Width, uint32 Height)
 	{
@@ -619,7 +620,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@FromData: Invalid Pixels: 0x%08x; Width: %d; Height: %d;", Pixels, Width, Height);
 			
 			return false;
-		};
+		}
 
 		WidthValue = Width;
 		HeightValue = Height;
@@ -628,7 +629,7 @@ namespace FlamingTorch
 		memcpy(&Data[0], Pixels, Width * Height * 4);
 
 		return true;
-	};
+	}
 
 	void TextureBuffer::FlipX()
 	{
@@ -645,9 +646,9 @@ namespace FlamingTorch
 				std::swap(Data[Start + 1], Data[End - 3]);
 				std::swap(Data[Start + 2], Data[End - 2]);
 				std::swap(Data[Start + 3], Data[End - 1]);
-			};
-		};
-	};
+			}
+		}
+	}
 
 	void TextureBuffer::FlipY()
 	{
@@ -660,23 +661,23 @@ namespace FlamingTorch
 			memcpy(&TempRow[0], &Data[EndIndex], RowSize);
 			memcpy(&Data[EndIndex], &Data[StartIndex], RowSize);
 			memcpy(&Data[StartIndex], &TempRow[0], RowSize);
-		};
-	};
+		}
+	}
 
 	uint32 TextureBuffer::Width() const
 	{
 		return WidthValue;
-	};
+	}
 
 	uint32 TextureBuffer::Height() const
 	{
 		return HeightValue;
-	};
+	}
 
 	uint32 TextureBuffer::ColorType() const
 	{
 		return ColorTypeValue;
-	};
+	}
 
 	bool TextureBuffer::Save(Stream *Out, const TextureEncoderInfo &Info)
 	{
@@ -693,10 +694,10 @@ namespace FlamingTorch
 
 		case TextureEncoderType::FTI:
 			return WriteFTI(Out, WidthValue, HeightValue, ColorTypeValue, Data);
-		};
+		}
 
 		return false;
-	};
+	}
 
 #if USE_GRAPHICS
 #	define GET_OWNER_IF_NOT_VALID()\
@@ -710,13 +711,13 @@ namespace FlamingTorch
 		TextureFilter(TextureFiltering::Nearest), TextureWrap(TextureWrapMode::Clamp)
 	{
 		GET_OWNER_IF_NOT_VALID();
-	};
+	}
 
 	Texture::~Texture()
 	{
 		Destroy();
 		Buffer.Dispose();
-	};
+	}
 
 	DisposablePointer<Texture> Texture::CreateFromBuffer(DisposablePointer<TextureBuffer> Buffer)
 	{
@@ -726,7 +727,7 @@ namespace FlamingTorch
 			return DisposablePointer<Texture>();
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<Texture> Texture::CreateFromData(const uint8 *Pixels, uint32 Width, uint32 Height)
 	{
@@ -736,7 +737,7 @@ namespace FlamingTorch
 			return DisposablePointer<Texture>();
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<Texture> Texture::CreateFromFile(const std::string &FileName)
 	{
@@ -746,7 +747,7 @@ namespace FlamingTorch
 			return DisposablePointer<Texture>();
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<Texture> Texture::CreateFromStream(Stream *Stream)
 	{
@@ -756,7 +757,7 @@ namespace FlamingTorch
 			return DisposablePointer<Texture>();
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<Texture> Texture::CreateFromPackage(const std::string &Directory, const std::string &Name)
 	{
@@ -766,7 +767,7 @@ namespace FlamingTorch
 			return DisposablePointer<Texture>();
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<Texture> Texture::CreateEmpty(uint32 Width, uint32 Height, bool RGBA)
 	{
@@ -776,32 +777,32 @@ namespace FlamingTorch
 			return DisposablePointer<Texture>();
 
 		return Out;
-	};
+	}
 
 	const TexturePackerIndex &Texture::GetIndex() const
 	{
 		return Index;
-	};
+	}
 
 	bool Texture::operator==(const Texture &o) const
 	{
 		return &o == this;
-	};
+	}
 
 	DisposablePointer<TextureBuffer> Texture::GetData() const
 	{
 		return Buffer;
-	};
+	}
 
 	Vector2 Texture::Size() const
 	{
 		return Vector2((f32)Width(), (f32)Height());
-	};
+	}
 
 	void Texture::SetIndex(TexturePackerIndex Index)
 	{
 		this->Index = Index;
-	};
+	}
 
 	void Texture::Destroy()
 	{
@@ -813,12 +814,12 @@ namespace FlamingTorch
 
 		HandleValue = 0;
 #endif
-	};
+	}
 
 	bool Texture::FromBuffer(DisposablePointer<TextureBuffer> Buffer)
 	{
 		return FromData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
-	};
+	}
 
 	bool Texture::FromStream(Stream *Stream)
 	{
@@ -835,7 +836,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGBUFFER, "@FromSteam: Failed to load a buffer from the stream");
 			
 			return false;
-		};
+		}
 
 		UpdateData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
 
@@ -843,7 +844,7 @@ namespace FlamingTorch
 		SetWrapMode(TextureWrap);
 
 		return true;
-	};
+	}
 
 	bool Texture::FromFile(const std::string &FileName)
 	{
@@ -860,17 +861,17 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "Unable to open '%s' for reading.", FileName.c_str());
 
 			return false;
-		};
+		}
 
 		if(!FromStream(&In))
 		{
 			Log::Instance.LogInfo(TAG, "Unable to read '%s' as a PNG.", FileName.c_str());
 
 			return false;
-		};
+		}
 
 		return true;
-	};
+	}
 
 	bool Texture::FromData(const uint8 *Pixels, uint32 Width, uint32 Height)
 	{
@@ -884,7 +885,7 @@ namespace FlamingTorch
 		if(Owner)
 		{
 			HandleValue = Owner->CreateTexture();
-		};
+		}
 #endif
 
 		UpdateData(Pixels, Width, Height);
@@ -893,7 +894,7 @@ namespace FlamingTorch
 		SetWrapMode(TextureWrap);
 
 		return true;
-	};
+	}
 
 	bool Texture::CreateEmptyTexture(uint32 Width, uint32 Height, bool RGBA)
 	{
@@ -913,14 +914,14 @@ namespace FlamingTorch
 			HandleValue = Owner->CreateTexture();
 
 			Owner->SetTextureData(HandleValue, NULL, Width, Height);
-		};
+		}
 
 		SetTextureFiltering(TextureFiltering::Linear_Mipmap);
 		SetWrapMode(TextureWrap);
 #endif
 
 		return true;
-	};
+	}
 
 	void Texture::UpdateData(const uint8 *Pixels, uint32 Width, uint32 Height)
 	{
@@ -930,7 +931,7 @@ namespace FlamingTorch
 		{
 			Buffer.Reset(new TextureBuffer());
 			Buffer->FromData(Pixels, Width, Height);
-		};
+		}
 
 #if USE_GRAPHICS
 		GET_OWNER_IF_NOT_VALID();
@@ -941,7 +942,7 @@ namespace FlamingTorch
 				HandleValue = Owner->CreateTexture();
 
 			Owner->SetTextureData(HandleValue, (uint8 *)Pixels, Width, Height);
-		};
+		}
 
 		SetTextureFiltering(TextureFilter);
 		SetWrapMode(TextureWrap);
@@ -953,9 +954,9 @@ namespace FlamingTorch
 			ColorTypeValue = Buffer->ColorType();
 
 			Buffer.Dispose();
-		};
+		}
 #endif
-	};
+	}
 
 	TextureHandle Texture::Handle() const
 	{
@@ -963,32 +964,32 @@ namespace FlamingTorch
 			return Index.Handle();
 
 		return HandleValue;
-	};
+	}
 
 	uint32 Texture::Width() const
 	{
 		return Index.Index != -1 ? Index.Width() : (Buffer.Get() ? Buffer->Width() : WidthValue);
-	};
+	}
 
 	uint32 Texture::Height() const
 	{
 		return Index.Index != -1 ? Index.Height() : (Buffer.Get() ? Buffer->Height() : HeightValue);
-	};
+	}
 	
 	uint32 Texture::ColorType() const
 	{
 		return Index.Index != -1 ? Index.ColorType() : (Buffer.Get() ? Buffer->ColorType() : ColorTypeValue);
-	};
+	}
 	
 	uint32 Texture::FilterMode() const
 	{
 		return Index.Index != -1 ? Index.Filtering : TextureFilter;
-	};
+	}
 
 	uint32 Texture::WrapMode() const
 	{
 		return Index.Index != -1 ? Index.WrapMode : TextureWrap;
-	};
+	}
 
 	void Texture::Bind()
 	{
@@ -996,7 +997,7 @@ namespace FlamingTorch
 		if (Owner)
 			Owner->BindTexture(HandleValue);
 #endif
-	};
+	}
 
 	void Texture::SetWrapMode(uint32 WrapMode)
 	{
@@ -1005,7 +1006,7 @@ namespace FlamingTorch
 			Index.WrapMode = WrapMode;
 
 			return;
-		};
+		}
 
 #if USE_GRAPHICS
 		GET_OWNER_IF_NOT_VALID();
@@ -1015,7 +1016,7 @@ namespace FlamingTorch
 		if(Owner)
 			Owner->SetTextureWrapMode(HandleValue, WrapMode);
 #endif
-	};
+	}
 
 	void Texture::PushTextureStates()
 	{
@@ -1024,7 +1025,7 @@ namespace FlamingTorch
 		Frame.WrapMode = WrapMode();
 
 		StateStack.push_back(Frame);
-	};
+	}
 
 	void Texture::PopTextureStates()
 	{
@@ -1040,9 +1041,9 @@ namespace FlamingTorch
 				SetWrapMode(it->WrapMode);
 
 				StateStack.erase(it.base());
-			};
-		};
-	};
+			}
+		}
+	}
 
 	void Texture::SetTextureFiltering(int32 Filter)
 	{
@@ -1051,7 +1052,7 @@ namespace FlamingTorch
 			Index.Filtering = Filter;
 
 			return;
-		};
+		}
 
 #if USE_GRAPHICS
 		GET_OWNER_IF_NOT_VALID();
@@ -1061,7 +1062,7 @@ namespace FlamingTorch
 		if(Owner)
 			Owner->SetTextureFiltering(HandleValue, Filter);
 #endif
-	};
+	}
 
 	bool Texture::FromPackage(const std::string &Directory, const std::string &Name)
 	{
@@ -1087,10 +1088,10 @@ namespace FlamingTorch
 				Name.c_str());
 
 			return false;
-		};
+		}
 
 		return FromStream(PackageStream.Get());
-	};
+	}
 
 #if USE_GRAPHICS
 	bool Texture::FromScreen()
@@ -1108,7 +1109,7 @@ namespace FlamingTorch
 				return false;
 
 		return FromBuffer(TempBuffer);
-	};
+	}
 #endif
 
 	Vector4 Texture::GetPixel(uint32 x, uint32 y)
@@ -1119,7 +1120,7 @@ namespace FlamingTorch
 		uint8 *Piece = &Buffer->Data[x * 4 + y * Buffer->Width() * 4];
 
 		return Vector4(Piece[0] / 255.f, Piece[1] / 255.f, Piece[2] / 255.f, Piece[3] / 255.f);
-	};
+	}
 
 	Rect Texture::TextureRect() const
 	{
@@ -1134,20 +1135,20 @@ namespace FlamingTorch
 			Out.Top += Index.y + 1;
 
 			t = t->GetIndex().Owner->MainTexture.Get();
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<Texture> Texture::BaseTexture() const
 	{
 		if (GetIndex().Owner.Get())
 		{
 			return GetIndex().Owner->MainTexture->BaseTexture();
-		};
+		}
 
 		return DisposablePointer<Texture>::MakeWeak(const_cast<Texture *>(this));
-	};
+	}
 
 	void Texture::Blur(uint32 Radius, uint32 Strength)
 	{
@@ -1171,7 +1172,7 @@ namespace FlamingTorch
 
 			if(Owner)
 				Owner->GetTextureData(HandleValue, &Buffer->Data[0], WidthValue * HeightValue * 4);
-		};
+		}
 #endif
 
 		if(!Buffer.Get())
@@ -1179,14 +1180,14 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "@Blur: Failed to blur due to invalid Buffer");
 
 			return;
-		};
+		}
 
 		static std::vector<uint8> PixelBuffer;
 		
 		if(PixelBuffer.size() != Width() * Height() * 4)
 		{
 			PixelBuffer.resize(Width() * Height() * 4);
-		};
+		}
 
 		int32 ActualWidth = Width(), ActualHeight = Height();
 		int32 ActualWidthBytes = ActualWidth * 4, ActualHeightBytes = ActualHeight * 4;
@@ -1242,7 +1243,7 @@ namespace FlamingTorch
 						Pixel[2] += BufferPtr[Index + 2];
 
 						Additions++;
-					};
+					}
 
 					if(Additions != 0 && (Pixel[0] != 0 || Pixel[1] != 0 || Pixel[2] != 0))
 					{
@@ -1257,14 +1258,14 @@ namespace FlamingTorch
 						PixelBuffer[PixelBufferIndex + 1] = BufferPtr[PixelBufferIndex + 1];
 						PixelBuffer[PixelBufferIndex + 2] = BufferPtr[PixelBufferIndex + 2];
 						PixelBuffer[PixelBufferIndex + 3] = BufferPtr[PixelBufferIndex + 3];
-					};
-				};
-			};
+					}
+				}
+			}
 
 			memcpy(&BufferPtr[0], &PixelBuffer[0], ActualWidth * ActualHeight * sizeof(uint8[4]));
 
 			PROFILE_PROGRESS((uint32)(100 * (i / (f32)Strength)));
-		};
+		}
 
 		PROFILE_PROGRESS(101);
 
@@ -1274,34 +1275,34 @@ namespace FlamingTorch
 		if(RequiredBufferPlacement)
 			Buffer.Dispose();
 #endif
-	};
+	}
 
 	uint32 TexturePackerIndex::Width() const
 	{
 		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Width - 2 : 0;
-	};
+	}
 
 	uint32 TexturePackerIndex::Height() const
 	{
 		return Owner.Get() && (int32)Owner->Indices.size() > Index ? Owner->Indices[Index].Height - 2 : 0;
-	};
+	}
 
 	TextureHandle TexturePackerIndex::Handle() const
 	{
 		return Owner.Get() ? Owner->MainTexture->Handle() : 0;
-	};
+	}
 
 	uint32 TexturePackerIndex::ColorType() const
 	{
 		return Owner.Get() ? Owner->MainTexture->ColorType() : 0;
-	};
+	}
 
-	TexturePacker::TexturePacker() : Dirty(false), MaxWidth(0), MaxHeight(0), FilteringValue(TextureFiltering::Nearest) {};
+	TexturePacker::TexturePacker() : Dirty(false), MaxWidth(0), MaxHeight(0), FilteringValue(TextureFiltering::Nearest), PaddingValue(DEFAULT_TEXTURE_PADDING) {}
 
 	TexturePacker::~TexturePacker()
 	{
 		MainTexture.Dispose();
-	};
+	}
 
 	bool TexturePacker::Bind()
 	{
@@ -1314,13 +1315,15 @@ namespace FlamingTorch
 		TextureBuffer Temp;
 		Temp.CreateEmpty(MaxWidth, MaxHeight);
 
+		uint32 Padding = PaddingValue, DoublePadding = PaddingValue * 2;
+
 		uint32 RowSize = MaxWidth * 4;
 
 		for (uint32 i = 0; i < Indices.size(); i++)
 		{
-			uint32 MyRowSize = (Indices[i].Width - 2) * 4;
+			uint32 MyRowSize = (Indices[i].Width - DoublePadding) * 4;
 			uint32 TargetRowSize = MyRowSize;
-			uint32 xpos = (Indices[i].x + 1) * 4;
+			uint32 xpos = (Indices[i].x + Padding) * 4;
 
 			const Texture *t = Indices[i].SourceInstance;
 
@@ -1331,18 +1334,20 @@ namespace FlamingTorch
 				if (!const_cast<TexturePacker *>(t->GetIndex().Owner.Get())->Bind())
 					return false;
 
-				ExtraX += (t->GetIndex().Owner->Indices[t->GetIndex().Index].x + 1) * 4 + (t->GetIndex().Owner->Indices[t->GetIndex().Index].y + 1) * t->GetIndex().Owner->MainTexture->Width() * 4;
+				ExtraX += (t->GetIndex().Owner->Indices[t->GetIndex().Index].x + t->GetIndex().Owner->Padding()) * 4 +
+					(t->GetIndex().Owner->Indices[t->GetIndex().Index].y + t->GetIndex().Owner->Padding()) * t->GetIndex().Owner->MainTexture->Width() * 4;
 
 				MyRowSize = t->GetIndex().Owner->MainTexture->Width() * 4;
 
 				t = t->GetIndex().Owner->MainTexture;
-			};
+			}
 
-			for (uint32 y = 0, ypos = (Indices[i].y + 1) * RowSize, ypostarget = ExtraX; y < Indices[i].Height - 2; y++, ypos += RowSize, ypostarget += MyRowSize)
+			for (uint32 y = 0, ypos = (Indices[i].y + Padding) * RowSize, ypostarget = ExtraX; y < Indices[i].Height - DoublePadding;
+				y++, ypos += RowSize, ypostarget += MyRowSize)
 			{
 				memcpy(&Temp.Data[xpos + ypos], &t->GetData()->Data[ypostarget], TargetRowSize);
-			};
-		};
+			}
+		}
 
 		if (!MainTexture->FromData(&Temp.Data[0], MaxWidth, MaxHeight))
 			return false;
@@ -1350,9 +1355,10 @@ namespace FlamingTorch
 		MainTexture->SetTextureFiltering(FilteringValue);
 
 		return true;
-	};
+	}
 
-	DisposablePointer<TexturePacker> TexturePacker::FromTextures(const std::vector<DisposablePointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight)
+	DisposablePointer<TexturePacker> TexturePacker::FromTextures(const std::vector<DisposablePointer<Texture> > &Textures, uint32 MaxWidth, uint32 MaxHeight,
+		uint32 Padding)
 	{
 		if(Textures.size() == 0)
 			return DisposablePointer<TexturePacker>();
@@ -1360,6 +1366,8 @@ namespace FlamingTorch
 		DisposablePointer<TexturePacker> Out(new TexturePacker());
 
 		Out->Rects.Init(MaxWidth, MaxHeight);
+
+		uint32 DoublePadding = Padding * 2;
 
 		MaxWidth = MaxHeight = 0;
 
@@ -1371,18 +1379,18 @@ namespace FlamingTorch
 			SortedTexture TextureInstance;
 			TextureInstance.Index = i;
 
-			::Rect RectInstance = Out->Rects.Insert(Textures[i]->Width() + 2, Textures[i]->Height() + 2, MaxRectsBinPack::RectBestShortSideFit);
+			::Rect RectInstance = Out->Rects.Insert(Textures[i]->Width() + DoublePadding, Textures[i]->Height() + DoublePadding, MaxRectsBinPack::RectBestShortSideFit);
 
-			TextureInstance.x = RectInstance.x + 1;
-			TextureInstance.y = RectInstance.y + 1;
+			TextureInstance.x = RectInstance.x + Padding;
+			TextureInstance.y = RectInstance.y + Padding;
 			TextureInstance.Width = RectInstance.width;
 			TextureInstance.Height = RectInstance.height;
 
-			if (TextureInstance.x + TextureInstance.Width + 1 > MaxWidth)
-				MaxWidth = TextureInstance.x + TextureInstance.Width + 1;
+			if (TextureInstance.x + TextureInstance.Width + Padding > MaxWidth)
+				MaxWidth = TextureInstance.x + TextureInstance.Width + Padding;
 
-			if (TextureInstance.y + TextureInstance.Height + 1 > MaxHeight)
-				MaxHeight = TextureInstance.y + TextureInstance.Height + 1;
+			if (TextureInstance.y + TextureInstance.Height + Padding > MaxHeight)
+				MaxHeight = TextureInstance.y + TextureInstance.Height + Padding;
 
 			TextureInstance.SourceInstance = Textures[i];
 			TextureInstance.TextureInstance.Reset(new Texture());
@@ -1394,14 +1402,15 @@ namespace FlamingTorch
 			TextureInstance.TextureInstance->SetIndex(Index);
 
 			Out->Indices.push_back(TextureInstance);
-		};
+		}
 
 		Out->Dirty = true;
 		Out->MaxWidth = MaxWidth;
 		Out->MaxHeight = MaxHeight;
+		Out->PaddingValue = Padding;
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<TexturePacker> TexturePacker::FromConfig(DisposablePointer<Texture> MainTexture, const GenericConfig &Config)
 	{
@@ -1412,6 +1421,9 @@ namespace FlamingTorch
 		GenericConfig::SectionMap::const_iterator Animations = Config.Sections.find("Animations");
 
 		if(Animations == Config.Sections.end())
+			return DisposablePointer<TexturePacker>();
+
+		if (1 != sscanf(Config.GetString("Config", "Padding", "1").c_str(), "%u", &Out->PaddingValue))
 			return DisposablePointer<TexturePacker>();
 
 		SortedTexture Item;
@@ -1434,16 +1446,16 @@ namespace FlamingTorch
 				Item.TextureInstance->SetIndex(Index);
 
 				Out->Indices.push_back(Item);
-			};
-		};
+			}
+		}
 
 		return Out;
-	};
+	}
 
 	DisposablePointer<Texture> TexturePacker::GetTexture(uint32 Index)
 	{
 		return Index < Indices.size() ? Indices[Index].TextureInstance : DisposablePointer<Texture>();
-	};
+	}
 
 	void TexturePacker::SetFiltering(uint32 Filtering)
 	{
@@ -1452,12 +1464,12 @@ namespace FlamingTorch
 		if (!Dirty && MainTexture.Get())
 		{
 			MainTexture->SetTextureFiltering(Filtering);
-		};
-	};
+		}
+	}
 
 	TextureGroup::TextureGroup(uint32 _MaxWidth, uint32 _MaxHeight) : MaxWidth(_MaxWidth), MaxHeight(_MaxHeight), FilteringValue(TextureFiltering::Linear)
 	{
-	};
+	}
 
 	void TextureGroup::SetFiltering(uint32 Filtering)
 	{
@@ -1466,8 +1478,8 @@ namespace FlamingTorch
 		if(PackedTexture.Get())
 		{
 			PackedTexture->SetFiltering(Filtering);
-		};
-	};
+		}
+	}
 
 	int32 TextureGroup::Add(DisposablePointer<Texture> t)
 	{
@@ -1487,14 +1499,14 @@ namespace FlamingTorch
 				{
 					if(InstanceTextures[j]->GetIndex().Index == i)
 						return i;
-				};
-			};
+				}
+			}
 			
 			if (StoredTextures[i].Get() == nullptr || InstanceTextures[i].Get() == nullptr)
 			{
 				ElementErased = true;
-			};
-		};
+			}
+		}
 
 		if(ElementErased)
 		{
@@ -1508,20 +1520,20 @@ namespace FlamingTorch
 					InstanceTextures.erase(InstanceTextures.begin() + i);
 
 					continue;
-				};
-			};
-		};
+				}
+			}
+		}
 
 		StoredTextures.push_back(t);
 
-		DisposablePointer<TexturePacker> Out = TexturePacker::FromTextures(StoredTextures, MaxWidth, MaxHeight);
+		DisposablePointer<TexturePacker> Out = TexturePacker::FromTextures(StoredTextures, MaxWidth, MaxHeight, DEFAULT_TEXTURE_PADDING);
 
 		if(Out.Get() == nullptr || Out->IndexCount() < StoredTextures.size())
 		{
 			StoredTextures.pop_back();
 
 			return -1;
-		};
+		}
 
 		TexturePackerIndex Index;
 
@@ -1532,12 +1544,12 @@ namespace FlamingTorch
 			Index.Owner = Out;
 
 			InstanceTextures[i]->SetIndex(Index);
-		};
+		}
 
 		for(uint32 i = InstanceTextures.size(); i < Out->IndexCount(); i++)
 		{
 			InstanceTextures.push_back(Out->GetTexture(i));
-		};
+		}
 
 		PackedTexture.Dispose();
 		PackedTexture = Out;
@@ -1545,10 +1557,10 @@ namespace FlamingTorch
 		Out->SetFiltering(FilteringValue);
 
 		return Out->IndexCount() - 1;
-	};
+	}
 
 	DisposablePointer<Texture> TextureGroup::Get(int32 Index)
 	{
 		return Index >= 0 && Index < (int32)InstanceTextures.size() ? InstanceTextures[Index] : DisposablePointer<Texture>();
-	};
-};
+	}
+}

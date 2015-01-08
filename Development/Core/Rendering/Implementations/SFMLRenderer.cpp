@@ -73,7 +73,7 @@ namespace FlamingTorch
 		GLCHECK();
 
 		Log::Instance.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
-	};
+	}
 
 	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), LastBoundVBO(0), 
 		UniqueCacheStringID(0), SavedTextDrawcalls(0), BorderlessWindowMode(false)
@@ -81,7 +81,7 @@ namespace FlamingTorch
 		FrameStatsValue.RendererName = "SFML";
 		FrameStatsValue.RendererVersion = CoreUtils::MakeVersionString(SFML_RENDERER_VERSION_MAJOR, SFML_RENDERER_VERSION_MINOR);
 		FrameStatsValue.RendererCustomMessage = "";
-	};
+	}
 
 	SFMLRendererImplementation::~SFMLRendererImplementation()
 	{
@@ -89,13 +89,13 @@ namespace FlamingTorch
 		{
 			Fonts.begin()->second.ActualFont.Dispose();
 			Fonts.erase(Fonts.begin());
-		};
+		}
 
 		while(Textures.size())
 		{
 			DestroyTexture(Textures.begin()->first);
-		};
-	};
+		}
+	}
 
 	bool SFMLRendererImplementation::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
 	{
@@ -112,7 +112,7 @@ namespace FlamingTorch
 			Log::Instance.LogInfo(TAG, "Unable to create the rendering window.");
 
 			return 0;
-		};
+		}
 
 		ContextSettings = Window.getSettings();
 
@@ -149,19 +149,19 @@ namespace FlamingTorch
 					SupportsFBOs = !!glewIsSupported("GL_ARB_framebuffer_object");
 					//Disabled for now
 					//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
-				};
-			};
+				}
+			}
 #endif
 
 			GLCHECK();
 
 			DumpRendererStats();
-		};
+		}
 
 		glDisable(GL_DEPTH_TEST);
 
 		return true;
-	};
+	}
 
 	bool SFMLRendererImplementation::Create(const std::string &Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities ExpectedCaps)
 	{
@@ -186,7 +186,7 @@ namespace FlamingTorch
 			ActualStyle = sf::Style::Close;
 
 			break;
-		};
+		}
 
 		sf::ContextSettings ContextSettings(ExpectedCaps.DepthBits, ExpectedCaps.StencilBits, ExpectedCaps.AntialiasLevel);
 
@@ -203,13 +203,13 @@ namespace FlamingTorch
 			if(ActualWidth > WorkArea.Right - WorkArea.Left)
 			{
 				ActualWidth = (uint32)(WorkArea.Right - WorkArea.Left);
-			};
+			}
 
 			if(ActualHeight > WorkArea.Bottom - WorkArea.Top)
 			{
 				ActualHeight = (uint32)(WorkArea.Bottom - WorkArea.Top);
-			};
-		};
+			}
+		}
 #endif
 
 		//Create the window
@@ -223,7 +223,7 @@ namespace FlamingTorch
 			Log::Instance.LogInfo(TAG, "Unable to create the rendering window.");
 
 			return false;
-		};
+		}
 
 #if !FLPLATFORM_ANDROID
 		Window.setPosition(sf::Vector2i((int32)WorkArea.Left, (int32)WorkArea.Top));
@@ -264,19 +264,19 @@ namespace FlamingTorch
 					SupportsFBOs = !!glewIsSupported("GL_ARB_framebuffer_object");
 					//Disabled for now
 					//SupportsVBOs = !!glewIsSupported("GL_ARB_vertex_buffer_object");
-				};
-			};
+				}
+			}
 #endif
 
 			GLCHECK();
 
 			DumpRendererStats();
-		};
+		}
 
 		glDisable(GL_DEPTH_TEST);
 
 		return true;
-	};
+	}
 
 	FrameBufferHandle SFMLRendererImplementation::CreateFrameBuffer(const FrameBufferCreationInfo &Info)
 	{
@@ -287,7 +287,7 @@ namespace FlamingTorch
 		{
 			if (Info.ColorBuffers[i].Get() == NULL || Info.ColorBuffers[i]->Size() != Info.Size || !IsTextureHandleValid(Info.ColorBuffers[i]->Handle()))
 				return INVALID_FTGHANDLE;
-		};
+		}
 
 		DisposablePointer<FrameBufferInfo> FBInfo(new FrameBufferInfo());
 
@@ -317,7 +317,7 @@ namespace FlamingTorch
 			GLCHECK();
 
 			DrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
-		};
+		}
 
 		BindTexture(PreviousHandle);
 
@@ -350,7 +350,7 @@ namespace FlamingTorch
 			glDeleteFramebuffers(1, &FBInfo->GLID);
 
 			return INVALID_FTGHANDLE;
-		};
+		}
 
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -358,14 +358,14 @@ namespace FlamingTorch
 		FrameBuffers[++FrameBufferCounter] = FBInfo;
 
 		return FrameBufferCounter;
-	};
+	}
 
 	bool SFMLRendererImplementation::IsFrameBufferValid(FrameBufferHandle Handle)
 	{
 		FrameBufferMap::iterator it = FrameBuffers.find(Handle);
 
 		return it != FrameBuffers.end();
-	};
+	}
 
 	void SFMLRendererImplementation::BindFrameBuffer(FrameBufferHandle Handle)
 	{
@@ -374,10 +374,10 @@ namespace FlamingTorch
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			return;
-		};
+		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, FrameBuffers[Handle]->GLID);
-	};
+	}
 
 	void SFMLRendererImplementation::DestroyFrameBuffer(FrameBufferHandle Handle)
 	{
@@ -392,12 +392,12 @@ namespace FlamingTorch
 		glDeleteFramebuffers(1, &it->second->GLID);
 
 		FrameBuffers.erase(it);
-	};
+	}
 
 	const RendererCapabilities &SFMLRendererImplementation::Capabilities() const
 	{
 		return RenderCaps;
-	};
+	}
 
 	RendererDisplayMode SFMLRendererImplementation::DesktopDisplayMode()
 	{
@@ -410,7 +410,7 @@ namespace FlamingTorch
 		Out.Bpp = Mode.bitsPerPixel;
 
 		return Out;
-	};
+	}
 
 	std::vector<RendererDisplayMode> SFMLRendererImplementation::DisplayModes()
 	{
@@ -428,15 +428,15 @@ namespace FlamingTorch
 			OutMode.Bpp = Mode.bitsPerPixel;
 
 			Out.push_back(OutMode);
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	Vector2 SFMLRendererImplementation::Size() const
 	{
 		return Vector2((f32)Window.getSize().x, (f32)Window.getSize().y);
-	};
+	}
 
 	VertexBufferHandle SFMLRendererImplementation::CreateVertexBuffer()
 	{
@@ -451,10 +451,10 @@ namespace FlamingTorch
 		if(SupportsVBOs)
 		{
 			glGenBuffers(1, &Info.VBOID);
-		};
+		}
 
 		return VertexBufferCounter;
-	};
+	}
 
 	void SFMLRendererImplementation::SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize)
 	{
@@ -479,14 +479,14 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Expected a list of connected Offsets; Offset '%d' is not valid: Should be '%d'", Elements[i].Offset, LastOffset + LastElementSize);
 
 				return;
-			};
+			}
 
 			if(Elements[i].DataType >= VertexElementDataType::Count)
 			{
 				Log::Instance.LogErr(TAG, "Unknown data type '%d'", Elements[i].DataType);
 
 				return;
-			};
+			}
 
 			switch(Elements[i].Type)
 			{
@@ -496,7 +496,7 @@ namespace FlamingTorch
 					Log::Instance.LogErr(TAG, "Found duplicate element for POSITION");
 
 					return;
-				};
+				}
 
 				PositionOffset = Elements[i].Offset;
 				PositionDataType = Elements[i].DataType;
@@ -509,7 +509,7 @@ namespace FlamingTorch
 					Log::Instance.LogErr(TAG, "Found duplicate element for TEXCOORD");
 
 					return;
-				};
+				}
 
 				TexCoordOffset = Elements[i].Offset;
 				TexCoordDataType = Elements[i].DataType;
@@ -523,7 +523,7 @@ namespace FlamingTorch
 					Log::Instance.LogErr(TAG, "Found duplicate element for NORMAL");
 
 					return;
-				};
+				}
 
 				NormalOffset = Elements[i].Offset;
 				NormalDataType = Elements[i].DataType;
@@ -537,7 +537,7 @@ namespace FlamingTorch
 					Log::Instance.LogErr(TAG, "Found duplicate element for COLOR");
 
 					return;
-				};
+				}
 
 				ColorOffset = Elements[i].Offset;
 				ColorDataType = Elements[i].DataType;
@@ -549,18 +549,18 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Unknown element type '%d'", Elements[i].Type);
 
 				return;
-			};
+			}
 
 			LastOffset = Elements[i].Offset;
 			LastElementSize = VertexBufferDataElementSizes[Elements[i].DataType];
-		};
+		}
 
 		if(PositionOffset == -1)
 		{
 			Log::Instance.LogErr(TAG, "Expected a Position in this buffer");
 
 			return;
-		};
+		}
 
 		VertexSize = (uint32)MathUtils::Max((f32)VertexSize, (f32)PositionOffset + PositionDataSize);
 		VertexSize = (uint32)MathUtils::Max((f32)VertexSize, (f32)TexCoordOffset + TexCoordDataSize);
@@ -572,14 +572,14 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "Vertex Size is 0");
 
 			return;
-		};
+		}
 
 		if(DataByteSize % VertexSize != 0)
 		{
 			Log::Instance.LogErr(TAG, "Data Byte Size is incompatible with estimated Vertex Size '%d': Not a multiple of Vertex Size.", VertexSize);
 
 			return;
-		};
+		}
 
 		uint32 VertexCount = DataByteSize / VertexSize;
 
@@ -603,7 +603,7 @@ namespace FlamingTorch
 		else
 		{
 			Info.TexCoordData.resize(0);
-		};
+		}
 
 		if(ColorDataSize)
 		{
@@ -612,7 +612,7 @@ namespace FlamingTorch
 		else
 		{
 			Info.ColorData.resize(0);
-		};
+		}
 
 		if(NormalDataSize)
 		{
@@ -621,7 +621,7 @@ namespace FlamingTorch
 		else
 		{
 			Info.NormalsData.resize(0);
-		};
+		}
 
 		switch(DetailsMode)
 		{
@@ -631,17 +631,17 @@ namespace FlamingTorch
 			if(TexCoordDataSize)
 			{
 				memcpy(&Info.TexCoordData[0], &((uint8 *)Data)[TexCoordOffset], TexCoordDataSize * VertexCount);
-			};
+			}
 
 			if(ColorDataSize)
 			{
 				memcpy(&Info.ColorData[0], &((uint8 *)Data)[ColorOffset], ColorDataSize * VertexCount);
-			};
+			}
 
 			if(NormalDataSize)
 			{
 				memcpy(&Info.NormalsData[0], &((uint8 *)Data)[NormalOffset], NormalDataSize * VertexCount);
-			};
+			}
 
 			break;
 
@@ -656,33 +656,33 @@ namespace FlamingTorch
 						memcpy(&Info.PositionData[PositionByteOffset], &((uint8 *)Data)[i + PositionOffset], PositionDataSize);
 
 						PositionByteOffset += PositionDataSize;
-					};
+					}
 
 					if(ColorDataSize > 0)
 					{
 						memcpy(&Info.ColorData[ColorByteOffset], &((uint8 *)Data)[i + ColorOffset], ColorDataSize);
 
 						ColorByteOffset += ColorDataSize;
-					};
+					}
 
 					if(TexCoordDataSize > 0)
 					{
 						memcpy(&Info.TexCoordData[TexCoordByteOffset], &((uint8 *)Data)[i + TexCoordOffset], TexCoordDataSize);
 
 						TexCoordByteOffset += TexCoordDataSize;
-					};
+					}
 
 					if(NormalDataSize > 0)
 					{
 						memcpy(&Info.NormalsData[NormalByteOffset], &((uint8 *)Data)[i + NormalOffset], NormalDataSize);
 
 						NormalByteOffset += NormalDataSize;
-					};
-				};
-			};
+					}
+				}
+			}
 
 			break;
-		};
+		}
 
 		if(SupportsVBOs)
 		{
@@ -699,7 +699,7 @@ namespace FlamingTorch
 			else
 			{
 				Info.PositionOffset = -1;
-			};
+			}
 
 			if(TexCoordDataSize)
 			{
@@ -710,7 +710,7 @@ namespace FlamingTorch
 			else
 			{
 				Info.TexCoordOffset = -1;
-			};
+			}
 
 			if(ColorDataSize)
 			{
@@ -721,7 +721,7 @@ namespace FlamingTorch
 			else
 			{
 				Info.ColorOffset = -1;
-			};
+			}
 
 			if(NormalDataSize)
 			{
@@ -732,30 +732,30 @@ namespace FlamingTorch
 			else
 			{
 				Info.NormalsOffset = -1;
-			};
+			}
 
 			for(uint32 i = 0, index = 0; i < DataByteSize; i += VertexSize, index++)
 			{
 				if(Info.PositionOffset != -1)
 				{
 					memcpy(&Info.CombinedData[i + Info.PositionOffset], &Info.PositionData[index * PositionDataSize], PositionDataSize);
-				};
+				}
 
 				if(Info.ColorOffset != -1)
 				{
 					memcpy(&Info.CombinedData[i + Info.ColorOffset], &Info.ColorData[index * ColorDataSize], ColorDataSize);
-				};
+				}
 
 				if(Info.TexCoordOffset != -1)
 				{
 					memcpy(&Info.CombinedData[i + Info.TexCoordOffset], &Info.TexCoordData[index * TexCoordDataSize], TexCoordDataSize);
-				};
+				}
 
 				if(Info.NormalsOffset != -1)
 				{
 					memcpy(&Info.CombinedData[i + Info.NormalsOffset], &Info.NormalsData[index * NormalDataSize], NormalDataSize);
-				};
-			};
+				}
+			}
 
 			GLCHECK();
 
@@ -774,20 +774,20 @@ namespace FlamingTorch
 				glBufferSubData(GL_ARRAY_BUFFER, 0, DataByteSize, &Info.CombinedData[0]);
 
 				GLCHECK();
-			};
+			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 			GLCHECK();
 
 			LastBoundVBO = 0;
-		};
-	};
+		}
+	}
 
 	bool SFMLRendererImplementation::IsVertexBufferHandleValid(VertexBufferHandle Handle)
 	{
 		return Handle != 0 && VertexBuffers.find(Handle) != VertexBuffers.end();
-	};
+	}
 
 	void SFMLRendererImplementation::DestroyVertexBuffer(VertexBufferHandle Handle)
 	{
@@ -805,10 +805,10 @@ namespace FlamingTorch
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glDeleteBuffers(1, &it->second.VBOID);
 			LastBoundVBO = 0;
-		};
+		}
 
 		VertexBuffers.erase(it);
-	};
+	}
 
 	void SFMLRendererImplementation::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
@@ -823,21 +823,21 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Buffer", Buffer);
 
 			return;
-		};
+		}
 
 		if(VertexMode >= VertexModes::Count)
 		{
 			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Vertex Mode '%d'", Buffer, VertexMode);
 
 			return;
-		};
+		}
 
 		if(End <= Start)
 		{
 			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Start/End Pair '%d, %d'", Buffer, Start, End);
 
 			return;
-		};
+		}
 
 		FrameStatsValue.DrawCalls++;
 		FrameStatsValue.VertexCount += End - Start;
@@ -849,7 +849,7 @@ namespace FlamingTorch
 		else
 		{
 			DisableState(GL_TEXTURE_2D);
-		};
+		}
 
 		EnableState(GL_VERTEX_ARRAY);
 
@@ -862,15 +862,15 @@ namespace FlamingTorch
 					glBindBuffer(GL_ARRAY_BUFFER, it->second.VBOID);
 					GLCHECK();
 					LastBoundVBO = it->second.VBOID;
-				};
+				}
 			}
 			else
 			{
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				GLCHECK();
 				LastBoundVBO = 0;
-			};
-		};
+			}
+		}
 
 		if(SupportsVBOs && glIsBuffer(it->second.VBOID))
 		{
@@ -879,7 +879,7 @@ namespace FlamingTorch
 		else
 		{
 			glVertexPointer(VertexBufferDataElementCount[it->second.PositionDataType], GL_FLOAT, 0, &it->second.PositionData[0]);
-		};
+		}
 
 		if(SupportsVBOs && glIsBuffer(it->second.VBOID) && it->second.TexCoordOffset != -1)
 		{
@@ -894,7 +894,7 @@ namespace FlamingTorch
 		else
 		{
 			DisableState(GL_TEXTURE_COORD_ARRAY);
-		};
+		}
 
 		if(SupportsVBOs && glIsBuffer(it->second.VBOID) && it->second.ColorOffset != -1)
 		{
@@ -910,7 +910,7 @@ namespace FlamingTorch
 		{
 			DisableState(GL_COLOR_ARRAY);
 			glColor4f(1, 1, 1, 1);
-		};
+		}
 
 		if(SupportsVBOs && glIsBuffer(it->second.VBOID) && it->second.NormalsOffset != -1)
 		{
@@ -925,12 +925,12 @@ namespace FlamingTorch
 		else
 		{
 			DisableState(GL_NORMAL_ARRAY);
-		};
+		}
 
 		glDrawArrays(VertexBufferVertexMode[VertexMode], Start, End - Start);
 
 		GLCHECK();
-	};
+	}
 
 	void SFMLRendererImplementation::StartClipping(const Rect &ClippingRect)
 	{
@@ -948,7 +948,7 @@ namespace FlamingTorch
 		glScissor(x, y, Width, Height);
 
 		GLCHECK();
-	};
+	}
 
 	void SFMLRendererImplementation::FinishClipping()
 	{
@@ -960,7 +960,7 @@ namespace FlamingTorch
 		DisableState(GL_SCISSOR_TEST);
 
 		GLCHECK();
-	};
+	}
 
 	void SFMLRendererImplementation::Clear(uint32 Buffers)
 	{
@@ -983,7 +983,7 @@ namespace FlamingTorch
 			glClear(Mask);
 
 		GLCHECK();
-	};
+	}
 
 	void SFMLRendererImplementation::Display()
 	{
@@ -992,12 +992,12 @@ namespace FlamingTorch
 		if(ExtensionsAvailable)
 		{
 			FrameStatsValue.RendererCustomMessage += "SupportsExtensions";
-		};
+		}
 
 		if(SupportsVBOs)
 		{
 			FrameStatsValue.RendererCustomMessage += " VBOEnabled";
-		};
+		}
 
 		if(RenderCaps.AntialiasLevel == 0)
 		{
@@ -1006,7 +1006,7 @@ namespace FlamingTorch
 		else
 		{
 			FrameStatsValue.RendererCustomMessage += " AAx" + StringUtils::MakeIntString(RenderCaps.AntialiasLevel);
-		};
+		}
 
 		FrameStatsValue.RendererCustomMessage += " RF: D" + StringUtils::MakeIntString(RenderCaps.DepthBits) + "S" + StringUtils::MakeIntString(RenderCaps.StencilBits);
 
@@ -1022,18 +1022,18 @@ namespace FlamingTorch
 		{
 			//We cannot verify all textures so we'll only report the client usage...
 			FrameStatsValue.TotalResourceUsage += it->second.ResourceSize / ONE_MB_FLOAT;
-		};
+		}
 
 		for(VertexBufferMap::iterator it = VertexBuffers.begin(); it != VertexBuffers.end(); it++)
 		{
 			FrameStatsValue.TotalResourceUsage += (it->second.PositionData.size() + it->second.TexCoordData.size() + it->second.NormalsData.size() + it->second.ColorData.size()) / ONE_MB_FLOAT;
-		};
+		}
 
 		for(TextureMap::iterator it = Textures.begin(); it != Textures.end(); it++)
 		{
 			//Multiplied by 8 instead of 4 due to double RAM usage
 			FrameStatsValue.TotalResourceUsage += (it->second.Width * it->second.Height * 8) / ONE_MB_FLOAT;
-		};
+		}
 
 		SavedTextDrawcalls = 0;
 
@@ -1047,12 +1047,12 @@ namespace FlamingTorch
 		BindTexture((TextureHandle)0);
 
 		BindTexture(PreviousTexture);
-	};
+	}
 
 	const RendererFrameStats &SFMLRendererImplementation::FrameStats() const
 	{
 		return PreviousFrameStatsValue;
-	};
+	}
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
@@ -1068,7 +1068,7 @@ namespace FlamingTorch
 		GLCHECK();
 
 		LastWorldMatrix = WorldMatrix;
-	};
+	}
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
@@ -1085,7 +1085,7 @@ namespace FlamingTorch
 		GLCHECK();
 
 		LastProjectionMatrix = ProjectionMatrix;
-	};
+	}
 
 	void SFMLRendererImplementation::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
@@ -1095,7 +1095,7 @@ namespace FlamingTorch
 		glViewport((GLint)x, (GLint)y, (GLsizei)Width, (GLsizei)Height);
 
 		GLCHECK();
-	};
+	}
 
 	TextureHandle SFMLRendererImplementation::CreateTexture()
 	{
@@ -1111,12 +1111,12 @@ namespace FlamingTorch
 		Textures[TextureCounter].GLID = GLID;
 
 		return TextureCounter;
-	};
+	}
 
 	bool SFMLRendererImplementation::IsTextureHandleValid(TextureHandle Handle)
 	{
 		return Handle != 0 && Textures.find(Handle) != Textures.end();
-	};
+	}
 
 	void SFMLRendererImplementation::DestroyTexture(TextureHandle Handle)
 	{
@@ -1137,7 +1137,7 @@ namespace FlamingTorch
 		GLCHECK();
 
 		Textures.erase(it);
-	};
+	}
 
 	void SFMLRendererImplementation::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
 	{
@@ -1155,7 +1155,7 @@ namespace FlamingTorch
 				BindTexture(Last);
 
 			return;
-		};
+		}
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
 
@@ -1167,7 +1167,7 @@ namespace FlamingTorch
 		Info.Height = Height;
 
 		BindTexture(Last);
-	};
+	}
 
 	void SFMLRendererImplementation::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
 	{
@@ -1185,7 +1185,7 @@ namespace FlamingTorch
 				BindTexture(Last);
 
 			return;
-		};
+		}
 
 		switch(WrapMode)
 		{
@@ -1224,10 +1224,10 @@ namespace FlamingTorch
 			GLCHECK();
 
 			break;
-		};
+		}
 
 		BindTexture(Last);
-	};
+	}
 
 	void SFMLRendererImplementation::SetTextureFiltering(TextureHandle Handle, uint32 Filter)
 	{
@@ -1243,7 +1243,7 @@ namespace FlamingTorch
 				BindTexture(Last);
 
 			return;
-		};
+		}
 
 		if(Filter == TextureFiltering::Nearest || Filter == TextureFiltering::Linear)
 		{
@@ -1267,10 +1267,10 @@ namespace FlamingTorch
 #endif
 
 			GLCHECK();
-		};
+		}
 
 		BindTexture(Last);
-	};
+	}
 
 	bool SFMLRendererImplementation::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
 	{
@@ -1296,12 +1296,12 @@ namespace FlamingTorch
 			Pixels[x + 1] = Temp[i + 1];
 			Pixels[x + 2] = Temp[i + 2];
 			Pixels[x + 3] = 255;
-		};
+		}
 
 		GLCHECK();
 
 		return true;
-	};
+	}
 
 	bool SFMLRendererImplementation::GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount)
 	{
@@ -1325,7 +1325,7 @@ namespace FlamingTorch
 				BindTexture(Last);
 
 			return false;
-		};
+		}
 
 		TextureInfo &Info = Textures[Handle];
 
@@ -1335,7 +1335,7 @@ namespace FlamingTorch
 				BindTexture(Last);
 
 			return false;
-		};
+		}
 
 #if !FLPLATFORM_ANDROID
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
@@ -1348,7 +1348,7 @@ namespace FlamingTorch
 		GLCHECK();
 
 		return true;
-	};
+	}
 
 	void SFMLRendererImplementation::SetBlendingMode(uint32 BlendingMode)
 	{
@@ -1384,10 +1384,10 @@ namespace FlamingTorch
 #endif
 
 			break;
-		};
+		}
 
 		GLCHECK();
-	};
+	}
 
 	void SFMLRendererImplementation::BindTexture(TextureHandle Handle)
 	{
@@ -1403,7 +1403,7 @@ namespace FlamingTorch
 		glBindTexture(GL_TEXTURE_2D, it != Textures.end() ? it->second.GLID : 0);
 
 		GLCHECK();
-	};
+	}
 
 	bool SFMLRendererImplementation::PollEvent(RendererEvent &Out)
 	{
@@ -1418,12 +1418,12 @@ namespace FlamingTorch
 			if(ExpectedSize.x > WorkArea.Right - WorkArea.Left)
 			{
 				ExpectedSize.x = WorkArea.Right - WorkArea.Left;
-			};
+			}
 
 			if(ExpectedSize.y > WorkArea.Bottom - WorkArea.Top)
 			{
 				ExpectedSize.y = WorkArea.Bottom - WorkArea.Top;
-			};
+			}
 
 			if(ExpectedSize != Size() || Window.getPosition().x < WorkArea.Left || Window.getPosition().y < WorkArea.Top) 
 			{
@@ -1436,9 +1436,9 @@ namespace FlamingTorch
 				Target->OnResized(Target, (uint32)ExpectedSize.x, (uint32)ExpectedSize.y);
 
 				LastWindowSize = ExpectedSize;
-			};
+			}
 			*/
-		};
+		}
 
 		static sf::Event Event;
 
@@ -1486,7 +1486,7 @@ namespace FlamingTorch
 				else
 				{
 					Out.JoystickAxisPosition = 0;
-				};
+				}
 
 				return true;
 
@@ -1531,14 +1531,14 @@ namespace FlamingTorch
 							Out.TouchPosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
 
 							break;
-						};
-					};
+						}
+					}
 				}
 				else
 				{
 					Out.Type = RendererEventType::MouseMoved;
 					Out.MousePosition = Vector2((f32)Event.mouseMove.x, (f32)Event.mouseMove.y);
-				};
+				}
 
 				return true;
 
@@ -1547,7 +1547,7 @@ namespace FlamingTorch
 				{
 					Out.Type = RendererEventType::MouseDeltaMoved;
 					Out.MouseDelta = (f32)Event.mouseWheel.delta;
-				};
+				}
 
 				return true;
 
@@ -1562,7 +1562,7 @@ namespace FlamingTorch
 				{
 					Out.Type = RendererEventType::MouseButtonPressed;
 					Out.MouseButtonIndex = Event.mouseButton.button;
-				};
+				}
 
 				return true;
 
@@ -1577,7 +1577,7 @@ namespace FlamingTorch
 				{
 					Out.Type = RendererEventType::MouseButtonReleased;
 					Out.MouseButtonIndex = Event.mouseButton.button;
-				};
+				}
 
 				return true;
 
@@ -1599,7 +1599,7 @@ namespace FlamingTorch
 				{
 					sf::View TheView(sf::FloatRect(0, 0, Out.WindowSize.x, Out.WindowSize.y));
 					Window.setView(TheView);
-				};
+				}
 
 				Target->OnResized(Target, (uint32)Out.WindowSize.x, (uint32)Out.WindowSize.y);
 
@@ -1635,26 +1635,26 @@ namespace FlamingTorch
 				Out.TouchPosition = Vector2((f32)Event.touch.x, (f32)Event.touch.y);
 
 				return true;
-			};
-		};
+			}
+		}
 
 		return false;
-	};
+	}
 
 	void SFMLRendererImplementation::SetMousePosition(const Vector2 &Position)
 	{
 		sf::Mouse::setPosition(sf::Vector2i((int32)Position.x, (int32)Position.y), Window);
-	};
+	}
 
 	void *SFMLRendererImplementation::WindowHandle() const
 	{
 		return (void *)Window.getSystemHandle();
-	};
+	}
 
 	void SFMLRendererImplementation::SetFrameRate(uint32 FPS)
 	{
 		Window.setFramerateLimit(FPS);
-	};
+	}
 
 	FontHandle SFMLRendererImplementation::CreateFont(Stream *Data)
 	{
@@ -1676,12 +1676,12 @@ namespace FlamingTorch
 			Fonts.erase(FontCounter);
 
 			return 0;
-		};
+		}
 
 		TheFont.ResourceSize = (uint32)Data->Length();
 
 		return FontCounter;
-	};
+	}
 
 	void SFMLRendererImplementation::DestroyFont(FontHandle Handle)
 	{
@@ -1691,7 +1691,7 @@ namespace FlamingTorch
 
 		if(it != Fonts.end())
 			Fonts.erase(it);
-	};
+	}
 
 	Rect SFMLRendererImplementation::MeasureText(const std::string &TheText, const TextParams &Parameters)
 	{
@@ -1711,17 +1711,17 @@ namespace FlamingTorch
 		if(Parameters.StyleValue & TextStyle::Bold)
 		{
 			Style |= sf::Text::Bold;
-		};
+		}
 
 		if(Parameters.StyleValue & TextStyle::Italic)
 		{
 			Style |= sf::Text::Italic;
-		};
+		}
 
 		if(Parameters.StyleValue & TextStyle::Underline)
 		{
 			Style |= sf::Text::Underlined;
-		};
+		}
 
 		sf::Text Text;
 		Text.setFont(*FontIterator->second.ActualFont);
@@ -1735,7 +1735,7 @@ namespace FlamingTorch
 		//We multiply by two because we not only need to add the width/height to top and bottom, but also
 		//the width and height already have that reduced as well, and we're working with LRTB, not LRWH
 		return Rect(InRect.left, InRect.width + InRect.left * 2, InRect.top, InRect.height + InRect.top * 2);
-	};
+	}
 
 	void SFMLRendererImplementation::RenderText(const std::string &TheText, const TextParams &Parameters)
 	{
@@ -1757,7 +1757,7 @@ namespace FlamingTorch
 			FlushRenderText();
 
 			UniqueCacheStringID = UniqueStringID;
-		};
+		}
 
 		Vector2 ActualPosition = Parameters.PositionValue;
 
@@ -1790,17 +1790,17 @@ namespace FlamingTorch
 		if(Parameters.StyleValue & TextStyle::Bold)
 		{
 			Style |= sf::Text::Bold;
-		};
+		}
 
 		if(Parameters.StyleValue & TextStyle::Italic)
 		{
 			Style |= sf::Text::Italic;
-		};
+		}
 
 		if(Parameters.StyleValue & TextStyle::Underline)
 		{
 			Style |= sf::Text::Underlined;
-		};
+		}
 
 		Window.pushGLStates();
 		Text.setFont(*FontIterator->second.ActualFont);
@@ -1846,7 +1846,7 @@ namespace FlamingTorch
 				Vertices[index + 2].color.a / 255.f);
 			Colors[i + 4] = Vector4(Vertices[index + 1].color.r / 255.f, Vertices[index + 1].color.g / 255.f, Vertices[index + 1].color.b / 255.f,
 				Vertices[index + 1].color.a / 255.f);
-		};
+		}
 
 		if(!Positions.size())
 			return;
@@ -1860,15 +1860,15 @@ namespace FlamingTorch
 			for(uint32 i = 0; i < VertexCount; i++)
 			{
 				Positions[i] = Vector2::Rotate(Positions[i] - ObjectSize, Parameters.RotationValue) + ObjectSize + ActualPosition;
-			};
+			}
 		}
 		else
 		{
 			for(uint32 i = 0; i < VertexCount; i++)
 			{
 				Positions[i] = Positions[i] + ActualPosition;
-			};
-		};
+			}
+		}
 		
 		SpriteCache::Instance.Flush(Target);
 
@@ -1883,7 +1883,7 @@ namespace FlamingTorch
 #else
 		FlushRenderText();
 #endif
-	};
+	}
 
 	TextGlyphInfo SFMLRendererImplementation::GetTextGlyph(uint32 Character, const TextParams &Parameters)
 	{
@@ -1921,13 +1921,13 @@ namespace FlamingTorch
 			DisposablePointer<TextureBuffer> Pixels(TextureBuffer::CreateFromData(&TheGlyph.pixels[0], TheGlyph.textureRect.width - 2, TheGlyph.textureRect.height - 2));
 
 			Out.Pixels = Pixels;
-		};
+		}
 
 		Out.Advance = TheGlyph.advance;
 		Out.Offset = Vector2((f32)TheGlyph.bounds.left, (f32)Parameters.FontSizeValue + TheGlyph.bounds.top);
 
 		return Out;
-	};
+	}
 
 	int32 SFMLRendererImplementation::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
 	{
@@ -1941,7 +1941,7 @@ namespace FlamingTorch
 		int32 Kerning = FontIterator->second.ActualFont->getKerning(Prev, Cur, Parameters.FontSizeValue);
 
 		return Kerning;
-	};
+	}
 
 	void SFMLRendererImplementation::FlushRenderText()
 	{
@@ -1962,7 +1962,7 @@ namespace FlamingTorch
 			FrameStatsValue.StateChanges++;
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		};
+		}
 
 		TextureHandle PreviousTexture = LastBoundTexture;
 
@@ -1989,19 +1989,19 @@ namespace FlamingTorch
 		if(PreviousTexture != 0)
 		{
 			BindTexture(PreviousTexture);
-		};
+		}
 
 		if(!TextureWasEnabled)
 		{
 			DisableState(GL_TEXTURE_2D);
-		};
+		}
 
 		TheRenderTextCache.Positions.resize(0);
 		TheRenderTextCache.Colors.resize(0);
 		TheRenderTextCache.TexCoords.resize(0);
 		TheRenderTextCache.TheTexture = NULL;
 		*/
-	};
+	}
 
 	bool SFMLRendererImplementation::IsStateEnabled(uint32 ID) const
 	{
@@ -2013,10 +2013,10 @@ namespace FlamingTorch
 				return true;
 
 			return false;
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	void SFMLRendererImplementation::EnableState(uint32 ID)
 	{
@@ -2045,12 +2045,12 @@ namespace FlamingTorch
 			glEnable(ID);
 
 			break;
-		};
+		}
 
 		GLCHECK();
 
 		GLStates[ID] = true;
-	};
+	}
 
 	void SFMLRendererImplementation::DisableState(uint32 ID)
 	{
@@ -2078,15 +2078,15 @@ namespace FlamingTorch
 			glDisable(ID);
 
 			break;
-		};
+		}
 
 		GLStates[ID] = false;
-	};
+	}
 
 	void SFMLRendererImplementation::ReportSkippedDrawCall()
 	{
 		FrameStatsValue.SkippedDrawCalls++;
-	};
+	}
 
 #	endif
-};
+}

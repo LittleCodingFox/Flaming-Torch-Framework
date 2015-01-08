@@ -42,7 +42,7 @@ public:
         str << std::hex << (intptr_t)Pointer << std::dec;
 
         return str.str();
-    };
+    }
 
 	/*!
 	*	Converts a Hex string to a uint32

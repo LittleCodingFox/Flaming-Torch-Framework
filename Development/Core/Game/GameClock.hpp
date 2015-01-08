@@ -14,7 +14,7 @@ public:
 	*/
 	uint64 Interval;
 
-	LinearTimer() : Interval(0), StartTime(0), GoingUp(true) {};
+	LinearTimer() : Interval(0), StartTime(0), GoingUp(true) {}
 
 	/*!
 	*	Current Linear Value
@@ -51,11 +51,11 @@ private:
 		LastAccumulationTimeFrame(0), SubSystem(GAMECLOCK_PRIORITY)
 	{
 		SetFixedStepRate(30);
-	};
+	}
 public:
 	static GameClock Instance;
 
-	~GameClock() {};
+	~GameClock() {}
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);

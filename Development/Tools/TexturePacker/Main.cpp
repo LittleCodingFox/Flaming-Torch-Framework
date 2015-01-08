@@ -17,7 +17,7 @@ std::string FLGameName()
 	return "TexturePacker";
 };
 
-int32 MaxWidth = 4096, MaxHeight = 4096;
+int32 MaxWidth = 4096, MaxHeight = 4096, Padding = 1, WidthOverride = -1, HeightOverride = -1;
 
 /*!
 *	Expects Config File in this form:
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 
 	if(argc == 1)
 	{
-		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-maxwidth width] [-maxheight height] [-out outfilename] filename", argv[0]);
+		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-maxwidth width] [-maxheight height] [-padding pixels] [-widthoverride width] [-heightoverride height] [-out outfilename] filename", argv[0]);
 		Log::Instance.LogInfo(TAG, "Default Max Width and Height: 4096x4096");
 
 		DeInitSubsystems();
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 		{
 			int32 Temp = 0;
 
-			if(i + 1 < argc && 1 == sscanf(argv[i], "%d", &Temp))
+			if(i + 1 < argc && 1 == sscanf(argv[i + 1], "%d", &Temp))
 			{
 				MaxWidth = Temp;
 
@@ -97,9 +97,42 @@ int main(int argc, char **argv)
 		{
 			int32 Temp = 0;
 
-			if(i + 1 < argc && 1 == sscanf(argv[i], "%d", &Temp))
+			if(i + 1 < argc && 1 == sscanf(argv[i + 1], "%d", &Temp))
 			{
 				MaxHeight = Temp;
+
+				i++;
+			};
+		}
+		else if (std::string(argv[i]) == "-widthoverride")
+		{
+			int32 Temp = 0;
+
+			if (i + 1 < argc && 1 == sscanf(argv[i + 1], "%d", &Temp))
+			{
+				WidthOverride = Temp;
+
+				i++;
+			};
+		}
+		else if (std::string(argv[i]) == "-heightoverride")
+		{
+			int32 Temp = 0;
+
+			if (i + 1 < argc && 1 == sscanf(argv[i + 1], "%d", &Temp))
+			{
+				HeightOverride = Temp;
+
+				i++;
+			};
+		}
+		else if (std::string(argv[i]) == "-padding")
+		{
+			int32 Temp = 0;
+
+			if (i + 1 < argc && 1 == sscanf(argv[i + 1], "%d", &Temp))
+			{
+				Padding = Temp;
 
 				i++;
 			};
@@ -126,9 +159,21 @@ int main(int argc, char **argv)
 		};
 	};
 
+	if (WidthOverride <= 0 || HeightOverride <= 0)
+	{
+		WidthOverride = HeightOverride = -1;
+	};
+
 	Log::Instance.LogInfo(TAG, "Starting version %d.%d", VERSION_MAJOR, VERSION_MINOR);
 	Log::Instance.LogInfo(TAG, "Will store compiled data to directory '%s' as '%s'", OutDirectory.c_str(), OutFileName.c_str());
 	Log::Instance.LogInfo(TAG, "Maximum size: %dx%d", MaxWidth, MaxHeight);
+
+	if (WidthOverride > 0)
+	{
+		Log::Instance.LogInfo(TAG, "Size override: %dx%d", WidthOverride, HeightOverride);
+	}
+
+	Log::Instance.LogInfo(TAG, "Padding: %d", Padding);
 	Log::Instance.LogInfo(TAG, "Processing '%s'", FileName.c_str());
 
 	DisposablePointer<FileStream> Stream(new FileStream());
@@ -187,14 +232,30 @@ int main(int argc, char **argv)
 			{
 				AnimationIndices[AnimationName] = Frames.size();
 			};
+
+			if (WidthOverride > 0 && (Frame->Width() > (uint32)WidthOverride || Frame->Height() > (uint32)HeightOverride))
+			{
+				Log::Instance.LogWarn(TAG, "Unable to load frame '%s' for animation '%s' because it is bigger than the size override '%dx%d'", AnimationFrames[i].c_str(), AnimationName.c_str(), WidthOverride, HeightOverride);
+
+				continue;
+			};
 			
 			Log::Instance.LogWarn(TAG, "Loaded frame '%s'", AnimationFrames[i].c_str());
+
+			if (WidthOverride > 0)
+			{
+				DisposablePointer<TextureBuffer> ResizeBuffer(TextureBuffer::CreateFromColor(WidthOverride, HeightOverride));
+
+				ResizeBuffer->Blend(0, 0, Frame->GetData());
+
+				Frame = Texture::CreateFromBuffer(ResizeBuffer);
+			};
 
 			Frames.push_back(Frame);
 		};
 	};
 
-	DisposablePointer<TexturePacker> Packed = TexturePacker::FromTextures(Frames, MaxWidth, MaxHeight);
+	DisposablePointer<TexturePacker> Packed = TexturePacker::FromTextures(Frames, MaxWidth, MaxHeight, Padding);
 
 	if(Packed.Get() == NULL || Packed->Indices.size() != Frames.size())
 	{
@@ -236,6 +297,8 @@ int main(int argc, char **argv)
 
 		OutConfig.SetValue("Animations", it->first.c_str(), str.str().c_str());
 	};
+
+	OutConfig.SetValue("Config", "Padding", StringUtils::MakeIntString(Padding).c_str());
 
 	DisposablePointer<FileStream> OutStream(new FileStream());
 

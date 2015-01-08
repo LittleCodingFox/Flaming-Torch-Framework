@@ -24,9 +24,9 @@ public:
 	static SimpleDelegate::SimpleDelegate<uint32> OnSubsystemShutdown;
 	static SimpleDelegate::SimpleDelegate<uint32> OnSubsystemUpdate;
 
-	SubSystem(uint32 Priority) : WasStarted(false), SubsystemPriority(Priority) {};
+	SubSystem(uint32 Priority) : WasStarted(false), SubsystemPriority(Priority) {}
 
-	virtual ~SubSystem() {};
+	virtual ~SubSystem() {}
 
 	virtual void StartUp(uint32 Priority)
 	{
@@ -34,20 +34,20 @@ public:
 			return;
 
 		WasStarted = true;
-	};
+	}
 
 	virtual void Shutdown(uint32 Priority)
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
 		WasStarted = false;
-	};
+	}
 
-	virtual void Update(uint32 Priority) {};
+	virtual void Update(uint32 Priority) {}
 
 	inline bool Started()
 	{
 		return WasStarted;
-	};
+	}
 
 	//Call this to enable usage of this Subsystem before you call InitSubsystems()
 	void Register()
@@ -55,5 +55,5 @@ public:
 		OnSubsystemStartUp.Connect<SubSystem, &SubSystem::StartUp>(this);
 		OnSubsystemShutdown.Connect<SubSystem, &SubSystem::Shutdown>(this);
 		OnSubsystemUpdate.Connect<SubSystem, &SubSystem::Update>(this);
-	};
+	}
 };

@@ -15,13 +15,13 @@ namespace FlamingTorch
 			Offset = Index + 1;
 
 			Index = String.find(Separator, Offset);
-		};
+		}
 
 		if(String.length() > (uint32)Offset)
 			Fragments.push_back(String.substr(Offset));
 
 		return Fragments;
-	};
+	}
 
 	std::string StringUtils::Strip(const std::string &str, char c)
 	{
@@ -34,12 +34,12 @@ namespace FlamingTorch
 				continue;
 
 			Out.push_back(str[i]);
-		};
+		}
 
 		Out.push_back(0);
 
 		return &Out[0];
-	};
+	}
 
 	std::string StringUtils::Trim(const std::string &str)
 	{
@@ -54,7 +54,7 @@ namespace FlamingTorch
 				break;
 
 			StartIndex++;
-		};
+		}
 
 		if(StartIndex >= (int32)str.length())
 			return std::string();
@@ -65,13 +65,13 @@ namespace FlamingTorch
 				break;
 
 			EndIndex--;
-		};
+		}
 
 		if (EndIndex < 0)
 			return std::string();
 
 		return str.substr(StartIndex, EndIndex - StartIndex + 1);
-	};
+	}
 
 	std::string StringUtils::Join(const std::string &Separator, const std::vector<std::string> &Fragments)
 	{
@@ -84,10 +84,10 @@ namespace FlamingTorch
 		for(uint32 i = 1; i < Fragments.size(); i++)
 		{
 			str << Separator << Fragments[i];
-		};
+		}
 
 		return str.str();
-	};
+	}
 
 	uint32 StringUtils::HexToInt(const std::string &str)
 	{
@@ -97,7 +97,7 @@ namespace FlamingTorch
 			return 0;
 
 		return Temp;
-	};
+	}
 
 	f32 StringUtils::HexToFloat(const std::string &str)
 	{
@@ -107,7 +107,7 @@ namespace FlamingTorch
 			return 0;
 
 		return Temp / 255.f;
-	};
+	}
 
 	std::string StringUtils::MakeIntString(const int32 &i, bool Hex)
 	{
@@ -121,12 +121,12 @@ namespace FlamingTorch
 		else
 		{
 			str << std::dec;
-		};
+		}
 
 		str << i << std::dec;
 
 		return str.str();
-	};
+	}
 
 	std::string StringUtils::MakeIntString(const uint32 &i, bool Hex)
 	{
@@ -140,12 +140,12 @@ namespace FlamingTorch
 		else
 		{
 			str << std::dec;
-		};
+		}
 
 		str << i << std::dec;
 
 		return str.str();
-	};
+	}
     
 	std::string StringUtils::MakeIntString(const int64 &i, bool Hex)
 	{
@@ -159,12 +159,12 @@ namespace FlamingTorch
 		else
 		{
 			str << std::dec;
-		};
+		}
         
 		str << i << std::dec;
         
 		return str.str();
-	};
+	}
     
 	std::string StringUtils::MakeIntString(const uint64 &i, bool Hex)
 	{
@@ -178,12 +178,12 @@ namespace FlamingTorch
 		else
 		{
 			str << std::dec;
-		};
+		}
         
 		str << i << std::dec;
         
 		return str.str();
-	};
+	}
 
 	std::string StringUtils::MakeFloatString(const f32 &f)
 	{
@@ -193,7 +193,7 @@ namespace FlamingTorch
 		str << f;
 
 		return str.str();
-	};
+	}
 
 	std::string StringUtils::MakeByteString(const uint8 &u)
 	{
@@ -201,7 +201,7 @@ namespace FlamingTorch
 		str << (uint32)u;
 
 		return str.str();
-	};
+	}
 
 	std::string StringUtils::ToUpperCase(const std::string &str)
 	{
@@ -210,7 +210,7 @@ namespace FlamingTorch
 		std::transform(str.begin(), str.end(), Out.begin(), toupper);
 
 		return Out;
-	};
+	}
 
 	std::string StringUtils::ToLowerCase(const std::string &str)
 	{
@@ -219,7 +219,7 @@ namespace FlamingTorch
 		std::transform(str.begin(), str.end(), Out.begin(), tolower);
 
 		return Out;
-	};
+	}
 
 	std::string StringUtils::Replace(const std::string &str, const std::string &Find, const std::string &Replace)
 	{
@@ -240,13 +240,13 @@ namespace FlamingTorch
 
 			Previous = Index;
 			Index = str.find(Find, Index);
-		};
+		}
 
 		if(Index != str.length())
 		{
 			Out << str.substr(Previous);
-		};
+		}
 
 		return Out.str();
-	};
-};
+	}
+}

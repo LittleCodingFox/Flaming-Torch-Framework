@@ -7,7 +7,7 @@ namespace FlamingTorch
 	UIVerticalGroup::UIVerticalGroup(UIManager *Manager) : UIElement("UIVerticalGroup", Manager)
 	{
 		OnConstructed();
-	};
+	}
 
 	void UIVerticalGroup::Update(const Vector2 &ParentPosition)
 	{
@@ -30,17 +30,17 @@ namespace FlamingTorch
 				CurrentPosition.x += CurrentMaxMeasurement;
 				CurrentMaxMeasurement = 0;
 				LineStartingElement = i;
-			};
+			}
 
 			ChildrenValue[i]->SetPosition(Vector2(CurrentPosition.x, CurrentPosition.y + CurrentExtent));
 			CurrentMaxMeasurement = MathUtils::Max(CurrentMaxMeasurement, ChildrenValue[i]->Size().x + ChildrenValue[i]->Offset().x);
-		};
+		}
 
 		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
 			ChildrenValue[i]->Update(ActualPosition);
-		};
-	};
+		}
+	}
 
 	void UIVerticalGroup::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -58,12 +58,12 @@ namespace FlamingTorch
 		{
 			DrawUIFocusZone(ParentPosition, Renderer);
 			DrawUIRect(ParentPosition, Renderer);
-		};
+		}
 
 		for (uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
 			ChildrenValue[i]->Draw(ActualPosition, Renderer);
-		};
-	};
+		}
+	}
 #endif
-};
+}

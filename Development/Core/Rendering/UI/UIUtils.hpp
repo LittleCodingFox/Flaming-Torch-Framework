@@ -39,7 +39,7 @@ namespace UIEventType
 		Draw,
 		Count
 	};
-};
+}
 
 /*!
 *	UI Input Types
@@ -54,7 +54,7 @@ namespace UIInputType
 		Joystick = FLAGVALUE(3),
 		All = Mouse | Keyboard | Touch | Joystick
 	};
-};
+}
 
 /*!
 *	Runs UI Script Events on a Lua Event Group
@@ -82,10 +82,10 @@ bool RunUIScriptEvents(LuaEventGroup &Group, const std::string &ID, bool Errored
 				Log::Instance.LogInfo("UIManager", "Scripting Exception on UI Element '%s'", ID.c_str()); 
 
 				return false;
-			};
-		};
-	};
+			}
+		}
+	}
 
 	return true;
-};
+}
 #endif

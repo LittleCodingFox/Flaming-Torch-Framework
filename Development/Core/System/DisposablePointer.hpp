@@ -13,36 +13,36 @@ public:
 
 	DisposableResource<type>() : ContainedObject(NULL), WeakReference(false)
 	{
-	};
+	}
 
 	explicit DisposableResource<type>(type *Object) : ContainedObject(Object), WeakReference(false)
 	{
-	};
+	}
 
 	~DisposableResource<type>()
 	{
 		Dispose();
-	};
+	}
 
 	inline void MakeWeakReference()
 	{
 		WeakReference = true;
-	};
+	}
 
 	inline type *Get()
 	{
 		return ContainedObject;
-	};
+	}
 
 	inline const type *Get() const
 	{
 		return ContainedObject;
-	};
+	}
 
 	inline type *operator->()
 	{
 		return ContainedObject;
-	};
+	}
 
 	inline void Dispose()
 	{
@@ -59,9 +59,9 @@ public:
 			else
 			{
 				return;
-			};
-		};
-	};
+			}
+		}
+	}
 };
 
 template<typename type>
@@ -72,26 +72,26 @@ private:
 public:
 	DisposablePointer() : ReadOnly(false)
 	{
-	};
+	}
 
 	explicit DisposablePointer(type *In) : ReadOnly(false)
 	{
 		this->reset(new DisposableResource<type>(In));
-	};
+	}
 
 	DisposablePointer(const DisposablePointer<type> &o) : std::shared_ptr<DisposableResource<type> >(o), ReadOnly(o.ReadOnly)
 	{
-	};
+	}
 
 	inline bool operator==(const DisposablePointer<type> &o)
 	{
 		return o.Get() == Get();
-	};
+	}
 
 	inline bool operator!=(const DisposablePointer<type> &o)
 	{
 		return o.Get() != Get();
-	};
+	}
 
 	inline DisposablePointer<type> &operator=(const DisposablePointer<type> &o)
 	{
@@ -100,75 +100,75 @@ public:
 		ReadOnly = o.ReadOnly;
 
 		return *this;
-	};
+	}
 
 	inline type *Get()
 	{
 		return this->get() != NULL ? this->get()->Get() : NULL;
-	};
+	}
 
 	inline const type *Get() const
 	{
 		return this->get() != NULL ? this->get()->Get() : NULL;
-	};
+	}
 
 	inline type *operator->()
 	{
 		return Get();
-	};
+	}
 
 	inline const type *operator->() const
 	{
 		return Get();
-	};
+	}
 
 	inline operator type*()
 	{
 		return Get();
-	};
+	}
 
 	inline operator const type*() const
 	{
 		return Get();
-	};
+	}
 
 	inline const type& operator*() const
 	{
 		return *Get();
-	};
+	}
 
 	inline type& operator*()
 	{
 		return *Get();
-	};
+	}
 
 	inline operator bool() const
 	{
 		return Get() != NULL;
-	};
+	}
 
 	inline operator bool()
 	{
 		return Get() != NULL;
-	};
+	}
 
 	inline bool IsReadOnly()
 	{
 		return ReadOnly;
-	};
+	}
 
 	inline void MakeReadOnly()
 	{
 		ReadOnly = true;
-	};
+	}
 
 	inline void Dispose()
 	{
 		if (!ReadOnly && this->get())
 		{
 			this->get()->Dispose();
-		};
-	};
+		}
+	}
 
 	inline void Reset(type *New)
 	{
@@ -176,12 +176,12 @@ public:
 			return;
 
 		this->reset(new DisposableResource<type>(New));
-	};
+	}
 
 	inline uint32 UseCount() const
 	{
 		return this->use_count();
-	};
+	}
 
 	template<typename OutType>
 	operator DisposablePointer<OutType>()
@@ -195,7 +195,7 @@ public:
 #endif
 
 		return *(DisposablePointer<OutType> *)this;
-	};
+	}
 
 	template<typename OutType>
 	inline OutType *AsDerived()
@@ -205,7 +205,7 @@ public:
 #else
 		return static_cast<OutType *>(Get());
 #endif
-	};
+	}
 
 	static DisposablePointer<type> MakeWeak(type *In)
 	{
@@ -213,5 +213,5 @@ public:
 		Out.get()->MakeWeakReference();
 
 		return Out;
-	};
+	}
 };

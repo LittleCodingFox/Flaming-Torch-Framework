@@ -19,17 +19,17 @@ namespace FlamingTorch
 
 			if(!DefaultFont)
 				return false;
-		};
+		}
 
 		return true;
-	};
+	}
 
 	Rect RenderTextUtils::MeasureTextSimple(Renderer *TheRenderer, const std::string &Str, TextParams Params)
 	{
 		PROFILE("RenderTextUtils MeasureTextSimple", StatTypes::Rendering);
 
 		return TheRenderer->MeasureText(Str, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
-	};
+	}
 
 	void RenderTextUtils::FitTextAroundLength(Renderer *TheRenderer, const std::string &Str, TextParams Params, const f32 &LengthInPixels, int32 *OutFontSize)
 	{
@@ -45,8 +45,8 @@ namespace FlamingTorch
 		while(MeasureTextSimple(TheRenderer, Str, Params.FontSize(*OutFontSize)).Size().x > LengthInPixels)
 		{
 			(*OutFontSize)--;
-		};
-	};
+		}
+	}
 
 	void RenderTextUtils::RenderText(Renderer *TheRenderer, const std::string &String, TextParams Params)
 	{
@@ -54,7 +54,7 @@ namespace FlamingTorch
 
 		//TheRenderer->RenderText(String, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
 		TheRenderer->UI->DrawText(String, Params);
-	};
+	}
 
 	Rect RenderTextUtils::MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params)
 	{
@@ -70,7 +70,7 @@ namespace FlamingTorch
 			if(i == 0)
 			{
 				Out = Temp;
-			};
+			}
 
 			//Compensate for extra space due to lower letters like y and p
 			if(Temp.Bottom > Params.FontSizeValue)
@@ -82,28 +82,28 @@ namespace FlamingTorch
 			if(Temp.Left < Out.Left)
 			{
 				Out.Left = Temp.Left;
-			};
+			}
 
 			if(Temp.Top < Out.Top)
 			{
 				Out.Top = Temp.Top;
-			};
+			}
 
 			if(Temp.Right > Out.Right)
 			{
 				Out.Right = Temp.Right;
-			};
+			}
 
 			if(Temp.Bottom > Out.Bottom)
 			{
 				Out.Bottom = Temp.Bottom;
-			};
-		};
+			}
+		}
 
 		Out.Bottom += AdditionalBottom;
 
 		return Out;
-	};
+	}
 
 	std::vector<std::string> RenderTextUtils::FitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size)
 	{
@@ -144,11 +144,11 @@ namespace FlamingTorch
 					else
 					{
 						return OutLines;
-					};
-				};
+					}
+				}
 
 				PreviousStream << (j > 0 ? " " : "") << Words[j];
-			};
+			}
 
 			if (Stream.str().length())
 			{
@@ -167,10 +167,10 @@ namespace FlamingTorch
 				OutLines.push_back("");
 
 				CurrentY += Params.FontSizeValue;
-			};
-		};
+			}
+		}
 
 		return OutLines;
-	};
+	}
 #endif
-};
+}

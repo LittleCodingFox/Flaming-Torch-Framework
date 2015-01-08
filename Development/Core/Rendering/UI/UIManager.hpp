@@ -27,7 +27,7 @@ private:
 		~ElementInfo()
 		{
 			Element.Dispose();
-		};
+		}
 	};
 
 	uint32 DrawOrderCounter;
@@ -84,7 +84,7 @@ private:
 
 		DisposablePointer<Texture> InstanceTexture;
 
-		TextResourceInfo() : References(0), Character(0) {};
+		TextResourceInfo() : References(0), Character(0) {}
 	};
 
 	struct TextureResourceInfo
@@ -95,7 +95,7 @@ private:
 
 		uint32 References;
 
-		TextureResourceInfo() : References(0) {};
+		TextureResourceInfo() : References(0) {}
 	};
 
 	typedef std::map<StringID, TextResourceInfo> TextResourceMap;
@@ -125,7 +125,7 @@ public:
 	inline uint32 ActiveTextureResources()
 	{
 		return TextureResources.size();
-	};
+	}
 
 	/*!
 	*	\return the active UI texture resources
@@ -133,7 +133,7 @@ public:
 	inline uint32 ActiveTextResources()
 	{
 		return TextResources.size();
-	};
+	}
 
 	/*!
 	*	\return the Renderer that owns this UI Manager

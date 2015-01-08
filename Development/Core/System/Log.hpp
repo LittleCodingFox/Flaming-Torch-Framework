@@ -27,7 +27,7 @@ public:
 
 	static Log Instance;
 
-	Log() : SubSystem(LOG_PRIORITY), LogFile(NULL), PrintTime(false) {};
+	Log() : SubSystem(LOG_PRIORITY), LogFile(NULL), PrintTime(false) {}
 
 	/*!
 	*	Hides a Tag from being logged

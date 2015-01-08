@@ -15,7 +15,7 @@ namespace FlamingTorch
 		UpdateTimer = GameClockTimeNoPause();
 
 		Log::Instance.LogInfo("Profiler", "Starting Profiler Subsystem");
-	};
+	}
 
 	void Profiler::Shutdown(uint32 Priority)
 	{
@@ -37,8 +37,8 @@ namespace FlamingTorch
 			str << "[" << Profiler::StatTypeString(it->second.Type) << "] " << it->first << " " << it->second.ms << " (" << Average << " avg)";
 
 			Log::Instance.LogInfo("Profiler", str.str().c_str());
-		};
-	};
+		}
+	}
 
 	void Profiler::Update(uint32 Priority)
 	{
@@ -55,9 +55,9 @@ namespace FlamingTorch
 			for(PacketMap::iterator it = Packets.begin(); it != Packets.end(); it++)
 			{
 				it->second.FrameMS = 0;
-			};
-		};
-	};
+			}
+		}
+	}
 
 	void Profiler::ReportStat(const std::string &Name, uint32 Type, uint64 ms)
 	{
@@ -79,8 +79,8 @@ namespace FlamingTorch
 			p.FrameMS = ms;
 			p.Type = Type;
 			Packets[Name] = p;
-		};
-	};
+		}
+	}
 
 	std::string Profiler::StatTypeString(uint32 Type)
 	{
@@ -102,13 +102,13 @@ namespace FlamingTorch
 			return "Sound";
 
 			break;
-		};
+		}
 
 		return "UNKNOWN";
-	};
+	}
 
 	ProfilerFragment::ProfilerFragment(const char *Name, uint32 Type) : Start(GameClock::Instance.CurrentTime()),
-		NameString(Name), FragmentType(Type) {};
+		NameString(Name), FragmentType(Type) {}
 	ProfilerFragment::~ProfilerFragment()
 	{
 		uint64 CurrentTime = GameClock::Instance.CurrentTime();
@@ -116,7 +116,7 @@ namespace FlamingTorch
 		uint64 ms = CurrentTime - Start;
 
 		Profiler::Instance.ReportStat(NameString, FragmentType, ms);
-	};
+	}
 
 	void ProfilerFragment::ReportPercentage(uint32 Percentage)
 	{
@@ -129,6 +129,6 @@ namespace FlamingTorch
 		str.str("");
 		str << NameString << " @ " << Percentage;
 		Profiler::Instance.ReportStat(str.str(), FragmentType, ms);
-	};
+	}
 #endif
-};
+}

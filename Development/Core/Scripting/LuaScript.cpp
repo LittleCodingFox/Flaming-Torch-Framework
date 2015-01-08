@@ -29,7 +29,7 @@ namespace FlamingTorch
 				Depth++;
 
 				continue;
-			};
+			}
 
 			static std::vector<std::string> Lines;
 			Lines = StringUtils::Split(StringUtils::Replace(DebugInfo.source, "\r", ""), '\n');
@@ -39,14 +39,14 @@ namespace FlamingTorch
 				Depth++;
 
 				continue;
-			};
+			}
 
 			str << "#" << LineIndex << "  " << DebugInfo.short_src << ":" << DebugInfo.currentline << ": " << StringUtils::Trim(Lines[DebugInfo.currentline - 1]);
 
 			if (DebugInfo.name != NULL)
 			{
 				str << "(" << DebugInfo.namewhat << " " << DebugInfo.name << ")";
-			};
+			}
 
 			str << "\n";
 
@@ -58,7 +58,7 @@ namespace FlamingTorch
 			LuaScriptManager::Instance.ErrorStream->Write2<char>(str.str().c_str(), str.str().length());
 
 		Log::Instance.LogErr(TAG, str.str().c_str());
-	};
+	}
 
 	void LuaEventGroup::Add(luabind::object Member)
 	{
@@ -67,16 +67,16 @@ namespace FlamingTorch
 			Log::Instance.LogWarn(TAG, "Unable to add a Member to a Lua Event Group: Invalid Member");
 
 			return;
-		};
+		}
 
 		for(std::list<luabind::object>::iterator it = Members.begin(); it != Members.end(); it++)
 		{
 			if(*it == Member)
 				return;
-		};
+		}
 
 		Members.push_back(Member);
-	};
+	}
 
 	void LuaEventGroup::Remove(luabind::object Member)
 	{
@@ -87,11 +87,11 @@ namespace FlamingTorch
 				Members.erase(it);
 
 				return;
-			};
-		};
-	};
+			}
+		}
+	}
 
-	LuaGlobalsTracker::LuaGlobalsTracker(DisposablePointer<LuaScript> Script) : ScriptInstance(Script) {};
+	LuaGlobalsTracker::LuaGlobalsTracker(DisposablePointer<LuaScript> Script) : ScriptInstance(Script) {}
 
 	void LuaGlobalsTracker::Add(const std::string &Name)
 	{
@@ -99,10 +99,10 @@ namespace FlamingTorch
 		{
 			if(Names[i] == Name)
 				return;
-		};
+		}
 
 		Names.push_back(Name);
-	};
+	}
 
 	void LuaGlobalsTracker::Clear()
 	{
@@ -115,15 +115,15 @@ namespace FlamingTorch
 			luaL_dostring(ScriptInstance->State, (*Names.begin() + " = nil").c_str());
 
 			Names.erase(Names.begin());
-		};
-	};
+		}
+	}
 
 	int LuabindPCall(lua_State* State)
 	{
 		LuaErrorFunction(State);
 
 		return 1;
-	};
+	}
 
 	bool LuaLoadPackage(const std::string &Name)
 	{
@@ -134,19 +134,19 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG2, "Unable to add package '%s': Failed to open for reading", Name.c_str());
 
 			return false;
-		};
+		}
 
 		if(!PackageFileSystemManager::Instance.AddPackage(MakeStringID(Name), Stream))
 		{
 			Log::Instance.LogErr(TAG2, "Unable to add package '%s': Failed to deserialize", Name.c_str());
 
 			return false;
-		};
+		}
 
 		Log::Instance.LogInfo(TAG2, "Loaded package '%s'", Name.c_str());
 
 		return true;
-	};
+	}
 
 	void RegisterBase(lua_State *State)
 	{
@@ -165,7 +165,7 @@ namespace FlamingTorch
 		luabind::module(State) [
 			luabind::class_<BaseScriptableInstance, DisposablePointer<BaseScriptableInstance> >("BaseScriptableInstance")
 		];
-	};
+	}
 
 	LuaScriptManager LuaScriptManager::Instance;
 
@@ -174,12 +174,12 @@ namespace FlamingTorch
 		State = luaL_newstate();
 		luaL_openlibs(State);
 		luabind::open(State);
-	};
+	}
 
 	LuaScript::~LuaScript()
 	{
 		lua_close(State);
-	};
+	}
 
 	int32 LuaScript::DoString(const std::string &Code)
 	{
@@ -189,7 +189,7 @@ namespace FlamingTorch
 			LuaErrorFunction(State);
 
 		return Error;
-	};
+	}
 
 	DisposablePointer<LuaScript> LuaScriptManager::CreateScript(const std::string &Code, LuaLib **Libs, uint32 LibCount)
 	{
@@ -211,8 +211,8 @@ namespace FlamingTorch
 				ScriptInstance.Dispose();
 
 				return DisposablePointer<LuaScript>();
-			};
-		};
+			}
+		}
 
 		luabind::set_pcall_callback(LuabindPCall);
 
@@ -226,7 +226,7 @@ namespace FlamingTorch
 		InstancedScripts.push_back(ScriptInstance);
 
 		return ScriptInstance;
-	};
+	}
 
 	void LuaScriptManager::LogError(const std::string &Message)
 	{
@@ -239,7 +239,7 @@ namespace FlamingTorch
 			ErrorStream->Write2<char>(FinalMessage.c_str(), FinalMessage.length());
 
 		Log::Instance.LogErr(TAG, FinalMessage.c_str());
-	};
+	}
 
 	void LuaScriptManager::StartUp(uint32 Priority)
 	{
@@ -268,10 +268,10 @@ namespace FlamingTorch
 			ErrorStream.Dispose();
 
 			Log::Instance.LogErr(TAG, "Lua ScriptManager running without ScriptErrors logging!");
-		};
+		}
 
 		luabind::set_pcall_callback(LuabindPCall);
-	};
+	}
 
 	void LuaScriptManager::Shutdown(uint32 Priority)
 	{
@@ -285,19 +285,19 @@ namespace FlamingTorch
 				InstancedScripts.begin()->Dispose();
 
 			InstancedScripts.erase(InstancedScripts.begin());
-		};
+		}
 
 		ErrorStream.Dispose();
 
 		SubSystem::Shutdown(Priority);
-	};
+	}
 
 	void LuaScriptManager::Update(uint32 Priority)
 	{
 		SubSystem::Update(Priority);
 
 		SUBSYSTEM_PRIORITY_CHECK();
-	};
+	}
 
 	int32 LuaScriptManager::PerformMainLoop(DisposablePointer<LuaScript> LoopScript)
 	{
@@ -313,7 +313,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		if(!ProtectedLuaCast<bool>(ScriptInit()))
 		{
@@ -321,7 +321,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		for(;;)
 		{
@@ -329,7 +329,7 @@ namespace FlamingTorch
 
 			if(!ProtectedLuaCast<bool>(ScriptLoop()))
 				break;
-		};
+		}
 
 		ScriptShutdown();
 
@@ -338,5 +338,5 @@ namespace FlamingTorch
 		DeInitSubsystems();
 
 		return 0;
-	};
-};
+	}
+}

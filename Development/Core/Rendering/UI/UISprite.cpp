@@ -7,7 +7,7 @@ namespace FlamingTorch
 	UISprite::UISprite(UIManager *Manager) : UIElement("UISprite", Manager)
 	{
 		OnConstructed();
-	};
+	}
 	
 	const Vector2 &UISprite::Size() const
 	{
@@ -18,7 +18,7 @@ namespace FlamingTorch
 			TheSprite.Options.NinePatchScaleValue : SizeValue;
 
 		return Out;
-	};
+	}
 
 	void UISprite::Update(const Vector2 &ParentPosition)
 	{
@@ -29,8 +29,8 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
 			ChildrenValue[i]->Update(ActualPosition);
-		};
-	};
+		}
+	}
 
 	void UISprite::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -52,27 +52,27 @@ namespace FlamingTorch
 			if(TempSprite.Options.NinePatchValue)
 			{
 				TempSprite.Options.Position(TempSprite.Options.PositionValue + TheSprite.Options.NinePatchRectValue.Position() * TheSprite.Options.NinePatchScaleValue);
-			};
+			}
 
 			if(!TempSprite.Options.UsingColorsArray)
 			{
 				TempSprite.Options.Color(TheSprite.Options.ColorValue);
-			};
+			}
 
 			TempSprite.Draw(Renderer);
-		};
+		}
 
 		//We want Debug Rects to show up on top of the element... but we don't want to show it after drawing children...
 		if(Manager()->DrawUIRects || Manager()->DrawUIFocusZones)
 		{
 			DrawUIFocusZone(ParentPosition, Renderer);
 			DrawUIRect(ParentPosition, Renderer);
-		};
+		}
 
 		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
 			ChildrenValue[i]->Draw(ActualPosition, Renderer);
-		};
-	};
+		}
+	}
 #endif
-};
+}

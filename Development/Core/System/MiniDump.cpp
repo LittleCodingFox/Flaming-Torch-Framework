@@ -33,7 +33,7 @@ namespace FlamingTorch
 			hDumpFile, MiniDumpWithDataSegs, &ExpParam, NULL, NULL);
 
 		return EXCEPTION_EXECUTE_HANDLER;
-	};
+	}
 
 	void EnableMinidumps(const char *AppName, const char *VersionString)
 	{
@@ -41,7 +41,7 @@ namespace FlamingTorch
 		Version = VersionString;
 
 		SetUnhandledExceptionFilter(GenerateDump);
-	};
-};
+	}
+}
 
 #endif

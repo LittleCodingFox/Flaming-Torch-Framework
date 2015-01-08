@@ -38,7 +38,7 @@
 #	define FLPLATFORM_PATHSPLITSTRING "\\"
 #
 #	if _DEBUG
-#		define DEBUG_BREAK __asm{int 3};
+#		define DEBUG_BREAK __asm{int 3}
 #	else
 #		define DEBUG_BREAK
 #	endif
@@ -106,4 +106,4 @@
 namespace FlamingTorch
 {
 	void PrintStack();
-};
+}

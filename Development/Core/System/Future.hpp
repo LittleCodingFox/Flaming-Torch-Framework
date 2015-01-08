@@ -13,8 +13,8 @@ class Future : public SubSystem
 
 		SimpleDelegate::SimpleDelegate<MemoryStream &> Signal;
 
-		FutureInfo() {};
-		FutureInfo(const FutureInfo &o) {};
+		FutureInfo() {}
+		FutureInfo(const FutureInfo &o) {}
 	};
 
 	std::list<FutureInfo> Futures;
@@ -26,7 +26,7 @@ public:
 
 	static Future Instance;
 
-	Future() : SubSystem(FUTURE_PRIORITY) {};
+	Future() : SubSystem(FUTURE_PRIORITY) {}
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
@@ -54,7 +54,7 @@ public:
 			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
-		};
+		}
 
 		FutureInfo Future;
 		Future.StartTime = GameClockTime();
@@ -64,7 +64,7 @@ public:
 		Future.Signal.Connect(Instance, Function);
 
 		Futures.push_back(Future);
-	};
+	}
 
 	template<class Class> void PostDelayed(Class *Instance, void (Class::*Function)(MemoryStream &Arguments),
 		uint32 Length, const MemoryStream &Stream = MemoryStream())
@@ -74,7 +74,7 @@ public:
 			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
-		};
+		}
 
 		FutureInfo Future;
 		Future.StartTime = GameClockTime();
@@ -84,5 +84,5 @@ public:
 		Future.Signal.Connect(Instance, Function);
 
 		Futures.push_back(Future);
-	};
+	}
 };

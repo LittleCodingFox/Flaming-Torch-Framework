@@ -67,16 +67,16 @@ namespace FlamingTorch
 				ActionID = FileSystemWatcherAction::Modified;
 
 				break;
-			};
+			}
 
 			FileSystemWatcher::Instance.OnAction(dir, filename, ActionID);
-		};
+		}
 	};
 #endif
 
 	Path::Path()
 	{
-	};
+	}
 
 	Path::Path(const std::string &_Directory, const std::string &_BaseName)
 	{
@@ -94,8 +94,8 @@ namespace FlamingTorch
 
 			if(DirectorySeparator + 1 < (int32)PathName.length())
 				BaseName = PathName.substr(DirectorySeparator + 1);
-		};
-	};
+		}
+	}
 
 	Path::Path(const std::string &_PathName)
 	{
@@ -113,13 +113,13 @@ namespace FlamingTorch
 
 			if(DirectorySeparator + 1 < (int32)PathName.length())
 				BaseName = PathName.substr(DirectorySeparator + 1);
-		};
-	};
+		}
+	}
 
 	std::string Path::FullPath() const
 	{
 		return Directory + BaseName;
-	};
+	}
 
 	std::string Path::Extension() const
 	{
@@ -129,7 +129,7 @@ namespace FlamingTorch
 			return "";
 
 		return BaseName.substr(ExtensionIndex + 1);
-	};
+	}
 
 	Path Path::ChangeExtension(const std::string &NewExtension) const
 	{
@@ -138,10 +138,10 @@ namespace FlamingTorch
 		if(Index != std::string::npos)
 		{
 			return Path(Directory, BaseName.substr(0, Index + 1) + NewExtension);
-		};
+		}
 
-		return *this;
-	};
+		return Path(Directory, BaseName + "." + NewExtension);
+	}
 
 	Path Path::StripExtension() const
 	{
@@ -150,28 +150,28 @@ namespace FlamingTorch
 		if(Index != std::string::npos)
 		{
 			return Path(Directory, BaseName.substr(0, Index));
-		};
+		}
 
 		return *this;
-	};
+	}
 
 	std::string Path::Normalize(const std::string &PathName)
 	{
 		return StringUtils::Replace(StringUtils::Replace(StringUtils::Replace(PathName, "\\", Path::PathSeparator), "/", Path::PathSeparator),
 			Path::PathSeparator + Path::PathSeparator, Path::PathSeparator);
-	};
+	}
 
 	bool FileSystemUtils::RemoveFile(const std::string Name)
 	{
 		return unlink(Name.c_str()) != -1;
-	};
+	}
 
 	bool FileSystemUtils::CopyFile(const std::string &From, const std::string &To)
 	{
 		FileStream In, Out;
 
 		return In.Open(From, StreamFlags::Read) && Out.Open(To, StreamFlags::Write) && In.CopyTo(&Out);
-	};
+	}
 
 	std::string FileSystemUtils::OpenFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
 	{
@@ -198,13 +198,13 @@ namespace FlamingTorch
 		if(TheRenderer)
 		{
 			Config.hwndOwner = (HWND)TheRenderer->WindowHandle();
-		};
+		}
 #endif
 
 		if(Config.hwndOwner == NULL)
 		{
 			Config.hwndOwner = GetDesktopWindow();
-		};
+		}
 
 		if(GetOpenFileNameA(&Config))
 		{
@@ -213,11 +213,11 @@ namespace FlamingTorch
 		else
 		{
 			Log::Instance.LogDebug(TAGUTILS, "Failed to OpenFileDialog: 0x%04x", CommDlgExtendedError());
-		};
+		}
 #endif
 
 		return std::string();
-	};
+	}
 
 	std::string FileSystemUtils::SaveFileDialog(const std::string &Title, const std::string &Extension, const std::string &Filter)
 	{
@@ -244,13 +244,13 @@ namespace FlamingTorch
 		if(TheRenderer)
 		{
 			Config.hwndOwner = (HWND)TheRenderer->WindowHandle();
-		};
+		}
 #endif
 
 		if(Config.hwndOwner == NULL)
 		{
 			Config.hwndOwner = GetDesktopWindow();
-		};
+		}
 
 		if(GetSaveFileNameA(&Config))
 		{
@@ -259,11 +259,11 @@ namespace FlamingTorch
 		else
 		{
 			Log::Instance.LogDebug("FileSystemUtils", "Failed to SaveFileDialog: 0x%04x", CommDlgExtendedError());
-		};
+		}
 #endif
 
 		return std::string();
-	};
+	}
 
 	std::vector<std::string> FileSystemUtils::ScanDirectory(const std::string &Directory,
 		const std::string &Extension, bool Recursive)
@@ -279,7 +279,7 @@ namespace FlamingTorch
 			Log::Instance.LogDebug(TAGUTILS, "Unable to opendir directory '%s'", Directory.c_str());
 
 			return Files;
-		};
+		}
 
 		dirent *Entry = readdir(Root);
 
@@ -290,7 +290,7 @@ namespace FlamingTorch
 			closedir(Root);
 
 			return Files;
-		};
+		}
 
 		while(Entry != NULL)
 		{
@@ -306,22 +306,22 @@ namespace FlamingTorch
 							FileName, Extension, Recursive));
 
 						Files.insert(Files.end(), t.begin(), t.end());
-					};
+					}
 				}
 				else if(Entry->d_type == DT_REG)
 				{
 					if(Extension.length() == 0 || Extension == "*" || FileName.rfind(Extension) == FileName.length() - Extension.length())
 						Files.push_back(Directory + std::string("/") + FileName);
-				};
-			};
+				}
+			}
 
 			Entry = readdir(Root);
-		};
+		}
 
 		closedir(Root);
 
 		return Files;
-	};
+	}
 
 	bool FileSystemUtils::DirectoryExists(const std::string &Directory)
 	{
@@ -332,10 +332,10 @@ namespace FlamingTorch
 			closedir(Root);
 
 			return true;
-		};
+		}
 
 		return false;
-	};
+	}
 
     bool FileSystemUtils::CopyDirectory(const std::string &_From, const std::string &_To, bool Recursive)
     {
@@ -353,7 +353,7 @@ namespace FlamingTorch
 			std::string TargetDirectory = To + "/" + Directories[i].substr(From.length());
 
 			FileSystemUtils::CreateDirectory(TargetDirectory);
-		};
+		}
 		
 		std::vector<std::string> Files = ScanDirectory(From, "*", Recursive);
         
@@ -366,7 +366,7 @@ namespace FlamingTorch
                 Log::Instance.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
                 
                 continue;
-            };
+            }
             
             std::string OutName = Files[i].substr(Files[i].find(From) + From.length() + 1);
             std::string OutFileName = To + "/" + OutName;
@@ -384,7 +384,7 @@ namespace FlamingTorch
                     DirectoryName += "/" + MissingDirectories[j];
                     
                     CreateDirectory(DirectoryName);
-                };
+                }
                 
                 if(!Out.Open(OutFileName, StreamFlags::Write))
                 {
@@ -392,8 +392,8 @@ namespace FlamingTorch
                                          Files[i].c_str(), OutFileName.c_str());
                     
                     continue;
-                };
-            };
+                }
+            }
             
             if(!In.CopyTo(&Out))
             {
@@ -403,11 +403,11 @@ namespace FlamingTorch
                                      Files[i].c_str(), OutFileName.c_str());
                 
                 continue;
-            };
-        };
+            }
+        }
         
         return true;
-    };
+    }
 
 	bool FileSystemUtils::CreateDirectory(const std::string &_Directory)
 	{
@@ -422,11 +422,11 @@ namespace FlamingTorch
 			if(Errno != EEXIST)
 			{
 				Log::Instance.LogWarn(TAGUTILS, "Failed to create directory '%s': %d", Directory.c_str(), Errno);
-			};
-		};
+			}
+		}
         
         return result;
-	};
+	}
 
 	bool FileSystemUtils::CreateDirectoryRecursive(const std::string &Directory)
 	{
@@ -440,10 +440,10 @@ namespace FlamingTorch
 
 			if(_mkdir(str.str().c_str()) != 0 && errno != EEXIST && (i != 0 || str.str().find(':') != std::string::npos))
 				return false;
-		};
+		}
 
 		return true;
-	};
+	}
     
     bool FileSystemUtils::DeleteDirectory(const std::string &Directory)
     {
@@ -454,7 +454,7 @@ namespace FlamingTorch
             Log::Instance.LogDebug(TAGUTILS, "Failed to remove directory %s", Directory.c_str());
             
             return false;
-        };
+        }
         
         dirent *Entry = readdir(Root);
         
@@ -473,7 +473,7 @@ namespace FlamingTorch
 						closedir(Root);
 
                         return false;
-                    };
+                    }
                 }
                 else if(Entry->d_type == DT_REG)
                 {
@@ -484,17 +484,17 @@ namespace FlamingTorch
 						closedir(Root);
                         
                         return false;
-                    };
-                };
-            };
+                    }
+                }
+            }
             
             Entry = readdir(Root);
-        };
+        }
         
         closedir(Root);
         
         return _rmdir (Directory.c_str()) == 0;
-    };
+    }
     
     std::vector<std::string> FileSystemUtils::GetAllDirectories(const std::string &Directory)
     {
@@ -507,7 +507,7 @@ namespace FlamingTorch
             Log::Instance.LogErr(TAGUTILS, "Failed to open Directory '%s' for reading!", Directory.c_str());
             
             return Out;
-        };
+        }
         
         dirent *Entry = readdir(Root);
         
@@ -520,16 +520,16 @@ namespace FlamingTorch
                 if(Entry->d_type == DT_DIR)
                 {
                     Out.push_back(Directory + "/" + FileName);
-                };
-            };
+                }
+            }
             
             Entry = readdir(Root);
-        };
+        }
         
         closedir(Root);
         
         return Out;
-    };
+    }
 
 #if FLPLATFORM_MACOSX
 	const char *OSXResourcesDirectory();
@@ -552,13 +552,13 @@ namespace FlamingTorch
 			{
 				ActualDirectory.resize(strlen(ActualDirectory.c_str()));
 				ActualDirectory += "/";
-			};
+			}
 
 			ActualDirectory = Path(ActualDirectory).FullPath();
-		};
+		}
 		
 		return ActualDirectory;
-	};
+	}
 
 	//Platform-specific resources directory (used mainly on OSX)
 	const std::string &FileSystemUtils::ResourcesDirectory()
@@ -568,7 +568,7 @@ namespace FlamingTorch
 		{
 			ActualResourcesDirectory = OSXResourcesDirectory();
 			ActualResourcesDirectory.resize(strlen(ActualResourcesDirectory.c_str()));
-		};
+		}
 #endif
 
 		if(ActualResourcesDirectory.length() == 0)
@@ -583,13 +583,13 @@ namespace FlamingTorch
 			{
 				ActualResourcesDirectory.resize(strlen(ActualResourcesDirectory.c_str()));
 				ActualResourcesDirectory += "/";
-			};
+			}
 
 			ActualResourcesDirectory = Path(ActualResourcesDirectory).FullPath();
-		};
+		}
 		
 		return ActualResourcesDirectory;
-	};
+	}
 
 	const std::string &FileSystemUtils::PreferredStorageDirectory()
 	{
@@ -613,7 +613,7 @@ namespace FlamingTorch
 			else
 			{
 				ActualStorageDirectory.resize(strlen(ActualStorageDirectory.c_str()));
-			};
+			}
             
 			ActualStorageDirectory += std::string("/My Games");
 
@@ -640,11 +640,11 @@ namespace FlamingTorch
 				ActualStorageDirectory = Path(ActualStorageDirectory).FullPath();
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
-			};
-		};
+			}
+		}
 
 		return ActualStorageDirectory;
-	};
+	}
 
 	uint32 Stream::CRC()
 	{
@@ -670,12 +670,12 @@ namespace FlamingTorch
 			OutCRC = CRC32::Instance.IterateCRC(&Buffer[0], Buffer.size(), OutCRC);
 
 			Offset += Buffer.size();
-		};
+		}
 
 		Seek(PreviousPosition);
 
 		return CRC32::Instance.FinishCRCIteration(OutCRC);
-	};
+	}
 
 	std::string Stream::AsString()
 	{
@@ -697,23 +697,23 @@ namespace FlamingTorch
 				str.resize(i + 1);
 
 				break;
-			};
-		};
+			}
+		}
 
 		return str;
-	};
+	}
 
-	MemoryStream::MemoryStream() : _Position(0) {};
+	MemoryStream::MemoryStream() : _Position(0) {}
 
 	uint64 MemoryStream::Length() const
 	{
 		return Data.size();
-	};
+	}
 
 	uint64 MemoryStream::Position() const
 	{
 		return _Position;
-	};
+	}
 
 	bool MemoryStream::Seek(uint64 Position)
 	{
@@ -723,7 +723,7 @@ namespace FlamingTorch
 		_Position = Position;
 
 		return true;
-	};
+	}
 
 	bool MemoryStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
 	{
@@ -739,7 +739,7 @@ namespace FlamingTorch
 		if(_Position + ActualLength > this->Data.size())
 		{
 			this->Data.resize((uint32)_Position + ActualLength);
-		};
+		}
 		
 		memcpy(&this->Data[(uint32)_Position], Data, ActualLength);
 
@@ -749,7 +749,7 @@ namespace FlamingTorch
 		_Position += ActualLength;
 
 		return true;
-	};
+	}
 
 	bool MemoryStream::Read(void *Data, uint32 ElementSize, uint32 Length)
 	{
@@ -773,7 +773,7 @@ namespace FlamingTorch
 		_Position += ActualLength;
 
 		return true;
-	};
+	}
 
 	void MemoryStream::AsBuffer(void *Data, uint32 Length)
 	{
@@ -791,32 +791,32 @@ namespace FlamingTorch
 			Processor->Decode(Data, Count);
 
 		_Position += Count;
-	};
+	}
 
 	const void *MemoryStream::Get() const
 	{
 		FLASSERT(!Processor, "Unable to decode the memory stream when using Get()!");
 
 		return Data.size() ? &Data[0] : NULL;
-	};
+	}
 
 	void MemoryStream::Clear()
 	{
 		_Position = 0;
 		Data.clear();
-	};
+	}
 
-	ConstantMemoryStream::ConstantMemoryStream(const void *Ptr, uint32 __Length) : Data((uint8 *)Ptr), _Length(__Length), _Position(0) {};
+	ConstantMemoryStream::ConstantMemoryStream(const void *Ptr, uint32 __Length) : Data((uint8 *)Ptr), _Length(__Length), _Position(0) {}
 
 	uint64 ConstantMemoryStream::Length() const
 	{
 		return _Length;
-	};
+	}
 
 	uint64 ConstantMemoryStream::Position() const
 	{
 		return _Position;
-	};
+	}
 
 	bool ConstantMemoryStream::Seek(uint64 Position)
 	{
@@ -826,12 +826,12 @@ namespace FlamingTorch
 		_Position = Position;
 
 		return true;
-	};
+	}
 
 	bool ConstantMemoryStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
 	{
 		return false;
-	};
+	}
 
 	bool ConstantMemoryStream::Read(void *Data, uint32 ElementSize, uint32 Length)
 	{
@@ -855,7 +855,7 @@ namespace FlamingTorch
 		_Position += ActualLength;
 
 		return true;
-	};
+	}
 
 	void ConstantMemoryStream::AsBuffer(void *Data, uint32 Length)
 	{
@@ -873,21 +873,21 @@ namespace FlamingTorch
 			Processor->Decode(Data, Count);
 
 		_Position += Count;
-	};
+	}
 
 	const void *ConstantMemoryStream::Get() const
 	{
 		FLASSERT(!Processor, "Unable to decode the constant memory stream when using Get()!");
 
 		return Data;
-	};
+	}
 
-	FileStream::FileStream() : Handle(NULL), _Length(0), _Position(0), IsBasic(false) {};
+	FileStream::FileStream() : Handle(NULL), _Length(0), _Position(0), IsBasic(false) {}
 
 	FileStream::~FileStream()
 	{
 		Close(); 
-	};
+	}
 
 	bool FileStream::Open(const std::string &_name, uint8 Flags)
 	{
@@ -912,7 +912,7 @@ namespace FlamingTorch
 		else
 		{
 			FLASSERT(0, "Invalid Stream Flags!");
-		};
+		}
 
 		//Text mode isn't reliable anymore
 		Mode[1] = 'b';
@@ -920,7 +920,7 @@ namespace FlamingTorch
 		if(!Handle)
 		{
 			Handle = fopen(name.c_str(), Mode);
-		};
+		}
 
 		_Length = 0;
 		_Position = 0;
@@ -934,7 +934,7 @@ namespace FlamingTorch
 			if(name[0] == '/')
 			{
 				name = name.substr(1);
-			};
+			}
 
 			//__android_log_print(ANDROID_LOG_DEBUG, "Core", "Loading asset '%s'", name.c_str());
 			sf::priv::ResourceStream *resource = new sf::priv::ResourceStream(name);
@@ -953,8 +953,8 @@ namespace FlamingTorch
 					delete resource;
 
 					return false;
-				};
-			};
+				}
+			}
 
 			_Length = resource->getSize();
 			Handle = resource;
@@ -964,7 +964,7 @@ namespace FlamingTorch
 #else
 			return false;
 #endif
-		};
+		}
 
 		if(Flags & StreamFlags::Read)
 		{
@@ -979,12 +979,12 @@ namespace FlamingTorch
 #endif
 			
 			fseek((FILE*)Handle, 0, SEEK_SET);
-		};
+		}
 
 		IsBasic = true;
 
 		return true;
-	};
+	}
 
 	void FileStream::Close()
 	{
@@ -998,28 +998,28 @@ namespace FlamingTorch
 			else
 			{
 				fclose((FILE*)Handle);
-			};
+			}
 #else
 			fclose((FILE*)Handle);
 #endif
 
 			Handle = NULL;
-		};
+		}
 
 		_Length = 0;
 		_Position = 0;
 		IsBasic = true;
-	};
+	}
 
 	uint64 FileStream::Length() const
 	{
 		return _Length;
-	};
+	}
 
 	uint64 FileStream::Position() const
 	{
 		return _Position;
-	};
+	}
 
 	bool FileStream::Seek(uint64 Position)
 	{
@@ -1045,7 +1045,7 @@ namespace FlamingTorch
 		else
 		{
 			Result = fseek((FILE *)Handle, Position, SEEK_SET);
-		};
+		}
 #else
 		int64 Result = fseeko64((FILE *)Handle, Position, SEEK_SET);
 #endif
@@ -1056,7 +1056,7 @@ namespace FlamingTorch
 		this->_Position = Position;
 
 		return true;
-	};
+	}
 
 	bool FileStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
 	{
@@ -1097,7 +1097,7 @@ namespace FlamingTorch
 		_Position += ElementSize * Length;
 
 		return true;
-	};
+	}
 
 	bool FileStream::Read(void *Data, uint32 ElementSize, uint32 Length)
 	{
@@ -1122,7 +1122,7 @@ namespace FlamingTorch
 		{
 			if(fread(Data, ElementSize, Length, (FILE*)Handle) != Length)
 				return false;
-		};
+		}
 #else
 		if(fread(Data, ElementSize, Length, (FILE*)Handle) != Length)
 			return false;
@@ -1134,7 +1134,7 @@ namespace FlamingTorch
 		_Position += ElementSize * Length;
 
 		return true;
-	};
+	}
 
 	void FileStream::AsBuffer(void *Data, uint32 Length)
 	{
@@ -1145,7 +1145,7 @@ namespace FlamingTorch
 			return;
 
 		Read(Data, sizeof(uint8), Length);
-	};
+	}
 
 	bool Stream::CopyTo(Stream *Out)
 	{
@@ -1169,10 +1169,10 @@ namespace FlamingTorch
 			SFLASSERT(Out->Write2<uint8>(&Buffer[0], Buffer.size()));
 
 			Offset += Buffer.size();
-		};
+		}
 
 		return true;
-	};
+	}
 
 	bool Stream::ReadFromStream(Stream *Target, uint32 Length)
 	{
@@ -1190,7 +1190,7 @@ namespace FlamingTorch
 		SFLASSERT(Write2<uint8>(&Buffer[0], Length));
 
 		return true;
-	};
+	}
 
 	bool Stream::WriteToStream(Stream *Target, uint32 _Length)
 	{
@@ -1211,7 +1211,7 @@ namespace FlamingTorch
 		SFLASSERT(Target->Write2<uint8>(&Buffer[0], _Length));
 
 		return true;
-	};
+	}
 
 	bool PackageFileSystemManager::Package::Serialize(Stream *Out)
 	{
@@ -1230,8 +1230,8 @@ namespace FlamingTorch
 					continue;
 
 				EntryList.push_back(fit->second.Get());
-			};
-		};
+			}
+		}
 
 		StartOffset += sizeof(VersionType) + //Version
 			sizeof(uint32) + //Length
@@ -1246,7 +1246,7 @@ namespace FlamingTorch
 				sizeof(uint8) + //DirectoryLength
 				sizeof(uint8) * EntryList[i]->DirectoryName.length() + //Directory Name
 				sizeof(uint64[2]); //Offset + Length
-		};
+		}
 
 		MemoryStream HeaderStream;
 
@@ -1277,7 +1277,7 @@ namespace FlamingTorch
 			SFLASSERT(HeaderStream.Write2<uint64>(&EntryList[i]->Length));
 
 			StartOffset += EntryList[i]->Length;
-		};
+		}
 
 		//Start by writing the header
 		VersionType Version = CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR);
@@ -1294,7 +1294,7 @@ namespace FlamingTorch
 			Log::Instance.LogWarn(TAGMANAGER, "Serializing a package with no Entries!");
 
 			return true;
-		};
+		}
 		
 		for(uint32 i = 0; i < EntryList.size(); i++)
 		{
@@ -1304,11 +1304,11 @@ namespace FlamingTorch
 					EntryList[i]->Name.c_str());
 
 				return false;
-			};
-		};
+			}
+		}
 
 		return true;
-	};
+	}
 
 	bool PackageFileSystemManager::Package::DeSerialize(Stream *In)
 	{
@@ -1333,7 +1333,7 @@ namespace FlamingTorch
 				Version, TargetVersion);
 
 			return false;
-		};
+		}
 
 		uint32 HeaderLength = 0;
 		StringID CRC = 0;
@@ -1352,7 +1352,7 @@ namespace FlamingTorch
 				ActualCRC, CRC);
 
 			return false;
-		};
+		}
 
 		uint32 Count = 0;
 
@@ -1396,10 +1396,10 @@ namespace FlamingTorch
 			Entry->Length = Length;
 
 			Entries[DirectoryID][NameID] = Entry;
-		};
+		}
 
 		return true;
-	};
+	}
 
 	bool PackageFileSystemManager::Package::AddFile(const std::string &Directory, const std::string &Name, DisposablePointer<FileStream> In)
 	{
@@ -1428,10 +1428,10 @@ namespace FlamingTorch
 			HasBeenTampered = true;
 
 			return true;
-		};
+		}
 
 		return false;
-	};
+	}
 
 	bool PackageFileSystemManager::Package::RemoveFile(const std::string &Directory, const std::string &Name)
 	{
@@ -1450,7 +1450,7 @@ namespace FlamingTorch
 		eit->second.erase(NameID);
 
 		return true;
-	};
+	}
 
 	PackageFileSystemManager::Package::~Package()
 	{
@@ -1458,7 +1458,7 @@ namespace FlamingTorch
 
 		PackageStream.Dispose();
 		Entries.clear();
-	};
+	}
 
 	bool PackageFileSystemManager::Package::FromStream(DisposablePointer<Stream> Stream)
 	{
@@ -1466,17 +1466,17 @@ namespace FlamingTorch
 		PackageStream = Stream;
 
 		return DeSerialize(Stream.Get());
-	};
+	}
 
 	uint64 PackageFileSystemManager::PackageStream::Length() const
 	{
 		return LengthValue;
-	};
+	}
 
 	uint64 PackageFileSystemManager::PackageStream::Position() const
 	{
 		return PositionValue;
-	};
+	}
 
 	bool PackageFileSystemManager::PackageStream::Seek(uint64 Position)
 	{
@@ -1493,16 +1493,16 @@ namespace FlamingTorch
 			PositionValue = Position;
 
 			return true;
-		};
+		}
 
 		return false;
-	};
+	}
 
 	//Package files can't write to
 	bool PackageFileSystemManager::PackageStream::Write(const void *Data, uint32 ElementSize, uint32 Length)
 	{
 		return false;
-	};
+	}
 
 	bool PackageFileSystemManager::PackageStream::Read(void *Data, uint32 ElementSize, uint32 Length)
 	{
@@ -1522,10 +1522,10 @@ namespace FlamingTorch
 			PositionValue += ElementSize * Length;
 
 			return true;
-		};
+		}
 
 		return false;
-	};
+	}
 
 	void PackageFileSystemManager::PackageStream::AsBuffer(void *Data, uint32 Length)
 	{
@@ -1544,8 +1544,8 @@ namespace FlamingTorch
 		if(!Result)
 		{
 			Log::Instance.LogErr(TAGMANAGER, "Unable to read '%d' bytes!", Length);
-		};
-	};
+		}
+	}
 
 	PackageFileSystemManager PackageFileSystemManager::Instance;
 
@@ -1558,7 +1558,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo(TAGMANAGER, "Initializing Package Filesystem...");
-	};
+	}
 
 	void PackageFileSystemManager::Shutdown(uint32 Priority)
 	{
@@ -1571,8 +1571,8 @@ namespace FlamingTorch
 		for(PackageMap::iterator it = Packages.begin(); it != Packages.end(); it++)
 		{
 			it->second.Dispose();
-		};
-	};
+		}
+	}
 
 	void PackageFileSystemManager::Update(uint32 Priority)
 	{
@@ -1581,7 +1581,7 @@ namespace FlamingTorch
 		SubSystem::Update(Priority);
 
 		SUBSYSTEM_PRIORITY_CHECK();
-	};
+	}
 
 	DisposablePointer<PackageFileSystemManager::Package> PackageFileSystemManager::NewPackage()
 	{
@@ -1592,10 +1592,10 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGMANAGER, "While calling NewPackage: Subsystem was not inited!");
 
 			return DisposablePointer<Package>();
-		};
+		}
 
 		return DisposablePointer<Package>(new Package());
-	};
+	}
 
 	bool PackageFileSystemManager::AddPackage(StringID ID, DisposablePointer<Stream> PackageStream)
 	{
@@ -1606,7 +1606,7 @@ namespace FlamingTorch
 			Log::Instance.LogWarn(TAGMANAGER, "Attempted to add a package '%08x' that already exists!", ID);
 
 			return false;
-		};
+		}
 
 		DisposablePointer<Package> ThePackage(new Package());
 
@@ -1615,7 +1615,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAGMANAGER, "Package '%08x' failed to be deserialized!", ID);
 
 			return false;
-		};
+		}
 
 		Packages[ID] = ThePackage;
 
@@ -1631,7 +1631,7 @@ namespace FlamingTorch
 				{
 					Log::Instance.LogWarn(TAGMANAGER, "While adding Package '%08x': Overriding file %08x/%08x",
 						ID, it->first, NameID);
-				};
+				}
 
 				std::pair<Package *, Package::FileEntry *> Pair;
 
@@ -1639,11 +1639,11 @@ namespace FlamingTorch
 				Pair.second = fit->second;
 
 				Files[it->first][NameID] = Pair;
-			};
-		};
+			}
+		}
 
 		return true;
-	};
+	}
 
 	bool PackageFileSystemManager::RemovePackage(StringID ID)
 	{
@@ -1657,7 +1657,7 @@ namespace FlamingTorch
 		Packages.erase(it);
 
 		return true;
-	};
+	}
 	
 	DisposablePointer<PackageFileSystemManager::Package> PackageFileSystemManager::GetPackage(StringID ID)
 	{
@@ -1667,7 +1667,7 @@ namespace FlamingTorch
 			return DisposablePointer<Package>();
 
 		return it->second;
-	};
+	}
 
 	void PackageFileSystemManager::ClearPackageData(Package *p)
 	{
@@ -1682,10 +1682,10 @@ namespace FlamingTorch
 
 					if(fit == it->second.end())
 						break;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 
 	DisposablePointer<Stream> PackageFileSystemManager::GetFile(StringID Directory, StringID Name)
 	{
@@ -1709,12 +1709,12 @@ namespace FlamingTorch
 		PStream->PositionValue = 0;
 
 		return DisposablePointer<Stream>(PStream);
-	};
+	}
 
 	DisposablePointer<Stream> PackageFileSystemManager::GetFile(const Path &FileName)
 	{
 		return GetFile(MakeStringID(FileName.Directory), MakeStringID(FileName.BaseName));
-	};
+	}
 
 	std::vector<std::string> PackageFileSystemManager::FindDirectories(const std::string &DirectoryBasePath)
 	{
@@ -1737,17 +1737,17 @@ namespace FlamingTorch
 							Found = true;
 
 							break;
-						};
-					};
+						}
+					}
 
 					if(!Found)
 						Out.push_back(DirectoryName);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		return Out;
-	};
+	}
 
 	std::vector<std::pair<std::string, std::string> > PackageFileSystemManager::FindFiles(const std::string &Prefix, const std::string &Suffix,
 		const std::string &Extension, const std::string &StartingDirectory)
@@ -1772,7 +1772,7 @@ namespace FlamingTorch
 				if(ExtensionIndex != std::string::npos)
 				{
 					FileExtension = fit->second.second->Name.substr(ExtensionIndex + 1);
-				};
+				}
 
 				if(Extension.length() && FileExtension != Extension)
 					continue;
@@ -1782,11 +1782,11 @@ namespace FlamingTorch
 					continue;
 
 				Out.push_back(std::pair<std::string, std::string>(fit->second.second->DirectoryName, fit->second.second->Name));
-			};
-		};
+			}
+		}
 
 		return Out;
-	};
+	}
 
 #if !FLPLATFORM_ANDROID
 	void FileSystemWatcher::StartUp(uint32 Priority)
@@ -1798,7 +1798,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo(TAGWATCHER, "Initializing FileSystem Watcher...");
-	};
+	}
 
 	void FileSystemWatcher::Shutdown(uint32 Priority)
 	{
@@ -1807,7 +1807,7 @@ namespace FlamingTorch
 		SubSystem::Shutdown(Priority);
 
 		Log::Instance.LogInfo(TAGWATCHER, "Terminating FileSystem Watcher...");
-	};
+	}
 
 	void FileSystemWatcher::Update(uint32 Priority)
 	{
@@ -1818,7 +1818,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		GlobalFileWatcher.update();
-	};
+	}
 
 	bool FileSystemWatcher::WatchDirectory(const std::string &Path)
 	{
@@ -1831,9 +1831,9 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			return false;
-		};
+		}
 
 		return true;
-	};
+	}
 #endif
-};
+}

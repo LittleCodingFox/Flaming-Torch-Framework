@@ -8,7 +8,7 @@ namespace FlamingTorch
 	void GameInterface::SetInstance(DisposablePointer<GameInterface> TheInstance)
 	{
 		Instance = TheInstance;
-	};
+	}
 
 	bool GameInterface::LoadPackage(const std::string &PackageName)
 	{
@@ -19,17 +19,17 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "Unable to open '%s' for reading!", PackageName.c_str());
 
 			return false;
-		};
+		}
 
 		if(!PackageFileSystemManager::Instance.AddPackage(MakeStringID(PackageName), TheStream))
 		{
 			Log::Instance.LogErr(TAG, "Unable to load the '%s' Package!", PackageName.c_str());
 
 			return false;
-		};
+		}
 
 		return true;
-	};
+	}
 
 	int32 GameInterface::Run(int32 argc, char **argv)
 	{
@@ -44,14 +44,14 @@ namespace FlamingTorch
 				if (1 != sscanf(argv[i + 1], "%u", &OverrideWidth))
 				{
 					OverrideWidth = 0;
-				};
+				}
 			}
 			else if (argument == "-h" && i + 1 < argc)
 			{
 				if (1 != sscanf(argv[i + 1], "%u", &OverrideHeight))
 				{
 					OverrideHeight = 0;
-				};
+				}
 			}
 			else if (argument == "-mobile")
 			{
@@ -85,22 +85,22 @@ namespace FlamingTorch
 
 				default:
 					Log::Instance.LogWarn(TAG, "Unknown rotation ID '%c'", c);
-				};
+				}
 			}
 			else if (argument == "-pc")
 			{
 				PlatformInfo::PlatformType = PlatformType::PC;
-			};
-		};
+			}
+		}
 
 		if (OverrideWidth > 0 && OverrideHeight > 0)
 		{
 			PlatformInfo::ResolutionOverrideWidth = OverrideWidth;
 			PlatformInfo::ResolutionOverrideHeight = OverrideHeight;
-		};
+		}
 
 		return 0;
-	};
+	}
 
 #if USE_GRAPHICS
 #	if !FLPLATFORM_ANDROID
@@ -108,7 +108,7 @@ namespace FlamingTorch
 	{
 		if(FileName == "GUILayout.resource" || FileName == "DefaultLayout.resource")
 			ReloadGUI();
-	};
+	}
 #	endif
 
 	void GameInterface::ReloadGUI()
@@ -123,7 +123,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "Failed to reload our Default GUI Layouts!");
 
 			return;
-		};
+		}
 
 		if(!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text) ||
 			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream))
@@ -131,8 +131,8 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "Failed to reload our GUI Layouts!");
 
 			return;
-		};
-	};
+		}
+	}
 
 	Renderer *GameInterface::CreateRenderer(const RenderCreateOptions &Options)
 	{
@@ -163,14 +163,14 @@ namespace FlamingTorch
 			Log::Instance.LogInfo(TAG, str.str().c_str());
 
 			Handle = RendererManager::Instance.AddRenderer(Options.Title.c_str(), Options.Width, Options.Height, Options.Style, Options.Caps);
-		};
+		}
 
 		if(Handle == 0xFFFFFFF)
 		{
 			Log::Instance.LogErr(TAG, "Failed to create a renderer");
 
 			return NULL;
-		};
+		}
 
 		RendererManager::Instance.SetActiveRenderer(Handle);
 
@@ -183,7 +183,7 @@ namespace FlamingTorch
 		else
 		{
 			TheRenderer->BaseResolutionValue = TheRenderer->Size();
-		};
+		}
 
 		TheRenderer->OnFrameStarted.Connect<GameInterface, &GameInterface::OnFrameBegin>(this);
 		TheRenderer->OnFrameDraw.Connect<GameInterface, &GameInterface::OnFrameDraw>(this);
@@ -194,14 +194,14 @@ namespace FlamingTorch
 		if(Options.FrameRate != 0)
 		{
 			TheRenderer->SetFrameRate(Options.FrameRate);
-		};
+		}
 
 		Vector2 RendererSize = TheRenderer->Size();
 
 		TheRenderer->SetViewport(0, 0, RendererSize.x, RendererSize.y);
 
 		return TheRenderer;
-	};
+	}
 
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass)
 	{
@@ -218,17 +218,17 @@ namespace FlamingTorch
 			TheRenderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(ScreenRect.Left, ScreenRect.Right, ScreenRect.Bottom, ScreenRect.Top, -1, 1));
 			TheRenderer->SetWorldMatrix(Matrix4x4());
 			TheRenderer->SetViewport(0, 0, TheRenderer->Size().x, TheRenderer->Size().y);
-		};
+		}
 
 		{
 			PROFILE("Update UI", StatTypes::Rendering);
 			TheRenderer->UI->Update();
-		};
+		}
 
 		{
 			PROFILE("Render UI", StatTypes::Rendering);
 			TheRenderer->UI->Draw();
-		};
+		}
 
 		static std::stringstream str;
 
@@ -245,7 +245,7 @@ namespace FlamingTorch
 
 			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(UIELEMENT_DEFAULT_FONT_SIZE).Color(Vector4(1, 1, 1, 1))
 				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
-		};
+		}
 
 		if(DevelopmentBuild)
 		{
@@ -271,7 +271,7 @@ namespace FlamingTorch
 				TriedLoadLogo = true;
 
 				Logo = ResourceManager::Instance.GetTextureFromPackage("/", "torch_small.png");
-			};
+			}
 
 			if(Logo.Get())
 			{
@@ -280,14 +280,14 @@ namespace FlamingTorch
 				TheSprite.Options.Position(TheRenderer->Size() - Logo->Size());
 
 				TheSprite.Draw(TheRenderer);
-			};
-		};
+			}
+		}
 
 		if(PushOrtho)
 		{
 			TheRenderer->PopMatrices();
-		};
-	};
+		}
+	}
 #endif
 
 	int32 NativeGameInterface::Run(int32 argc, char **argv)
@@ -306,14 +306,14 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		DisposablePointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
 		{
 			AutoExecStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("autoexec.cfg"));
-		};
+		}
 
 		if(AutoExecStream)
 		{
@@ -324,9 +324,9 @@ namespace FlamingTorch
 				if(Commands[i].length() && Commands[i][0] != '#')
 				{
 					Console::Instance.RunConsoleCommand(Commands[i]);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 
@@ -337,7 +337,7 @@ namespace FlamingTorch
 			while(GameClockMayPerformFixedTimeStep())
 			{
 				OnFixedUpdate();
-			};
+			}
 
 			OnFrameUpdate();
 
@@ -359,21 +359,21 @@ namespace FlamingTorch
 						DeInitSubsystems();
 
 						return 1;
-					};
+					}
 
 					FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
 #	endif
 
 					ReloadGUI();
-				};
+				}
 #endif
-			};
+			}
 
 #if USE_GRAPHICS
 			if(PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
 #endif
-		};
+		}
 
 		if(!DeInitialize())
 		{
@@ -384,7 +384,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		Log::Instance.LogInfo(TAG, "Finished");
 
@@ -393,7 +393,7 @@ namespace FlamingTorch
 		DeInitSubsystems();
 
 		return 0;
-	};
+	}
 
 	ScriptedGameInterface::~ScriptedGameInterface()
 	{
@@ -408,7 +408,7 @@ namespace FlamingTorch
 		OnResizeFunction = luabind::object();
 		OnResourcesReloadedFunction = luabind::object();
 		ShouldQuitFunction = luabind::object();
-	};
+	}
 
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
 	{
@@ -437,7 +437,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
             
 			return 1;
-        };
+        }
 
 		{
 			DisposablePointer<Stream> ConfigurationFileStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("Config.cfg"));
@@ -450,7 +450,7 @@ namespace FlamingTorch
 				DeInitSubsystems();
 
 				return 1;
-			};
+			}
 
 			GenericConfig::Section &PackagesSection = GameConfig.Sections["Packages"];
 
@@ -463,8 +463,8 @@ namespace FlamingTorch
 					DeInitSubsystems();
 
 					return 1;
-				};
-			};
+				}
+			}
 
 			GenericConfig::Section &GameSection = GameConfig.Sections["Game"];
 
@@ -473,7 +473,7 @@ namespace FlamingTorch
 			if(it != GameSection.Values.end())
 			{
 				GameNameValue = it->second.Content;
-			};
+			}
 
 			it = GameSection.Values.find("UpdateRate");
 
@@ -484,8 +484,8 @@ namespace FlamingTorch
 				if(1 != sscanf(it->second.Content.c_str(), "%d", &UpdateRateValue))
 				{
 					UpdateRateValue = CurrentUpdateRate;
-				};
-			};
+				}
+			}
 
 			it = GameSection.Values.find("FrameRate");
 
@@ -496,8 +496,8 @@ namespace FlamingTorch
 				if(1 != sscanf(it->second.Content.c_str(), "%d", &FrameRateValue) || FrameRateValue <= 0)
 				{
 					FrameRateValue = CurrentFrameRate;
-				};
-			};
+				}
+			}
 
 			it = GameSection.Values.find("BaseWidth");
 
@@ -508,8 +508,8 @@ namespace FlamingTorch
 				if(1 == sscanf(it->second.Content.c_str(), "%d", &Width) && Width > 0)
 				{
 					BaseResolution.x = (f32)Width;
-				};
-			};
+				}
+			}
 
 			it = GameSection.Values.find("BaseHeight");
 
@@ -524,9 +524,9 @@ namespace FlamingTorch
 				else
 				{
 					BaseResolution = Vector2();
-				};
-			};
-		};
+				}
+			}
+		}
 
 		LuaScriptManager::Instance.Register();
 
@@ -547,7 +547,7 @@ namespace FlamingTorch
 				DeInitSubsystems();
 
 				return 1;
-			};
+			}
 
 			DisposablePointer<Stream> GameStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/Scripts/Game/"), MakeStringID("Game.lua"));
 
@@ -558,7 +558,7 @@ namespace FlamingTorch
 				DeInitSubsystems();
 
 				return 1;
-			};
+			}
 
 			ScriptInstance->DoString(GameStream->AsString());
 
@@ -575,7 +575,7 @@ namespace FlamingTorch
 			OnResizeFunction = Globals["GameResize"];
 			OnResourcesReloadedFunction = Globals["GameResourcesReloaded"];
 			ShouldQuitFunction = Globals["GameShouldQuit"];
-		};
+		}
 
 		bool Success = false;
 
@@ -588,7 +588,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		try
 		{
@@ -601,7 +601,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		if(!Success)
 		{
@@ -612,7 +612,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		InitSubsystems();
 
@@ -627,7 +627,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		try
 		{
@@ -636,7 +636,7 @@ namespace FlamingTorch
 			for(int32 i = 0; i < argc; i++)
 			{
 				Arguments[i + 1] = std::string(argv[i]);
-			};
+			}
 
 			Success = ProtectedLuaCast<bool>(InitFunction(Arguments));
 		}
@@ -647,7 +647,7 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		if(!Success)
 		{
@@ -658,14 +658,14 @@ namespace FlamingTorch
 			DeInitSubsystems();
 
 			return 1;
-		};
+		}
 
 		DisposablePointer<Stream> AutoExecStream(new FileStream());
 
 		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
 		{
 			AutoExecStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("autoexec.cfg"));
-		};
+		}
 
 		if(AutoExecStream)
 		{
@@ -676,9 +676,9 @@ namespace FlamingTorch
 				if(Commands[i].length() && Commands[i][0] != '#')
 				{
 					Console::Instance.RunConsoleCommand(Commands[i]);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 
@@ -686,7 +686,7 @@ namespace FlamingTorch
 		if(RendererManager::Instance.ActiveRenderer())
 		{
 			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "DefaultFont.ttf");
-		};
+		}
 #endif
 
 		for(;;)
@@ -696,7 +696,7 @@ namespace FlamingTorch
 			while(GameClockMayPerformFixedTimeStep())
 			{
 				OnFixedUpdate();
-			};
+			}
 
 			OnFrameUpdate();
 
@@ -718,21 +718,21 @@ namespace FlamingTorch
 						DeInitSubsystems();
 
 						return 1;
-					};
+					}
 
 					FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
 #	endif
 
 					ReloadGUI();
-				};
+				}
 #endif
-			};
+			}
 
 #if USE_GRAPHICS
 			if (PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
 				sf::sleep(sf::milliseconds(1000));
 #endif
-		};
+		}
 
 		if(DeInitFunction)
 		{
@@ -747,8 +747,8 @@ namespace FlamingTorch
 				DeInitSubsystems();
 
 				return 1;
-			};
-		};
+			}
+		}
 
 #if USE_GRAPHICS
 		RendererManager::Instance.Input.ClearContexts();
@@ -759,7 +759,7 @@ namespace FlamingTorch
 		DeInitSubsystems();
 
 		return 0;
-	};
+	}
 
 #define STATIC_FUNCTION_CHECK_RETURN_VOID(Function)\
 	static bool __STATIC_FN_CHECK__ = !!Function;\
@@ -788,8 +788,8 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			ErroredOnFrameBegin = true;
-		};
-	};
+		}
+	}
 
 	void ScriptedGameInterface::OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass)
 	{
@@ -805,8 +805,8 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			ErroredOnFrameDraw = true;
-		};
-	};
+		}
+	}
 
 	void ScriptedGameInterface::OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass)
 	{
@@ -822,10 +822,10 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			ErroredOnFrameEnd = true;
-		};
+		}
 
 		GameInterface::OnFrameEnd(TheRenderer, ScenePass);
-	};
+	}
 
 	void ScriptedGameInterface::OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height)
 	{
@@ -841,8 +841,8 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			ErroredOnResize = true;
-		};
-	};
+		}
+	}
 
 	void ScriptedGameInterface::OnResourcesReloaded(Renderer *TheRenderer)
 	{
@@ -858,8 +858,8 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			ErroredOnResourcesReloaded = true;
-		};
-	};
+		}
+	}
 #endif
 
 	void ScriptedGameInterface::OnFixedUpdate()
@@ -876,8 +876,8 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			ErroredOnFixedUpdate = true;
-		};
-	};
+		}
+	}
 
 	void ScriptedGameInterface::OnFrameUpdate()
 	{
@@ -893,8 +893,8 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			ErroredOnFrameUpdate = true;
-		};
-	};
+		}
+	}
 
 	bool ScriptedGameInterface::ShouldQuit()
 	{
@@ -907,6 +907,6 @@ namespace FlamingTorch
 		catch(std::exception &)
 		{
 			return true;
-		};
-	};
-};
+		}
+	}
+}

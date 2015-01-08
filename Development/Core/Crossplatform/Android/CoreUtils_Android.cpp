@@ -12,17 +12,17 @@ namespace FlamingTorch
 			return "Android";
 
 		return std::string(Info.sysname) + " " + Info.version + " " + Info.release;
-	};
+	}
 
 	int32 CoreUtils::RunProgram(const std::string &_ExePath, const std::string &Parameters, const std::string &WorkingDirectory)
 	{
 		return 0;
-	};
+	}
 
 	Rect CoreUtils::GetDesktopWorkArea()
 	{
 		return Rect();
-	};
-};
+	}
+}
 
 #endif

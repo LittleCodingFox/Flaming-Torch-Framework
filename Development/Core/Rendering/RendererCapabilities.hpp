@@ -9,6 +9,6 @@ public:
 	uint32 DepthBits; //!<Depth Bits
 	uint32 StencilBits; //!<Stencil Bits
 
-	RendererCapabilities() : AntialiasLevel(0), DepthBits(32), StencilBits(0) {};
+	RendererCapabilities() : AntialiasLevel(0), DepthBits(32), StencilBits(0) {}
 };
 #endif

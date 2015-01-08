@@ -7,7 +7,7 @@ namespace ValueTypes
 		Int32,
 		F32,
 	};
-};
+}
 
 /*!
 *	INI-style configuration class
@@ -79,28 +79,32 @@ public:
 	*	\param ValueName the name of the value
 	*	\param Default the default value on failure
 	*/
-	Value GetValue(const char *SectionName, const char *ValueName, const Value &Default);
+	Value GetValue(const char *SectionName, const char *ValueName, const Value &Default) const;
+
 	/*!
 	*	Gets an int value
 	*	\param SectionName the name of the section the value is in
 	*	\param ValueName the name of the value
 	*	\param Default the default value on failure
 	*/
-	int32 GetInt(const char *SectionName, const char *ValueName, int32 Default);
+	int32 GetInt(const char *SectionName, const char *ValueName, int32 Default) const;
+
 	/*!
 	*	Gets a float value
 	*	\param SectionName the name of the section the value is in
 	*	\param ValueName the name of the value
 	*	\param Default the default value on failure
 	*/
-	f32 GetFloat(const char *SectionName, const char *ValueName, f32 Default);
+	f32 GetFloat(const char *SectionName, const char *ValueName, f32 Default) const;
+
 	/*!
 	*	Gets a string value
 	*	\param SectionName the name of the section the value is in
 	*	\param ValueName the name of the value
 	*	\param Default the default value on failure
 	*/
-	std::string GetString(const char *SectionName, const char *ValueName, const std::string &Default = "");
+	std::string GetString(const char *SectionName, const char *ValueName, const std::string &Default = "") const;
+
 	/*!
 	*	Sets a value
 	*	\param SectionName the name of the section the value is in

@@ -15,7 +15,7 @@ namespace FlamingTorch
 
 		for (uint64 i = 0; i < MusicCounter; i++)
 			DestroyMusic(i);
-	};
+	}
 
 	MusicHandle SFMLSoundManagerImplementation::CreateMusic(const void *Source, uint32 Length)
 	{
@@ -35,7 +35,7 @@ namespace FlamingTorch
 		Musics[Out] = Info;
 
 		return Out;
-	};
+	}
 
 	SoundHandle SFMLSoundManagerImplementation::CreateSound(const void *Source, uint32 Length)
 	{
@@ -55,7 +55,7 @@ namespace FlamingTorch
 		Sounds[Out] = Info;
 
 		return Out;
-	};
+	}
 
 	void SFMLSoundManagerImplementation::DestroyMusic(MusicHandle Handle)
 	{
@@ -68,7 +68,7 @@ namespace FlamingTorch
 		it->second.Dispose();
 
 		Musics.erase(it);
-	};
+	}
 
 	void SFMLSoundManagerImplementation::DestroySound(SoundHandle Handle)
 	{
@@ -82,7 +82,7 @@ namespace FlamingTorch
 		it->second.Dispose();
 
 		Sounds.erase(it);
-	};
+	}
 
 	void SFMLSoundManagerImplementation::SetMusicVolume(MusicHandle Handle, f32 Volume)
 	{
@@ -93,10 +93,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Music->setVolume(Volume * 100);
-	};
+	}
 
 	void SFMLSoundManagerImplementation::SetSoundVolume(SoundHandle Handle, f32 Volume)
 	{
@@ -107,10 +107,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Sound->setVolume(Volume * 100);
-	};
+	}
 
 	f32 SFMLSoundManagerImplementation::GetMusicVolume(MusicHandle Handle)
 	{
@@ -121,10 +121,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return 0;
-		};
+		}
 
 		return it->second->Music->getVolume() / 100;
-	};
+	}
 
 	f32 SFMLSoundManagerImplementation::GetSoundVolume(SoundHandle Handle)
 	{
@@ -135,10 +135,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return 0;
-		};
+		}
 
 		return it->second->Sound->getVolume() / 100;
-	};
+	}
 
 	uint8 SFMLSoundManagerImplementation::GetMusicStatus(MusicHandle Handle)
 	{
@@ -149,7 +149,7 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return SoundStatus::Stopped;
-		};
+		}
 
 		switch (it->second->Music->getStatus())
 		{
@@ -162,10 +162,10 @@ namespace FlamingTorch
 			return SoundStatus::Paused;
 
 			break;
-		};
+		}
 
 		return SoundStatus::Stopped;
-	};
+	}
 
 	uint8 SFMLSoundManagerImplementation::GetSoundStatus(SoundHandle Handle)
 	{
@@ -176,7 +176,7 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return SoundStatus::Stopped;
-		};
+		}
 
 		switch (it->second->Sound->getStatus())
 		{
@@ -189,10 +189,10 @@ namespace FlamingTorch
 			return SoundStatus::Paused;
 
 			break;
-		};
+		}
 
 		return SoundStatus::Stopped;
-	};
+	}
 
 	void SFMLSoundManagerImplementation::SetMusicLooping(MusicHandle Handle, bool Loop)
 	{
@@ -203,10 +203,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Music->setLoop(Loop);
-	};
+	}
 
 	void SFMLSoundManagerImplementation::SetSoundLooping(SoundHandle Handle, bool Loop)
 	{
@@ -217,10 +217,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Sound->setLoop(Loop);
-	};
+	}
 
 	bool SFMLSoundManagerImplementation::MusicLooping(MusicHandle Handle)
 	{
@@ -231,10 +231,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return false;
-		};
+		}
 
 		return it->second->Music->getLoop();
-	};
+	}
 
 	bool SFMLSoundManagerImplementation::SoundLooping(SoundHandle Handle)
 	{
@@ -245,10 +245,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return false;
-		};
+		}
 
 		return it->second->Sound->getLoop();
-	};
+	}
 
 	void SFMLSoundManagerImplementation::SetMusicPitch(MusicHandle Handle, f32 Pitch)
 	{
@@ -259,10 +259,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Music->setPitch(Pitch);
-	};
+	}
 
 	void SFMLSoundManagerImplementation::SetSoundPitch(SoundHandle Handle, f32 Pitch)
 	{
@@ -273,10 +273,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Sound->setPitch(Pitch);
-	};
+	}
 
 	f32 SFMLSoundManagerImplementation::MusicPitch(MusicHandle Handle)
 	{
@@ -287,10 +287,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return 1;
-		};
+		}
 
 		return it->second->Music->getPitch();
-	};
+	}
 
 	f32 SFMLSoundManagerImplementation::SoundPitch(SoundHandle Handle)
 	{
@@ -301,10 +301,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return 1;
-		};
+		}
 
 		return it->second->Sound->getPitch();
-	};
+	}
 
 	void SFMLSoundManagerImplementation::PlayMusic(MusicHandle Handle)
 	{
@@ -315,10 +315,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Music->play();
-	};
+	}
 
 	void SFMLSoundManagerImplementation::PlaySound(SoundHandle Handle)
 	{
@@ -329,10 +329,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Sound->play();
-	};
+	}
 
 	void SFMLSoundManagerImplementation::PauseMusic(MusicHandle Handle)
 	{
@@ -343,10 +343,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Music->pause();
-	};
+	}
 
 	void SFMLSoundManagerImplementation::PauseSound(SoundHandle Handle)
 	{
@@ -357,10 +357,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Sound->pause();
-	};
+	}
 
 	void SFMLSoundManagerImplementation::StopMusic(MusicHandle Handle)
 	{
@@ -371,10 +371,10 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Music->stop();
-	};
+	}
 
 	void SFMLSoundManagerImplementation::StopSound(SoundHandle Handle)
 	{
@@ -385,9 +385,9 @@ namespace FlamingTorch
 			REPORT_INVALID();
 
 			return;
-		};
+		}
 
 		it->second->Sound->stop();
-	};
-};
+	}
+}
 #endif

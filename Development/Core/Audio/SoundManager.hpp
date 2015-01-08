@@ -11,7 +11,7 @@ namespace SoundStatus
 		Playing,
 		Paused
 	};
-};
+}
 
 class SoundManager : public SubSystem
 {
@@ -85,7 +85,7 @@ public:
 
 	static SoundManager Instance;
 
-	SoundManager() : SubSystem(SOUNDMANAGER_PRIORITY) {};
+	SoundManager() : SubSystem(SOUNDMANAGER_PRIORITY) {}
 
 	DisposablePointer<Sound> GetSound(StringID ID);
 	DisposablePointer<Music> GetMusic(StringID ID);
@@ -108,7 +108,7 @@ public:
 class ISoundManagerImplementation
 {
 public:
-	virtual ~ISoundManagerImplementation() {};
+	virtual ~ISoundManagerImplementation() {}
 	virtual MusicHandle CreateMusic(const void *Source, uint32 Length) = 0;
 	virtual SoundHandle CreateSound(const void *Source, uint32 Length) = 0;
 	virtual void DestroyMusic(MusicHandle Handle) = 0;

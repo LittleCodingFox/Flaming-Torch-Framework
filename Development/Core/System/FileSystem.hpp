@@ -165,7 +165,7 @@ namespace StreamFlags
 		Read = FLAGVALUE(2), //!<Read Mode
 		Text = FLAGVALUE(3) //!<Text Mode
 	};
-};
+}
 
 /*!
 *	Stream Processor
@@ -174,8 +174,8 @@ namespace StreamFlags
 class StreamProcessor 
 {
 public:
-	StreamProcessor(const std::string &NativeType) {};
-	virtual ~StreamProcessor() {};
+	StreamProcessor(const std::string &NativeType) {}
+	virtual ~StreamProcessor() {}
 
 	/*!
 	*	Encodes data
@@ -203,7 +203,7 @@ public:
 	*/
 	uint8 Key;
 
-	XORStreamProcessor() : StreamProcessor("XORStreamProcessor"), Key((uint8)'FL') {};
+	XORStreamProcessor() : StreamProcessor("XORStreamProcessor"), Key((uint8)'FL') {}
 
 	void Encode(void *Data, uint32 Length)
 	{
@@ -212,8 +212,8 @@ public:
 		for(uint32 i = 0; i < Length; i++)
 		{
 			Ptr[i] ^= Key;
-		};
-	};
+		}
+	}
 
 	void Decode(void *Data, uint32 Length)
 	{
@@ -222,8 +222,8 @@ public:
 		for(uint32 i = 0; i < Length; i++)
 		{
 			Ptr[i] ^= Key;
-		};
-	};
+		}
+	}
 };
 
 /*!
@@ -234,7 +234,7 @@ class Stream
 protected:
 	DisposablePointer<StreamProcessor> Processor;
 public:
-	virtual ~Stream() {};
+	virtual ~Stream() {}
 	/*!
 	*	\return the size of the stream
 	*/
@@ -287,7 +287,7 @@ public:
 	void SetProcessor(DisposablePointer<StreamProcessor> Processor)
 	{
 		this->Processor = Processor;
-	};
+	}
 
 	/*!
 	*	Gets our active stream processor
@@ -295,7 +295,7 @@ public:
 	DisposablePointer<StreamProcessor> GetProcessor()
 	{
 		return Processor;
-	};
+	}
 
 	/*!
 	*	Template-specialized Write method
@@ -306,7 +306,7 @@ public:
 	template<typename type> bool Write2(const type *Data, uint32 Length = 1)
 	{
 		return Write(Data, sizeof(type), Length);
-	};
+	}
 
 	/*!
 	*	Template-specialized Read method
@@ -317,7 +317,7 @@ public:
 	template<typename type> bool Read2(type *Data, uint32 Length = 1)
 	{
 		return Read(Data, sizeof(type), Length);
-	};
+	}
 
 	/*!
 	*	Writes data from another stream into this stream
@@ -448,7 +448,7 @@ public:
 		DisposablePointer<Stream> PackageStream;
 		uint64 OriginalOffset;
 
-		Package() : HasBeenTampered(false), OriginalOffset(0) {};
+		Package() : HasBeenTampered(false), OriginalOffset(0) {}
 		~Package();
 
 		bool Serialize(Stream *Out);
@@ -469,7 +469,7 @@ public:
 		DisposablePointer<Stream> Source;
 		uint64 StartOffset, PositionValue, LengthValue;
 
-		PackageStream() : StartOffset(0), PositionValue(0), LengthValue(0) {};
+		PackageStream() : StartOffset(0), PositionValue(0), LengthValue(0) {}
 		uint64 Length() const;
 		uint64 Position() const;
 		bool Seek(uint64 Position);
@@ -479,7 +479,7 @@ public:
 	};
 private:
 	friend class Package;
-	PackageFileSystemManager() : SubSystem(PACKAGE_FILESYSTEM_PRIORITY) {};
+	PackageFileSystemManager() : SubSystem(PACKAGE_FILESYSTEM_PRIORITY) {}
 
 	typedef std::map<StringID, std::pair<Package *, Package::FileEntry *> > FileMap;
 	typedef std::map<StringID, FileMap> EntryMap;
@@ -562,7 +562,7 @@ namespace FileSystemWatcherAction
 		Deleted, //!<File was deleted
 		Modified //!<File was modified
 	};
-};
+}
 
 /*!
 *	FileSystem Watching Class
@@ -576,7 +576,7 @@ public:
 	//!<Directory, FileName, Action
 	SimpleDelegate::SimpleDelegate<const std::string &, const std::string &, uint32> OnAction;
 
-	FileSystemWatcher() : SubSystem(FILESYSTEM_WATCHER_PRIORITY) {};
+	FileSystemWatcher() : SubSystem(FILESYSTEM_WATCHER_PRIORITY) {}
 
 	/*!
 	*	Watches a directory for changes

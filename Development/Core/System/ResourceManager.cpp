@@ -10,7 +10,7 @@ namespace FlamingTorch
 	bool ResourceManager::IsSameTexture(Texture *Self, Texture *Other)
 	{
 		return Self == Other;
-	};
+	}
 
 	void ResourceManager::StartUp(uint32 Priority)
 	{
@@ -23,7 +23,7 @@ namespace FlamingTorch
 		Log::Instance.LogInfo(TAG, "Starting Resource Manager Subsystem");
 
 		InvalidTexture.Reset(new Texture());
-	};
+	}
 
 	void ResourceManager::Shutdown(uint32 Priority)
 	{
@@ -39,8 +39,8 @@ namespace FlamingTorch
 				Textures.begin()->second.Dispose();
 
 			Textures.erase(Textures.begin());
-		};
-	};
+		}
+	}
 
 	void ResourceManager::Update(uint32 Priority)
 	{
@@ -50,7 +50,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Cleanup();
-	};
+	}
 
 	DisposablePointer<Texture> ResourceManager::GetTexture(const std::string &FileName)
 	{
@@ -59,7 +59,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return DisposablePointer<Texture>();
-		};
+		}
 
 		StringID RealName = MakeStringID(FileName);
 		TextureMap::iterator it =
@@ -77,20 +77,20 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Failed to load texture '%s' (H: '0x%08x').", FileName.c_str(), RealName);
 
 				return DisposablePointer<Texture>();
-			};
+			}
 
 			Textures[RealName] = _Texture;
 
 			return _Texture;
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	DisposablePointer<Texture> ResourceManager::GetTexture(const Path &ThePath)
 	{
 		return GetTexture(ThePath.FullPath());
-	};
+	}
 
 	DisposablePointer<Texture> ResourceManager::GetTextureFromPackage(const std::string &Directory, const std::string &FileName)
 	{
@@ -99,7 +99,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return DisposablePointer<Texture>();
-		};
+		}
 
 		StringID RealName = MakeStringID("PACKAGE:" + Directory + "_" + FileName);
 		TextureMap::iterator it =
@@ -118,20 +118,20 @@ namespace FlamingTorch
 					FileName.c_str(), RealName);
 
 				return DisposablePointer<Texture>();
-			};
+			}
 
 			Textures[RealName] = _Texture;
 
 			return _Texture;
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	DisposablePointer<Texture> ResourceManager::GetTextureFromPackage(const Path &ThePath)
 	{
 		return GetTextureFromPackage(ThePath.Directory, ThePath.BaseName);
-	};
+	}
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const std::string &FileName, GenericConfig *Config)
 	{
@@ -140,7 +140,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return DisposablePointer<TexturePacker>();
-		};
+		}
 
 		if(!Config)
 			return DisposablePointer<TexturePacker>();
@@ -166,25 +166,25 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", FileName.c_str(), RealName);
 
 				return DisposablePointer<TexturePacker>();
-			};
+			}
 
 			TexturePackers[RealName] = Packer;
 
 			return Packer;
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const Path &ThePath, GenericConfig *Config)
 	{
 		return GetTexturePack(ThePath.FullPath(), Config);
-	};
+	}
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePackFromPackage(const std::string &Directory, const std::string &FileName, GenericConfig *Config)
 	{
 		return GetTexturePackFromPackage(Path(Directory + Path::PathSeparator + FileName), Config);
-	};
+	}
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePackFromPackage(const Path &ThePath, GenericConfig *Config)
 	{
@@ -193,7 +193,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return DisposablePointer<TexturePacker>();
-		};
+		}
 
 		if (!Config)
 			return DisposablePointer<TexturePacker>();
@@ -219,12 +219,12 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(), RealName);
 
 				return DisposablePointer<TexturePacker>();
-			};
+			}
 
 			TexturePackers[RealName] = Packer;
 
 			return Packer;
-		};
+		}
 
 		return it->second;
 
@@ -234,13 +234,13 @@ namespace FlamingTorch
 			return DisposablePointer<TexturePacker>();
 
 		return TexturePacker::FromConfig(In, *Config);
-	};
+	}
 
 #if USE_GRAPHICS
 	void ResourceManager::DisposeFont(Renderer *TheRenderer, FontHandle Handle)
 	{
 		TheRenderer->DestroyFont(Handle);
-	};
+	}
 
 	FontHandle ResourceManager::GetFont(Renderer *TheRenderer, const std::string &FileName)
 	{
@@ -249,7 +249,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return 0;
-		};
+		}
 
 		StringID RealName = MakeStringID(FileName);
 		FontMap::iterator it = Fonts.find(RealName);
@@ -265,7 +265,7 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
 				return 0;
-			};
+			}
 
 			FontHandle Out = TheRenderer->CreateFont(TheStream);
 
@@ -274,20 +274,20 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
 				return 0;
-			};
+			}
 
 			Fonts[RealName] = Out;
 
 			return Out;
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	FontHandle ResourceManager::GetFont(Renderer *TheRenderer, const Path &ThePath)
 	{
 		return GetFont(TheRenderer, ThePath.FullPath());
-	};
+	}
 
 	FontHandle ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName)
 	{
@@ -296,7 +296,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return 0;
-		};
+		}
 
 		StringID RealName = MakeStringID("PACKAGE:" + Directory + "_" + FileName);
 		FontMap::iterator it = Fonts.find(RealName);
@@ -312,7 +312,7 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
 				return 0;
-			};
+			}
 
 			FontHandle Out = TheRenderer->CreateFont(TheStream);
 
@@ -321,20 +321,20 @@ namespace FlamingTorch
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
 				return 0;
-			};
+			}
 
 			Fonts[RealName] = Out;
 
 			return Out;
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	FontHandle ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath)
 	{
 		return GetFontFromPackage(TheRenderer, ThePath.Directory, ThePath.BaseName);
-	};
+	}
 
 #endif
 
@@ -349,11 +349,11 @@ namespace FlamingTorch
 
 				if(it == Textures.end())
 					return;
-			};
+			}
 
 			it->second->Destroy();
-		};
-	};
+		}
+	}
 
 	void ResourceManager::ReloadResources()
 	{
@@ -366,7 +366,7 @@ namespace FlamingTorch
 
 				if(it == Textures.end())
 					return;
-			};
+			}
 
 			uint32 TextureFilter = it->second->FilterMode();
 
@@ -380,17 +380,17 @@ namespace FlamingTorch
 			{
 				it->second->CreateEmptyTexture(it->second->Width(), it->second->Height(),
 					it->second->ColorType() == ColorType::RGBA8);
-			};
+			}
 
 			it->second->SetTextureFiltering(TextureFilter);
-		};
+		}
 
 #if USE_GRAPHICS
 		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
 
 		TheRenderer->OnResourcesReloaded(TheRenderer);
 #endif
-	};
+	}
 
 	void ResourceManager::Cleanup()
 	{
@@ -410,11 +410,11 @@ namespace FlamingTorch
 
 				if(it == Textures.end())
 					break;
-			};
+			}
 
 			if (it == Textures.end())
 				break;
-		};
+		}
 
 		for (TexturePackerMap::iterator it = TexturePackers.begin(); it != TexturePackers.end(); it++)
 		{
@@ -425,11 +425,11 @@ namespace FlamingTorch
 
 				if(it == TexturePackers.end())
 					break;
-			};
+			}
 
 			if (it == TexturePackers.end())
 				break;
-		};
+		}
 
 		uint32 CurrentObjects = Textures.size() + TexturePackers.size() + 
 #if USE_GRAPHICS
@@ -441,6 +441,6 @@ namespace FlamingTorch
 		if(CurrentObjects != TotalObjects)
 		{
 			Log::Instance.LogDebug(TAG, "Cleared %d objects (Prev: %d/Now: %d)", TotalObjects - CurrentObjects, TotalObjects, CurrentObjects);
-		};
-	};
-};
+		}
+	}
+}

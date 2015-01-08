@@ -9,167 +9,167 @@ namespace FlamingTorch
 	void SoundManager::Music::Play()
 	{
 		Impl->PlayMusic(Handle);
-	};
+	}
 
 	void SoundManager::Music::Stop()
 	{
 		Impl->StopMusic(Handle);
-	};
+	}
 
 	void SoundManager::Music::Pause()
 	{
 		Impl->PauseMusic(Handle);
-	};
+	}
 
 	void SoundManager::Music::SetVolume(f32 Volume)
 	{
 		Impl->SetMusicVolume(Handle, Volume);
-	};
+	}
 
 	f32 SoundManager::Music::GetVolume()
 	{
 		return Impl->GetMusicVolume(Handle);
-	};
+	}
 
 	uint8 SoundManager::Music::GetStatus()
 	{
 		return Impl->GetMusicStatus(Handle);
-	};
+	}
 
 	bool SoundManager::Music::IsPlaying()
 	{
 		return GetStatus() == SoundStatus::Playing;
-	};
+	}
 
 	void SoundManager::Music::SetLoop(bool Value)
 	{
 		Impl->SetMusicLooping(Handle, Value);
-	};
+	}
 
 	bool SoundManager::Music::IsLooping()
 	{
 		return Impl->MusicLooping(Handle);
-	};
+	}
 
 	void SoundManager::Music::SetPitch(f32 Pitch)
 	{
 		Impl->SetMusicPitch(Handle, Pitch);
-	};
+	}
 
 	f32 SoundManager::Music::GetPitch()
 	{
 		return Impl->MusicPitch(Handle);
-	};
+	}
 
 	void SoundManager::Sound::Play()
 	{
 		Impl->PlaySound(Handle);
-	};
+	}
 
 	void SoundManager::Sound::Stop()
 	{
 		Impl->StopSound(Handle);
-	};
+	}
 
 	void SoundManager::Sound::Pause()
 	{
 		Impl->PauseSound(Handle);
-	};
+	}
 
 	void SoundManager::Sound::SetVolume(f32 Volume)
 	{
 		Impl->SetSoundVolume(Handle, Volume);
-	};
+	}
 
 	f32 SoundManager::Sound::GetVolume()
 	{
 		return Impl->GetSoundVolume(Handle);
-	};
+	}
 
 	uint8 SoundManager::Sound::GetStatus()
 	{
 		return Impl->GetSoundStatus(Handle);
-	};
+	}
 
 	bool SoundManager::Sound::IsPlaying()
 	{
 		return GetStatus() == SoundStatus::Playing;
-	};
+	}
 
 	void SoundManager::Sound::SetLoop(bool Value)
 	{
 		Impl->SetSoundLooping(Handle, Value);
-	};
+	}
 
 	bool SoundManager::Sound::IsLooping()
 	{
 		return Impl->SoundLooping(Handle);
-	};
+	}
 
 	void SoundManager::Sound::SetPitch(f32 Pitch)
 	{
 		Impl->SetSoundPitch(Handle, Pitch);
-	};
+	}
 
 	f32 SoundManager::Sound::GetPitch()
 	{
 		return Impl->SoundPitch(Handle);
-	};
+	}
 
 	DisposablePointer<SoundManager::Sound> SoundManager::GetSound(StringID ID)
 	{
 		if(!WasStarted)
 		{
 			return DisposablePointer<Sound>();
-		};
+		}
 
 		SoundMap::iterator it = Sounds.find(ID);
 
 		if(it == Sounds.end())
 		{
 			return DisposablePointer<Sound>();
-		};
+		}
 
 		if(it->second.Get() == NULL)
 		{
 			Sounds.erase(it);
 
 			return DisposablePointer<Sound>();
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	DisposablePointer<SoundManager::Music> SoundManager::GetMusic(StringID ID)
 	{
 		if(!WasStarted)
 		{
 			return DisposablePointer<Music>();
-		};
+		}
 
 		MusicMap::iterator it = Musics.find(ID);
 
 		if(it == Musics.end())
 		{
 			return DisposablePointer<Music>();
-		};
+		}
 
 		if(it->second.Get() == NULL)
 		{
 			Musics.erase(it);
 
 			return DisposablePointer<Music>();
-		};
+		}
 
 		return it->second;
-	};
+	}
 
 	StringID SoundManager::SoundFromStream(Stream *In)
 	{
 		if(!WasStarted)
 		{
 			return 0xFFFFFFFF;
-		};
+		}
 
 		StringID SoundID = MakeStringID("SOUND__STREAM__" + StringUtils::PointerString(In) + "_" + StringUtils::MakeIntString(SoundCounter));
 
@@ -178,7 +178,7 @@ namespace FlamingTorch
 		if(sit != Sounds.end())
 		{
 			return sit->first;
-		};
+		}
 
 		std::vector<uint8> Data((uint32)(In->Length() - In->Position()));
 
@@ -197,7 +197,7 @@ namespace FlamingTorch
 		SoundCounter++;
 
 		return SoundID;
-	};
+	}
 
 	StringID SoundManager::SoundFromPackage(StringID Directory, StringID FileName)
 	{
@@ -209,10 +209,10 @@ namespace FlamingTorch
 		if(PackageStream.Get() == NULL)
 		{
 			return 0xFFFFFFFF;
-		};
+		}
 
 		return SoundFromStream(PackageStream.Get());
-	};
+	}
 
 	StringID SoundManager::SoundFromFile(const char *FileName)
 	{
@@ -224,17 +224,17 @@ namespace FlamingTorch
 		if(!Stream->Open(FileName, StreamFlags::Read))
 		{
 			return 0xFFFFFFFF;
-		};
+		}
 
 		return SoundFromStream(Stream.Get());
-	};
+	}
 
 	StringID SoundManager::MusicFromStream(Stream *In)
 	{
 		if(!WasStarted)
 		{
 			return 0xFFFFFFFF;
-		};
+		}
 
 		std::stringstream str;
 		str << "MUSIC__STREAM__" << std::hex << (uint64)In << GameClockTimeNoPause();
@@ -246,7 +246,7 @@ namespace FlamingTorch
 		if(sit != Musics.end())
 		{
 			return sit->first;
-		};
+		}
 
 		DisposablePointer<Music> Out(new Music());
 
@@ -266,7 +266,7 @@ namespace FlamingTorch
 		MusicCounter++;
 
 		return MusicID;
-	};
+	}
 
 	StringID SoundManager::MusicFromPackage(StringID Directory, StringID FileName)
 	{
@@ -278,10 +278,10 @@ namespace FlamingTorch
 		if(PackageStream.Get() == NULL)
 		{
 			return 0xFFFFFFFF;
-		};
+		}
 
 		return MusicFromStream(PackageStream.Get());
-	};
+	}
 
 	StringID SoundManager::MusicFromFile(const char *FileName)
 	{
@@ -293,10 +293,10 @@ namespace FlamingTorch
 		if(!Stream->Open(FileName, StreamFlags::Read))
 		{
 			return 0xFFFFFFFF;
-		};
+		}
 
 		return MusicFromStream(Stream.Get());
-	};
+	}
 
 
 	void SoundManager::StartUp(uint32 Priority)
@@ -310,7 +310,7 @@ namespace FlamingTorch
 		Log::Instance.LogInfo(TAG, "SoundManager Subsystem starting..");
 
 		Impl.Reset(new DEFAULT_SOUNDMANAGER_IMPLEMENTATION());
-	};
+	}
 
 	void SoundManager::Shutdown(uint32 Priority)
 	{
@@ -325,7 +325,7 @@ namespace FlamingTorch
 
 			Sounds.begin()->second.Dispose();
 			Sounds.erase(Sounds.begin());
-		};
+		}
 
 		while(Musics.begin() != Musics.end())
 		{
@@ -334,12 +334,12 @@ namespace FlamingTorch
 
 			Musics.begin()->second.Dispose();
 			Musics.erase(Musics.begin());
-		};
+		}
 
 		Impl.Dispose();
 
 		SubSystem::Shutdown(Priority);
-	};
+	}
 
 	void SoundManager::Update(uint32 Priority)
 	{
@@ -348,7 +348,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Cleanup();
-	};
+	}
 
 	void SoundManager::Cleanup()
 	{
@@ -366,11 +366,11 @@ namespace FlamingTorch
 
 				if(it == Sounds.end())
 					break;
-			};
+			}
 
 			if(it == Sounds.end())
 				break;
-		};
+		}
 
 		for(MusicMap::iterator it = Musics.begin(); it != Musics.end(); it++)
 		{
@@ -384,18 +384,18 @@ namespace FlamingTorch
 
 				if(it == Musics.end())
 					break;
-			};
+			}
 
 			if(it == Musics.end())
 				break;
-		};
+		}
 
 		uint32 CurrentObjects = Sounds.size() + Musics.size();
 
 		if(CurrentObjects != TotalObjects)
 		{
 			Log::Instance.LogDebug(TAG, "Cleared %d objects (Prev: %d/Now: %d)", TotalObjects - CurrentObjects, TotalObjects, CurrentObjects);
-		};
-	};
+		}
+	}
 #endif
-};
+}

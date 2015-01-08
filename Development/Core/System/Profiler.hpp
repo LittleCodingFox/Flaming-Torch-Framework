@@ -9,7 +9,7 @@ namespace StatTypes
 		Sound,
 		Count
 	};
-};
+}
 
 class Profiler : public SubSystem
 {
@@ -30,11 +30,11 @@ public:
 	std::mutex Lock;
 
 private:
-	Profiler() : SubSystem(PROFILER_PRIORITY), UpdateTimer(0) {};
+	Profiler() : SubSystem(PROFILER_PRIORITY), UpdateTimer(0) {}
 public:
 	static Profiler Instance;
 
-	~Profiler() {};
+	~Profiler() {}
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);

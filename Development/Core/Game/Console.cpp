@@ -11,14 +11,14 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < ConsoleCommands.size(); i++)
 		{
 			LogConsole("  " + ConsoleCommands[i]->Name);
-		};
-	};
+		}
+	}
 
 	void Console::VersionCommand(const std::vector<std::string> &Parameters)
 	{
 		LogConsole(std::string("> ") + (GameInterface::Instance ? GameInterface::Instance->GameName() : "(No Game)") +
 			" using core version " + CoreUtils::MakeVersionString(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR));
-	};
+	}
 
 #if USE_GRAPHICS
 	void Console::ValidKeyCommand(const std::vector<std::string> &Parameters)
@@ -34,7 +34,7 @@ namespace FlamingTorch
 			if(!First)
 			{
 				str << ", ";
-			};
+			}
 
 			First = false;
 			str << it->second;
@@ -43,11 +43,11 @@ namespace FlamingTorch
 			{
 				Counter -= 100;
 				str << "\n";
-			};
-		};
+			}
+		}
 
 		LogConsole("> Valid Keys: " + str.str());
-	};
+	}
 
 	void Console::BindCommand(const std::vector<std::string> &Parameters)
 	{
@@ -90,22 +90,22 @@ namespace FlamingTorch
 					LogConsole("> Invalid Action detected - " + Action);
 
 					break;
-				};
+				}
 			}
 			else
 			{
 				LogConsole("> UNBOUND");
-			};
+			}
 
 			return;
-		};
+		}
 
 		if(Parameters.size() != 2)
 		{
 			LogConsole("Should have 2 parameters (have " + StringUtils::MakeIntString((uint32)Parameters.size()) + ")");
 
 			return;
-		};
+		}
 
 		std::string Action = StringUtils::ToUpperCase(Parameters[0]), Target = StringUtils::ToUpperCase(Parameters[1]);
 
@@ -123,7 +123,7 @@ namespace FlamingTorch
 				LogConsole("> Invalid key identifier (should be JOY<joyindex>AXIS<axis><+/->, e.g. JOY0AXISX-)");
 
 				return;
-			};
+			}
 
 			if(Target[Target.length() - 1] == '+')
 			{
@@ -138,7 +138,7 @@ namespace FlamingTorch
 				LogConsole("> Invalid key identifier (Missing + or - at end; Example: JOYAXISX+)");
 
 				return;
-			};
+			}
 
 			int32 Index = Target.find("AXIS") + strlen("AXIS");
 			Target = Target.substr(Index, Target.length() - Index - 1);
@@ -157,15 +157,15 @@ namespace FlamingTorch
 					TheAction.SecondaryIndex = Counter;
 
 					break;
-				};
-			};
+				}
+			}
 
 			if(!Found)
 			{
 				LogConsole("> Invalid key identifier (Incorrect axis '" + Target + "')");
 
 				return;
-			};
+			}
 		}
 		else if(Target.find("JOYBUTTON") == 0)
 		{
@@ -178,7 +178,7 @@ namespace FlamingTorch
 				LogConsole("> Invalid key identifier");
 
 				return;
-			};
+			}
 
 			TheAction.Index = 0;
 			TheAction.SecondaryIndex = Index;
@@ -208,7 +208,7 @@ namespace FlamingTorch
 					LogConsole("> Invalid key identifier (Incorrect mouse scroll value '" + Target + "')");
 
 					return;
-				};
+				}
 			}
 			else
 			{
@@ -225,16 +225,16 @@ namespace FlamingTorch
 						TheAction.Index = Counter;
 
 						break;
-					};
-				};
+					}
+				}
 
 				if(!Found)
 				{
 					LogConsole("> Invalid key identifier (Incorrect button '" + Target + "')");
 
 					return;
-				};
-			};
+				}
+			}
 		}
 		else if(Target.find("KEY") == 0)
 		{
@@ -255,25 +255,25 @@ namespace FlamingTorch
 					TheAction.Index = Counter;
 
 					break;
-				};
-			};
+				}
+			}
 
 			if(!Found)
 			{
 				LogConsole("> Invalid key identifier (Incorrect key '" + Target + "')");
 
 				return;
-			};
+			}
 		}
 		else
 		{
 			LogConsole("> Invalid key identifier '" + Target + "'");
-		};
+		}
 
 		RendererManager::Instance.Input.RegisterAction(TheAction);
 
 		LogConsole("[" + Action + "] => [" + Target + "]");
-	};
+	}
 
 	void Console::ScreenshotCommand(const std::vector<std::string> &Parameters)
 	{
@@ -296,7 +296,7 @@ namespace FlamingTorch
 			LogConsole("Failed to take screenshot: Unable to capture screen");
 
 			return;
-		};
+		}
 
 		t.FlipY();
 
@@ -313,7 +313,7 @@ namespace FlamingTorch
 			LogConsole("Failed to take screenshot: Unable to open '" + ScreenFileName + "' for writing");
 
 			return;
-		};
+		}
 
 		TextureEncoderInfo TEInfo;
 		TEInfo.Encoder = TextureEncoderType::PNG;
@@ -323,10 +323,10 @@ namespace FlamingTorch
 			LogConsole("Failed to take screenshot: Unable to save '" + ScreenFileName + "'");
 
 			return;
-		};
+		}
 
 		LogConsole("Successfully took screenshot '" + ScreenFileName + "'");
-	};
+	}
 
 #endif
 
@@ -370,12 +370,12 @@ namespace FlamingTorch
 		RegisterVariable(ConsoleVariable("r_drawui", (uint32)1));
 		RegisterVariable(ConsoleVariable("r_drawrenderstats", (uint32)0));
 #endif
-	};
+	}
 
 	void Console::Update(uint32 Priority)
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
-	};
+	}
 
 	void Console::Shutdown(uint32 Priority)
 	{
@@ -383,7 +383,7 @@ namespace FlamingTorch
 
 		ConsoleCommands.clear();
 		ConsoleVariables.clear();
-	};
+	}
 
 	void Console::RegisterVariable(const ConsoleVariable &Variable)
 	{
@@ -394,11 +394,11 @@ namespace FlamingTorch
 				Log::Instance.LogWarn(TAG, "Unable to register ConVar '%s': Already exists", Variable.Name.c_str());
 
 				return;
-			};
-		};
+			}
+		}
 
 		ConsoleVariables.push_back(Variable);
-	};
+	}
 
 	ConsoleVariable *Console::GetVariable(const std::string &Name)
 	{
@@ -406,10 +406,10 @@ namespace FlamingTorch
 		{
 			if(ConsoleVariables[i].Name == Name)
 				return &ConsoleVariables[i];
-		};
+		}
 
 		return NULL;
-	};
+	}
 
 	void Console::RegisterCommand(DisposablePointer<ConsoleCommand> Command)
 	{
@@ -420,11 +420,11 @@ namespace FlamingTorch
 				Log::Instance.LogWarn(TAG, "Unable to register ConCmd '%s': Already exists", Command->Name.c_str());
 
 				return;
-			};
-		};
+			}
+		}
 
 		ConsoleCommands.push_back(Command);
-	};
+	}
 
 	void Console::LogConsole(const std::string &Message)
 	{
@@ -437,13 +437,13 @@ namespace FlamingTorch
 			for(uint32 i = 0; i < Lines.size(); i++)
 			{
 				ConsoleLog.push_back(Lines[i]);
-			};
+			}
 		}
 		else
 		{
 			ConsoleLog.push_back(Message);
-		};
-	};
+		}
+	}
 
 	void Console::RunConsoleCommand(const std::string &ConsoleText)
 	{
@@ -476,14 +476,14 @@ namespace FlamingTorch
 					CurrentParameter.push_back(Parameters[i]);
 
 					continue;
-				};
+				}
 
 				if(Parameters[i] == '\\')
 				{
 					Escaping = true;
 
 					continue;
-				};
+				}
 
 				if(Parameters[i] == '\"')
 				{
@@ -504,11 +504,11 @@ namespace FlamingTorch
 							ParameterStrings.push_back(CurrentParameter);
 
 							CurrentParameter.clear();
-						};
-					};
+						}
+					}
 
 					continue;
-				};
+				}
 
 				if(Parameters[i] == ' ' && !InsideString)
 				{
@@ -517,17 +517,17 @@ namespace FlamingTorch
 						ParameterStrings.push_back(CurrentParameter);
 
 						CurrentParameter.clear();
-					};
+					}
 
 					continue;
-				};
+				}
 
 				CurrentParameter.push_back(Parameters[i]);
-			};
+			}
 
 			if(CurrentParameter.length())
 				ParameterStrings.push_back(CurrentParameter);
-		};
+		}
 
 		bool Found = false;
 
@@ -540,8 +540,8 @@ namespace FlamingTorch
 				ConsoleCommands[i]->Method(ParameterStrings);
 
 				break;
-			};
-		};
+			}
+		}
 
 		if(!Found)
 		{
@@ -565,8 +565,8 @@ namespace FlamingTorch
 							else
 							{
 								ConsoleVariables[i].UIntValue = Value;
-							};
-						};
+							}
+						}
 
 						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].UIntValue));
 
@@ -584,8 +584,8 @@ namespace FlamingTorch
 							else
 							{
 								ConsoleVariables[i].IntValue = Value;
-							};
-						};
+							}
+						}
 
 						LogConsole(std::string("> ") + StringUtils::MakeIntString(ConsoleVariables[i].IntValue));
 
@@ -603,8 +603,8 @@ namespace FlamingTorch
 							else
 							{
 								ConsoleVariables[i].FloatValue = Value;
-							};
-						};
+							}
+						}
 
 						LogConsole(std::string("> ") + StringUtils::MakeFloatString(ConsoleVariables[i].FloatValue));
 
@@ -617,16 +617,16 @@ namespace FlamingTorch
 						LogConsole(std::string("> ") + ConsoleVariables[i].StringValue);
 
 						break;
-					};
+					}
 
 					break;
-				};
-			};
-		};
+				}
+			}
+		}
 
 		if(!Found)
 		{
 			LogConsole("Invalid Command or Variable");
-		};
-	};
-};
+		}
+	}
+}

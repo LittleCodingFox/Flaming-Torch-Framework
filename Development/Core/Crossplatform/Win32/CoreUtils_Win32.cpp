@@ -16,7 +16,7 @@ namespace FlamingTorch
 
 		//TODO: Version String
 		return "Windows [" + ArchString + "]";
-	};
+	}
 
 	int32 CoreUtils::RunProgram(const std::string &_ExePath, const std::string &Parameters, const std::string &WorkingDirectory)
 	{
@@ -43,7 +43,7 @@ namespace FlamingTorch
 		if (!ShellExecuteExA(&sei))
 		{
 			return -1;
-		};
+		}
 
 		DWORD ExitCode = 1;
 
@@ -52,7 +52,7 @@ namespace FlamingTorch
 		CloseHandle(sei.hProcess);
 
 		return ExitCode;
-	};
+	}
 
 	Rect CoreUtils::GetDesktopWorkArea()
 	{
@@ -67,6 +67,6 @@ namespace FlamingTorch
 			return Rect();
 
 		return Rect((f32)MonitorInfo.rcWork.left, (f32)MonitorInfo.rcWork.right, (f32)MonitorInfo.rcWork.top, (f32)MonitorInfo.rcWork.bottom);
-	};
-};
+	}
+}
 #endif

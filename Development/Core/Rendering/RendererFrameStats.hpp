@@ -42,7 +42,7 @@ public:
 	std::string RendererCustomMessage;
 
 	RendererFrameStats() : DrawCalls(0), VertexCount(0), TextureChanges(0), MatrixChanges(0), ClippingChanges(0),
-		StateChanges(0), TotalResources(0), TotalResourceUsage(0), SkippedDrawCalls(0) {};
+		StateChanges(0), TotalResources(0), TotalResourceUsage(0), SkippedDrawCalls(0) {}
 
 	/*!
 	*	Clears the statistics
@@ -53,6 +53,6 @@ public:
 			StateChanges = TotalResources = SkippedDrawCalls = 0;
 
 		TotalResourceUsage = 0.0f;
-	};
+	}
 };
 #endif

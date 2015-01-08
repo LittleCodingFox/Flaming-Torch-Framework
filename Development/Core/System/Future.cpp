@@ -14,7 +14,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo(TAG, "Starting Future Subsystem");
-	};
+	}
 
 	void Future::Shutdown(uint32 Priority)
 	{
@@ -22,7 +22,7 @@ namespace FlamingTorch
 		WasStarted = false;
 
 		Log::Instance.LogInfo(TAG, "Shutting down Future Subsystem");
-	};
+	}
 
 	void Future::Update(uint32 Priority)
 	{
@@ -47,10 +47,10 @@ namespace FlamingTorch
 					Found = true;
 
 					break;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 
 	void Future::Post(FutureFn Ptr, const MemoryStream &Stream)
 	{
@@ -59,7 +59,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
-		};
+		}
 
 		FutureInfo Future;
 		Future.StartTime = GameClockTime();
@@ -69,7 +69,7 @@ namespace FlamingTorch
 		Future.Signal.Connect(Ptr);
 
 		Futures.push_back(Future);
-	};
+	}
 
 	void Future::PostDelayed(FutureFn Ptr, uint32 Length, const MemoryStream &Stream)
 	{
@@ -78,7 +78,7 @@ namespace FlamingTorch
 			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
-		};
+		}
 
 		FutureInfo Future;
 		Future.StartTime = GameClockTime();
@@ -88,5 +88,5 @@ namespace FlamingTorch
 		Future.Signal.Connect(Ptr);
 
 		Futures.push_back(Future);
-	};
-};
+	}
+}

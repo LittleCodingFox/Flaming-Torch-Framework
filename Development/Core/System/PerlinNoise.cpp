@@ -123,4 +123,4 @@ namespace FlamingTorch
 				((uint8) (green * ((pDataf32[i] - min) / (max - min)) * 255) << 8) | (uint8) (blue * ((pDataf32[i] - min) / (max - min)) * 255);
 		}
 	}
-};
+}

@@ -32,7 +32,7 @@ public:
 	bool IsPassword() const
 	{
 		return IsPasswordValue;
-	};
+	}
 
 	/*!
 	*	Sets whether this textbox is a password
@@ -41,7 +41,7 @@ public:
 	void SetPassword(bool Value)
 	{
 		IsPasswordValue = Value;
-	};
+	}
 
 	/*!
 	*	\return the Text of this Text Box
@@ -49,7 +49,7 @@ public:
 	const std::string &GetText() const
 	{
 		return Text;
-	};
+	}
 
 	/*!
 	*	Sets the Text of this Text Box
@@ -59,6 +59,6 @@ public:
 	{
 		this->Text = Text;
 		CursorPosition = TextOffset = 0;
-	};
+	}
 };
 #endif

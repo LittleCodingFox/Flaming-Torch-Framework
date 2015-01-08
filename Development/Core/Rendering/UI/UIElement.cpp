@@ -15,14 +15,14 @@ namespace FlamingTorch
 				if(Owner->GetFocusedElement().Get() != this)
 				{
 					Owner->ClearFocus();
-				};
+				}
 
 				Owner->FocusedElementValue = it->second->Element;
 
 				Owner->FocusedElementValue->OnEvent(UIEventType::GainedFocus, { Owner });
-			};
-		};
-	};
+			}
+		}
+	}
 
 	UIElement::UIElement(const std::string &NativeTypeName, UIManager *_Manager) : NativeTypeValue(NativeTypeName),
 		ManagerValue(_Manager), VisibleValue(true),
@@ -36,20 +36,20 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < UIEventType::Count; i++)
 		{
 			EventErrorCache[i] = true;
-		};
+		}
 
 		OnEvent.Connect<UIElement, &UIElement::OnEventPrivate>(this);
-	};
+	}
 
 	void UIElement::SetSkin(DisposablePointer<GenericConfig> Skin)
 	{
 		SkinValue = Skin;
-	};
+	}
 
 	void UIElement::Update(const Vector2 &ParentPosition)
 	{
 		OnEvent(UIEventType::Update, { const_cast<Vector2 *>(&ParentPosition) });
-	};
+	}
 
 	void UIElement::OnEventPrivate(uint32 Type, std::vector<void *> Args)
 	{
@@ -96,7 +96,7 @@ namespace FlamingTorch
 				ClickPressed = false;
 
 				OnEvent(UIEventType::Click, Args);
-			};
+			}
 
 			ClickPressed = false;
 
@@ -177,7 +177,7 @@ namespace FlamingTorch
 				ClickPressed = false;
 
 				OnEvent(UIEventType::Click, Args);
-			};
+			}
 
 			ClickPressed = false;
 
@@ -273,7 +273,7 @@ namespace FlamingTorch
 				JoystickButtonPressed = false;
 
 				OnEvent(UIEventType::JoystickTap, Args);
-			};
+			}
 
 			JoystickButtonPressed = false;
 
@@ -362,7 +362,7 @@ namespace FlamingTorch
 
 				FailedArgCount = Args.size() != 1;
 				EventErrorCache[Type] = !FailedArgCount && RunUIScriptEvents<UIElement *, std::string>(EventScriptHandlers[Type], NameValue, !EventErrorCache[Type], this, Temp);
-			};
+			}
 
 			break;
 
@@ -406,8 +406,8 @@ namespace FlamingTorch
 				!EventErrorCache[Type], this, *static_cast<const Vector2 *>(Args[0]));
 
 			break;
-		};
-	};
+		}
+	}
 
 	void UIElement::OnConstructed()
 	{
@@ -415,12 +415,12 @@ namespace FlamingTorch
 		ClickPressed = IsInputBlockerValue = RespondsToTooltipsValue = JoystickButtonPressed = false;
 
 		PropertyValues = luabind::newtable(Manager()->ScriptInstance->State);
-	};
+	}
 
 	void UIElement::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
 		OnEvent(UIEventType::Draw, { const_cast<Vector2 *>(&ParentPosition) });
-	};
+	}
 
 	void UIElement::DrawUIFocusZone(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -458,11 +458,11 @@ namespace FlamingTorch
 				ParentCounter++;
 
 				ParentPanel = ParentPanel->ParentValue;
-			};
+			}
 
 			RenderTextUtils::RenderText(Renderer, StringUtils::MakeIntString(ParentCounter), TextParams().Position(AABB.min.ToVector2() + Vector2(IndicatorPosition, 0)));
-		};
-	};
+		}
+	}
 
 	void UIElement::DrawUIRect(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -481,8 +481,8 @@ namespace FlamingTorch
 			TheSprite.Options.Wireframe(true).WireframePixelSize(1).Position(AABB.min.ToVector2()).Scale(PanelSize).Color(Vector4(1, 0.75f, 0, 0.75f));
 			
 			TheSprite.Draw(Renderer);
-		};
-	};
+		}
+	}
 
 	void UIElement::Clear()
 	{
@@ -496,8 +496,8 @@ namespace FlamingTorch
 
 			if(NewSize == OldSize)
 				ChildrenValue.erase(ChildrenValue.begin());
-		};
-	};
+		}
+	}
 
 	UIElement::~UIElement()
 	{
@@ -514,112 +514,112 @@ namespace FlamingTorch
 		Properties.clear();
 
 		GlobalsTracker.Clear();
-	};
+	}
 
 	void UIElement::SetPropagatesEvents(bool Value)
 	{
 		PropagatesEventsValue = Value;
-	};
+	}
 
 	bool UIElement::PropagatesEvents() const
 	{
 		return PropagatesEventsValue;
-	};
+	}
 
 	void UIElement::SetInputBlockerBackground(bool Value)
 	{
 		DrawsInputBlockerBackgroundValue = Value;
-	};
+	}
 
 	bool UIElement::InputBlockerBackground() const
 	{
 		return DrawsInputBlockerBackgroundValue;
-	};
+	}
 
 	void UIElement::SetRespondsToTooltips(bool Value)
 	{
 		RespondsToTooltipsValue = Value;
-	};
+	}
 
 	void UIElement::SetTooltipsFixed(bool Value)
 	{
 		TooltipsAreFixedValue = Value;
-	};
+	}
 
 	bool UIElement::TooltipsFixed() const
 	{
 		return TooltipsAreFixedValue;
-	};
+	}
 
 	void UIElement::SetTooltipsPosition(const Vector2 &Position)
 	{
 		TooltipPositionValue = Position;
-	};
+	}
 
 	const Vector2 &UIElement::TooltipsPosition() const
 	{
 		return TooltipPositionValue;
-	};
+	}
 
 	void UIElement::SetEnabledInputTypes(uint32 Types)
 	{
 		EnabledInputsValue = Types;
-	};
+	}
 
 	uint32 UIElement::EnabledInputTypes() const
 	{
 		return EnabledInputsValue;
-	};
+	}
 
 	const std::string &UIElement::Name() const
 	{
 		return NameValue;
-	};
+	}
 
 	const std::string &UIElement::NativeType() const
 	{
 		return NativeTypeValue;
-	};
+	}
 
 	const Vector2 &UIElement::Offset() const
 	{
 		return OffsetValue;
-	};
+	}
 
 	void UIElement::SetOffset(const Vector2 &Offset)
 	{
 		OffsetValue = Offset;
-	};
+	}
 
 	DisposablePointer<UIElement> UIElement::TooltipElement() const
 	{
 		return TooltipElementValue;
-	};
+	}
 
 	bool UIElement::BlockingInput() const
 	{
 		return IsInputBlockerValue;
-	};
+	}
 
 	void UIElement::SetBlockingInput(bool Value)
 	{
 		IsInputBlockerValue = Value;
-	};
+	}
 
 	void UIElement::SetTooltipElement(DisposablePointer<UIElement> Element)
 	{
 		TooltipElementValue = Element;
-	};
+	}
 
 	UIManager *UIElement::Manager() const
 	{
 		return ManagerValue;
-	};
+	}
 
 	StringID UIElement::ID() const
 	{
 		return IDValue;
-	};
+	}
 
 	Vector2 UIElement::ParentPosition() const
 	{
@@ -634,30 +634,30 @@ namespace FlamingTorch
 			Position += Parent->Position() + Parent->Offset();
 
 			Parent = Parent->Parent();
-		};
+		}
 
 		return Position;
-	};
+	}
 
 	void UIElement::SetVisible(bool value)
 	{
 		VisibleValue = value;
-	};
+	}
 
 	bool UIElement::Visible() const
 	{
 		return VisibleValue;
-	};
+	}
 
 	void UIElement::SetEnabled(bool value)
 	{
 		EnabledValue = value;
-	};
+	}
 
 	bool UIElement::Enabled() const
 	{
 		return EnabledValue;
-	};
+	}
 
 	void UIElement::AddChild(DisposablePointer<UIElement> Child)
 	{
@@ -674,11 +674,11 @@ namespace FlamingTorch
 		if (Child->ParentValue)
 		{
 			Child->ParentValue->RemoveChild(Child);
-		};
+		}
 
 		ChildrenValue.push_back(Child);
 		Child->ParentValue = Manager()->GetElement(IDValue);
-	};
+	}
 
 	void UIElement::RemoveChild(DisposablePointer<UIElement> Child)
 	{
@@ -699,39 +699,39 @@ namespace FlamingTorch
 
 				if(it == ChildrenValue.end())
 					return;
-			};
-		};
-	};
+			}
+		}
+	}
 
 	uint32 UIElement::ChildrenCount() const
 	{
 		return ChildrenValue.size();
-	};
+	}
 
 	DisposablePointer<UIElement> UIElement::Child(uint32 Index) const
 	{
 		return ChildrenValue.size() > Index ? ChildrenValue[Index] : DisposablePointer<UIElement>();
-	};
+	}
 
 	DisposablePointer<UIElement> UIElement::Parent() const
 	{
 		return ParentValue;
-	};
+	}
 
 	const Vector2 &UIElement::Position() const
 	{
 		return PositionValue;
-	};
+	}
 
 	void UIElement::SetPosition(const Vector2 &Position)
 	{
 		PositionValue = Position;
-	};
+	}
 
 	const Vector2 &UIElement::Size() const
 	{
 		return SizeValue;
-	};
+	}
 
 	void UIElement::SetSize(const Vector2 &Size)
 	{
@@ -742,7 +742,7 @@ namespace FlamingTorch
 
 		if(SizeValue.y < 0)
 			SizeValue.y = 0;
-	};
+	}
 
 	Vector2 UIElement::ChildrenSize() const
 	{
@@ -760,19 +760,19 @@ namespace FlamingTorch
 
 			if(Out.y < Size.y)
 				Out.y = Size.y;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	UILayout *UIElement::Layout() const
 	{
 		return LayoutValue;
-	};
+	}
 
 	bool UIElement::RespondsToTooltips() const
 	{
 		return RespondsToTooltipsValue && TooltipElementValue.Get();
-	};
+	}
 #endif
-};
+}

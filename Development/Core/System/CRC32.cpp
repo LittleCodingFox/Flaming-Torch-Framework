@@ -18,11 +18,11 @@ namespace FlamingTorch
             for(uint32 j = 0; j < 8; j++)
             {
                 CRC = (CRC & 0x80000000) != 0 ? (CRC << 1 ^ Poly) : (CRC << 1);
-            };
+            }
 
 			Value = CRC;
-		};
-	};
+		}
+	}
 
 	uint32 CRC32::Reflect(uint32 Reflect, char Char)
 	{
@@ -33,13 +33,13 @@ namespace FlamingTorch
 			if(Reflect & 1)
 			{
 				Value |= (1 << (Char - i));
-			};
+			}
 
 			Reflect >>= 1;
-		};
+		}
 
 		return Value;
-	};
+	}
 
 	uint32 CRC32::CRC(const uint8 *Data, uint32 DataLength)
 	{
@@ -49,7 +49,7 @@ namespace FlamingTorch
 			OutCRC = (OutCRC >> 8) ^ LookupTable[(OutCRC & 0xFF) ^ *Data++];
 
 		return OutCRC ^ 0xFFFFFFFF;
-	};
+	}
 
 	uint32 CRC32::IterateCRC(const uint8 *Data, uint32 DataLength, uint32 PreviousCRC)
 	{
@@ -59,10 +59,10 @@ namespace FlamingTorch
 			OutCRC = (OutCRC >> 8) ^ LookupTable[(OutCRC & 0xFF) ^ *Data++];
 
 		return OutCRC;
-	};
+	}
 
 	uint32 CRC32::FinishCRCIteration(uint32 PreviousCRC)
 	{
 		return PreviousCRC ^ 0xFFFFFFFF;
-	};
-};
+	}
+}

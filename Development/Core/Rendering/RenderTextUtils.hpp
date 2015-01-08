@@ -10,7 +10,7 @@ struct TextGlyphInfo
 	DisposablePointer<TextureBuffer> Pixels;
 	Vector2 Offset;
 
-	TextGlyphInfo() : Advance(0) {};
+	TextGlyphInfo() : Advance(0) {}
 };
 
 /*!
@@ -25,7 +25,7 @@ namespace TextStyle
 		Italic = FLAGVALUE(2),
 		Underline = FLAGVALUE(3)
 	};
-};
+}
 
 /*!
 *	Text rendering parameters
@@ -44,7 +44,7 @@ public:
 		FontValue(0), FontSizeValue(12), StyleValue(TextStyle::Regular), RotationValue(0) {}
 	TextParams(const TextParams &o) : BorderSizeValue(o.BorderSizeValue), TextColorValue(o.TextColorValue),
 		SecondaryTextColorValue(o.SecondaryTextColorValue), BorderColorValue(o.BorderColorValue), PositionValue(o.PositionValue),
-		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), StyleValue(o.StyleValue), RotationValue(o.RotationValue) {};
+		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), StyleValue(o.StyleValue), RotationValue(o.RotationValue) {}
 
 	TextParams &operator=(const TextParams &o)
 	{
@@ -59,7 +59,7 @@ public:
 		RotationValue = o.RotationValue;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the text's rotation
@@ -70,7 +70,7 @@ public:
 		RotationValue = Rotation;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the font style
@@ -81,7 +81,7 @@ public:
 		StyleValue = Style;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the text font
@@ -92,7 +92,7 @@ public:
 		FontValue = Font;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the text font size
@@ -103,7 +103,7 @@ public:
 		FontSizeValue = FontSize;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the text color
@@ -116,7 +116,7 @@ public:
 		TextColorValue = SecondaryTextColorValue = Color;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the secondary text color
@@ -128,7 +128,7 @@ public:
 		SecondaryTextColorValue = SecondaryColor;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the border color for the text
@@ -140,7 +140,7 @@ public:
 		BorderColorValue = BorderColor;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the border size for the text
@@ -152,7 +152,7 @@ public:
 		BorderSizeValue = BorderSize;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the text position
@@ -163,7 +163,7 @@ public:
 		PositionValue = Position;
 
 		return *this;
-	};
+	}
 };
 
 class RenderTextUtils

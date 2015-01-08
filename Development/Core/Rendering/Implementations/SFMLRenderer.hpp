@@ -29,8 +29,8 @@ namespace FlamingTorch
 
 			uint32 ResourceSize;
 
-			FontInfo() : ResourceSize(0) {};
-			~FontInfo() { ActualFont.Dispose(); };
+			FontInfo() : ResourceSize(0) {}
+			~FontInfo() { ActualFont.Dispose(); }
 		};
 
 		class TextureInfo
@@ -67,7 +67,7 @@ namespace FlamingTorch
 			std::vector<Vector2> Positions, TexCoords;
 			std::vector<Vector4> Colors;
 
-			RenderTextCache() : TheTexture(NULL) {};
+			RenderTextCache() : TheTexture(NULL) {}
 		};
 
 		RenderTextCache TheRenderTextCache;

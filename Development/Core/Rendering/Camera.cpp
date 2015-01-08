@@ -5,12 +5,12 @@ namespace FlamingTorch
 	void Camera::SetOrtho(Rect Bounds, f32 zNear, f32 zFar)
 	{
 		ProjectionTransform = Matrix4x4::OrthoMatrixRH(Bounds.Left, Bounds.Right, Bounds.Bottom, Bounds.Top, zNear, zFar);
-	};
+	}
 
 	void Camera::SetPerspective(f32 FOV, f32 Aspect, f32 zNear, f32 zFar)
 	{
 		ProjectionTransform = Matrix4x4::PerspectiveMatrixRH(FOV, Aspect, zNear, zFar);
-	};
+	}
 
 #if USE_GRAPHICS
 	void Camera::BeginTransforms(Renderer *TheRenderer)
@@ -25,13 +25,13 @@ namespace FlamingTorch
 		TheRenderer->PushMatrices();
 		TheRenderer->SetProjectionMatrix(ProjectionTransform);
 		TheRenderer->SetWorldMatrix(CameraTransform);
-	};
+	}
 
 	void Camera::EndTransforms(Renderer *TheRenderer)
 	{
 		SpriteCache::Instance.Flush(TheRenderer);
 
 		TheRenderer->PopMatrices();
-	};
+	}
 #endif
-};
+}

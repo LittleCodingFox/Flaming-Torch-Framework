@@ -9,7 +9,7 @@ namespace FlamingTorch
 		OnConstructed();
 
 		TextParameters = TextParameters.FontSize(UIELEMENT_DEFAULT_FONT_SIZE);
-	};
+	}
 
 	void UIText::SetSkin(DisposablePointer<GenericConfig> Skin)
 	{
@@ -19,7 +19,7 @@ namespace FlamingTorch
 		SkinValue = Skin;
 
 		TextParameters.Font(ManagerValue->DefaultFontHandle).FontSize(ManagerValue->DefaultTextFontSize).Color(ManagerValue->DefaultTextColor).SecondaryColor(ManagerValue->DefaultTextSecondaryColor);
-	};
+	}
 
 	void UIText::SetText(const std::string &String)
 	{
@@ -35,13 +35,13 @@ namespace FlamingTorch
 			Info.Size = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), OutputStrings[i], TextParameters);
 
 			Strings.push_back(Info);
-		};
-	};
+		}
+	}
 
 	const std::string &UIText::Text() const
 	{
 		return TextValue;
-	};
+	}
 
 	Vector2 UIText::TextSize() const
 	{
@@ -53,15 +53,15 @@ namespace FlamingTorch
 
 			if (Size.x < Strings[i].Size.Size().x)
 				Size.x = Strings[i].Size.Size().x;
-		};
+		}
 
 		return Size;
-	};
+	}
 
 	void UIText::Update(const Vector2 &ParentPosition)
 	{
 		UIElement::Update(ParentPosition);
-	};
+	}
 
 	void UIText::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -81,7 +81,7 @@ namespace FlamingTorch
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
 				YOffset += MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue);
-			};
+			}
 
 			YOffset = MathUtils::Clamp((SizeValue.y - YOffset) / 2, 0, SizeValue.y);
 		}
@@ -90,10 +90,10 @@ namespace FlamingTorch
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
 				YOffset += MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue);
-			};
+			}
 
 			YOffset = SizeValue.y - YOffset;
-		};
+		}
 
 		f32 TextYOffset = YOffset;
 
@@ -115,16 +115,16 @@ namespace FlamingTorch
 			else
 			{
 				ChildrenPosition = Vector2(0, (f32)TextYOffset);
-			};
+			}
 
 			Vector2 FinalPosition = ActualPosition + ChildrenPosition;
 
 			RenderTextUtils::RenderText(Renderer, Strings[i].TheString, TextParams(TextParameters).Position(FinalPosition)
 				.Color(TextParameters.TextColorValue).SecondaryColor(TextParameters.SecondaryTextColorValue));
-		};
+		}
 
 		DrawUIFocusZone(ParentPosition, Renderer);
 		DrawUIRect(ParentPosition, Renderer);
-	};
+	}
 #endif
-};
+}

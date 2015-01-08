@@ -12,7 +12,7 @@ namespace AABBResults
 		Intersecting, //!<The AABB is Intersecting our Frustum
 		Invisible //!<The AABB is Invisible
 	};
-};
+}
 
 /*!
 *	A Frustum Culling class

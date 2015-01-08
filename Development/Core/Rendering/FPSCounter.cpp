@@ -7,7 +7,7 @@ namespace FlamingTorch
 	uint32 FPSCounter::FPS()
 	{
 		return CurrentFPS;
-	};
+	}
 
 	void FPSCounter::StartUp(uint32 Priority)
 	{
@@ -18,7 +18,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Log::Instance.LogInfo("FPSCounter", "Initializing FPS Counter...");
-	};
+	}
 
 	void FPSCounter::Shutdown(uint32 Priority)
 	{
@@ -27,7 +27,7 @@ namespace FlamingTorch
 		SubSystem::Shutdown(Priority);
 
 		Log::Instance.LogInfo("FPSCounter", "Terminating FPS Counter...");
-	};
+	}
 
 	void FPSCounter::Update(uint32 Priority)
 	{
@@ -43,6 +43,6 @@ namespace FlamingTorch
 			Time -= 1.f;
 			CurrentFPS = Counter;
 			Counter = 0;
-		};
-	};
-};
+		}
+	}
+}

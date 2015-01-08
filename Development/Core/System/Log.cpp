@@ -21,7 +21,7 @@ namespace FlamingTorch
 			Err,
 			Debug
 		};
-	};
+	}
 
 	inline std::string LogTime(bool FileName = false)
 	{
@@ -34,7 +34,7 @@ namespace FlamingTorch
 			localtime(&rawtime));
 
 		return Buffer;
-	};
+	}
 
 	void Log::StartUp(uint32 Priority)
 	{
@@ -61,7 +61,7 @@ namespace FlamingTorch
 		else
 		{
 			fputs("\n\n>>>>>> Starting Session <<<<<<\n", LogFile);
-		};
+		}
 
 		LogInfo("Log", "Starting Logging Subsystem");
 		LogInfo("Log", "Core Build: %s", CoreUtils::MakeVersionString(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR).c_str());
@@ -69,7 +69,7 @@ namespace FlamingTorch
 		LogInfo("Log", "Working Directory: %s", FileSystemUtils::ActiveDirectory().c_str());
 		LogInfo("Log", "Resources Directory: %s", FileSystemUtils::ResourcesDirectory().c_str());
 		LogInfo("Log", "Preferred Storage Directory: %s\n\n", FileSystemUtils::PreferredStorageDirectory().c_str());
-	};
+	}
 
 	void Log::Shutdown(uint32 Priority)
 	{
@@ -78,7 +78,7 @@ namespace FlamingTorch
 		LogInfo("Log", "Terminating Logging Subsystem");
 
 		SubSystem::Shutdown(Priority);
-	};
+	}
 
 	void Log::BaseLog(uint8 Level, const std::string &Message)
 	{
@@ -102,7 +102,7 @@ namespace FlamingTorch
 			Prefix = "[Debug] ";
 
 			break;
-		};
+		}
 
 		std::string Final = Prefix + LogTime() + std::string(": ") + Message + "\n";
 		std::string FinalPrint = Prefix + std::string(": ") + Message + "\n";
@@ -111,14 +111,14 @@ namespace FlamingTorch
 		{
 			fputs(Final.c_str(), LogFile);
 			fflush(LogFile);
-		};
+		}
 
 		printf("%s", (PrintTime ? Final : FinalPrint).c_str());
 
 #if FLPLATFORM_ANDROID
 		__android_log_print(ANDROID_LOG_DEBUG, "Core", (PrintTime ? Final : FinalPrint).c_str());
 #endif
-	};
+	}
 
 	inline std::string ProcessMessage(const char *Format, va_list vp)
 	{
@@ -126,12 +126,12 @@ namespace FlamingTorch
 		vsnprintf(Buffer, 102400, Format, vp);
 
 		return Buffer;
-	};
+	}
 
 	void Log::HideTag(const std::string &Tag)
 	{
 		HiddenTags.push_back(Tag);
-	};
+	}
 
 	void Log::LogInfo(const char *Tag, const char *Format, ...)
 	{
@@ -145,7 +145,7 @@ namespace FlamingTorch
 		va_end(vp);
 
 		BaseLog(LoggingLevel::Info, str.str());
-	};
+	}
 
 	void Log::LogWarn(const char *Tag, const char *Format, ...)
 	{
@@ -159,7 +159,7 @@ namespace FlamingTorch
 		va_end(vp);
 
 		BaseLog(LoggingLevel::Warn, str.str());
-	};
+	}
 
 	void Log::LogErr(const char *Tag, const char *Format, ...)
 	{
@@ -173,7 +173,7 @@ namespace FlamingTorch
 		va_end(vp);
 
 		BaseLog(LoggingLevel::Err, str.str());
-	};
+	}
 
 	void Log::LogDebug(const char *Tag, const char *Format, ...)
 	{
@@ -189,5 +189,5 @@ namespace FlamingTorch
 
 		BaseLog(LoggingLevel::Debug, str.str());
 #endif
-	};
-};
+	}
+}

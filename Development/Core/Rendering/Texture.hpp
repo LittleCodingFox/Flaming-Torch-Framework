@@ -1,5 +1,7 @@
 #pragma once
 
+#define DEFAULT_TEXTURE_PADDING 1
+
 namespace TextureFiltering
 {
 	enum TextureFiltering
@@ -9,7 +11,7 @@ namespace TextureFiltering
 		Nearest_Mipmap,
 		Linear_Mipmap
 	};
-};
+}
 
 namespace ColorType
 {
@@ -18,7 +20,7 @@ namespace ColorType
 		RGB8 = 0,
 		RGBA8
 	};
-};
+}
 
 namespace TextureEncoderType
 {
@@ -28,7 +30,7 @@ namespace TextureEncoderType
 		WebP,
 		FTI //Flaming Torch Image
 	};
-};
+}
 
 /*!
 *	Texture Encoder Settings
@@ -64,7 +66,7 @@ struct TextureEncoderInfo
 	*/
 	bool Lossless;
 
-	TextureEncoderInfo() : TargetWidth(0), TargetHeight(0), Quality(100), Encoder(TextureEncoderType::PNG), Lossless(true) {};
+	TextureEncoderInfo() : TargetWidth(0), TargetHeight(0), Quality(100), Encoder(TextureEncoderType::PNG), Lossless(true) {}
 };
 
 namespace TextureWrapMode
@@ -76,7 +78,7 @@ namespace TextureWrapMode
 		ClampToEdge,
 		Repeat
 	};
-};
+}
 
 /*!
 *	Texture Buffer
@@ -92,7 +94,7 @@ public:
 	*/
 	std::vector<uint8> Data;
 
-	TextureBuffer() : WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8) {};
+	TextureBuffer() : WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8) {}
 
 	/*!
 	*	Loads this TextureBuffer as an empty Image
@@ -215,7 +217,7 @@ public:
 
 	DisposablePointer<TexturePacker> Owner;
 
-	TexturePackerIndex() : Index(-1), Filtering(TextureFiltering::Nearest), WrapMode(TextureWrapMode::Clamp) {};
+	TexturePackerIndex() : Index(-1), Filtering(TextureFiltering::Nearest), WrapMode(TextureWrapMode::Clamp) {}
 
 	uint32 Width() const;
 	uint32 Height() const;
@@ -480,7 +482,7 @@ private:
 
 	bool Dirty;
 
-	uint32 MaxWidth, MaxHeight, FilteringValue;
+	uint32 MaxWidth, MaxHeight, FilteringValue, PaddingValue;
 
 public:
 	class SortedTexture
@@ -491,7 +493,7 @@ public:
 		DisposablePointer<Texture> SourceInstance;
 		DisposablePointer<Texture> TextureInstance;
 
-		SortedTexture() : Index(-1), x(0), y(0), Width(0), Height(0) {};
+		SortedTexture() : Index(-1), x(0), y(0), Width(0), Height(0) {}
 	};
 
 	/*!
@@ -507,12 +509,17 @@ public:
 	TexturePacker();
 	~TexturePacker();
 
-	inline uint32 GetFiltering()
+	inline uint32 Filtering() const
 	{
 		return FilteringValue;
-	};
+	}
 
 	void SetFiltering(uint32 Filtering);
+
+	inline uint32 Padding() const
+	{
+		return PaddingValue;
+	}
 
 	/*!
 	*	Binds (and completes) this texture packer
@@ -531,16 +538,17 @@ public:
 	inline uint32 IndexCount()
 	{
 		return Indices.size();
-	};
+	}
 
 	/*!
 	*	Creates a TexturePacker from multiple textures
 	*	\param Textures the Textures to load from
 	*	\param MaxWidth the maximum width of the texture
 	*	\param MaxHeight the maximum height of the texture
+	*	\param Padding the padding between textures in pixels (default is 1)
 	*/
 	static DisposablePointer<TexturePacker> FromTextures(const std::vector<DisposablePointer<Texture> > &Textures,
-		uint32 MaxWidth, uint32 MaxHeight);
+		uint32 MaxWidth, uint32 MaxHeight, uint32 Padding);
 
 	/*!
 	*	Creates a TexturePacker from a prepacked Texture
@@ -570,7 +578,7 @@ public:
 	inline uint32 GetFiltering()
 	{
 		return FilteringValue;
-	};
+	}
 
 	void SetFiltering(uint32 Filtering);
 

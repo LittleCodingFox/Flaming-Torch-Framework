@@ -577,7 +577,7 @@ namespace PlanePointClassifications
 		Back, //!<Behind Plane
 		Front, //!<In front of Plane
 	};
-};
+}
 
 class Plane 
 {
@@ -632,12 +632,12 @@ public:
 	Rect operator+(const Rect &Other) const
 	{
 		return Rect(Left + Other.Left, Right + Other.Right, Top + Other.Top, Bottom + Other.Bottom);
-	};
+	}
 
 	Rect operator-(const Rect &Other) const
 	{
 		return Rect(Left - Other.Left, Right - Other.Right, Top - Other.Top, Bottom - Other.Bottom);
-	};
+	}
 
 	/*!
 	*	\return the size of this Rect
@@ -645,7 +645,7 @@ public:
 	Vector2 Size() const
 	{
 		return Vector2(Right - Left, Bottom - Top);
-	};
+	}
 
 	/*!
 	*	\return the position of this Rect
@@ -653,7 +653,7 @@ public:
 	Vector2 Position() const
 	{
 		return Vector2(Left, Top);
-	};
+	}
 };
 
 /*!
@@ -684,12 +684,12 @@ public:
 	RotateableRect operator+(const RotateableRect &Other) const
 	{
 		return RotateableRect(Left + Other.Left, Right + Other.Right, Top + Other.Top, Bottom + Other.Bottom);
-	};
+	}
 
 	RotateableRect operator-(const RotateableRect &Other) const
 	{
 		return RotateableRect(Left - Other.Left, Right - Other.Right, Top - Other.Top, Bottom - Other.Bottom);
-	};
+	}
 
 	/*!
 	*	\return the size of this Rect
@@ -697,7 +697,7 @@ public:
 	Vector2 Size() const
 	{
 		return Vector2(Right - Left, Bottom - Top);
-	};
+	}
 
 	/*!
 	*	\return the position of this Rect
@@ -705,7 +705,7 @@ public:
 	Vector2 Position() const
 	{
 		return Vector2(Left, Top);
-	};
+	}
 	
 	/*!
 	*	\return the full size of this Rect
@@ -713,7 +713,7 @@ public:
 	Vector2 ToFullSize() const
 	{
 		return Vector2(Right + Left, Bottom + Top);
-	};
+	}
 };
 
 /*!
@@ -927,7 +927,7 @@ public:
 	static inline f32 Clamp(f32 Value, f32 Min = 0.0f, f32 Max = 1.0f)
 	{
 		return Value < Min ? Min : Value > Max ? Max : Value;
-	};
+	}
 
 	/*!
 	*	Rounds a value so it reaches the next positive integer based on the decimal value of the Value
@@ -938,17 +938,17 @@ public:
 	static inline f32 Round(f32 Value)
 	{
 		return floorf(Value + 0.5f);
-	};
+	}
 
 	static inline f32 Min(f32 A, f32 B)
 	{
 		return A > B ? B : A;
-	};
+	}
 
 	static inline f32 Max(f32 A, f32 B)
 	{
 		return A > B ? A : B;
-	};
+	}
 
 	/*!
 	*	Converts a degree angle to a radian angle
@@ -958,7 +958,7 @@ public:
 	static inline f32 DegToRad(f32 Value)
 	{
 		return Value * 0.0174444444444444f;
-	};
+	}
 
 	/*!
 	*	Converts a radian angle to a degree angle
@@ -968,7 +968,7 @@ public:
 	static inline f32 RadToDeg(f32 Value)
 	{
 		return Value * 57.32484076433121f;
-	};
+	}
 
 	/*!
 	*	Converts a HTML color code to a Vector4
@@ -985,7 +985,7 @@ public:
 		if(Value[0] == '#')
 		{
 			StartIndex = 1;
-		};
+		}
 
 		uint32 ComponentID = 0;
 		Vector4 Out(0, 0, 0, 1);
@@ -1018,17 +1018,17 @@ public:
 				Out.w = Temp / 255.f;
 
 				break;
-			};
+			}
 
 			if(ComponentID == 3)
 				break;
 
 			ComponentID++;
 			StartIndex += 2;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	/*!
 		Calculates the viewport offset and size from two sizes keeping aspect ratio
@@ -1061,7 +1061,7 @@ public:
 		f32 Pow3IT = powf(InvertedT, 3);
 
 		return p * Pow3IT + p2 * 3 * Pow2IT * t + p3 * 3 * InvertedT * Pow2T + p4 * Pow3T;
-	};
+	}
 
 	/*!
 	*	Perform a linear interpolation
@@ -1074,7 +1074,7 @@ public:
 	static PointClass LinearInterpolate(const PointClass &a, const PointClass &b, f32 t)
 	{
 		return a + (b - a) * t;
-	};
+	}
 
 	/*!
 	*	Perform a smoothstep interpolation
@@ -1087,7 +1087,7 @@ public:
 	static PointClass SmoothstepInterpolate(const PointClass &a, const PointClass &b, f32 t)
 	{
 		return LinearInterpolate(a, b, t * t * (3 - 2 * t));
-	};
+	}
 
 	/*!
 	*	Perform a spring interpolation
@@ -1102,7 +1102,7 @@ public:
 	static PointClass SpringInterpolate(const PointClass &a, const PointClass &b, f32 t, f32 Factor)
 	{
 		return LinearInterpolate(a, b, powf(2, -10 * t) * sinf((t - Factor / 4) * (2 * Pi) / Factor) + 1);
-	};
+	}
 
 	/*!
 	*	Perform a bounce interpolation
@@ -1119,7 +1119,7 @@ public:
 		return LinearInterpolate(a, b, t < 0.3535f ? BOUNCE(t) : (t < 0.7408f ? BOUNCE(t - 0.54719f) + 0.7f : (t < 0.9644f ? BOUNCE(t - 0.8526f) + 0.9f : BOUNCE(t - 1.0435f) + 0.95f)));
 
 #undef BOUNCE
-	};
+	}
 
 	/*!
 	*	Perform an acceleration interpolation
@@ -1134,5 +1134,5 @@ public:
 	static PointClass AccelerationInterpolate(const PointClass &a, const PointClass &b, f32 t, f32 Factor)
 	{
 		return LinearInterpolate(a, b, Factor == 1 ? t * t : powf(t, 2 * Factor));
-	};
+	}
 };

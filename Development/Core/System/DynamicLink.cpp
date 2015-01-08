@@ -13,7 +13,7 @@ namespace FlamingTorch
 	DynamicLibrary::DynamicLibrary()
 	{
 		Handle = NULL;
-	};
+	}
 
 	DynamicLibrary::~DynamicLibrary()
 	{
@@ -24,8 +24,8 @@ namespace FlamingTorch
 #else
 			dlclose(Handle);
 #endif
-		};
-	};
+		}
+	}
 
 	bool DynamicLibrary::Load(const std::string &FileName)
 	{
@@ -36,7 +36,7 @@ namespace FlamingTorch
 #else
 			dlclose(Handle);
 #endif
-		};
+		}
 
 #ifdef FLPLATFORM_WINDOWS
 		Handle = LoadLibraryA(FileName.c_str());
@@ -45,7 +45,7 @@ namespace FlamingTorch
 #endif
 
 		return Handle != NULL;
-	};
+	}
 
 	void* DynamicLibrary::GetAddressAt(const std::string &ProcName)
 	{
@@ -56,6 +56,6 @@ namespace FlamingTorch
 #else
 		return dlsym(Handle, ProcName.c_str());
 #endif
-	};
+	}
 
-};
+}

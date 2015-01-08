@@ -12,43 +12,43 @@ namespace FlamingTorch
 	std::string InputCenter::KeyInfo::NameAsString() const
 	{
 		return Names.find(Name) != Names.end() ? Names[Name] : "UNKNOWN";
-	};
+	}
 
 	std::string InputCenter::TouchInfo::NameAsString() const
 	{
 		return Names.find(Index) != Names.end() ? Names[Index] : "UNKNOWN";
-	};
+	}
 
 	std::string InputCenter::MouseButtonInfo::NameAsString() const
 	{
 		return Names.find(Name) != Names.end() ? Names[Name] : "UNKNOWN";
-	};
+	}
 
 	std::string InputCenter::JoystickButtonInfo::NameAsString() const
 	{
 		return "BUTTON" + StringUtils::MakeIntString((uint32)Name);
-	};
+	}
 
 	std::string InputCenter::JoystickAxisInfo::NameAsString() const
 	{
 		return Names.find(Name) != Names.end() ? "AXIS" + Names[Name] : "UNKNOWN";
-	};
+	}
 
 	InputCenter::InputCenter() : HasFocus(true), InputConsumedValue(false), Character(false), MouseWheel(false)
 	{
-	};
+	}
 
 	void InputCenter::Initialize()
 	{
 		for(wchar_t i = 0; i < InputKey::Count; i++)
 		{
 			Keys[i].Name = i;
-		};
+		}
 
 		for(uint8 i = 0; i < InputMouseButton::Count; i++)
 		{
 			MouseButtons[i].Name = i;
-		};
+		}
 
 		for(uint32 i = 0; i < JoystickCount; i++)
 		{
@@ -56,14 +56,14 @@ namespace FlamingTorch
 			{
 				JoystickButtons[i][j].Name = j;
 				JoystickButtons[i][j].JoystickIndex = (uint8)i;
-			};
+			}
 
 			for(uint8 j = 0; j < InputJoystickAxis::Count; j++)
 			{
 				JoystickAxis[i][j].Name = j;
 				JoystickAxis[i][j].JoystickIndex = (uint8)i;
-			};
-		};
+			}
+		}
 
 		Touches[0].Index = 0;
 		Touches[1].Index = 1;
@@ -217,7 +217,7 @@ namespace FlamingTorch
 		REGISTER_TOUCH_NAME(7);
 		REGISTER_TOUCH_NAME(8);
 		REGISTER_TOUCH_NAME(9);
-	};
+	}
 
 	bool InputCenter::Update(Renderer *TheRenderer)
 	{
@@ -229,25 +229,25 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < InputKey::Count; i++)
 		{
 			Keys[i].JustPressed = Keys[i].JustReleased = Keys[i].FirstPress = false;
-		};
+		}
 
 		for(uint32 i = 0; i < InputMouseButton::Count; i++)
 		{
 			MouseButtons[i].JustPressed = MouseButtons[i].JustReleased = MouseButtons[i].FirstPress = false;
-		};
+		}
 
 		for(uint32 i = 0; i < JoystickCount; i++)
 		{
 			for(uint8 j = 0; j < JoystickButtonCount; j++)
 			{
 				JoystickButtons[i][j].JustPressed = JoystickButtons[i][j].JustReleased = JoystickButtons[i][j].FirstPress = false;
-			};
-		};
+			}
+		}
 
 		for(TouchMap::iterator it = Touches.begin(); it != Touches.end(); it++)
 		{
 			it->second.Dragged = it->second.JustPressed = it->second.JustReleased = false;
-		};
+		}
 
 		Character = L'\0';
 
@@ -274,7 +274,7 @@ namespace FlamingTorch
 						Button.FirstPress = true;
 
 					Button.Pressed = Button.JustPressed = true;
-				};
+				}
 
 				break;
 
@@ -284,7 +284,7 @@ namespace FlamingTorch
 
 					Button.Pressed = false;
 					Button.JustReleased = true;
-				};
+				}
 
 				break;
 
@@ -292,7 +292,7 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
 					Contexts[EnabledContexts[i]]->OnJoystickConnected((uint8)Event.JoystickIndex);
-				};
+				}
 
 				break;
 
@@ -300,7 +300,7 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
 					Contexts[EnabledContexts[i]]->OnJoystickDisconnected((uint8)Event.JoystickIndex);
-				};
+				}
 
 				break;
 
@@ -308,7 +308,7 @@ namespace FlamingTorch
 				{
 					JoystickAxisInfo &Axis = JoystickAxis[Event.JoystickIndex][Event.JoystickAxisIndex];
 					Axis.Position = Event.JoystickAxisPosition;
-				};
+				}
 
 				break;
 
@@ -317,7 +317,7 @@ namespace FlamingTorch
 				{
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
 					MouseButtons[i].JustReleased = true;
-				};
+				}
 
 				if(PlatformInfo::PlatformType == PlatformType::Mobile)
 					HasFocus = false;
@@ -329,7 +329,7 @@ namespace FlamingTorch
 				{
 					//TODO: Pool for input somehow
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
-				};
+				}
 
 				if(PlatformInfo::PlatformType == PlatformType::Mobile)
 					HasFocus = true;
@@ -364,7 +364,7 @@ namespace FlamingTorch
 						Key.FirstPress = true;
 
 					Key.Pressed = Key.JustPressed = true;
-				};
+				}
 
 				break;
 
@@ -374,7 +374,7 @@ namespace FlamingTorch
 
 					Key.Pressed = Key.JustPressed = false;
 					Key.JustReleased = true;
-				};
+				}
 
 				break;
 
@@ -396,7 +396,7 @@ namespace FlamingTorch
 						Button.FirstPress = true;
 
 					Button.Pressed = Button.JustPressed = true;
-				};
+				}
 
 				break;
 
@@ -405,7 +405,7 @@ namespace FlamingTorch
 					MouseButtonInfo &Button = MouseButtons[Event.MouseButtonIndex];
 					Button.Pressed = Button.JustPressed = false;
 					Button.JustReleased = true;
-				};
+				}
 
 				break;
 
@@ -434,29 +434,29 @@ namespace FlamingTorch
 				HasFocus = false;
 
 				break;
-			};
-		};
+			}
+		}
 
 		if(HasPendingResize)
 		{
 			TheRenderer->OnResized(TheRenderer, (uint32)PendingResizeSize.x, (uint32)PendingResizeSize.y);
-		};
+		}
 
 		if(HadFocus != HasFocus)
 		{
 			for(uint32 i = 0; i < EnabledContexts.size(); i++)
 			{
 				HasFocus ? Contexts[EnabledContexts[i]]->OnGainFocus() : Contexts[EnabledContexts[i]]->OnLoseFocus();
-			};
-		};
+			}
+		}
 
 		if(Character != L'\0')
 		{
 			for(uint32 i = 0; i < EnabledContexts.size(); i++)
 			{
 				Contexts[EnabledContexts[i]]->OnCharacterEntered(Character);
-			};
-		};
+			}
+		}
 
 		InputConsumedValue = false;
 
@@ -472,9 +472,9 @@ namespace FlamingTorch
 				if(MouseMovement.z != 0 && !InputConsumed())
 				{
 					FireAction(MouseMovement.z);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		InputConsumedValue = false;
 
@@ -491,13 +491,13 @@ namespace FlamingTorch
 						IgnoreAction = true;
 
 						break;
-					};
-				};
+					}
+				}
 
 				if(!IgnoreAction)
 					FireAction(Keys[i]);
-			};
-		};
+			}
+		}
 
 		InputConsumedValue = false;
 
@@ -514,13 +514,13 @@ namespace FlamingTorch
 						IgnoreAction = true;
 
 						break;
-					};
-				};
+					}
+				}
 
 				if(!IgnoreAction)
 					FireAction(it->second);
-			};
-		};
+			}
+		}
 
 		InputConsumedValue = false;
 
@@ -537,13 +537,13 @@ namespace FlamingTorch
 						IgnoreAction = true;
 
 						break;
-					};
-				};
+					}
+				}
 
 				if(!IgnoreAction)
 					FireAction(MouseButtons[i]);
-			};
-		};
+			}
+		}
 
 		InputConsumedValue = false;
 
@@ -564,13 +564,13 @@ namespace FlamingTorch
 							IgnoreAction = true;
 
 							break;
-						};
-					};
+						}
+					}
 
 					if(!IgnoreAction)
 						FireAction(Button);
-				};
-			};
+				}
+			}
 
 			for(uint32 j = 0; j < InputJoystickAxis::Count; j++)
 			{
@@ -588,14 +588,14 @@ namespace FlamingTorch
 							IgnoreAction = true;
 
 							break;
-						};
-					};
+						}
+					}
 
 					if(!IgnoreAction)
 						FireAction(Axis);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		InputConsumedValue = false;
 
@@ -608,36 +608,36 @@ namespace FlamingTorch
 					for(uint32 i = 0; i < EnabledContexts.size(); i++)
 					{
 						Contexts[EnabledContexts[i]]->OnAction(it->second);
-					};
+					}
 
 					it->second.CurrentSequenceIndex = 0;
 				}
 				else if(GameClockDiffNoPause(it->second.LastSequenceTime) >= it->second.MaxTimeBetweenSequenceKeyPresses)
 				{
 					it->second.CurrentSequenceIndex = 0;
-				};
-			};
-		};
+				}
+			}
+		}
 
 		return true;
-	};
+	}
 
 	void InputCenter::CenterMouse(Renderer *TheRenderer)
 	{
 		TheRenderer->SetMousePosition(TheRenderer->Size() / 2);
 
 		RendererManager::Instance.Input.MousePosition = TheRenderer->Size() / 2;
-	};
+	}
 
 	bool InputCenter::InputConsumed()
 	{
 		return InputConsumedValue;
-	};
+	}
 
 	void InputCenter::ConsumeInput()
 	{
 		InputConsumedValue = true;
-	};
+	}
 
 	void InputCenter::RegisterAction(const Action &TheAction)
 	{
@@ -654,11 +654,11 @@ namespace FlamingTorch
 
 				if(it == Actions.end())
 					break;
-			};
-		};
+			}
+		}
 
 		Actions[MakeStringID(TheAction.Name)] = TheAction;
-	};
+	}
 
 	void InputCenter::UnregisterAction(const std::string &Name)
 	{
@@ -669,8 +669,8 @@ namespace FlamingTorch
 			Actions.erase(it);
 
 			Log::Instance.LogDebug(TAG, "Removed action '%s'", Name.c_str());
-		};
-	};
+		}
+	}
 
 	void InputCenter::FireAction(const JoystickAxisInfo &Axis)
 	{
@@ -683,10 +683,10 @@ namespace FlamingTorch
 					for(uint32 i = 0; i < EnabledContexts.size(); i++)
 					{
 						Contexts[EnabledContexts[i]]->OnAction(it->second);
-					};
+					}
 
 					return;
-				};
+				}
 			}
 			else if(fabs(Axis.Position) >= 0.8f && it->second.Type == InputActionType::Sequence)
 			{
@@ -694,7 +694,7 @@ namespace FlamingTorch
 				{
 					it->second.LastSequenceTime = GameClockTimeNoPause();
 					it->second.CurrentSequenceIndex = 0;
-				};
+				}
 				
 				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
 					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::JoystickAxis &&
@@ -711,13 +711,13 @@ namespace FlamingTorch
 					{
 						it->second.CurrentSequenceIndex = 0;
 						it->second.LastSequenceTime = GameClockTimeNoPause();
-					};
+					}
 
 					return;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 
 	void InputCenter::FireAction(const JoystickButtonInfo &Button)
 	{
@@ -730,7 +730,7 @@ namespace FlamingTorch
 					it->second.Index = Button.JoystickIndex;
 
 					Contexts[EnabledContexts[i]]->OnAction(it->second);
-				};
+				}
 
 				return;
 			}
@@ -740,7 +740,7 @@ namespace FlamingTorch
 				{
 					it->second.LastSequenceTime = GameClockTimeNoPause();
 					it->second.CurrentSequenceIndex = 0;
-				};
+				}
 
 				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
 					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::JoystickButton)
@@ -755,13 +755,13 @@ namespace FlamingTorch
 					{
 						it->second.CurrentSequenceIndex = 0;
 						it->second.LastSequenceTime = GameClockTimeNoPause();
-					};
+					}
 
 					return;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 
 	void InputCenter::FireAction(const MouseButtonInfo &Button)
 	{
@@ -772,7 +772,7 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
 					Contexts[EnabledContexts[i]]->OnAction(it->second);
-				};
+				}
 
 				return;
 			}
@@ -782,7 +782,7 @@ namespace FlamingTorch
 				{
 					it->second.LastSequenceTime = GameClockTimeNoPause();
 					it->second.CurrentSequenceIndex = 0;
-				};
+				}
 
 				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
 					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::MouseButton)
@@ -797,13 +797,13 @@ namespace FlamingTorch
 					{
 						it->second.CurrentSequenceIndex = 0;
 						it->second.LastSequenceTime = GameClockTimeNoPause();
-					};
+					}
 
 					return;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 	
 	void InputCenter::FireAction(const TouchInfo &Touch)
 	{
@@ -818,12 +818,12 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
 					Contexts[EnabledContexts[i]]->OnAction(it->second);
-				};
+				}
 
 				return;
-			};
-		};
-	};
+			}
+		}
+	}
 
 	void InputCenter::FireAction(f32 MouseScrollDelta)
 	{
@@ -835,7 +835,7 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
 					Contexts[EnabledContexts[i]]->OnAction(it->second);
-				};
+				}
 
 				return;
 			}
@@ -845,7 +845,7 @@ namespace FlamingTorch
 				{
 					it->second.LastSequenceTime = GameClockTimeNoPause();
 					it->second.CurrentSequenceIndex = 0;
-				};
+				}
 
 				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
 					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::MouseScroll)
@@ -861,13 +861,13 @@ namespace FlamingTorch
 					{
 						it->second.CurrentSequenceIndex = 0;
 						it->second.LastSequenceTime = GameClockTimeNoPause();
-					};
+					}
 
 					return;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 
 	void InputCenter::FireAction(const KeyInfo &Key)
 	{
@@ -878,7 +878,7 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < EnabledContexts.size(); i++)
 				{
 					Contexts[EnabledContexts[i]]->OnAction(it->second);
-				};
+				}
 
 				return;
 			}
@@ -889,7 +889,7 @@ namespace FlamingTorch
 				{
 					it->second.LastSequenceTime = GameClockTimeNoPause();
 					it->second.CurrentSequenceIndex = 0;
-				};
+				}
 
 				if(it->second.Sequence[it->second.CurrentSequenceIndex].Index == Key.Name &&
 					GameClockDiffNoPause(it->second.LastSequenceTime) < it->second.MaxTimeBetweenSequenceKeyPresses)
@@ -901,45 +901,45 @@ namespace FlamingTorch
 				{
 					it->second.CurrentSequenceIndex = 0;
 					it->second.LastSequenceTime = GameClockTimeNoPause();
-				};
+				}
 
 				return;
-			};
-		};
-	};
+			}
+		}
+	}
 
 	const InputCenter::Action *const InputCenter::GetAction(StringID Name)
 	{
 		ActionMap::iterator it = Actions.find(Name);
 
 		return it != Actions.end() ? &it->second : NULL;
-	};
+	}
 
 	InputCenter::KeyInfo *InputCenter::Action::Key() const
 	{
 		return Type == InputActionType::Keyboard ? &RendererManager::Instance.Input.Keys[Index] : NULL;
-	};
+	}
 
 	InputCenter::TouchInfo *InputCenter::Action::Touch() const
 	{
 		return (Type == InputActionType::TouchDown || Type == InputActionType::TouchUp || Type == InputActionType::TouchDrag) ?
 			&RendererManager::Instance.Input.Touches[Index] : NULL;
-	};
+	}
 
 	InputCenter::MouseButtonInfo *InputCenter::Action::MouseButton() const
 	{
 		return Type == InputActionType::MouseButton ? &RendererManager::Instance.Input.MouseButtons[Index] : NULL;
-	};
+	}
 
 	InputCenter::JoystickButtonInfo *InputCenter::Action::JoystickButton() const
 	{
 		return Type == InputActionType::JoystickButton ? &RendererManager::Instance.Input.JoystickButtons[Index][SecondaryIndex] : NULL;
-	};
+	}
 
 	InputCenter::JoystickAxisInfo *InputCenter::Action::JoystickAxis() const
 	{
 		return Type == InputActionType::JoystickAxis ? &RendererManager::Instance.Input.JoystickAxis[Index][SecondaryIndex] : NULL;
-	};
+	}
 
 	std::string InputCenter::Action::AsString() const
 	{
@@ -980,30 +980,30 @@ namespace FlamingTorch
 				for(uint32 i = 0; i < Sequence.size(); i++)
 				{
 					str << (i > 0 ? " + " : "") << Sequence[i].AsString();
-				};
+				}
 
 				return str.str();
-			};
+			}
 
 			break;
-		};
+		}
 
 		return "UNKNOWN";
-	};
+	}
 
 	const InputCenter::Context *const InputCenter::GetContext(StringID Name)
 	{
 		ContextMap::iterator it = Contexts.find(Name);
 
 		return it != Contexts.end() ? it->second.Get() : NULL;
-	};
+	}
 
 	void InputCenter::AddContext(DisposablePointer<Context> TheContext)
 	{
 		FLASSERT(TheContext.Get(), "Invalid Context!");
 
 		Contexts[MakeStringID(TheContext->Name)] = TheContext;
-	};
+	}
 
 	void InputCenter::EnableContext(StringID Name, bool ToFront)
 	{
@@ -1014,7 +1014,7 @@ namespace FlamingTorch
 		{
 			if(EnabledContexts[i] == Name)
 				return;
-		};
+		}
 
 		if(ToFront)
 		{
@@ -1023,8 +1023,8 @@ namespace FlamingTorch
 		else
 		{
 			EnabledContexts.push_back(Name);
-		};
-	};
+		}
+	}
 
 	void InputCenter::DisableContext(StringID Name)
 	{
@@ -1035,8 +1035,8 @@ namespace FlamingTorch
 				EnabledContexts.erase(EnabledContexts.begin() + i);
 
 				return;
-			};
-		};
-	};
+			}
+		}
+	}
 #endif
-};
+}

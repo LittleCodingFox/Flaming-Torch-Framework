@@ -16,8 +16,8 @@ namespace FlamingTorch
 
 				//Enable if necessary to debug StringIDs
 				//Log::Instance.LogInfo("StringID", "New StringID: '%s' => 0x%08x", Name.c_str(), Hash);
-			};
-		};
+			}
+		}
 
 		const std::string &Get(StringID Hash)
 		{
@@ -28,10 +28,10 @@ namespace FlamingTorch
 				static std::string Empty;
 
 				return Empty;
-			};
+			}
 			
 			return it->second;
-		};
+		}
 
 		static StringIDManager Instance;
 	};
@@ -45,10 +45,10 @@ namespace FlamingTorch
 		StringIDManager::Instance.Add(Name, Hash);
 
 		return Hash;
-	};
+	}
 
 	const std::string &GetStringIDString(StringID ID)
 	{
 		return StringIDManager::Instance.Get(ID);
-	};
-};
+	}
+}

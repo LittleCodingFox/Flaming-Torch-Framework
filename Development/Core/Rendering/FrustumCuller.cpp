@@ -61,7 +61,7 @@ namespace FlamingTorch
 
 		Planes[5].Origin = Vector3(Vector.x / Magnitude, Vector.y / Magnitude, Vector.z / Magnitude);
 		Planes[5].Distance = Vector.w / Magnitude;
-	};
+	}
 
 	bool FrustumCuller::PointTest(const Vector3 &v)
 	{
@@ -69,10 +69,10 @@ namespace FlamingTorch
 		{
 			if(Planes[i].ClassifyPoint(v) == PlanePointClassifications::Back)
 				return false;
-		};
+		}
 
 		return true;
-	};
+	}
 
 	bool FrustumCuller::SphereTest(const BoundingSphere &bs)
 	{
@@ -81,10 +81,10 @@ namespace FlamingTorch
 			if(Planes[i].Origin.x * bs.Center.x + Planes[i].Origin.y * bs.Center.y + Planes[i].Origin.z * bs.Center.z +
 				Planes[i].Distance <= -bs.Radius )
 				return false;
-		};
+		}
 
 		return true;
-	};
+	}
 
 	AABBResults::AABBResult FrustumCuller::AABBTest(const AxisAlignedBoundingBox &aabb)
 	{
@@ -115,8 +115,8 @@ namespace FlamingTorch
 
 			if(t < 0)
 				Result = AABBResults::Intersecting;
-		};
+		}
 
 		return Result;
-	};
-};
+	}
+}

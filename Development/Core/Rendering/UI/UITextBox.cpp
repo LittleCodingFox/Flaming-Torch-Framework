@@ -11,7 +11,7 @@ namespace FlamingTorch
 		OnConstructed();
 
 		OnEvent.Connect<UITextBox, &UITextBox::PrivOnEvent>(this);
-	};
+	}
 
 	void UITextBox::SetSkin(DisposablePointer<GenericConfig> Skin)
 	{
@@ -29,12 +29,12 @@ namespace FlamingTorch
 		if (1 != sscanf(Skin->GetString("TextBox", "FontSize", "12").c_str(), "%u", &FontSize))
 		{
 			FontSize = 12;
-		};
+		}
 
 		if (1 != sscanf(Skin->GetString("TextBox", "Padding", "12").c_str(), "%u", &Padding))
 		{
 			Padding = 0;
-		};
+		}
 
 		Rect NinePatchTextureRect;
 
@@ -46,8 +46,8 @@ namespace FlamingTorch
 		else
 		{
 			TheSprite.Options.NinePatch(false, NinePatchTextureRect);
-		};
-	};
+		}
+	}
 
 	const Vector2 &UITextBox::Size() const
 	{
@@ -56,12 +56,12 @@ namespace FlamingTorch
 		Out = UISprite::Size() + Vector2(Padding, Padding);
 
 		return Out;
-	};
+	}
 
 	void UITextBox::Update(const Vector2 &ParentPosition)
 	{
 		UIElement::Update(ParentPosition);
-	};
+	}
 
 	void UITextBox::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -79,7 +79,7 @@ namespace FlamingTorch
 		else
 		{
 			TheSprite.SpriteTexture = Background;
-		};
+		}
 
 		UISprite::Draw(ParentPosition, Renderer);
 
@@ -96,7 +96,7 @@ namespace FlamingTorch
 					str << "*";
 
 				ActualString = str.str();
-			};
+			}
 
 			Rect TextSize = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualString.substr(TextOffset),
 				TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
@@ -115,12 +115,12 @@ namespace FlamingTorch
 
 					if (Size.x >= SizeValue.x)
 						break;
-				};
-			};
+				}
+			}
 
 			ManagerValue->DrawText(ActualString.substr(TextOffset, Count), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize)
 				.Color(Vector4(0, 0, 0, 1)).Position(ActualPosition + Offset));
-		};
+		}
 
 		if (this == ManagerValue->GetFocusedElement())
 		{
@@ -138,14 +138,14 @@ namespace FlamingTorch
 					break;
 
 				X = Size.x;
-			};
+			}
 
 			Sprite TheSprite;
 			TheSprite.Options.Position(ActualPosition + Vector2(X + Offset.x, Offset.y)).Scale(Vector2(2, FontSize)).Color(Vector4(0, 0, 0, 1));
 
 			TheSprite.Draw(Renderer);
-		};
-	};
+		}
+	}
 
 	void UITextBox::PrivOnEvent(uint32 EventType, std::vector<void *> Arguments)
 	{
@@ -173,7 +173,7 @@ namespace FlamingTorch
 							str << "*";
 
 						TempText = str.str();
-					};
+					}
 
 					unsigned long X = 0;
 
@@ -190,11 +190,11 @@ namespace FlamingTorch
 							break;
 
 						X++;
-					};
+					}
 
 					CursorPosition = X;
-				};
-			};
+				}
+			}
 
 			break;
 
@@ -218,7 +218,7 @@ namespace FlamingTorch
 					else
 					{
 						CursorPosition--;
-					};
+					}
 				}
 				else if (o.Name == InputKey::Right)
 				{
@@ -239,7 +239,7 @@ namespace FlamingTorch
 					else
 					{
 						CursorPosition++;
-					};
+					}
 				}
 				else if (o.Name == InputKey::Home)
 				{
@@ -262,23 +262,23 @@ namespace FlamingTorch
 							CursorPosition = i;
 
 							break;
-						};
-					};
+						}
+					}
 
 					if (MaxCharacterCount == 0)
 					{
 						MaxCharacterCount = ActualText.length();
 						CursorPosition = ActualText.length();
-					};
+					}
 
 					if (Text.length() && CursorPosition)
 					{
 						TextOffset = Text.length() - CursorPosition;
-					};
+					}
 
 					return;
-				};
-			};
+				}
+			}
 
 			break;
 
@@ -303,7 +303,7 @@ namespace FlamingTorch
 					else if (CursorPosition > 0)
 					{
 						CursorPosition--;
-					};
+					}
 				}
 				else
 				{
@@ -329,16 +329,16 @@ namespace FlamingTorch
 						{
 							CursorPosition--;
 							TextOffset++;
-						};
-					};
-				};
+						}
+					}
+				}
 
 				Text = ActualText;
-			};
+			}
 
 			break;
-		};
-	};
+		}
+	}
 
 #endif
-};
+}

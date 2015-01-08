@@ -5,7 +5,7 @@ template <typename T>
 T* get_pointer(DisposablePointer<T> const& p)
 {
 	return (T *)p.Get();
-};
+}
 
 /*!
 *	Trues to cast a luabind object into a native type safely without throwing an exception
@@ -20,10 +20,10 @@ type ProtectedLuaCast(luabind::object In)
 	}
 	catch(std::exception &)
 	{
-	};
+	}
 
 	return type();
-};
+}
 
 /*!
 *	Script
@@ -55,10 +55,10 @@ public:
 		for(typename std::vector<type>::const_iterator it = In.begin(); it != In.end(); it++)
 		{
 			Out[++Counter] = *it;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	template<typename type>
 	inline std::vector<type> VectorFromLua(luabind::object In)
@@ -68,10 +68,10 @@ public:
 		for (luabind::iterator it(In), end; it != end; ++it)
 		{
 			Out.push_back(ProtectedLuaCast<type>(*it));
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	template<typename key, typename value>
 	inline luabind::object MapToLua(const std::map<key, value> &In)
@@ -83,10 +83,10 @@ public:
 		for (typename std::map<key, value>::const_iterator it = In.begin(); it != In.end(); it++)
 		{
 			Out[it->first] = it->second;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	template<typename key, typename value>
 	inline std::map<key, value> MapFromLua(luabind::object In)
@@ -96,10 +96,10 @@ public:
 		for (luabind::iterator it(In), end; it != end; ++it)
 		{
 			Out[ProtectedLuaCast<key>(it.key())] = ProtectedLuaCast<value>(*it);
-		};
+		}
 
 		return Out;
-	};
+	}
 };
 
 /*!
@@ -139,7 +139,7 @@ public:
 class LuaLib
 {
 public:
-	virtual ~LuaLib() {};
+	virtual ~LuaLib() {}
 
 	virtual bool Register(lua_State *State) = 0;
 };
@@ -167,7 +167,7 @@ public:
 
 	static LuaScriptManager Instance;
 
-	LuaScriptManager() : SubSystem(LUASCRIPTMANAGER_PRIORITY) {};
+	LuaScriptManager() : SubSystem(LUASCRIPTMANAGER_PRIORITY) {}
 
 	/*!
 		Creates a script

@@ -46,7 +46,7 @@ namespace luabind
 	{};
 
 	REGISTER_POD_CONVERTER(wchar_t);
-};
+}
 
 namespace FlamingTorch
 {
@@ -55,77 +55,77 @@ namespace FlamingTorch
 	int32 BitwiseSet(int32 a, int32 b)
 	{
 		return a | b;
-	};
+	}
 
 	bool BitwiseCheck(int32 a, int32 b)
 	{
 		return (a & b) != 0;
-	};
+	}
 
 	int32 BitwiseRemove(int32 a, int32 b)
 	{
 		return a | ~b;
-	};
+	}
 
 	void LuaGameClockPause(GameClock &)
 	{
 		GameClock::Instance.Pause();
-	};
+	}
 
 	void LuaGameClockUnpause(GameClock &)
 	{
 		GameClock::Instance.Unpause();
-	};
+	}
 
 	ConsoleVariable MakeLuaConsoleVariable_Int(const std::string &Name, int32 Value)
 	{
 		return ConsoleVariable(Name, Value);
-	};
+	}
 
 	ConsoleVariable MakeLuaConsoleVariable_UInt(const std::string &Name, uint32 Value)
 	{
 		return ConsoleVariable(Name, Value);
-	};
+	}
 
 	ConsoleVariable MakeLuaConsoleVariable_Float(const std::string &Name, f32 Value)
 	{
 		return ConsoleVariable(Name, Value);
-	};
+	}
 
 	ConsoleVariable MakeLuaConsoleVariable_String(const std::string &Name, const std::string &Value)
 	{
 		return ConsoleVariable(Name, Value);
-	};
+	}
 
 	uint8 GetPlatformInfoType()
 	{
 		return PlatformInfo::PlatformType;
-	};
+	}
 
 	bool LuaGameClockMayPerformFixedStepStep(GameClock &)
 	{
 		return GameClock::Instance.MayPerformFixedStepStep();
-	};
+	}
 
 	f32 LuaGameClockFixedDelta(GameClock &)
 	{
 		return GameClock::Instance.FixedStepDelta();
-	};
+	}
 
 	f32 LuaGameClockDelta(GameClock &)
 	{
 		return GameClock::Instance.Delta();
-	};
+	}
 
 	uint64 LuaGameClockTime(GameClock &)
 	{
 		return GameClockTime();
-	};
+	}
 
 	uint64 LuaGameClockTimeNoPause(GameClock &)
 	{
 		return GameClockTimeNoPause();
-	};
+	}
 
 	luabind::object GetGenericConfigSections(GenericConfig &Self, lua_State *State)
 	{
@@ -138,13 +138,13 @@ namespace FlamingTorch
 			for(GenericConfig::Section::ValueMap::iterator vit = it->second.Values.begin(); vit != it->second.Values.end(); vit++)
 			{
 				Inner[vit->first] = vit->second.Content;
-			};
+			}
 
 			Out[it->first] = Inner;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object LuaDoStream(Stream *In, lua_State *State)
 	{
@@ -163,7 +163,7 @@ namespace FlamingTorch
 		if(0 != luaL_dostring(State, str.str().c_str()))
 		{
 			return luabind::object();
-		};
+		}
 
 		luabind::object Globals = luabind::globals(State);
 
@@ -178,16 +178,16 @@ namespace FlamingTorch
 		}
 		catch(std::exception &)
 		{
-		};
+		}
 
 		return luabind::object();
-	};
+	}
 	
 	template<class type>
 	bool LuabindSimpleCompare(type &Self, type *Other)
 	{
 		return &Self == Other;
-	};
+	}
 
 	luabind::object StringUtilsSplit(const std::string &Self, const std::string &Separator, lua_State *State)
 	{
@@ -201,10 +201,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Fragments.size(); i++)
 		{
 			Out[i + 1] = Fragments[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object FileSystemUtilsGetDirectories(const std::string &Directory, lua_State *State)
 	{
@@ -217,10 +217,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Directories.size(); i++)
 		{
 			Out[i + 1] = Directories[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object FileSystemUtilsScan(const std::string &Directory, const std::string &Extension, bool Recursive, lua_State *State)
 	{
@@ -233,10 +233,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Files.size(); i++)
 		{
 			Out[i + 1] = Files[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object PackageFileSystemFindDirectories(const std::string &Directory, lua_State *State)
 	{
@@ -249,10 +249,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Directories.size(); i++)
 		{
 			Out[i + 1] = Directories[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object PackageFileSystemFindFiles(const std::string &Prefix, const std::string &Suffix,
 		const std::string &Extension, const std::string &StartingDirectory, lua_State *State)
@@ -270,10 +270,10 @@ namespace FlamingTorch
 			Inner[2] = Files[i].second;
 
 			Out[i + 1] = Inner;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object GetTextureBufferData(TextureBuffer &Self, lua_State *State)
 	{
@@ -282,10 +282,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Self.Data.size(); i++)
 		{
 			Out[i + 1] = Self.Data[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	void SetTextureBufferData(TextureBuffer &Self, luabind::argument arg)
 	{
@@ -295,47 +295,47 @@ namespace FlamingTorch
 		for(luabind::iterator it(arg), end; it != end; it++)
 		{
 			Bytes.push_back(ProtectedLuaCast<uint8>(*it));
-		};
+		}
 
 		if(Bytes.size() != Self.Data.size())
 		{
 			Log::Instance.LogWarn(TAG, "Unable to set a TextureBuffer Data: Invalid Size %d: Should be %d", Bytes.size(), Self.Data.size());
 
 			return;
-		};
+		}
 
 		Self.Data = Bytes;
-	};
+	}
 
 	lua_Number GetMathUtilsPi()
 	{
 		return (lua_Number)MathUtils::Pi;
-	};
+	}
 
 	lua_Number GetMathUtilsEpsilon()
 	{
 		return (lua_Number)MathUtils::Epsilon;
-	};
+	}
 
 	void LogInfo(Log &Self, const std::string &Message)
 	{
 		Log::Instance.LogInfo(TAG, "[Script] %s", Message.c_str());
-	};
+	}
 
 	void LogErr(Log &Self, const std::string &Message)
 	{
 		Log::Instance.LogErr(TAG, "[Script] %s", Message.c_str());
-	};
+	}
 
 	void LogWarn(Log &Self, const std::string &Message)
 	{
 		Log::Instance.LogWarn(TAG, "[Script] %s", Message.c_str());
-	};
+	}
 
 	void LogDebug(Log &Self, const std::string &Message)
 	{
 		Log::Instance.LogDebug(TAG, "[Script] %s", Message.c_str());
-	};
+	}
 
 	luabind::object GetMatrix4x4M(Matrix4x4 &Self, lua_State *State)
 	{
@@ -348,13 +348,13 @@ namespace FlamingTorch
 			for(uint32 j = 0; j < 4; j++)
 			{
 				Line[j + 1] = Self.m[i][j];
-			};
+			}
 
 			Out[i + 1] = Line;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	void SetMatrix4x4M(Matrix4x4 &Self, const luabind::argument &arg)
 	{
@@ -367,14 +367,14 @@ namespace FlamingTorch
 			for(luabind::iterator Line(*Column); Line != end; Line++, j++)
 			{
 				Self.m[i][j] = ProtectedLuaCast<float>(*Line);
-			};
-		};
-	};
+			}
+		}
+	}
 
 	std::string GetConsoleVariableString(ConsoleVariable &Self)
 	{
 		return Self.StringValue;
-	};
+	}
 	
 	void SetConsoleVariableString(ConsoleVariable &Self, luabind::argument arg)
 	{
@@ -384,18 +384,18 @@ namespace FlamingTorch
 		}
 		catch(std::exception &)
 		{
-		};
-	};
+		}
+	}
 
 	void ConsoleLogConsole(Console &Self, const std::string &Message)
 	{
 		Self.LogConsole(Message);
-	};
+	}
 
 	void ConsoleRunConsoleCommand(Console &Self, const std::string &Command)
 	{
 		Self.RunConsoleCommand(Command);
-	};
+	}
 
 	luabind::object GetTiledMapInitPackageDirectoriesValue(TiledMapInitOptions &Self, lua_State *State)
 	{
@@ -404,10 +404,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Self.PackageDirectoriesValue.size(); i++)
 		{
 			Out[i + 1] = Self.PackageDirectoriesValue[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	void SetTiledMapInitPackageDirectoriesValue(TiledMapInitOptions &Self, luabind::argument arg)
 	{
@@ -416,8 +416,8 @@ namespace FlamingTorch
 		for(luabind::iterator it(arg), end; it != end; it++)
 		{
 			Self.PackageDirectoriesValue.push_back(ProtectedLuaCast<const char *>(*it));
-		};
-	};
+		}
+	}
 
 	luabind::object GetTileLayerTiles(TiledMap::Layer &Self, lua_State *State)
 	{
@@ -426,10 +426,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Self.Tiles.size(); i++)
 		{
 			Out[i + 1] = Self.Tiles[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	void SetTileLayerTiles(TiledMap::Layer &Self, luabind::argument arg)
 	{
@@ -438,8 +438,8 @@ namespace FlamingTorch
 		for(luabind::iterator it(arg), end; it != end; it++)
 		{
 			Self.Tiles.push_back(ProtectedLuaCast<TiledMap::Layer::TileInfo>(*it));
-		};
-	};
+		}
+	}
 
 	luabind::object GetTilesetInfoProperties(TiledMap::UniqueTilesetInfo &Self, lua_State *State)
 	{
@@ -450,11 +450,11 @@ namespace FlamingTorch
 			for(std::map<std::string, std::string>::iterator sit = it->second.begin(); sit != it->second.end(); sit++)
 			{
 				Out[it->first][sit->first] = sit->second;
-			};
-		};
+			}
+		}
 
 		return Out;
-	};
+	}
 
 	void SetTilesetInfoProperties(TiledMap::UniqueTilesetInfo &Self, luabind::argument arg)
 	{
@@ -465,9 +465,9 @@ namespace FlamingTorch
 			for(luabind::iterator sit(*it); sit != end; sit++)
 			{
 				Self.Properties[ProtectedLuaCast<uint8>(it.key())][ProtectedLuaCast<const char *>(sit.key())] = ProtectedLuaCast<const char *>(*sit);
-			};
-		};
-	};
+			}
+		}
+	}
 
 	luabind::object GetTiledMapPolygonData(TiledMap::MapObject &Self, lua_State *State)
 	{
@@ -476,10 +476,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Self.PolygonData.size(); i++)
 		{
 			Out[i + 1] = Self.PolygonData[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	void SetTiledMapPolygonData(TiledMap::MapObject &Self, luabind::argument arg)
 	{
@@ -488,8 +488,8 @@ namespace FlamingTorch
 		for(luabind::iterator it(arg), end; it != end; it++)
 		{
 			Self.PolygonData.push_back(ProtectedLuaCast<Vector2>(*it));
-		};
-	};
+		}
+	}
 
 	luabind::object GetTiledMapObjectProperties(TiledMap::MapObject &Self, lua_State *State)
 	{
@@ -498,10 +498,10 @@ namespace FlamingTorch
 		for(std::map<std::string, std::string>::iterator it = Self.Properties.begin(); it != Self.Properties.end(); it++)
 		{
 			Out[it->first] = it->second;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	void SetTiledMapObjectProperties(TiledMap::MapObject &Self, luabind::argument arg)
 	{
@@ -510,8 +510,8 @@ namespace FlamingTorch
 		for(luabind::iterator it(arg), end; it != end; it++)
 		{
 			Self.Properties[ProtectedLuaCast<const char *>(it.key())] = ProtectedLuaCast<const char *>(*it);
-		};
-	};
+		}
+	}
 
 	luabind::object GetTiledMapObjects(TiledMap &Self, lua_State *State)
 	{
@@ -520,10 +520,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Self.Objects.size(); i++)
 		{
 			Out[i + 1] = Self.Objects[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object GetTiledMapLayers(TiledMap &Self, lua_State *State)
 	{
@@ -532,10 +532,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Self.Layers.size(); i++)
 		{
 			Out[i + 1] = Self.Layers[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object GetResourceManagerScript(const std::string &ScriptFileName)
 	{
@@ -555,14 +555,14 @@ namespace FlamingTorch
 		if(Index != std::string::npos)
 		{
 			ClassName = ClassName.substr(Index + 1);
-		};
+		}
 
 		Index = ClassName.rfind('\\');
 
 		if(Index != std::string::npos)
 		{
 			ClassName = ClassName.substr(Index + 1);
-		};
+		}
 
 		Index = ClassName.rfind('.');
 
@@ -594,10 +594,10 @@ namespace FlamingTorch
 			LuaScriptManager::Instance.LogError("While loading module '" + ScriptFileName + "' ('" + ClassName + "'): " + e.what());
 
 			return luabind::object();
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object GetResourceManagerScriptFromPackage(ResourceManager &Self, const std::string &Directory, const std::string &FileName)
 	{
@@ -640,22 +640,22 @@ namespace FlamingTorch
 			LuaScriptManager::Instance.LogError("While loading module '" + Directory + "/" + FileName + "' ('" + ClassName + "'): " + e.what());
 
 			return luabind::object();
-		};
+		}
 
 		return Out;
-	};
+	}
 
 #if USE_GRAPHICS
 #	define DECLARE_UIEVENT_FUNCTION(event)\
 	LuaEventGroup GetUIElement## event ## Event(UIElement *Self)\
 	{\
 		return Self->EventScriptHandlers[UIEventType::event];\
-	};\
+	}\
 	\
 	void SetUIElement## event ## Event(UIElement *Self, const LuaEventGroup &Value)\
 	{\
 		Self->EventScriptHandlers[UIEventType::event] = Value;\
-	};
+	}
 
 #define DECLARE_UIEVENT_FUNCTION_BINDING(event)\
 	.property("On" #event, &GetUIElement##event##Event, &SetUIElement##event##Event)
@@ -669,10 +669,10 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Modes.size(); i++)
 		{
 			Out[i + 1] = Modes[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	DECLARE_UIEVENT_FUNCTION(MouseJustPressed);
 	DECLARE_UIEVENT_FUNCTION(MousePressed);
@@ -714,7 +714,7 @@ namespace FlamingTorch
 		Out[4] = Self.ColorsValue[3];
 
 		return Out;
-	};
+	}
 	
 	void SetSpriteColors(SpriteDrawOptions &Self, luabind::argument arg)
 	{
@@ -723,13 +723,13 @@ namespace FlamingTorch
 		for(luabind::iterator it(arg), end; it != end && Index < 4; it++, Index++)
 		{
 			Self.ColorsValue[Index] = ProtectedLuaCast<Vector4>(*it);
-		};
-	};
+		}
+	}
 
 	bool UIManagerLoadLayoutsSimple(UIManager &Self, Stream *TheStream, bool Default)
 	{
 		return Self.LoadLayouts(TheStream, DisposablePointer<UIElement>(), Default);
-	};
+	}
 
 	luabind::object GetUIManagerLayouts(UIManager &Self, lua_State *State)
 	{
@@ -738,10 +738,10 @@ namespace FlamingTorch
 		for(UIManager::LayoutMap::iterator it = Self.Layouts.begin(); it != Self.Layouts.end(); it++)
 		{
 			Out[GetStringIDString(it->first)] = it->second;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	bool AddUIManagerLayout(UIManager &Self, DisposablePointer<UILayout> Layout, StringID LayoutID)
 	{
@@ -751,7 +751,7 @@ namespace FlamingTorch
 		Self.Layouts[LayoutID] = Layout;
 
 		return true;
-	};
+	}
 
 	void RemoveUIManagerLayout(UIManager &Self, StringID LayoutID)
 	{
@@ -759,7 +759,7 @@ namespace FlamingTorch
 
 		if(it != Self.Layouts.end())
 			Self.Layouts.erase(it);
-	};
+	}
 
 	luabind::object GetUILayoutElements(UILayout &Self, lua_State *State)
 	{
@@ -768,10 +768,10 @@ namespace FlamingTorch
 		for(UILayout::ElementMap::iterator it = Self.Elements.begin(); it != Self.Elements.end(); it++)
 		{
 			Out[GetStringIDString(it->first)] = it->second;
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	luabind::object GetUIElementChildren(UIElement &Self, lua_State *State)
 	{
@@ -780,20 +780,20 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Self.ChildrenCount(); i++)
 		{
 			Out[i + 1] = Self.Child(i);
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	std::string UITextGetText(UIText &Self)
 	{
 		return Self.Text();
-	};
+	}
 
 	void UITextSetText(UIText &Self, const std::string &Text)
 	{
 		Self.SetText(Text);
-	};
+	}
 
 	luabind::object RenderTextFitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size, lua_State *State)
 	{
@@ -804,27 +804,27 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < Temp.size(); i++)
 		{
 			Out[i + 1] = Temp[i];
-		};
+		}
 
 		return Out;
-	};
+	}
 
 	Rect RenderTextMeasureTextSimple(Renderer *TheRenderer, const std::string &String, TextParams Params)
 	{
 		return RenderTextUtils::MeasureTextSimple(TheRenderer, String, Params);
-	};
+	}
 
 	int32 RenderTextFitTextAroundLength(Renderer *TheRenderer, const std::string &String, TextParams Params, f32 LengthInPixels, int32 FontSize)
 	{
 		RenderTextUtils::FitTextAroundLength(TheRenderer, String, Params, LengthInPixels, &FontSize);
 
 		return FontSize;
-	};
+	}
 
 	void RenderTextRenderText(Renderer *Renderer, const std::string &String, TextParams Params)
 	{
 		RenderTextUtils::RenderText(Renderer, String, Params);
-	};
+	}
 
 	Rect RenderTextMeasureTextLines(Renderer *TheRenderer, luabind::object Lines, TextParams Params)
 	{
@@ -833,21 +833,21 @@ namespace FlamingTorch
 		for(luabind::iterator it(Lines), end; it != end; it++)
 		{
 			ActualLines.push_back(ProtectedLuaCast<const char *>(*it));
-		};
+		}
 
 		return RenderTextUtils::MeasureTextLines(TheRenderer, &ActualLines[0], ActualLines.size(), Params);
-	};
+	}
 
 	/*
 	bool ShaderCompileShader(Shader &Self, uint32 Type, const std::string &Data, std::string *Log)
 	{
 		return Self.CompileShader(Type, (void *)Data.c_str(), Data.length(), Log);
-	};
+	}
 
 	bool ShaderLinkShader(Shader &Self, std::string *Log)
 	{
 		return Self.LinkShader(Log);
-	};
+	}
 
 	void ShaderUniformFloatArray(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -856,10 +856,10 @@ namespace FlamingTorch
 		for(luabind::iterator it(List), end; it != end; it++)
 		{
 			Out.push_back(ProtectedLuaCast<float>(*it));
-		};
+		}
 
 		Self.UniformFloatArray(Uniform, Out.size(), &Out[0]);
-	};
+	}
 
 	void ShaderUniformVector2Array(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -868,10 +868,10 @@ namespace FlamingTorch
 		for(luabind::iterator it(List), end; it != end; it++)
 		{
 			Out.push_back(ProtectedLuaCast<Vector2>(*it));
-		};
+		}
 
 		Self.UniformVector2Array(Uniform, Out.size(), &Out[0]);
-	};
+	}
 
 	void ShaderUniformVector3Array(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -880,10 +880,10 @@ namespace FlamingTorch
 		for(luabind::iterator it(List), end; it != end; it++)
 		{
 			Out.push_back(ProtectedLuaCast<Vector3>(*it));
-		};
+		}
 
 		Self.UniformVector3Array(Uniform, Out.size(), &Out[0]);
-	};
+	}
 
 	void ShaderUniformVector4Array(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -892,10 +892,10 @@ namespace FlamingTorch
 		for(luabind::iterator it(List), end; it != end; it++)
 		{
 			Out.push_back(ProtectedLuaCast<Vector4>(*it));
-		};
+		}
 
 		Self.UniformVector4Array(Uniform, Out.size(), &Out[0]);
-	};
+	}
 
 	void ShaderUniformMat3(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -906,11 +906,11 @@ namespace FlamingTorch
 			for(luabind::iterator matit(*it); matit != end; matit++)
 			{
 				Out.push_back(ProtectedLuaCast<float>(*matit));
-			};
-		};
+			}
+		}
 
 		Self.UniformMat3(Uniform, &Out[0], Out.size());
-	};
+	}
 
 	void ShaderUniformMat4(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -919,10 +919,10 @@ namespace FlamingTorch
 		for(luabind::iterator it(List), end; it != end; it++)
 		{
 			Out.push_back(ProtectedLuaCast<Matrix4x4>(*it));
-		};
+		}
 
 		Self.UniformMat4(Uniform, &Out[0], Out.size());
-	};
+	}
 
 	void ShaderUniformIntArray(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -931,10 +931,10 @@ namespace FlamingTorch
 		for(luabind::iterator it(List), end; it != end; it++)
 		{
 			Out.push_back(ProtectedLuaCast<int32>(*it));
-		};
+		}
 
 		Self.UniformIntArray(Uniform, Out.size(), &Out[0]);
-	};
+	}
 
 	void ShaderUniformInt2Array(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -945,11 +945,11 @@ namespace FlamingTorch
 			for(luabind::iterator intit(*it); intit != end; intit++)
 			{
 				Out.push_back(ProtectedLuaCast<int32>(*intit));
-			};
-		};
+			}
+		}
 
 		Self.UniformInt2Array(Uniform, Out.size(), &Out[0]);
-	};
+	}
 
 	void ShaderUniformInt3Array(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -960,11 +960,11 @@ namespace FlamingTorch
 			for(luabind::iterator intit(*it); intit != end; intit++)
 			{
 				Out.push_back(ProtectedLuaCast<int32>(*intit));
-			};
-		};
+			}
+		}
 
 		Self.UniformInt3Array(Uniform, Out.size(), &Out[0]);
-	};
+	}
 
 	void ShaderUniformInt4Array(Shader &Self, uint32 Uniform, luabind::object List)
 	{
@@ -975,49 +975,37 @@ namespace FlamingTorch
 			for(luabind::iterator intit(*it); intit != end; intit++)
 			{
 				Out.push_back(ProtectedLuaCast<int32>(*intit));
-			};
-		};
+			}
+		}
 
 		Self.UniformInt4Array(Uniform, Out.size(), &Out[0]);
-	};
+	}
 	*/
-
-	void AnimatedSpriteAddAnimation(AnimatedSprite &Self, const std::string &Name, luabind::object Frames)
-	{
-		std::vector<Vector2> ActualFrames;
-
-		for(luabind::iterator it(Frames), end; it != end; it++)
-		{
-			ActualFrames.push_back(ProtectedLuaCast<Vector2>(*it));
-		};
-
-		Self.AddAnimation(Name, ActualFrames);
-	};
 
 	const InputCenter::KeyInfo &GetInputCenterKey(InputCenter &Self, uint32 Name)
 	{
 		return Self.Keys[Name];
-	};
+	}
 
 	const InputCenter::TouchInfo &GetInputCenterTouch(InputCenter &Self, uint32 Name)
 	{
 		return Self.Touches[Name];
-	};
+	}
 
 	const InputCenter::MouseButtonInfo &GetInputCenterMouseButton(InputCenter &Self, uint32 Name)
 	{
 		return Self.MouseButtons[Name];
-	};
+	}
 
 	const InputCenter::JoystickButtonInfo &GetInputCenterJoystickButton(InputCenter &Self, uint32 JoyIndex, uint32 Name)
 	{
 		return Self.JoystickButtons[JoyIndex][Name];
-	};
+	}
 
 	const InputCenter::JoystickAxisInfo &GetInputCenterJoystickAxis(InputCenter &Self, uint32 JoyIndex, uint32 Name)
 	{
 		return Self.JoystickAxis[JoyIndex][Name];
-	};
+	}
 #endif
 
 	bool FrameworkLib::Register(lua_State *State)
@@ -1968,18 +1956,6 @@ namespace FlamingTorch
 				.def_readwrite("Texture", &Sprite::SpriteTexture)
 				.def("Draw", &Sprite::Draw),
 
-			//AnimatedSprite
-			luabind::class_<AnimatedSprite, Sprite, DisposablePointer<AnimatedSprite> >("AnimatedSprite")
-				.def_readwrite("FrameSize", &AnimatedSprite::FrameSize)
-				.def_readwrite("DefaultFrame", &AnimatedSprite::DefaultFrame)
-				.def_readwrite("Scale", &AnimatedSprite::Scale)
-				.def_readwrite("FrameInterval", &AnimatedSprite::FrameInterval)
-				.def(luabind::constructor<const Vector2 &, const Vector2 &>())
-				.def("AddAnimation", &AnimatedSpriteAddAnimation)
-				.def("SetAnimation", &AnimatedSprite::SetAnimation)
-				.def("StopAnimation", &AnimatedSprite::StopAnimation)
-				.def("Update", &AnimatedSprite::Update),
-
 			//RendererManager
 			luabind::class_<RendererManager, SubSystem>("RendererManager")
 				.enum_("constants") [
@@ -2532,5 +2508,5 @@ namespace FlamingTorch
 		ObjectModelManager::RegisterBindings(State);
 
 		return true;
-	};
-};
+	}
+}

@@ -8,5 +8,5 @@ namespace FlamingTorch
 		str << (uint32)a << "." << (uint32)b;
 
 		return str.str();
-	};
-};
+	}
+}

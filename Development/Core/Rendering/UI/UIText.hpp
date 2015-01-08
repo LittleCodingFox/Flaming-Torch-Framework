@@ -14,7 +14,7 @@ namespace UITextAlignment
 		VCenter = FLAGVALUE(3), //!<Align Vertical Center
 		Bottom = FLAGVALUE(4) //!<Align Bottom
 	};
-};
+}
 
 /*!
 *	UI Text Element
@@ -69,7 +69,7 @@ public:
 	const std::vector<StringInfo> GetStrings() const
 	{
 		return Strings;
-	};
+	}
 
 	virtual void SetSkin(DisposablePointer<GenericConfig> Skin) override;
 	virtual void Update(const Vector2 &ParentPosition) override;

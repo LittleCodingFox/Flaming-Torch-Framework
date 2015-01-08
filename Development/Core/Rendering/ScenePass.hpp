@@ -13,7 +13,7 @@ public:
 	inline const std::string GetName()
 	{
 		return Name;
-	};
+	}
 
 	void Bind(Renderer *TheRenderer);
 	void Unbind(Renderer *TheRenderer);

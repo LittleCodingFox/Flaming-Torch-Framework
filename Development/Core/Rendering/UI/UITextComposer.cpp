@@ -7,39 +7,39 @@ namespace FlamingTorch
 	UITextComposer::UITextComposer(UIManager *Manager) : UIElement("UITextComposer", Manager), LineHeight(0), IgnoreHeightBoundsValue(false)
 	{
 		OnConstructed();
-	};
+	}
 
 	void UITextComposer::ClearText()
 	{
 		for(uint32 i = 0; i < Nodes.size(); i++)
 		{
 			Nodes[i].Instance.Dispose();
-		};
+		}
 
 		Nodes.clear();
 
 		LastPosition = Vector2();
-	};
+	}
 
 	const Vector2 &UITextComposer::GetWritePosition() const
 	{
 		return LastPosition;
-	};
+	}
 
 	void UITextComposer::SetWritePosition(const Vector2 &WritePosition)
 	{
 		LastPosition = WritePosition;
-	};
+	}
 
 	bool UITextComposer::IgnoreHeightBounds() const
 	{
 		return IgnoreHeightBoundsValue;
-	};
+	}
 
 	void UITextComposer::SetIgnoreHeightBounds(bool Value)
 	{
 		IgnoreHeightBoundsValue = Value;
-	};
+	}
 
 	void UITextComposer::AddText(const std::string &Text, const TextParams &Params)
 	{
@@ -55,10 +55,10 @@ namespace FlamingTorch
 				LastPosition.y += LineHeight;
 
 				LineHeight = 0;
-			};
+			}
 
 			return;
-		};
+		}
 
 		Vector2 TextSize = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), Text, Params).Size();
 
@@ -82,7 +82,7 @@ namespace FlamingTorch
 			AddText(Text.substr(Temp[0].length()), TempParams);
 
 			return;
-		};
+		}
 
 		LineHeight = (uint32)MathUtils::Max((f32)LineHeight, TextSize.y);
 
@@ -106,7 +106,7 @@ namespace FlamingTorch
 		Nodes.push_back(Out);
 
 		LastPosition.x += Params.PositionValue.x + TextSize.x;
-	};
+	}
 
 	void UITextComposer::Update(const Vector2 &ParentPosition)
 	{
@@ -117,8 +117,8 @@ namespace FlamingTorch
 		for(uint32 i = 0; i < ChildrenValue.size(); i++)
 		{
 			ChildrenValue[i]->Update(ActualPosition);
-		};
-	};
+		}
+	}
 
 	void UITextComposer::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -132,7 +132,7 @@ namespace FlamingTorch
 			{
 				//TODO: Maybe allow the Translation field here like in scrollbars?
 				ChildrenValue[i]->Draw(ActualPosition, Renderer);
-			};
+			}
 		}
 		else
 		{
@@ -142,8 +142,8 @@ namespace FlamingTorch
 					break;
 
 				ChildrenValue[i]->Draw(ActualPosition, Renderer);
-			};
-		};
-	};
+			}
+		}
+	}
 #endif
-};
+}

@@ -54,7 +54,7 @@ namespace FlamingTorch
 			PC,
 			Mobile
 		};
-	};
+	}
 
 	namespace ScreenRotation
 	{
@@ -65,7 +65,7 @@ namespace FlamingTorch
 			East, //!<90 degree right
 			West //!<90 degree left
 		};
-	};
+	}
 
 	class PlatformInfo
 	{
@@ -119,7 +119,7 @@ namespace FlamingTorch
 			t[1] = b;
 
 			return Result;
-		};
+		}
 
 		/*!
 		*	Makes a version string from two bytes
@@ -145,7 +145,7 @@ namespace FlamingTorch
 			t[3] = d;
 
 			return Result;
-		};
+		}
 
 		/*!
 		*	Makes an Int from Bytes
@@ -169,12 +169,12 @@ namespace FlamingTorch
 					if(Length > 3)
 					{
 						t[3] = Bytes[3];
-					};
-				};
-			};
+					}
+				}
+			}
 
 			return Result;
-		};
+		}
 
 		/*!
 		*	\return the current desktop work area (position and size)
@@ -184,4 +184,4 @@ namespace FlamingTorch
 
 	void LibWarning(unsigned int Line, const char* FileName,
 		const char* Function, const char* Variable, const char *Message, ...);
-};
+}

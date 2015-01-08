@@ -24,7 +24,7 @@ namespace VertexElementType
 		Color, //!<Color of the vertex
 		Normal //!<Normal of the vertex
 	};
-};
+}
 
 /*!
 *	Vertex Element Data Type
@@ -39,7 +39,7 @@ namespace VertexElementDataType
 		Float4, //!<Four Floats (Vector4)
 		Count //!<Total data types (do not use)
 	};
-};
+}
 
 /*!
 *	Vertex Details Modes
@@ -51,7 +51,7 @@ namespace VertexDetailsMode
 		Mixed = 0, //!<Vertices are mixed (e.g., vertices are in format (pos, tex, normal, pos, tex, normal)
 		Lists //!<Vertices are lists (e.g., vertices are in format (pos, pos, pos, tex, tex, tex, norma, normal, normal)
 	};
-};
+}
 
 /*!
 *	Vertex Element Descriptor
@@ -86,7 +86,7 @@ namespace VertexModes
 		Points, //!<Point list
 		Count //!<Total Vertex Modes (do not use)
 	};
-};
+}
 
 /*!
 *	Renderer Window Styles
@@ -99,7 +99,7 @@ namespace RendererWindowStyle
 		FullScreen, //!<Window is a fullscreen window
 		Default //!<Default Window with a border and title bar
 	};
-};
+}
 
 /*!
 *	Renderer Buffers namespace
@@ -112,7 +112,7 @@ namespace RendererBuffer
 		Depth = FLAGVALUE(1), //!<Depth Buffer
 		Stencil = FLAGVALUE(2) //!<Stencil Buffer
 	};
-};
+}
 
 class IRendererImplementation;
 

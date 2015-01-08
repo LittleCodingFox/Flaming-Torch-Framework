@@ -12,7 +12,7 @@ namespace FlamingTorch
 			Vertical = FLAGVALUE(2),
 			Diagonal = FLAGVALUE(3)
 		};
-	};
+	}
 
 	union TileInstanceInfo
 	{
@@ -34,7 +34,7 @@ namespace FlamingTorch
 
 	VertexBufferHandle TiledMapVertexBuffer = 0;
 
-	TiledMap::TiledMap() : ResourcesInitedValue(false), Scale(1, 1), Color(1, 1, 1), Orientation(0), TileRatio(0), TileOrder(TiledMapOrder::North) {};
+	TiledMap::TiledMap() : ResourcesInitedValue(false), Scale(1, 1), Color(1, 1, 1), Orientation(0), TileRatio(0), TileOrder(TiledMapOrder::North) {}
 
 	bool TiledMap::DeSerialize(Stream *In)
 	{
@@ -56,7 +56,7 @@ namespace FlamingTorch
 				CoreUtils::MakeIntFromBytes('F', 'T', 'T', 'M'));
 
 			return false;
-		};
+		}
 
 		if(Header.Version != CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR))
 		{
@@ -64,7 +64,7 @@ namespace FlamingTorch
 				CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR));
 
 			return false;
-		};
+		}
 
 		MapTileSize = Header.MapTileSize;
 		MapPixelSize = Header.MapPixelSize;
@@ -80,7 +80,7 @@ namespace FlamingTorch
 		{
 			TileSet.UniqueTilesetTextureName.resize(Length);
 			SFLASSERT(In->Read2<char>(&TileSet.UniqueTilesetTextureName[0], Length));
-		};
+		}
 #else
 		SFLASSERT(In->Seek(In->Position() + Length));
 #endif
@@ -107,7 +107,7 @@ namespace FlamingTorch
 				if(Length)
 				{
 					SFLASSERT(In->Read2<char>(&Key[0]));
-				};
+				}
 
 				SFLASSERT(In->Read2<uint16>(&Length));
 				Value.resize(Length);
@@ -115,11 +115,11 @@ namespace FlamingTorch
 				if(Length)
 				{
 					SFLASSERT(In->Read2<char>(&Value[0]));
-				};
+				}
 
 				TileSet.Properties[i][Key] = Value;
-			};
-		};
+			}
+		}
 
 		//Layers
 		uint32 LayerCount = Header.LayerCount;
@@ -152,9 +152,9 @@ namespace FlamingTorch
 					TInfo.FlipFlag = Info.Info.FlipFlag;
 
 					Layers[Layers.size() - 1]->Tiles.push_back(TInfo);
-				};
-			};
-		};
+				}
+			}
+		}
 
 		//Objects
 		for(uint32 i = 0; i < Header.ObjectCount; i++)
@@ -167,7 +167,7 @@ namespace FlamingTorch
 			if(Length)
 			{
 				SFLASSERT(In->Read2<char>(&Object.Name[0], Length));
-			};
+			}
 
 			SFLASSERT(In->Read2<uint16>(&Length));
 			Object.Type.resize(Length);
@@ -175,7 +175,7 @@ namespace FlamingTorch
 			if(Length)
 			{
 				SFLASSERT(In->Read2<char>(&Object.Type[0], Length));
-			};
+			}
 
 			SFLASSERT(In->Read2<Vector2>(&Object.Position));
 			SFLASSERT(In->Read2<Vector2>(&Object.Size));
@@ -188,7 +188,7 @@ namespace FlamingTorch
 			{
 				Object.PolygonData.resize(Length);
 				SFLASSERT(In->Read2<Vector2>(&Object.PolygonData[0], Length));
-			};
+			}
 
 			SFLASSERT(In->Read2<uint16>(&Length));
 
@@ -204,7 +204,7 @@ namespace FlamingTorch
 				if(Length)
 				{
 					SFLASSERT(In->Read2<char>(&Name[0], Length));
-				};
+				}
 
 				SFLASSERT(In->Read2<uint16>(&Length));
 				Value.resize(Length);
@@ -212,16 +212,16 @@ namespace FlamingTorch
 				if(Length)
 				{
 					SFLASSERT(In->Read2<char>(&Value[0], Length));
-				};
+				}
 
 				Object.Properties[Name] = Value;
-			};
+			}
 
 			Objects.push_back(Object);
-		};
+		}
 
 		return true;
-	};
+	}
 
 #if USE_GRAPHICS
 	void TiledMap::UpdateGeometry()
@@ -278,7 +278,7 @@ namespace FlamingTorch
 							Log::Instance.LogDebug(TAG, "Unknown Tiled Map Order '%d'", TileOrder);
 
 							break;
-					};
+					}
 
 					int32 FoundLayerIndex = -1;
 
@@ -289,8 +289,8 @@ namespace FlamingTorch
 							FoundLayerIndex = j;
 
 							break;
-						};
-					};
+						}
+					}
 
 					if(FoundLayerIndex == -1)
 						continue;
@@ -321,7 +321,7 @@ namespace FlamingTorch
 						Layers[i]->Vertices[index + 1] = TempVertices[0];
 						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
 						Layers[i]->Vertices[index + 4] = TempVertices[2];
-					};
+					}
 
 					if(Layers[i]->Tiles[FoundLayerIndex].FlipFlag & TileFlipFlags::Vertical)
 					{
@@ -330,7 +330,7 @@ namespace FlamingTorch
 						Layers[i]->Vertices[index + 1] = TempVertices[4];
 						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[0];
 						Layers[i]->Vertices[index + 4] = TempVertices[1];
-					};
+					}
 
 					if(Layers[i]->Tiles[FoundLayerIndex].FlipFlag & TileFlipFlags::Horizontal)
 					{
@@ -339,7 +339,7 @@ namespace FlamingTorch
 						Layers[i]->Vertices[index + 1] = TempVertices[2];
 						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
 						Layers[i]->Vertices[index + 4] = TempVertices[0];
-					};
+					}
 
 					//Need to repeat here in case of rotating
 					if(ExtraSwapFlags & TileFlipFlags::Diagonal)
@@ -349,7 +349,7 @@ namespace FlamingTorch
 						Layers[i]->Vertices[index + 1] = TempVertices[0];
 						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
 						Layers[i]->Vertices[index + 4] = TempVertices[2];
-					};
+					}
 					
 					if(ExtraSwapFlags & TileFlipFlags::Vertical)
 					{
@@ -358,7 +358,7 @@ namespace FlamingTorch
 						Layers[i]->Vertices[index + 1] = TempVertices[4];
 						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[0];
 						Layers[i]->Vertices[index + 4] = TempVertices[1];
-					};
+					}
 					
 					if(ExtraSwapFlags & TileFlipFlags::Horizontal)
 					{
@@ -367,13 +367,13 @@ namespace FlamingTorch
 						Layers[i]->Vertices[index + 1] = TempVertices[2];
 						Layers[i]->Vertices[index + 2] = Layers[i]->Vertices[index + 3] = TempVertices[1];
 						Layers[i]->Vertices[index + 4] = TempVertices[0];
-					};
+					}
 
 					index += 6;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 
 	bool TiledMap::InitResources(const TiledMapInitOptions &Options)
 	{
@@ -384,7 +384,7 @@ namespace FlamingTorch
 			ResourcesInitedValue = true;
 
 			return true;
-		};
+		}
 
 		bool KeepData = Texture::KeepData;
 		Texture::KeepData = false;
@@ -410,13 +410,13 @@ namespace FlamingTorch
 						TileSet.UniqueTilesetTexture.Dispose();
 
 						continue;
-					};
+					}
 
 					Found = true;
 
 					break;
-				};
-			};
+				}
+			}
 
 			if(!Found)
 			{
@@ -429,7 +429,7 @@ namespace FlamingTorch
 					Texture::KeepData = KeepData;
 
 					return false;
-				};
+				}
 
 				TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
 
@@ -442,8 +442,8 @@ namespace FlamingTorch
 					TileSet.UniqueTilesetTexture.Dispose();
 
 					return false;
-				};
-			};
+				}
+			}
 		}
 		else
 		{
@@ -456,7 +456,7 @@ namespace FlamingTorch
 				Texture::KeepData = KeepData;
 
 				return false;
-			};
+			}
 
 			TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
 
@@ -469,8 +469,8 @@ namespace FlamingTorch
 				TileSet.UniqueTilesetTexture.Dispose();
 
 				return false;
-			};
-		};
+			}
+		}
 
 		TileSet.UniqueTilesetTexturePacker = TexturePacker::FromConfig(TileSet.UniqueTilesetTexture, TileSet.UniqueTilesetConfig);
 
@@ -481,7 +481,7 @@ namespace FlamingTorch
 			TileSet.UniqueTilesetTexture.Dispose();
 
 			return false;
-		};
+		}
 
 		Texture::KeepData = KeepData;
 
@@ -492,7 +492,7 @@ namespace FlamingTorch
 		UpdateGeometry();
 
 		return true;
-	};
+	}
 
 	void TiledMap::Draw(uint32 Layer, Renderer *Renderer)
 	{
@@ -509,12 +509,12 @@ namespace FlamingTorch
 		{
 			Renderer->PushMatrices();
 			Renderer->SetWorldMatrix(Renderer->WorldMatrix() * Matrix4x4::Scale(Vector4(Scale, 1, 1)) * Matrix4x4::Translate(Vector4(Translation, 0, 1)));
-		};
+		}
 
 		if(!Renderer->IsVertexBufferHandleValid(TiledMapVertexBuffer))
 		{
 			TiledMapVertexBuffer = Renderer->CreateVertexBuffer();
-		};
+		}
 
 		//TODO: Optimize this
 		static std::vector<SpriteVertex> Vertices;
@@ -526,7 +526,7 @@ namespace FlamingTorch
 			Vertices[i].Position = Layers[Layer]->Vertices[i];
 			Vertices[i].Color = Vector4(Color, Layers[Layer]->Alpha);
 			Vertices[i].TexCoord = Layers[Layer]->TexCoords[i];
-		};
+		}
 
 		Renderer->SetBlendingMode(BlendingMode::Alpha);
 		Renderer->SetVertexBufferData(TiledMapVertexBuffer, VertexDetailsMode::Mixed, SpriteVertexDescriptor, sizeof(SpriteVertexDescriptor) / sizeof(SpriteVertexDescriptor[0]), &Vertices[0], sizeof(SpriteVertex) * Vertices.size());
@@ -540,13 +540,13 @@ namespace FlamingTorch
 		if(DoTranslation)
 		{
 			Renderer->PopMatrices();
-		};
-	};
+		}
+	}
 
 	bool TiledMap::ResourcesInited()
 	{
 		return ResourcesInitedValue;
-	};
+	}
 #endif
 
 	Vector2 TiledMap::ToIsometric(const Vector2 &Point)
@@ -555,7 +555,7 @@ namespace FlamingTorch
 			return Point;
 
 		return Vector2(Point.x - Point.y, Point.x / TileRatio + Point.y / TileRatio);
-	};
+	}
 
 	Vector2 TiledMap::ToOrthogonal(const Vector2 &Point)
 	{
@@ -563,5 +563,5 @@ namespace FlamingTorch
 			return Point;
 
 		return Vector2(Point.x / TileRatio + Point.y, Point.y - Point.x / TileRatio);
-	};
-};
+	}
+}

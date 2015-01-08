@@ -17,7 +17,7 @@ namespace PinningMode
 		BottomCenter,
 		BottomRight
 	};
-};
+}
 
 namespace CropMode
 {
@@ -28,7 +28,7 @@ namespace CropMode
 		CropNormalized, //[Normalized Coordinates]
 		CropTiled, //[Right/Bottom -> TileID, Left/Top -> FrameSize]
 	};
-};
+}
 
 namespace BlendingMode
 {
@@ -39,7 +39,7 @@ namespace BlendingMode
 		Additive,
 		Subtractive
 	};
-};
+}
 
 class SpriteDrawOptions
 {
@@ -69,7 +69,7 @@ public:
 		UsingColorsArray(false), IsDirty(true) {
 
 		ColorsValue[0] = ColorsValue[1] = ColorsValue[2] = ColorsValue[3] = ColorValue;
-	};
+	}
 
 	SpriteDrawOptions(const SpriteDrawOptions &o) : ColorValue(o.ColorValue), BlendingModeValue(o.BlendingModeValue),
 		PositionValue(o.PositionValue), ScaleValue(o.ScaleValue), RotationValue(o.RotationValue),
@@ -83,7 +83,7 @@ public:
 		ColorsValue[1] = o.ColorsValue[1];
 		ColorsValue[2] = o.ColorsValue[2];
 		ColorsValue[3] = o.ColorsValue[3];
-	};
+	}
 
 	/*!
 	*	Sets the position of this sprite
@@ -95,7 +95,7 @@ public:
 		PositionValue = Pos;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the object's scale
@@ -109,7 +109,7 @@ public:
 		ScaleValue = Scale;
 
 		return *this;
-	};
+	}
 	
 	/*!
 	*	Sets the object's color
@@ -123,7 +123,7 @@ public:
 		ColorValue = Color;
 		
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the object's blending mode
@@ -135,7 +135,7 @@ public:
 		BlendingModeValue = Blending;
 		
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the object's rotation
@@ -147,7 +147,7 @@ public:
 		RotationValue = Rotation;
 		
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the origin (Pin) of the object when rendering
@@ -159,7 +159,7 @@ public:
 		PinningModeValue = PinningMode;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets an additional move (Offset) in the object
@@ -170,7 +170,7 @@ public:
 		IsDirty = true;
 		OffsetValue = Offset;
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets whether this sprite should be wireframe (lines covering the sprite)
@@ -183,7 +183,7 @@ public:
 		WireframeValue = Value;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the wireframe size for this sprite
@@ -196,7 +196,7 @@ public:
 		WireframePixelSizeValue = Value;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the object's colors for the four corners of the square rendered
@@ -216,7 +216,7 @@ public:
 		ColorsValue[3] = D;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the texture's rotation
@@ -229,7 +229,7 @@ public:
 		TexCoordRotation = Rotation;
 		
 		return *this;
-	};
+	}
 
 	/*!
 	*	Set up texture borders
@@ -244,7 +244,7 @@ public:
 		TexCoordBorderMax = Max;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the texture's position
@@ -257,7 +257,7 @@ public:
 		TexCoordPosition = Position;
 
 		return *this;
-	};
+	}
 	
 	/*!
 	*	Flips a texture
@@ -271,7 +271,7 @@ public:
 		FlipY = Y;
 		
 		return *this;
-	};
+	}
 
 	/*!
 	*	Crops a texture
@@ -286,7 +286,7 @@ public:
 		CropRectValue = CropRect;
 	
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets up as a Nine Patch
@@ -300,7 +300,7 @@ public:
 		NinePatchRectValue = NinePatchRect;
 
 		return *this;
-	};
+	}
 
 	/*!
 	*	Sets the Nine Patch Scale
@@ -311,7 +311,7 @@ public:
 		NinePatchScaleValue = Scale;
 
 		return *this;
-	};
+	}
 };
 
 struct SpriteVertex
@@ -339,38 +339,6 @@ public:
 	void Draw(Renderer *Renderer);
 };
 
-class AnimatedSprite : public Sprite
-{
-	struct AnimationInfo
-	{
-		std::vector<Vector2> Frames;
-		bool Repeating;
-		uint32 CurrentFrame;
-
-		AnimationInfo() : Repeating(true), CurrentFrame(0) {};
-	};
-
-	typedef std::map<StringID, AnimationInfo> FrameMap;
-	FrameMap Animations;
-	uint64 LastFrameUpdate;
-	AnimationInfo *CurrentAnimation;
-public:
-	Vector2 FrameSize, DefaultFrame, Scale;
-
-	uint64 FrameInterval;
-
-	AnimatedSprite(const Vector2 &SpriteFrameSize, const Vector2 &SpriteDefaultFrame = Vector2()) :
-		FrameSize(SpriteFrameSize), LastFrameUpdate(0), CurrentAnimation(NULL), DefaultFrame(SpriteDefaultFrame),
-		FrameInterval(250), Scale(1, 1) {};
-
-	void AddAnimation(const std::string &Name, const std::vector<Vector2> &Frames);
-	//May pass any name if wishing to set no animation
-	void SetAnimation(const std::string &Name, bool Repeats);
-	void StopAnimation();
-
-	void Update();
-};
-
 class SpriteCache
 {
 	friend class Sprite;
@@ -384,7 +352,7 @@ public:
 
 	static SpriteCache Instance;
 
-	SpriteCache() : CurrentBlendingMode(BlendingMode::None), ActiveTexture(NULL), CurrentCachePosition(0) {};
+	SpriteCache() : CurrentBlendingMode(BlendingMode::None), ActiveTexture(NULL), CurrentCachePosition(0) {}
 	void Register(SpriteVertex *Vertices, uint32 VertexCount, Texture *TheTexture, uint32 BlendingMode, Renderer *Renderer);
 	void Flush(Renderer *Renderer);
 };

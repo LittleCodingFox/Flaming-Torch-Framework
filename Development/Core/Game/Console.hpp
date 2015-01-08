@@ -9,7 +9,7 @@ namespace ConsoleVariableType
 		Float, //!<Float
 		String //!<String
 	};
-};
+}
 
 struct ConsoleVariable
 {
@@ -23,11 +23,11 @@ struct ConsoleVariable
 	f32 FloatValue;
 	std::string StringValue;
 
-	ConsoleVariable() : Type(ConsoleVariableType::String), UIntValue(0), IntValue(0), FloatValue(0) {};
-	ConsoleVariable(const std::string _Name, uint32 Value) : Name(_Name), UIntValue(Value), Type(ConsoleVariableType::UInt), IntValue(0), FloatValue(0) {};
-	ConsoleVariable(const std::string _Name, int32 Value) : Name(_Name), IntValue(Value), Type(ConsoleVariableType::Int), UIntValue(0), FloatValue(0) {};
-	ConsoleVariable(const std::string _Name, f32 Value) : Name(_Name), FloatValue(Value), Type(ConsoleVariableType::Float), UIntValue(0), IntValue(0) {};
-	ConsoleVariable(const std::string _Name, const std::string Value) : Name(_Name), StringValue(Value), Type(ConsoleVariableType::String), UIntValue(0), IntValue(0), FloatValue(0) {};
+	ConsoleVariable() : Type(ConsoleVariableType::String), UIntValue(0), IntValue(0), FloatValue(0) {}
+	ConsoleVariable(const std::string _Name, uint32 Value) : Name(_Name), UIntValue(Value), Type(ConsoleVariableType::UInt), IntValue(0), FloatValue(0) {}
+	ConsoleVariable(const std::string _Name, int32 Value) : Name(_Name), IntValue(Value), Type(ConsoleVariableType::Int), UIntValue(0), FloatValue(0) {}
+	ConsoleVariable(const std::string _Name, f32 Value) : Name(_Name), FloatValue(Value), Type(ConsoleVariableType::Float), UIntValue(0), IntValue(0) {}
+	ConsoleVariable(const std::string _Name, const std::string Value) : Name(_Name), StringValue(Value), Type(ConsoleVariableType::String), UIntValue(0), IntValue(0), FloatValue(0) {}
 };
 
 class ConsoleCommand
@@ -37,7 +37,7 @@ public:
 
 	SimpleDelegate::SimpleDelegate<const std::vector<std::string> &> Method;
 
-	virtual ~ConsoleCommand() {};
+	virtual ~ConsoleCommand() {}
 };
 
 class ScriptedConsoleCommand : public ConsoleCommand
@@ -57,20 +57,20 @@ public:
 			for(uint32 i = 0; i < Parameters.size(); i++)
 			{
 				ActualParameters[i + 1] = Parameters[i];
-			};
+			}
 
 			ScriptedMethod(ActualParameters);
 		}
 		catch(std::exception &e)
 		{
 			LuaScriptManager::Instance.LogError("Console Command [" + Name + "]: Scripting Error: " + e.what());
-		};
-	};
+		}
+	}
 
 	ScriptedConsoleCommand()
 	{
 		Method.Connect<ScriptedConsoleCommand, &ScriptedConsoleCommand::ScriptedMethodProxy>(this);
-	};
+	}
 };
 
 /*!
@@ -101,7 +101,7 @@ private:
 public:
 	std::vector<std::string> ConsoleLog, CommandLog;
 
-	Console() : SubSystem(CONSOLE_PRIORITY) {};
+	Console() : SubSystem(CONSOLE_PRIORITY) {}
 
 	/*!
 	*	Registers a console variable

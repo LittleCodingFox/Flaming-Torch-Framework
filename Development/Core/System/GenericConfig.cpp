@@ -3,15 +3,15 @@ namespace FlamingTorch
 {
 	GenericConfig::GenericConfig() : CRCValue(0)
 	{
-	};
+	}
 
-	GenericConfig::Value::Value() : Type(ValueTypes::Unknown) {};
+	GenericConfig::Value::Value() : Type(ValueTypes::Unknown) {}
 
 	GenericConfig::IntValue::IntValue() : Value()
 	{
 		Type = ValueTypes::Int32;
 		Value = 0xBAADF00D;
-	};
+	}
 
 	GenericConfig::IntValue::IntValue(int32 Value) : Value()
 	{
@@ -19,7 +19,7 @@ namespace FlamingTorch
 		this->Value = Value;
 		Content.resize(256);
 		sprintf(&Content[0], "%d", Value);
-	};
+	}
 
 	GenericConfig::IntValue::IntValue(const char *ValueString) : Value()
 	{
@@ -30,14 +30,14 @@ namespace FlamingTorch
 			Value = 0xBAADF00D;
 			Content.resize(256);
 			sprintf(&Content[0], "%d", Value);
-		};
-	};
+		}
+	}
 
 	GenericConfig::FloatValue::FloatValue() : Value()
 	{
 		Type = ValueTypes::F32;
 		Value = (f32)0xBAADF00D;
-	};
+	}
 
 	GenericConfig::FloatValue::FloatValue(f32 Value) : Value()
 	{
@@ -45,7 +45,7 @@ namespace FlamingTorch
 		this->Value = Value;
 		Content.resize(256);
 		sprintf(&Content[0], "%f", Value);
-	};
+	}
 
 	GenericConfig::FloatValue::FloatValue(const char *ValueString) : Value()
 	{
@@ -56,32 +56,32 @@ namespace FlamingTorch
 			Value = (f32)0xBAADF00D;
 			Content.resize(256);
 			sprintf(&Content[0], "%f", Value);
-		};
-	};
+		}
+	}
 
-	GenericConfig::Value GenericConfig::GetValue(const char *SectionName, const char *ValueName, const Value &Default)
+	GenericConfig::Value GenericConfig::GetValue(const char *SectionName, const char *ValueName, const Value &Default) const
 	{
-		SectionMap::iterator it = Sections.find(SectionName);
+		SectionMap::const_iterator it = Sections.find(SectionName);
 
 		if(it == Sections.end())
 			return Default;
 
-		Section::ValueMap::iterator vit = it->second.Values.find(ValueName);
+		Section::ValueMap::const_iterator vit = it->second.Values.find(ValueName);
 
 		if(vit == it->second.Values.end())
 			return Default;
 
 		return vit->second;
-	};
+	}
 
-	int32 GenericConfig::GetInt(const char *SectionName, const char *ValueName, int32 Default)
+	int32 GenericConfig::GetInt(const char *SectionName, const char *ValueName, int32 Default) const
 	{
-		SectionMap::iterator it = Sections.find(SectionName);
+		SectionMap::const_iterator it = Sections.find(SectionName);
 
 		if(it == Sections.end())
 			return Default;
 
-		Section::ValueMap::iterator vit = it->second.Values.find(ValueName);
+		Section::ValueMap::const_iterator vit = it->second.Values.find(ValueName);
 
 		if(vit == it->second.Values.end())
 			return Default;
@@ -89,16 +89,16 @@ namespace FlamingTorch
 		IntValue Out(vit->second.Content.c_str());
 
 		return Out.Value != 0xBAADF00D ? Out.Value : Default;
-	};
+	}
 
-	f32 GenericConfig::GetFloat(const char *SectionName, const char *ValueName, f32 Default)
+	f32 GenericConfig::GetFloat(const char *SectionName, const char *ValueName, f32 Default) const
 	{
-		SectionMap::iterator it = Sections.find(SectionName);
+		SectionMap::const_iterator it = Sections.find(SectionName);
 
 		if(it == Sections.end())
 			return Default;
 
-		Section::ValueMap::iterator vit = it->second.Values.find(ValueName);
+		Section::ValueMap::const_iterator vit = it->second.Values.find(ValueName);
 
 		if(vit == it->second.Values.end())
 			return Default;
@@ -106,12 +106,12 @@ namespace FlamingTorch
 		FloatValue Out(vit->second.Content.c_str());
 
 		return Out.Value != 0xBAADF00D ? Out.Value : Default;
-	};
+	}
 
 	void GenericConfig::SetValue(const char *SectionName, const char *ValueName, const char *Content)
 	{
 		Sections[SectionName].Values[ValueName].Content = Content;
-	};
+	}
 
 	bool GenericConfig::Serialize(Stream *Out)
 	{
@@ -129,20 +129,20 @@ namespace FlamingTorch
 			for(Section::ValueMap::iterator vit = it->second.Values.begin(); vit != it->second.Values.end(); vit++)
 			{
 				str << vit->first << "=" << vit->second.Content << "\n";
-			};
-		};
+			}
+		}
 
 		std::string Final = str.str();
 
 		SFLASSERT(Out->Write2<char>(Final.c_str(), Final.length()));
 
 		return true;
-	};
+	}
 
 	uint32 GenericConfig::CRC() const
 	{
 		return CRCValue;
-	};
+	}
 
 	bool GenericConfig::DeSerialize(Stream *In)
 	{
@@ -174,7 +174,7 @@ namespace FlamingTorch
 					ActiveSection = std::string();
 
 					continue;
-				};
+				}
 
 				ActiveSection = StringUtils::Trim(Lines[i].substr(1, Lines[i].length() - 2));
 			}
@@ -187,20 +187,20 @@ namespace FlamingTorch
 					Log::Instance.LogWarn("GenericConfig", "Mismatch setting line '%s'!", Lines[i].c_str());
 
 					continue;
-				};
+				}
 
 				Sections[ActiveSection].Values[StringUtils::Trim(Lines[i].substr(0, Index))].Content = StringUtils::Trim(Lines[i].substr(Index + 1));
-			};
-		};
+			}
+		}
 
 		return true;
-	};
+	}
 
-	std::string GenericConfig::GetString(const char *SectionName, const char *ValueName, const std::string &Default)
+	std::string GenericConfig::GetString(const char *SectionName, const char *ValueName, const std::string &Default) const
 	{
 		Value DefaultValue;
 		DefaultValue.Content = Default;
 
 		return GetValue(SectionName, ValueName, DefaultValue).Content;
-	};
-};
+	}
+}

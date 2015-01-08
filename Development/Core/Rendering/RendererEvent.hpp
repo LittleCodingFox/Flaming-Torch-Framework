@@ -28,7 +28,7 @@ namespace RendererEventType
 		MouseLeft, //!<Mouse has left
 		MouseEntered //!<Mouse has entered
 	};
-};
+}
 
 /*!
 *	Renderer Event class
@@ -101,6 +101,6 @@ public:
 	*/
 	Vector2 TouchPosition;
 
-	RendererEvent() : Type(0), MouseDelta(0), JoystickAxisPosition(0), TypedCharacter(0), KeyCode(0), MouseButtonIndex(0), JoystickAxisIndex(0), JoystickButtonIndex(0), JoystickIndex(0), TouchIndex(0) {};
+	RendererEvent() : Type(0), MouseDelta(0), JoystickAxisPosition(0), TypedCharacter(0), KeyCode(0), MouseButtonIndex(0), JoystickAxisIndex(0), JoystickButtonIndex(0), JoystickIndex(0), TouchIndex(0) {}
 };
 #endif

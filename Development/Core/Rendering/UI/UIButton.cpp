@@ -11,7 +11,7 @@ namespace FlamingTorch
 		OnConstructed();
 
 		OnEvent.Connect<UIButton, &UIButton::PrivOnEvent>(this);
-	};
+	}
 
 	void UIButton::SetSkin(DisposablePointer<GenericConfig> Skin)
 	{
@@ -33,14 +33,14 @@ namespace FlamingTorch
 		if (1 != sscanf(Skin->GetString("Button", "FontSize", "12").c_str(), "%u", &FontSize))
 		{
 			FontSize = 12;
-		};
+		}
 
 		FontColor = MathUtils::ColorFromHTML(Skin->GetString("Button", "FontColor", "#FFFFFFFF"));
 
 		if (FontColor.w == 0)
 		{
 			FontColor = Vector4(1, 1, 1, 1);
-		};
+		}
 
 		Rect NinePatchTextureRect;
 
@@ -52,13 +52,13 @@ namespace FlamingTorch
 		else
 		{
 			TheSprite.Options.NinePatch(false, NinePatchTextureRect);
-		};
+		}
 
 		if (2 != sscanf(Skin->GetString("Button", "LabelOffset", "").c_str(), "%f,%f", &LabelOffset.x, &LabelOffset.y))
 		{
 			LabelOffset = Vector2();
-		};
-	};
+		}
+	}
 
 	void UIButton::Draw(const Vector2 &ParentPosition, Renderer *Renderer)
 	{
@@ -80,7 +80,7 @@ namespace FlamingTorch
 		else
 		{
 			TheSprite.SpriteTexture = Normal;
-		};
+		}
 
 		UISprite::Draw(ParentPosition, Renderer);
 
@@ -90,17 +90,17 @@ namespace FlamingTorch
 		f32 Size = RenderTextUtils::MeasureTextSimple(Renderer, Caption, Parameters).Right;
 
 		RenderTextUtils::RenderText(Renderer, Caption, TextParams(Parameters).Position(ActualPosition + LabelOffset + TheSprite.Options.NinePatchRectValue.Position() + Vector2((SizeValue.x - Size) / 2, 0)));
-	};
+	}
 
 	void UIButton::SetCaption(const std::string &Caption)
 	{
 		this->Caption = Caption;
-	};
+	}
 
 	const std::string &UIButton::GetCaption() const
 	{
 		return Caption;
-	};
+	}
 
 	void UIButton::PrivOnEvent(uint32 EventType, std::vector<void *> Arguments)
 	{
@@ -114,7 +114,7 @@ namespace FlamingTorch
 					return;
 
 				MouseDown = true;
-			};
+			}
 
 			break;
 
@@ -126,7 +126,7 @@ namespace FlamingTorch
 					return;
 
 				MouseDown = false;
-			};
+			}
 
 			break;
 
@@ -139,7 +139,7 @@ namespace FlamingTorch
 			MouseOver = false;
 
 			break;
-		};
-	};
+		}
+	}
 #endif
-};
+}
