@@ -70,11 +70,11 @@ public:
 	/*!
 	*	Run your fixed step update code here
 	*/
-	virtual void OnFixedUpdate() {}
+	virtual void OnFixedUpdate();
 	/*!
 	*	Run your frame update code here
 	*/
-	virtual void OnFrameUpdate() {}
+	virtual void OnFrameUpdate();
 	/*!
 	*	Whether we should quit
 	*/
@@ -112,7 +112,7 @@ public:
 	*	\param TheRenderer the renderer to use for rendering
 	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass) {}
+	virtual void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass);
 
 	/*!
 	*	Called when a frame ends

@@ -1,156 +1,56 @@
 #pragma once
 
-namespace ObjectAttributeType
+namespace FeatureMessage
 {
-	enum ObjectAttributeType
+	enum
 	{
-		None,
-		Int8,
-		UInt8,
-		Int16,
-		UInt16,
-		Int32,
-		UInt32,
-		Int64,
-		UInt64,
-		F32,
-		F64,
-		Path,
-		String,
-		Camera,
-		TextureBuffer,
-		TextureEncoderInfo,
-		TexturePacker,
-		TextureGroup,
-		LinearTimer,
-		GenericConfig,
-		LuaEventGroup,
-		Matrix4x4,
-		Vector2,
-		Vector3,
-		Vector4,
-		Plane,
-		Rect,
-		RotateableRect,
-		Ray,
-		AxisAlignedBoundingBox,
-		BoundingSphere,
-		Quaternion,
-		TiledMap,
-		ConsoleVariable,
-		RendererDisplayMode,
-		RendererCapabilities,
-		RenderCreateOptions,
-		Sprite,
-		RendererFrameStats,
-		TextParams,
-		MouseButtonInfo,
-		KeyInfo,
-		JoystickAxisInfo,
-		JoystickButtonInfo,
-		Action,
-		TouchInfo,
-		Int8Ptr,
-		UInt8Ptr,
-		Int16Ptr,
-		UInt16Ptr,
-		Int32Ptr,
-		UInt32Ptr,
-		Int64Ptr,
-		UInt64Ptr,
-		F32Ptr,
-		F64Ptr,
-		PathPtr,
-		StreamPtr,
-		StringPtr,
-		CameraPtr,
-		TextureBufferPtr,
-		TextureEncoderInfoPtr,
-		TexturePtr,
-		TexturePackerPtr,
-		TextureGroupPtr,
-		LinearTimerPtr,
-		GenericConfigPtr,
-		GameInterfacePtr,
-		LuaEventGroupPtr,
-		Matrix4x4Ptr,
-		Vector2Ptr,
-		Vector3Ptr,
-		Vector4Ptr,
-		PlanePtr,
-		RectPtr,
-		RotateableRectPtr,
-		RayPtr,
-		AxisAlignedBoundingBoxPtr,
-		BoundingSpherePtr,
-		QuaternionPtr,
-		TiledMapPtr,
-		ConsoleVariablePtr,
-		SoundPtr,
-		MusicPtr,
-		RendererDisplayModePtr,
-		RendererCapabilitiesPtr,
-		RenderCreateOptionsPtr,
-		SpritePtr,
-		RendererFrameStatsPtr,
-		RendererPtr,
-		TextParamsPtr,
-		MouseButtonInfoPtr,
-		KeyInfoPtr,
-		JoystickAxisInfoPtr,
-		JoystickButtonInfoPtr,
-		ActionPtr,
-		TouchInfoPtr,
-		InputContextPtr,
-		UIElementPtr,
-		UIGroupPtr,
-		UIVerticalGroupPtr,
-		UIHorizontalGroupPtr,
-		UITextPtr,
-		UISpritePtr
+		FrameUpdate = 0,
+		FixedUpdate,
+		FrameDraw,
+		Count
 	};
 }
 
-template<typename type>
-bool IsLuaType(luabind::object o)
+class ObjectDef;
+
+class ObjectFeature
 {
-	try
-	{
-		luabind::object_cast<type>(o);
-	}
-	catch (std::exception &)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-template<typename type>
-bool IsLuaTypePtr(luabind::object o)
-{
-	try
-	{
-		luabind::object_cast<type *>(o);
-	}
-	catch (std::exception &)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-class ObjectAttribute
-{
+	friend class ObjectModelManager;
 public:
 	uint64 ID;
 	std::string Name;
-	uint32 Type;
-	luabind::object Value, Set, Get;
 
-	bool IsValid() const;
-	bool IsValid(luabind::object Value) const;
+	ObjectFeature();
+	virtual ~ObjectFeature() {};
+
+	virtual void OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments);
+	virtual bool RespondsToMessage(uint32 MessageID);
+	virtual void OnAttached(DisposablePointer<ObjectDef> Def);
+	virtual DisposablePointer<ObjectFeature> Clone() = 0;
+};
+
+class TransformFeature : public ObjectFeature
+{
+public:
+	Vector3 Position, Rotation, Scale;
+
+	TransformFeature();
+	void OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments) override;
+	bool RespondsToMessage(uint32 MessageID) override;
+	void OnAttached(DisposablePointer<ObjectDef> Def) override;
+	DisposablePointer<ObjectFeature> Clone() override;
+};
+
+class SpriteFeature : public ObjectFeature
+{
+public:
+	Sprite TheSprite;
+
+	SpriteFeature();
+	void OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments) override;
+	bool RespondsToMessage(uint32 MessageID) override;
+	void OnAttached(DisposablePointer<ObjectDef> Def) override;
+	DisposablePointer<ObjectFeature> Clone() override;
 };
 
 class ObjectDef
@@ -159,8 +59,15 @@ public:
 	uint64 ID;
 	std::string Name;
 
-	std::vector<std::string> Tags, Layers, Groups;
-	std::vector<DisposablePointer<ObjectAttribute> > Attributes;
+	std::vector<std::string> Tags;
+
+	std::string Layer, Group;
+
+	std::vector<DisposablePointer<ObjectFeature> > Features;
+
+	ObjectDef();
+	DisposablePointer<ObjectDef> Clone();
+	DisposablePointer<ObjectFeature> GetFeature(const std::string &Name);
 };
 
 class ObjectModelManager : public SubSystem
@@ -169,10 +76,23 @@ private:
 	typedef std::map<uint64, DisposablePointer<ObjectDef> > ObjectDefMap;
 	ObjectDefMap ObjectDefs;
 
-	typedef std::map<uint64, DisposablePointer<ObjectAttribute> > ObjectAttributeMap;
-	ObjectAttributeMap ObjectAttributes;
+	typedef std::map<uint64, DisposablePointer<ObjectFeature> > ObjectFeatureMap;
+	ObjectFeatureMap ObjectFeatures;
 
-	uint64 ObjectAttributesCounter, ObjectDefCounter, ObjectCounter;
+	std::vector<DisposablePointer<ObjectDef> > Objects;
+
+	typedef std::map<uint64, std::vector<DisposablePointer<ObjectDef> > > ObjectLayerMap;
+	typedef std::map<uint64, ObjectLayerMap> ObjectGroupMap;
+
+	ObjectGroupMap ObjectGroups;
+
+	typedef std::map<std::string, uint64> LayerPriorityMap;
+	typedef std::map<std::string, LayerPriorityMap> GroupPriorityMap;
+
+	LayerPriorityMap LayerPriorities;
+	GroupPriorityMap GroupPriorities;
+
+	uint64 ObjectFeatureCounter, ObjectDefCounter, ObjectCounter;
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
@@ -180,13 +100,38 @@ private:
 public:
 	static ObjectModelManager Instance;
 	
-	ObjectModelManager() : SubSystem(OBJECTMODEL_PRIORITY), ObjectAttributesCounter(0), ObjectDefCounter(0), ObjectCounter(0)
+	ObjectModelManager() : SubSystem(OBJECTMODEL_PRIORITY), ObjectFeatureCounter(0), ObjectDefCounter(0), ObjectCounter(0)
 	{
 	}
 
 	static bool RegisterBindings(lua_State *State);
 
-	DisposablePointer<ObjectDef> MakeObjectDef(const std::string &Name);
-	DisposablePointer<ObjectAttribute> MakeObjectAttribute(const std::string &Name);
+	/*!
+	*	\param Def the definition to register
+	*	\note Registers the object itself, not a definition
+	*/
+	bool RegisterObject(DisposablePointer<ObjectDef> Def);
+
+	/*!
+	*	\param Def the definition to register
+	*	\note Registers a definition archetype, not the object itself
+	*/
+	bool RegisterObjectDef(DisposablePointer<ObjectDef> Def);
+
+	/*!
+	*	\param Feature the feature to register
+	*/
+	bool RegisterObjectFeature(DisposablePointer<ObjectFeature> Feature);
+
+	/*!
+	*	Clears all data
+	*/
 	void Clear();
+
+	/*!
+	*	Emits a message to all objects
+	*	\param MessageID one of FeatureMessage::*
+	*	\param Arguments any arguments passed
+	*/
+	void EmitMessage(uint32 MessageID, const std::vector<void *> &Arguments);
 };

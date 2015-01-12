@@ -102,6 +102,22 @@ namespace FlamingTorch
 		return 0;
 	}
 
+	void GameInterface::OnFixedUpdate()
+	{
+		if (ObjectModelManager::Instance.Started())
+		{
+			ObjectModelManager::Instance.EmitMessage(FeatureMessage::FixedUpdate, {});
+		}
+	}
+
+	void GameInterface::OnFrameUpdate()
+	{
+		if (ObjectModelManager::Instance.Started())
+		{
+			ObjectModelManager::Instance.EmitMessage(FeatureMessage::FrameUpdate, {});
+		}
+	}
+
 #if USE_GRAPHICS
 #	if !FLPLATFORM_ANDROID
 	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
@@ -201,6 +217,14 @@ namespace FlamingTorch
 		TheRenderer->SetViewport(0, 0, RendererSize.x, RendererSize.y);
 
 		return TheRenderer;
+	}
+
+	void GameInterface::OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass)
+	{
+		if (ObjectModelManager::Instance.Started())
+		{
+			ObjectModelManager::Instance.EmitMessage(FeatureMessage::FrameDraw, { TheRenderer, const_cast<std::string *>(&ScenePass) });
+		}
 	}
 
 	void GameInterface::OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass)
@@ -796,6 +820,8 @@ namespace FlamingTorch
 		if(ErroredOnFrameDraw)
 			return;
 
+		GameInterface::OnFrameDraw(TheRenderer, ScenePass);
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameDrawFunction);
 
 		try
@@ -867,6 +893,8 @@ namespace FlamingTorch
 		if(ErroredOnFixedUpdate)
 			return;
 
+		GameInterface::OnFixedUpdate();
+
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFixedUpdateFunction);
 
 		try
@@ -883,6 +911,8 @@ namespace FlamingTorch
 	{
 		if(ErroredOnFrameUpdate)
 			return;
+
+		GameInterface::OnFrameUpdate();
 
 		STATIC_FUNCTION_CHECK_RETURN_VOID(OnFrameUpdateFunction);
 
