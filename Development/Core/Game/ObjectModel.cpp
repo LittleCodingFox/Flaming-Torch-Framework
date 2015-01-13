@@ -19,6 +19,8 @@ namespace FlamingTorch
 		}
 
 		Self.Features.push_back(Feature);
+		
+		Feature->OnAttached(DisposablePointer<ObjectDef>::MakeWeak(&Self));
 	}
 
 	void RemoveObjectDefFeature(ObjectDef &Self, const std::string &Name)
@@ -27,6 +29,8 @@ namespace FlamingTorch
 		{
 			if (Self.Features[i].Get() == NULL || Self.Features[i]->Name != Name)
 				continue;
+
+			Self.Features[i]->OnDetached(DisposablePointer<ObjectDef>::MakeWeak(&Self));
 
 			Self.Features.erase(Self.Features.begin() + i);
 
@@ -63,13 +67,19 @@ namespace FlamingTorch
 		return GameInterface::Instance->GetScriptInstance()->VectorToLua<DisposablePointer<ObjectFeature> >(Self.Features);
 	}
 
+	luabind::object ObjectModelManagerFindObjectsWithFeature(ObjectModelManager &Self, const std::string &Name)
+	{
+		return GameInterface::Instance->GetScriptInstance()->VectorToLua<DisposablePointer<ObjectDef> >(Self.FindObjectsWithFeature(Name));
+	}
+
 	bool ObjectModelManager::RegisterBindings(lua_State *State)
 	{
 		luabind::module(State)[
 			luabind::class_<ObjectModelManager, SubSystem>("ObjectModelManager")
 				.def("RegisterObject", &ObjectModelManager::RegisterObject)
 				.def("RegisterObjectDef", &ObjectModelManager::RegisterObjectDef)
-				.def("RegisterObjectFeature", &ObjectModelManager::RegisterObjectFeature),
+				.def("RegisterObjectFeature", &ObjectModelManager::RegisterObjectFeature)
+				.def("FindObjectsWithFeature", &ObjectModelManagerFindObjectsWithFeature),
 
 			luabind::class_<ObjectDef, DisposablePointer<ObjectDef> >("ObjectDef")
 				.def(luabind::constructor<>())
@@ -99,7 +109,18 @@ namespace FlamingTorch
 
 			luabind::class_<SpriteFeature, ObjectFeature, DisposablePointer<ObjectFeature> >("SpriteFeature")
 				.def(luabind::constructor<>())
-				.def_readwrite("Sprite", &SpriteFeature::TheSprite)
+				.def_readwrite("Sprite", &SpriteFeature::TheSprite),
+
+			luabind::class_<PhysicsFeature, ObjectFeature, DisposablePointer<ObjectFeature> >("PhysicsFeature")
+				.def(luabind::constructor<>())
+				.def_readonly("Body", &PhysicsFeature::Body)
+				.def_readwrite("Size", &PhysicsFeature::Size)
+				.def_readwrite("Position", &PhysicsFeature::Position)
+				.def_readwrite("Dynamic", &PhysicsFeature::Dynamic)
+				.def_readwrite("Angle", &PhysicsFeature::Angle)
+				.def_readwrite("FixedRotation", &PhysicsFeature::FixedRotation)
+				.def_readwrite("Density", &PhysicsFeature::Density)
+				.def_readwrite("Friction", &PhysicsFeature::Friction)
 		];
 
 		luabind::object Globals = luabind::globals(State);
@@ -147,6 +168,9 @@ namespace FlamingTorch
 		if (!GameInterface::Instance.Get() || !GameInterface::Instance->GetScriptInstance().Get())
 			return false;
 
+		if (Def->ID != 0) //Already registered
+			return false;
+
 		Def->ID = ++ObjectCounter;
 
 		Objects.push_back(Def);
@@ -192,6 +216,11 @@ namespace FlamingTorch
 			}
 		}
 
+		for (uint32 i = 0; i < Def->Features.size(); i++)
+		{
+			ObjectFeatureUsage[MakeStringID(Def->Features[i]->Name)].push_back(Def);
+		}
+
 		return true;
 	}
 
@@ -202,6 +231,13 @@ namespace FlamingTorch
 
 		if (!GameInterface::Instance.Get() || !GameInterface::Instance->GetScriptInstance().Get())
 			return false;
+
+		//Keep duplicates out
+		for (ObjectFeatureMap::iterator it = ObjectFeatures.begin(); it != ObjectFeatures.end(); it++)
+		{
+			if (it->second->Name == Feature->Name)
+				return false;
+		}
 
 		Feature->ID = ++ObjectFeatureCounter;
 
@@ -272,9 +308,11 @@ namespace FlamingTorch
 
 		DisposablePointer<ObjectFeature> Transform(new TransformFeature());
 		DisposablePointer<ObjectFeature> Sprite(new SpriteFeature());
+		DisposablePointer<ObjectFeature> Physics(new PhysicsFeature());
 
 		RegisterObjectFeature(Transform);
 		RegisterObjectFeature(Sprite);
+		RegisterObjectFeature(Physics);
 	}
 
 	void ObjectModelManager::Shutdown(uint32 Priority)
@@ -291,6 +329,14 @@ namespace FlamingTorch
 		SubSystem::Update(Priority);
 
 		SUBSYSTEM_PRIORITY_CHECK();
+	}
+
+	std::vector<DisposablePointer<ObjectDef> > ObjectModelManager::FindObjectsWithFeature(const std::string &Name)
+	{
+		if (ObjectFeatureUsage.find(MakeStringID(Name)) == ObjectFeatureUsage.end())
+			return std::vector<DisposablePointer<ObjectDef> >();
+
+		return ObjectFeatureUsage[MakeStringID(Name)];
 	}
 
 	ObjectFeature::ObjectFeature() : ID(0), Name("ObjectFeature")
@@ -310,6 +356,10 @@ namespace FlamingTorch
 	{
 	}
 
+	void ObjectFeature::OnDetached(DisposablePointer<ObjectDef> Def)
+	{
+	}
+
 	ObjectDef::ObjectDef() : ID(0), Layer("None"), Group("None"), Name("ObjectDef")
 	{
 	}
@@ -322,6 +372,7 @@ namespace FlamingTorch
 		Out->Layer = Layer;
 		Out->Tags = Tags;
 		Out->Group = Group;
+		Out->ID = 0;
 
 		for (uint32 i = 0; i < Features.size(); i++)
 		{
@@ -331,6 +382,8 @@ namespace FlamingTorch
 				return DisposablePointer<ObjectDef>();
 
 			Out->Features.push_back(Feature);
+
+			Feature->OnAttached(Out);
 		}
 
 		return Out;
@@ -362,10 +415,6 @@ namespace FlamingTorch
 	bool TransformFeature::RespondsToMessage(uint32 MessageID)
 	{
 		return false;
-	}
-
-	void TransformFeature::OnAttached(DisposablePointer<ObjectDef> Def)
-	{
 	}
 
 	DisposablePointer<ObjectFeature> TransformFeature::Clone()
@@ -411,10 +460,6 @@ namespace FlamingTorch
 		return MessageID == FeatureMessage::FrameDraw;
 	}
 
-	void SpriteFeature::OnAttached(DisposablePointer<ObjectDef> Def)
-	{
-	}
-
 	DisposablePointer<ObjectFeature> SpriteFeature::Clone()
 	{
 		DisposablePointer<SpriteFeature> Out(new SpriteFeature());
@@ -422,6 +467,64 @@ namespace FlamingTorch
 		Out->TheSprite = TheSprite;
 		Out->Name = Name;
 		Out->ID = ID;
+
+		return Out;
+	}
+
+	PhysicsFeature::PhysicsFeature() : ObjectFeature(), Dynamic(false), FixedRotation(false), Density(0), Friction(0), Angle(0)
+	{
+		Name = "Physics";
+	}
+
+	void PhysicsFeature::OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments)
+	{
+		if (Body.Get() == NULL)
+			return;
+
+		switch (MessageID)
+		{
+		case FeatureMessage::FrameUpdate:
+			{
+				DisposablePointer<TransformFeature> Transform = Def->GetFeature("Transform");
+
+				if (Transform.Get())
+				{
+					Transform->Position = Body->Position();
+					Transform->Rotation.z = Body->Rotation();
+				}
+			}
+
+			break;
+		}
+	}
+
+	bool PhysicsFeature::RespondsToMessage(uint32 MessageID)
+	{
+		return MessageID == FeatureMessage::FrameUpdate;
+	}
+
+	void PhysicsFeature::OnAttached(DisposablePointer<ObjectDef> Def)
+	{
+		Body = PhysicsWorld::Instance.MakeBody(Dynamic, Position, Size, Angle, FixedRotation, Density, Friction);
+	}
+
+	void PhysicsFeature::OnDetached(DisposablePointer<ObjectDef> Def)
+	{
+		Body.Dispose();
+	}
+
+	DisposablePointer<ObjectFeature> PhysicsFeature::Clone()
+	{
+		DisposablePointer<PhysicsFeature> Out(new PhysicsFeature);
+
+		Out->ID = ID;
+		Out->Angle = Angle;
+		Out->Density = Density;
+		Out->Dynamic = Dynamic;
+		Out->FixedRotation = FixedRotation;
+		Out->Friction = Friction;
+		Out->Position = Position;
+		Out->Size = Size;
 
 		return Out;
 	}

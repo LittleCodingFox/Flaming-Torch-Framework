@@ -8,6 +8,7 @@ GamePreInitialize = function()
 	g_RendererManager:Register()
 	g_Console:Register()
 	g_ObjectModel:Register()
+	g_Physics:Register()
 	
 	if PlatformInfo.PlatformType() == PlatformInfo.PlatformType_PC then
 		g_FileSystemWatcher:Register()
@@ -44,18 +45,21 @@ GameInitialize = function(Arguments)
 	
 	local Transform = TransformFeature()
 	local LogoSpriteFeature = SpriteFeature()
+	local Physics = PhysicsFeature()
 	
 	LogoSpriteFeature.Sprite.Texture = LogoTexture
 	
-	g_ObjectModel:RegisterObjectFeature(Transform)
-	g_ObjectModel:RegisterObjectFeature(LogoSpriteFeature)
+	Physics.Dynamic = true
+	Physics.Size = LogoTexture.Size
+	Physics.Density = 1
 	
-	local LogoEntityDef = ObjectDef()
+	 LogoEntityDef = ObjectDef()
 
 	LogoEntityDef.Name = "LogoEntity"
 	
 	LogoEntityDef:AddFeature(Transform)
 	LogoEntityDef:AddFeature(LogoSpriteFeature)
+	LogoEntityDef:AddFeature(Physics)
 	
 	g_ObjectModel:RegisterObjectDef(LogoEntityDef)
 	
@@ -65,7 +69,7 @@ GameInitialize = function(Arguments)
 	
 	local SkinStream = g_PackageManager:GetFile(MakeStringID("/UIThemes/PolyCode/"), MakeStringID("skin.cfg"))
 	local SkinConfig = GenericConfig()
-
+	
 	if SkinStream == nil or not SkinConfig:DeSerialize(SkinStream) then
 		return false
 	end
@@ -105,47 +109,27 @@ GameResourcesReloaded = function(Renderer)
 end
 
 GameFrameUpdate = function()
-	local Transform = LogoEntity:GetFeature("Transform")
-	local LogoSpriteFeature = LogoEntity:GetFeature("Sprite")
-	local Position = Transform.Position
+	local Position = Vector2()
+	local MakeNew = false
 	
 	if g_Input:GetTouch(InputCenter.Touch_0).JustPressed then
 		Position = g_Input:GetTouch(InputCenter.Touch_0).Position
-	end
-
-	if g_Input:GetKey(InputCenter.Key_Left).Pressed then
-		Position.x = Position.x - g_Clock.Delta * 500
-		
-		if Position.x < 0 then
-			Position.x = 0
-		end
-	end
-
-	if g_Input:GetKey(InputCenter.Key_Right).Pressed then
-		Position.x = Position.x + g_Clock.Delta * 500
-		
-		if Position.x > g_RendererManager.ActiveRenderer.Size.x - LogoSpriteFeature.Sprite.Texture.Size.x then
-			Position.x = g_RendererManager.ActiveRenderer.Size.x - LogoSpriteFeature.Sprite.Texture.Size.x
-		end
+		MakeNew = true
 	end
 	
-	if g_Input:GetKey(InputCenter.Key_Up).Pressed then
-		Position.y = Position.y - g_Clock.Delta * 500
-		
-		if Position.y < 0 then
-			Position.y = 0
-		end
-	end
-
-	if g_Input:GetKey(InputCenter.Key_Down).Pressed then
-		Position.y = Position.y + g_Clock.Delta * 500
-		
-		if Position.y > g_RendererManager.ActiveRenderer.Size.y - LogoSpriteFeature.Sprite.Texture.Size.y then
-			Position.y = g_RendererManager.ActiveRenderer.Size.y - LogoSpriteFeature.Sprite.Texture.Size.y
-		end
+	if g_Input:GetMouseButton(InputCenter.Mouse_Left).FirstPress then
+		Position = g_Input.MousePosition
+		MakeNew = true
 	end
 	
-	Transform.Position = Position
+	if MakeNew then
+		local Entity = LogoEntityDef:Clone()
+
+		Entity:GetFeature("Physics").Body.Position = Position
+		
+		g_ObjectModel:RegisterObject(Entity)
+	end
+	
 end
 
 GameDeInitialize = function()

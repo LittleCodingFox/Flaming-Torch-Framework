@@ -1823,6 +1823,16 @@ namespace FlamingTorch
 					luabind::def("Split", &StringUtilsSplit)
 				],
 
+			//PhysicsBody
+			luabind::class_<PhysicsBody>("PhysicsBody")
+				.property("Position", &PhysicsBody::Position, &PhysicsBody::SetPosition)
+				.property("Rotation", &PhysicsBody::Rotation, &PhysicsBody::SetRotation),
+
+			//PhysicsWorld
+			luabind::class_<PhysicsWorld, SubSystem>("PhysicsWorld")
+				.def_readwrite("Gravity", &PhysicsWorld::Gravity)
+				.def("MakeBody", &PhysicsWorld::MakeBody),
+
 #if USE_SOUND
 			//SoundManager
 			luabind::class_<SoundManager, SubSystem>("SoundManager")
@@ -2481,6 +2491,7 @@ namespace FlamingTorch
 		Globals["g_LuaScriptManager"] = &LuaScriptManager::Instance;
 		Globals["g_GameInterface"] = GameInterface::Instance.Get();
 		Globals["Game"] = GameInterface::Instance.Get();
+		Globals["g_Physics"] = &PhysicsWorld::Instance;
 
 #if !FLPLATFORM_ANDROID
 		Globals["g_FileSystemWatcher"] = &FileSystemWatcher::Instance;

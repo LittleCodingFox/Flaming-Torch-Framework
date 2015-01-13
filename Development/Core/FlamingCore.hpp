@@ -65,6 +65,8 @@ namespace FlamingTorch
 #
 #	include "Game/GameInterface.hpp"
 #
+#	include "Game/Physics.hpp"
+#
 #	include "Rendering/Sprite.hpp"
 #	include "Rendering/TiledMap.hpp"
 #
