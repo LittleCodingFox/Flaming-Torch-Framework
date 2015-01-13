@@ -52,8 +52,9 @@ GameInitialize = function(Arguments)
 	Physics.Dynamic = true
 	Physics.Size = LogoTexture.Size
 	Physics.Density = 1
+	Physics.FixedRotation = true
 	
-	 LogoEntityDef = ObjectDef()
+	LogoEntityDef = ObjectDef()
 
 	LogoEntityDef.Name = "LogoEntity"
 	
@@ -125,7 +126,9 @@ GameFrameUpdate = function()
 	if MakeNew then
 		local Entity = LogoEntityDef:Clone()
 
-		Entity:GetFeature("Physics").Body.Position = Position
+		local Physics = Entity:GetFeature("Physics")
+		
+		Physics.Position = Position
 		
 		g_ObjectModel:RegisterObject(Entity)
 	end

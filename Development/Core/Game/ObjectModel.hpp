@@ -16,6 +16,8 @@ class ObjectDef;
 class ObjectFeature
 {
 	friend class ObjectModelManager;
+private:
+	bool Started;
 public:
 	uint64 ID;
 	std::string Name;
@@ -27,6 +29,7 @@ public:
 	virtual bool RespondsToMessage(uint32 MessageID);
 	virtual void OnAttached(DisposablePointer<ObjectDef> Def);
 	virtual void OnDetached(DisposablePointer<ObjectDef> Def);
+	virtual void OnStart(DisposablePointer<ObjectDef> Def);
 	virtual DisposablePointer<ObjectFeature> Clone() = 0;
 };
 
@@ -65,11 +68,80 @@ public:
 	f32 Friction;
 
 	PhysicsFeature();
+	~PhysicsFeature();
 	void OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments) override;
 	bool RespondsToMessage(uint32 MessageID) override;
-	void OnAttached(DisposablePointer<ObjectDef> Def) override;
-	void OnDetached(DisposablePointer<ObjectDef> Def) override;
+	void OnStart(DisposablePointer<ObjectDef> Def) override;
 	DisposablePointer<ObjectFeature> Clone() override;
+};
+
+class ScriptedFeature : public ObjectFeature
+{
+public:
+	enum ScriptedFeatureEvent
+	{
+		Message,
+		RespondMessage,
+		Attached,
+		Detached,
+		Start,
+		Count
+	};
+
+	luabind::object Events[ScriptedFeatureEvent::Count];
+	bool ErroredOnEvent[ScriptedFeatureEvent::Count];
+
+	luabind::object Container;
+
+	ScriptedFeature(const std::string &Name, luabind::object OnMessageFn, luabind::object RespondsToMessageFn,
+		luabind::object OnAttachedFn, luabind::object OnDetachedFn, luabind::object OnStartFn);
+
+	void OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments);
+	bool RespondsToMessage(uint32 MessageID);
+	void OnAttached(DisposablePointer<ObjectDef> Def);
+	void OnDetached(DisposablePointer<ObjectDef> Def);
+	void OnStart(DisposablePointer<ObjectDef> Def);
+	DisposablePointer<ObjectFeature> Clone();
+
+	template<typename R, typename... Args>
+	bool RunEvent(uint32 EventID, R &Result, Args... Arguments)
+	{
+		if (ErroredOnEvent[EventID])
+			return false;
+
+		try
+		{
+			Result = ProtectedLuaCast<R>(Events[EventID](Arguments...));
+		}
+		catch (luabind::error &)
+		{
+			ErroredOnEvent[EventID] = true;
+
+			return false;
+		}
+
+		return true;
+	}
+
+	template<typename... Args>
+	bool RunEventVoid(uint32 EventID, Args... Arguments)
+	{
+		if (ErroredOnEvent[EventID])
+			return false;
+
+		try
+		{
+			Events[EventID](Arguments...);
+		}
+		catch (luabind::error &)
+		{
+			ErroredOnEvent[EventID] = true;
+
+			return false;
+		}
+
+		return true;
+	}
 };
 
 class ObjectDef

@@ -120,7 +120,18 @@ namespace FlamingTorch
 				.def_readwrite("Angle", &PhysicsFeature::Angle)
 				.def_readwrite("FixedRotation", &PhysicsFeature::FixedRotation)
 				.def_readwrite("Density", &PhysicsFeature::Density)
-				.def_readwrite("Friction", &PhysicsFeature::Friction)
+				.def_readwrite("Friction", &PhysicsFeature::Friction),
+
+			luabind::class_<ScriptedFeature, ObjectFeature, DisposablePointer<ObjectFeature> >("ScriptedFeature")
+				.def(luabind::constructor<const std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>())
+				.def_readwrite("Container", &ScriptedFeature::Container)
+				.enum_("constants") [
+					luabind::value("Event_Message", ScriptedFeature::ScriptedFeatureEvent::Message),
+					luabind::value("Event_RespondMessage", ScriptedFeature::ScriptedFeatureEvent::RespondMessage),
+					luabind::value("Event_Attached", ScriptedFeature::ScriptedFeatureEvent::Attached),
+					luabind::value("Event_Detached", ScriptedFeature::ScriptedFeatureEvent::Detached),
+					luabind::value("Event_Start", ScriptedFeature::ScriptedFeatureEvent::Start)
+				]
 		];
 
 		luabind::object Globals = luabind::globals(State);
@@ -135,6 +146,9 @@ namespace FlamingTorch
 			return false;
 
 		if (!GameInterface::Instance.Get() || !GameInterface::Instance->GetScriptInstance().Get())
+			return false;
+
+		if (Def->ID != 0) //Already registered
 			return false;
 
 		for (ObjectDefMap::iterator it = ObjectDefs.begin(); it != ObjectDefs.end(); it++)
@@ -232,6 +246,9 @@ namespace FlamingTorch
 		if (!GameInterface::Instance.Get() || !GameInterface::Instance->GetScriptInstance().Get())
 			return false;
 
+		if (Feature->ID != 0) //Already registered
+			return false;
+
 		//Keep duplicates out
 		for (ObjectFeatureMap::iterator it = ObjectFeatures.begin(); it != ObjectFeatures.end(); it++)
 		{
@@ -262,6 +279,12 @@ namespace FlamingTorch
 			ObjectFeatures.begin()->second.Dispose();
 			ObjectFeatures.erase(ObjectFeatures.begin());
 		}
+
+		while (Objects.size())
+		{
+			Objects.begin()->Dispose();
+			Objects.erase(Objects.begin());
+		}
 	}
 
 	void ObjectModelManager::EmitMessage(uint32 MessageID, const std::vector<void *> &Arguments)
@@ -286,7 +309,16 @@ namespace FlamingTorch
 					{
 						ObjectFeature *Feature = Def->Features[j];
 
-						if (Feature == NULL || !Feature->RespondsToMessage(MessageID))
+						if (Feature == NULL)
+							continue;
+
+						if (Feature->Started == false)
+						{
+							Feature->Started = true;
+							Feature->OnStart(Def);
+						}
+
+						if (!Feature->RespondsToMessage(MessageID))
 							continue;
 
 						Feature->OnMessage(Def, MessageID, Arguments);
@@ -339,7 +371,7 @@ namespace FlamingTorch
 		return ObjectFeatureUsage[MakeStringID(Name)];
 	}
 
-	ObjectFeature::ObjectFeature() : ID(0), Name("ObjectFeature")
+	ObjectFeature::ObjectFeature() : ID(0), Name("ObjectFeature"), Started(false)
 	{
 	}
 
@@ -357,6 +389,10 @@ namespace FlamingTorch
 	}
 
 	void ObjectFeature::OnDetached(DisposablePointer<ObjectDef> Def)
+	{
+	}
+
+	void ObjectFeature::OnStart(DisposablePointer<ObjectDef> Def)
 	{
 	}
 
@@ -476,6 +512,11 @@ namespace FlamingTorch
 		Name = "Physics";
 	}
 
+	PhysicsFeature::~PhysicsFeature()
+	{
+		Body.Dispose();
+	}
+
 	void PhysicsFeature::OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments)
 	{
 		if (Body.Get() == NULL)
@@ -503,14 +544,9 @@ namespace FlamingTorch
 		return MessageID == FeatureMessage::FrameUpdate;
 	}
 
-	void PhysicsFeature::OnAttached(DisposablePointer<ObjectDef> Def)
+	void PhysicsFeature::OnStart(DisposablePointer<ObjectDef> Def)
 	{
 		Body = PhysicsWorld::Instance.MakeBody(Dynamic, Position, Size, Angle, FixedRotation, Density, Friction);
-	}
-
-	void PhysicsFeature::OnDetached(DisposablePointer<ObjectDef> Def)
-	{
-		Body.Dispose();
 	}
 
 	DisposablePointer<ObjectFeature> PhysicsFeature::Clone()
@@ -525,6 +561,63 @@ namespace FlamingTorch
 		Out->Friction = Friction;
 		Out->Position = Position;
 		Out->Size = Size;
+
+		return Out;
+	}
+
+	ScriptedFeature::ScriptedFeature(const std::string &Name, luabind::object OnMessageFn, luabind::object RespondsToMessageFn,
+		luabind::object OnAttachedFn, luabind::object OnDetachedFn, luabind::object OnStartFn) : ObjectFeature()
+	{
+		Events[ScriptedFeatureEvent::Message] = OnMessageFn;
+		Events[ScriptedFeatureEvent::RespondMessage] = RespondsToMessageFn;
+		Events[ScriptedFeatureEvent::Attached] = OnAttachedFn;
+		Events[ScriptedFeatureEvent::Detached] = OnDetachedFn;
+		Events[ScriptedFeatureEvent::Start] = OnStartFn;
+
+		memset(ErroredOnEvent, 0, sizeof(ErroredOnEvent));
+
+		Container = luabind::newtable(GameInterface::Instance->GetScriptInstance()->State);
+	}
+
+	void ScriptedFeature::OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments)
+	{
+		RunEventVoid(ScriptedFeatureEvent::Message, this, Def, MessageID, GameInterface::Instance->GetScriptInstance()->VectorToLua<void *>(Arguments));
+	}
+
+	bool ScriptedFeature::RespondsToMessage(uint32 MessageID)
+	{
+		bool Result;
+
+		RunEvent(ScriptedFeatureEvent::RespondMessage, Result, this, MessageID);
+
+		return Result;
+	}
+
+	void ScriptedFeature::OnAttached(DisposablePointer<ObjectDef> Def)
+	{
+		RunEventVoid(ScriptedFeatureEvent::Attached, this, Def);
+	}
+
+	void ScriptedFeature::OnDetached(DisposablePointer<ObjectDef> Def)
+	{
+		RunEventVoid(ScriptedFeatureEvent::Detached, this, Def);
+	}
+
+	void ScriptedFeature::OnStart(DisposablePointer<ObjectDef> Def)
+	{
+		RunEventVoid(ScriptedFeatureEvent::Start, this, Def);
+	}
+
+	DisposablePointer<ObjectFeature> ScriptedFeature::Clone()
+	{
+		//Doing this this way since otherwise it's a liability for coding errors
+		DisposablePointer<ScriptedFeature> Out(new ScriptedFeature(Name, luabind::object(), luabind::object(), luabind::object(), luabind::object(), luabind::object()));
+		Out->ID = ID;
+
+		for (uint32 i = 0; i < ScriptedFeatureEvent::Count; i++)
+		{
+			Out->Events[i] = Events[i];
+		}
 
 		return Out;
 	}
