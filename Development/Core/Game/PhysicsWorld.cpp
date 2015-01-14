@@ -7,6 +7,23 @@ namespace FlamingTorch
 
 	PhysicsWorld PhysicsWorld::Instance;
 
+	void PhysicsWorld::ContactListener::BeginContact(b2Contact *contact)
+	{
+		b2Fixture *A = contact->GetFixtureA();
+		b2Fixture *B = contact->GetFixtureB();
+
+		return;
+	}
+
+	void PhysicsWorld::ContactListener::EndContact(b2Contact *contact)
+	{
+	}
+
+	bool PhysicsWorld::ContactFilter::ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB)
+	{
+		return true;
+	}
+
 	PhysicsWorld::PhysicsWorld() : SubSystem(PHYSICS_PRIORITY), Gravity(0, 9.81f), UpdateTimer(0)
 	{
 	}
@@ -49,7 +66,12 @@ namespace FlamingTorch
 
 		Log::Instance.LogInfo(TAG, "Initializing Physics...");
 
+		TheContactListener.Reset(new ContactListener());
+		TheContactFilter.Reset(new ContactFilter());
 		World.Reset(new b2World(b2Vec2(Gravity.x, Gravity.y)));
+
+		World->SetContactListener(TheContactListener.Get());
+		World->SetContactFilter(TheContactFilter.Get());
 	}
 
 	void PhysicsWorld::Shutdown(uint32 Priority)

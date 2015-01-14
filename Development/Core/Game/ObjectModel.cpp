@@ -322,6 +322,32 @@ namespace FlamingTorch
 							continue;
 
 						Feature->OnMessage(Def, MessageID, Arguments);
+
+						if (MessageID == FeatureMessage::FrameDraw && !!Console::Instance.GetVariable("r_drawobjectsdebug") && Console::Instance.GetVariable("r_drawobjectsdebug")->UIntValue == 1)
+						{
+							DisposablePointer<TransformFeature> Transform = Def->GetFeature("Transform");
+							DisposablePointer<SpriteFeature> SpriteFeature = Def->GetFeature("Sprite");
+
+							if (Transform.Get() == NULL)
+								continue;
+
+							Sprite TheSprite;
+							TheSprite.Options.Position(Transform->Position.ToVector2()).Rotation(Transform->Rotation.z).Color(Vector4(1, 1, 0, 0.25f));
+
+							if (SpriteFeature.Get())
+							{
+								Vector2 Scale = SpriteFeature->TheSprite.Options.ScaleValue;
+
+								if (SpriteFeature->TheSprite.SpriteTexture.Get())
+								{
+									Scale *= SpriteFeature->TheSprite.SpriteTexture->Size();
+								}
+
+								TheSprite.Options.Scale(Scale);
+							}
+
+							TheSprite.Draw(RendererManager::Instance.ActiveRenderer());
+						}
 					}
 				}
 			}

@@ -20,7 +20,22 @@ namespace FlamingTorch
 	class PhysicsWorld : public SubSystem
 	{
 	private:
+		class ContactListener : public b2ContactListener
+		{
+		public:
+			void BeginContact(b2Contact *contact) override;
+			void EndContact(b2Contact *contact) override;
+		};
+
+		class ContactFilter : public b2ContactFilter
+		{
+		public:
+			bool ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB) override;
+		};
+
 		DisposablePointer<b2World> World;
+		DisposablePointer<ContactListener> TheContactListener;
+		DisposablePointer<ContactFilter> TheContactFilter;
 
 		uint64 UpdateTimer;
 

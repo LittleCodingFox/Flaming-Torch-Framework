@@ -369,6 +369,7 @@ namespace FlamingTorch
 		RegisterVariable(ConsoleVariable("r_drawuifocuszones", (uint32)0));
 		RegisterVariable(ConsoleVariable("r_drawui", (uint32)1));
 		RegisterVariable(ConsoleVariable("r_drawrenderstats", (uint32)0));
+		RegisterVariable(ConsoleVariable("r_drawobjectsdebug", (uint32)0));
 #endif
 	}
 
