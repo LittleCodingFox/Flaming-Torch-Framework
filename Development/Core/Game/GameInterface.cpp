@@ -354,6 +354,13 @@ namespace FlamingTorch
 
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 
+#if USE_GRAPHICS
+		if (RendererManager::Instance.ActiveRenderer())
+		{
+			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "DefaultFont.ttf");
+		}
+#endif
+
 		for(;;)
 		{
 			UpdateSubsystems();
@@ -731,10 +738,9 @@ namespace FlamingTorch
 			{
 				FirstFrame = false;
 
-#if USE_GRAPHICS
+#if USE_GRAPHICS && !FLPLATFORM_MOBILE
 				if(IsGUISandbox)
 				{
-#	if !FLPLATFORM_ANDROID
 					if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
 					{
 						Instance.Dispose();
@@ -745,7 +751,6 @@ namespace FlamingTorch
 					}
 
 					FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
-#	endif
 
 					ReloadGUI();
 				}

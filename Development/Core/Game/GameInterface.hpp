@@ -22,15 +22,16 @@ private:
 #if USE_GRAPHICS
 	void OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action);
 #endif
+protected:
+	bool ErroredOnFrameUpdate, ErroredOnFixedUpdate, ErroredOnFrameBegin, ErroredOnFrameEnd, ErroredOnFrameDraw, ErroredOnResize, ErroredOnResourcesReloaded;
 public:
 	bool FirstFrame;
-	bool DevelopmentBuild;
-	bool IsGUISandbox;
 	bool QuitFlag;
 	bool GraphicsEnabled;
+	bool DevelopmentBuild;
+	bool IsGUISandbox;
 	uint32 UpdateRateValue, FrameRateValue;
 	Vector2 BaseResolution;
-	bool ErroredOnFrameUpdate, ErroredOnFixedUpdate, ErroredOnFrameBegin, ErroredOnFrameEnd, ErroredOnFrameDraw, ErroredOnResize, ErroredOnResourcesReloaded;
 
 	static DisposablePointer<GameInterface> Instance;
 

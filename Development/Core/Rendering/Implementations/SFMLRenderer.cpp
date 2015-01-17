@@ -1894,6 +1894,8 @@ namespace FlamingTorch
 		if(FontIterator == Fonts.end())
 			return Out;
 
+		Window.pushGLStates();
+
 		sf::String str(Character);
 
 		GLCHECK();
@@ -1925,6 +1927,8 @@ namespace FlamingTorch
 
 		Out.Advance = TheGlyph.advance;
 		Out.Offset = Vector2((f32)TheGlyph.bounds.left, (f32)Parameters.FontSizeValue + TheGlyph.bounds.top);
+
+		Window.popGLStates();
 
 		return Out;
 	}

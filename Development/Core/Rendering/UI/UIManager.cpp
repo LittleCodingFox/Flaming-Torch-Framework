@@ -396,7 +396,9 @@ namespace FlamingTorch
 				TheResource.References = 1;
 
 				TheResource.Info = Owner->GetTextGlyph(Text[i], Parameters);
-				TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(Texture::CreateFromBuffer(TheResource.Info.Pixels)));
+
+				if (TheResource.Info.Pixels.Get())
+					TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(Texture::CreateFromBuffer(TheResource.Info.Pixels)));
 
 				TextResources[ID] = TheResource;
 			}
@@ -443,12 +445,15 @@ namespace FlamingTorch
 							TheSprite.Draw(Owner);
 
 #if DEBUG_UIMANAGER_DRAWTEXT
-							TheSprite.Options.Scale(Vector2(TheSprite.SpriteTexture->Size())).Color(Vector4(1, 1, 0, 1)).Wireframe(true);
-							TheSprite.SpriteTexture = DisposablePointer<Texture>();
+							if(TheSprite.SpriteTexture.Get())
+							{
+								TheSprite.Options.Scale(Vector2(TheSprite.SpriteTexture->Size())).Color(Vector4(1, 1, 0, 1)).Wireframe(true);
+								TheSprite.SpriteTexture = DisposablePointer<Texture>();
 
-							TheSprite.Draw(Owner);
+								TheSprite.Draw(Owner);
 
-							TheSprite.Options.Scale(Vector2(1, 1)).Color(Vector4(1, 1, 1, 1)).Wireframe(false);
+								TheSprite.Options.Scale(Vector2(1, 1)).Color(Vector4(1, 1, 1, 1)).Wireframe(false);
+							}
 #endif
 
 							Position.x = Position.x + it->second.Info.Advance;
