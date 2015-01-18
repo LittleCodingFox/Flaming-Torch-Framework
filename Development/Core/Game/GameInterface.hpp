@@ -25,7 +25,6 @@ private:
 protected:
 	bool ErroredOnFrameUpdate, ErroredOnFixedUpdate, ErroredOnFrameBegin, ErroredOnFrameEnd, ErroredOnFrameDraw, ErroredOnResize, ErroredOnResourcesReloaded;
 public:
-	bool FirstFrame;
 	bool QuitFlag;
 	bool GraphicsEnabled;
 	bool DevelopmentBuild;
@@ -35,7 +34,7 @@ public:
 
 	static DisposablePointer<GameInterface> Instance;
 
-	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), FirstFrame(false),
+	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0),
 			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
 			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS), QuitFlag(false){}
 

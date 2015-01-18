@@ -33,7 +33,7 @@ namespace FlamingTorch
 				IsGUISandbox = true;
 
 				Console::Instance.GetVariable("r_drawuirects")->UIntValue = 1;
-				Console::Instance.GetVariable("r_drawuiFocusZones")->UIntValue = 1;
+				Console::Instance.GetVariable("r_drawuifocuszones")->UIntValue = 1;
 			}
 		}
 

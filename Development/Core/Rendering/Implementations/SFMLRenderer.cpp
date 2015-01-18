@@ -1147,15 +1147,15 @@ namespace FlamingTorch
 
 		TextureHandle Last = LastBoundTexture;
 
-		BindTexture(Handle);
-
-		if(!IsTextureHandleValid(Handle))
+		if (!IsTextureHandleValid(Handle))
 		{
-			if(Last)
+			if (Last)
 				BindTexture(Last);
 
 			return;
 		}
+
+		BindTexture(Handle);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
 
@@ -1723,6 +1723,8 @@ namespace FlamingTorch
 			Style |= sf::Text::Underlined;
 		}
 
+		Window.pushGLStates();
+
 		sf::Text Text;
 		Text.setFont(*FontIterator->second.ActualFont);
 		Text.setCharacterSize(Parameters.FontSizeValue);
@@ -1730,6 +1732,8 @@ namespace FlamingTorch
 		Text.setStyle(Style);
 
 		sf::FloatRect InRect = Text.getLocalBounds();
+
+		Window.popGLStates();
 
 		//Width/Height are considering the left/top position, we have to consider that too
 		//We multiply by two because we not only need to add the width/height to top and bottom, but also
@@ -1803,6 +1807,7 @@ namespace FlamingTorch
 		}
 
 		Window.pushGLStates();
+
 		Text.setFont(*FontIterator->second.ActualFont);
 		Text.setCharacterSize(Parameters.FontSizeValue);
 		Text.setColor(ActualTextColor);
@@ -1811,13 +1816,14 @@ namespace FlamingTorch
 		Text.setBorderSize(Parameters.BorderSizeValue);
 		Text.setString(TheText);
 		Text.setStyle(Style);
-		Window.popGLStates();
 
 		const sf::VertexArray &Vertices = Text.getVertices();
 
 		uint32 VertexCount = Vertices.getVertexCount() / 4 * 6;
 		const sf::Texture *FontTexture = &FontIterator->second.ActualFont->getTexture(Text.getCharacterSize(), Text.getColor(), Text.getColor2(), Text.getBorderSize(), Text.getBorderColor());
 		Vector2 FontTextureSize((f32)FontTexture->getSize().x, (f32)FontTexture->getSize().y);
+
+		Window.popGLStates();
 
 		static std::vector<Vector2> Positions(VertexCount), TexCoords(VertexCount);
 		static std::vector<Vector4> Colors(VertexCount);
@@ -1942,7 +1948,11 @@ namespace FlamingTorch
 
 		GLCHECK();
 
+		Window.pushGLStates();
+
 		int32 Kerning = FontIterator->second.ActualFont->getKerning(Prev, Cur, Parameters.FontSizeValue);
+
+		Window.popGLStates();
 
 		return Kerning;
 	}

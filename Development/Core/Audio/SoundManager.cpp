@@ -6,6 +6,11 @@ namespace FlamingTorch
 	uint64 SoundManager::SoundCounter = 0, SoundManager::MusicCounter = 0;
 	SoundManager SoundManager::Instance;
 
+	SoundManager::Music::~Music()
+	{
+		Stop();
+	}
+
 	void SoundManager::Music::Play()
 	{
 		Impl->PlayMusic(Handle);
@@ -59,6 +64,11 @@ namespace FlamingTorch
 	f32 SoundManager::Music::GetPitch()
 	{
 		return Impl->MusicPitch(Handle);
+	}
+
+	SoundManager::Sound::~Sound()
+	{
+		Stop();
 	}
 
 	void SoundManager::Sound::Play()
@@ -298,6 +308,15 @@ namespace FlamingTorch
 		return MusicFromStream(Stream.Get());
 	}
 
+	void SoundManager::Crossfade(DisposablePointer<Music> From, DisposablePointer<Music> To, uint64 Delay)
+	{
+		CrossfadeFrom = From;
+		CrossfadeTo = To;
+		CrossfadeTimer = GameClockTimeNoPause();
+		CrossfadeDelay = Delay;
+
+		CrossfadeTo->Stop();
+	}
 
 	void SoundManager::StartUp(uint32 Priority)
 	{
@@ -320,18 +339,12 @@ namespace FlamingTorch
 
 		while(Sounds.begin() != Sounds.end())
 		{
-			if(Sounds.begin()->second.Get())
-				Sounds.begin()->second->Stop();
-
 			Sounds.begin()->second.Dispose();
 			Sounds.erase(Sounds.begin());
 		}
 
 		while(Musics.begin() != Musics.end())
 		{
-			if(Musics.begin()->second.Get())
-				Musics.begin()->second->Stop();
-
 			Musics.begin()->second.Dispose();
 			Musics.erase(Musics.begin());
 		}
@@ -348,6 +361,33 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		Cleanup();
+
+		if (CrossfadeFrom.Get() || CrossfadeTo.Get())
+		{
+			if (!CrossfadeFrom.Get() || !CrossfadeTo.Get())
+			{
+				CrossfadeFrom = CrossfadeTo = DisposablePointer<Music>();
+
+				return;
+			}
+
+			uint64 Difference = GameClockDiff(CrossfadeTimer);
+
+			CrossfadeFrom->SetVolume(MathUtils::Clamp(1 - Difference / (f32)CrossfadeDelay));
+			CrossfadeTo->SetVolume(MathUtils::Clamp(Difference / (f32)CrossfadeDelay));
+
+			if (!CrossfadeFrom->IsPlaying())
+				CrossfadeFrom->Play();
+
+			if (!CrossfadeTo->IsPlaying())
+				CrossfadeTo->Play();
+
+			if (Difference >= CrossfadeDelay)
+			{
+				CrossfadeFrom->Stop();
+				CrossfadeFrom = CrossfadeTo = DisposablePointer<Music>();
+			}
+		}
 	}
 
 	void SoundManager::Cleanup()

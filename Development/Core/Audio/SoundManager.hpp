@@ -30,6 +30,9 @@ private:
 	MusicMap Musics;
 
 	static uint64 SoundCounter, MusicCounter;
+
+	DisposablePointer<Music> CrossfadeFrom, CrossfadeTo;
+	uint64 CrossfadeTimer, CrossfadeDelay;
 public:
 	class Sound
 	{
@@ -38,6 +41,8 @@ public:
 		DisposablePointer<ISoundManagerImplementation> Impl;
 		SoundHandle Handle;
 	public:
+		~Sound();
+
 		void Play();
 		void Stop();
 		void Pause();
@@ -64,6 +69,8 @@ public:
 		DisposablePointer<ISoundManagerImplementation> Impl;
 		MusicHandle Handle;
 	public:
+		~Music();
+
 		void Play();
 		void Stop();
 		void Pause();
@@ -97,6 +104,8 @@ public:
 	StringID MusicFromStream(Stream *In);
 	StringID MusicFromPackage(StringID Directory, StringID FileName);
 	StringID MusicFromFile(const char *FileName);
+
+	void Crossfade(DisposablePointer<Music> From, DisposablePointer<Music> To, uint64 Delay);
 
 	void Cleanup();
 

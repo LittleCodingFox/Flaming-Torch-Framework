@@ -318,7 +318,6 @@ namespace FlamingTorch
 	{
 		GameInterface::Run(argc, argv);
 
-		FirstFrame = true;
 		InitSubsystems();
 
 		if(!Initialize(argc, argv))
@@ -359,6 +358,24 @@ namespace FlamingTorch
 		{
 			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "DefaultFont.ttf");
 		}
+
+		if (IsGUISandbox)
+		{
+#	if !FLPLATFORM_MOBILE
+			if (!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
+			{
+				Instance.Dispose();
+
+				DeInitSubsystems();
+
+				return 1;
+			}
+
+			FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
+#	endif
+
+			ReloadGUI();
+		}
 #endif
 
 		for(;;)
@@ -374,31 +391,6 @@ namespace FlamingTorch
 
 			if(ShouldQuit())
 				break;
-
-			if(FirstFrame)
-			{
-				FirstFrame = false;
-
-#if USE_GRAPHICS
-				if(IsGUISandbox)
-				{
-#	if !FLPLATFORM_ANDROID
-					if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
-					{
-						Instance.Dispose();
-
-						DeInitSubsystems();
-
-						return 1;
-					}
-
-					FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
-#	endif
-
-					ReloadGUI();
-				}
-#endif
-			}
 
 #if USE_GRAPHICS
 			if(PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
@@ -444,37 +436,36 @@ namespace FlamingTorch
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
 	{
 		GameInterface::Run(argc, argv);
-		FirstFrame = true;
 		PackageFileSystemManager::Instance.Register();
 
 		InitSubsystems();
-        
-        std::string DefaultPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Default.package";
-        
-        std::string ConfigurationPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Configuration.package";
 
-		if(!LoadPackage(DefaultPackageFileName))
-        {
+		std::string DefaultPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Default.package";
+
+		std::string ConfigurationPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Configuration.package";
+
+		if (!LoadPackage(DefaultPackageFileName))
+		{
 			Instance.Dispose();
-            
+
 			DeInitSubsystems();
-            
+
 			return 1;
-        }
-        else if(!LoadPackage(ConfigurationPackageFileName))
-        {
+		}
+		else if (!LoadPackage(ConfigurationPackageFileName))
+		{
 			Instance.Dispose();
-            
+
 			DeInitSubsystems();
-            
+
 			return 1;
-        }
+		}
 
 		{
 			DisposablePointer<Stream> ConfigurationFileStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("Config.cfg"));
 			GenericConfig GameConfig;
 
-			if(!ConfigurationFileStream || !GameConfig.DeSerialize(ConfigurationFileStream))
+			if (!ConfigurationFileStream || !GameConfig.DeSerialize(ConfigurationFileStream))
 			{
 				Instance.Dispose();
 
@@ -485,9 +476,9 @@ namespace FlamingTorch
 
 			GenericConfig::Section &PackagesSection = GameConfig.Sections["Packages"];
 
-			for(GenericConfig::Section::ValueMap::iterator it = PackagesSection.Values.begin(); it != PackagesSection.Values.end(); it++)
+			for (GenericConfig::Section::ValueMap::iterator it = PackagesSection.Values.begin(); it != PackagesSection.Values.end(); it++)
 			{
-				if(!LoadPackage(FileSystemUtils::ResourcesDirectory() + "/Content/" + it->second.Content))
+				if (!LoadPackage(FileSystemUtils::ResourcesDirectory() + "/Content/" + it->second.Content))
 				{
 					Instance.Dispose();
 
@@ -501,18 +492,18 @@ namespace FlamingTorch
 
 			GenericConfig::Section::ValueMap::iterator it = GameSection.Values.find("Title");
 
-			if(it != GameSection.Values.end())
+			if (it != GameSection.Values.end())
 			{
 				GameNameValue = it->second.Content;
 			}
 
 			it = GameSection.Values.find("UpdateRate");
 
-			if(it != GameSection.Values.end())
+			if (it != GameSection.Values.end())
 			{
 				int32 CurrentUpdateRate = UpdateRateValue;
 
-				if(1 != sscanf(it->second.Content.c_str(), "%d", &UpdateRateValue))
+				if (1 != sscanf(it->second.Content.c_str(), "%d", &UpdateRateValue))
 				{
 					UpdateRateValue = CurrentUpdateRate;
 				}
@@ -520,11 +511,11 @@ namespace FlamingTorch
 
 			it = GameSection.Values.find("FrameRate");
 
-			if(it != GameSection.Values.end())
+			if (it != GameSection.Values.end())
 			{
 				int32 CurrentFrameRate = FrameRateValue;
 
-				if(1 != sscanf(it->second.Content.c_str(), "%d", &FrameRateValue) || FrameRateValue <= 0)
+				if (1 != sscanf(it->second.Content.c_str(), "%d", &FrameRateValue) || FrameRateValue <= 0)
 				{
 					FrameRateValue = CurrentFrameRate;
 				}
@@ -532,11 +523,11 @@ namespace FlamingTorch
 
 			it = GameSection.Values.find("BaseWidth");
 
-			if(it != GameSection.Values.end())
+			if (it != GameSection.Values.end())
 			{
 				int32 Width = 0;
 
-				if(1 == sscanf(it->second.Content.c_str(), "%d", &Width) && Width > 0)
+				if (1 == sscanf(it->second.Content.c_str(), "%d", &Width) && Width > 0)
 				{
 					BaseResolution.x = (f32)Width;
 				}
@@ -544,11 +535,11 @@ namespace FlamingTorch
 
 			it = GameSection.Values.find("BaseHeight");
 
-			if(BaseResolution.x > 0 && it != GameSection.Values.end())
+			if (BaseResolution.x > 0 && it != GameSection.Values.end())
 			{
 				int32 Height = 0;
 
-				if(1 == sscanf(it->second.Content.c_str(), "%d", &Height) && Height > 0)
+				if (1 == sscanf(it->second.Content.c_str(), "%d", &Height) && Height > 0)
 				{
 					BaseResolution.y = (f32)Height;
 				}
@@ -571,7 +562,7 @@ namespace FlamingTorch
 
 			ScriptInstance = LuaScriptManager::Instance.CreateScript("", Libs, sizeof(Libs) / sizeof(Libs[0]));
 
-			if(!ScriptInstance)
+			if (!ScriptInstance)
 			{
 				Instance.Dispose();
 
@@ -582,7 +573,7 @@ namespace FlamingTorch
 
 			DisposablePointer<Stream> GameStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/Scripts/Game/"), MakeStringID("Game.lua"));
 
-			if(!GameStream)
+			if (!GameStream)
 			{
 				Instance.Dispose();
 
@@ -610,7 +601,7 @@ namespace FlamingTorch
 
 		bool Success = false;
 
-		if(!PreInitFunction)
+		if (!PreInitFunction)
 		{
 			LuaScriptManager::Instance.LogError("Failed to find script 'GamePreInitialize' function");
 
@@ -625,7 +616,7 @@ namespace FlamingTorch
 		{
 			Success = ProtectedLuaCast<bool>(PreInitFunction());
 		}
-		catch(std::exception &)
+		catch (std::exception &)
 		{
 			Instance.Dispose();
 
@@ -634,7 +625,7 @@ namespace FlamingTorch
 			return 1;
 		}
 
-		if(!Success)
+		if (!Success)
 		{
 			LuaScriptManager::Instance.LogError("GamePreInitialize failed");
 
@@ -649,7 +640,7 @@ namespace FlamingTorch
 
 		Success = false;
 
-		if(!InitFunction)
+		if (!InitFunction)
 		{
 			LuaScriptManager::Instance.LogError("Failed to find script 'GameInitialize' function");
 
@@ -664,14 +655,14 @@ namespace FlamingTorch
 		{
 			luabind::object Arguments = luabind::newtable(ScriptInstance->State);
 
-			for(int32 i = 0; i < argc; i++)
+			for (int32 i = 0; i < argc; i++)
 			{
 				Arguments[i + 1] = std::string(argv[i]);
 			}
 
 			Success = ProtectedLuaCast<bool>(InitFunction(Arguments));
 		}
-		catch(std::exception &)
+		catch (std::exception &)
 		{
 			Instance.Dispose();
 
@@ -680,7 +671,7 @@ namespace FlamingTorch
 			return 1;
 		}
 
-		if(!Success)
+		if (!Success)
 		{
 			LuaScriptManager::Instance.LogError("GameInitialize failed");
 
@@ -693,18 +684,18 @@ namespace FlamingTorch
 
 		DisposablePointer<Stream> AutoExecStream(new FileStream());
 
-		if(!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
+		if (!AutoExecStream.AsDerived<FileStream>()->Open(FileSystemUtils::PreferredStorageDirectory() + "/autoexec.cfg", StreamFlags::Read | StreamFlags::Text))
 		{
 			AutoExecStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/"), MakeStringID("autoexec.cfg"));
 		}
 
-		if(AutoExecStream)
+		if (AutoExecStream)
 		{
 			std::vector<std::string> Commands = StringUtils::Split(StringUtils::Strip(AutoExecStream->AsString(), '\r'), '\n');
 
-			for(uint32 i = 0; i < Commands.size(); i++)
+			for (uint32 i = 0; i < Commands.size(); i++)
 			{
-				if(Commands[i].length() && Commands[i][0] != '#')
+				if (Commands[i].length() && Commands[i][0] != '#')
 				{
 					Console::Instance.RunConsoleCommand(Commands[i]);
 				}
@@ -714,48 +705,43 @@ namespace FlamingTorch
 		GameClockSetFixedFrameRate(FixedUpdateRate());
 
 #if USE_GRAPHICS
-		if(RendererManager::Instance.ActiveRenderer())
+		if (RendererManager::Instance.ActiveRenderer())
 		{
 			RenderTextUtils::LoadDefaultFont(RendererManager::Instance.ActiveRenderer(), "DefaultFont.ttf");
 		}
+
+		if (IsGUISandbox)
+		{
+#	if !FLPLATFORM_MOBILE
+			if (!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
+			{
+				Instance.Dispose();
+
+				DeInitSubsystems();
+
+				return 1;
+			}
+
+			FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
+#	endif
+
+			ReloadGUI();
+		}
 #endif
 
-		for(;;)
+		for (;;)
 		{
 			UpdateSubsystems();
 
-			while(GameClockMayPerformFixedTimeStep())
+			while (GameClockMayPerformFixedTimeStep())
 			{
 				OnFixedUpdate();
 			}
 
 			OnFrameUpdate();
 
-			if(ShouldQuit())
+			if (ShouldQuit())
 				break;
-
-			if(FirstFrame)
-			{
-				FirstFrame = false;
-
-#if USE_GRAPHICS && !FLPLATFORM_MOBILE
-				if(IsGUISandbox)
-				{
-					if(!FileSystemWatcher::Instance.WatchDirectory(FileSystemUtils::ResourcesDirectory()))
-					{
-						Instance.Dispose();
-
-						DeInitSubsystems();
-
-						return 1;
-					}
-
-					FileSystemWatcher::Instance.OnAction.Connect<GameInterface, &GameInterface::OnGUISandboxTrigger>(this);
-
-					ReloadGUI();
-				}
-#endif
-			}
 
 #if USE_GRAPHICS
 			if (PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)

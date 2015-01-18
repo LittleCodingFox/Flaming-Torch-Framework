@@ -2385,8 +2385,23 @@ namespace FlamingTorch
 		{
 			DisposablePointer<ElementInfo> Element = it->second;
 
-			if(Element.Get() && MouseOverElement == Element->Element.Get())
-				MouseOverElement = DisposablePointer<UIElement>();
+			if (Element.Get())
+			{
+				if (MouseOverElement == Element->Element.Get())
+					MouseOverElement = DisposablePointer<UIElement>();
+
+#if FLPLATFORM_DEBUG
+				for (ElementIDMap::iterator sit = ElementIDs.begin(); sit != ElementIDs.end(); sit++)
+				{
+					if (sit->second == it->first)
+					{
+						ElementIDs.erase(sit);
+
+						break;
+					}
+				}
+#endif
+			}
 
 			Elements.erase(it);
 

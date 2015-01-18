@@ -10,10 +10,10 @@ namespace FlamingTorch
 
 	SFMLSoundManagerImplementation::~SFMLSoundManagerImplementation()
 	{
-		for (uint64 i = 0; i < SoundCounter; i++)
+		for (uint64 i = 1; i <= SoundCounter; i++)
 			DestroySound(i);
 
-		for (uint64 i = 0; i < MusicCounter; i++)
+		for (uint64 i = 1; i <= MusicCounter; i++)
 			DestroyMusic(i);
 	}
 
@@ -77,6 +77,7 @@ namespace FlamingTorch
 		if (it == Sounds.end())
 			return;
 
+		it->second->Sound->stop();
 		it->second->Sound.Dispose();
 		it->second->Buffer.Dispose();
 		it->second.Dispose();

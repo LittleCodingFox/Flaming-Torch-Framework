@@ -64,9 +64,17 @@ GameInitialize = function(Arguments)
 	
 	g_ObjectModel:RegisterObjectDef(LogoEntityDef)
 	
+	CollisionDef = ObjectDef()
+	CollisionDef.Name = "Collision"
+	CollisionDef:AddFeature(TransformFeature())
+	CollisionDef:AddFeature(SpriteFeature())
+	CollisionDef:AddFeature(PhysicsFeature())
+	
+	g_ObjectModel:RegisterObjectDef(CollisionDef)
+	
 	LogoEntity = LogoEntityDef:Clone()
 	
-	g_ObjectModel:RegisterObject(LogoEntity)
+	--g_ObjectModel:RegisterObject(LogoEntity)
 	
 	local SkinStream = g_PackageManager:GetFile(MakeStringID("/UIThemes/PolyCode/"), MakeStringID("skin.cfg"))
 	local SkinConfig = GenericConfig()
@@ -78,6 +86,19 @@ GameInitialize = function(Arguments)
 	Renderer.UI.Skin = SkinConfig
 	
 	GameResize(Renderer, Renderer.Size.x, Renderer.Size.y)
+	
+	Collision = CollisionDef:Clone()
+	
+	Collision:GetFeature("Transform").Scale = Vector3(Renderer.Size.x, 50, 0)
+	
+	local Physics = Collision:GetFeature("Physics")
+	
+	Physics.Size = Vector2(Renderer.Size.x, 50)
+	Physics.Position = Vector2(0, Renderer.Size.y - 50)
+	Physics.Dynamic = false
+	Physics.Density = 0
+	
+	g_ObjectModel:RegisterObject(Collision)
 
 	return true
 end
