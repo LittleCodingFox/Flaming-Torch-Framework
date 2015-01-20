@@ -17,6 +17,7 @@ class UIManager : public BaseScriptableInstance
 	friend class UISprite;
 	friend class UILayout;
 	friend class UIInputProcessor;
+	friend class RendererManager;
 private:
 	class ElementInfo
 	{
@@ -82,7 +83,7 @@ private:
 
 		uint32 References;
 
-		DisposablePointer<Texture> InstanceTexture;
+		DisposablePointer<Texture> SourceTexture, InstanceTexture;
 
 		TextResourceInfo() : References(0), Character(0) {}
 	};
@@ -109,6 +110,8 @@ private:
 	DisposablePointer<TextureGroup> ResourcesGroup;
 
 	DisposablePointer<GenericConfig> SkinValue;
+
+	void ClearUnusedResources();
 public:
 	typedef std::map<StringID, DisposablePointer<UILayout> > LayoutMap;
 	LayoutMap Layouts, DefaultLayouts;

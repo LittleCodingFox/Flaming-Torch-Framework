@@ -515,6 +515,8 @@ namespace FlamingTorch
 
 		Renderer->Display();
 
+		Renderer->UI->ClearUnusedResources();
+
 		return ReturnValue;
 	}
 

@@ -396,7 +396,10 @@ namespace FlamingTorch
 				TheResource.Info = const_cast<Font *>(Parameters.FontValue.Get())->LoadGlyph(Text[i], Parameters);
 
 				if (TheResource.Info.Pixels.Get())
-					TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(Texture::CreateFromBuffer(TheResource.Info.Pixels)));
+				{
+					TheResource.SourceTexture = Texture::CreateFromBuffer(TheResource.Info.Pixels);
+					TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(TheResource.SourceTexture));
+				}
 
 				TextResources[ID] = TheResource;
 			}
@@ -413,8 +416,8 @@ namespace FlamingTorch
 
 		Vector2 Position = Params.PositionValue, InitialPosition = Position;
 
-		f32 LineSpace = TheFont->LineSpacing(ActualParams);
-		f32 SpaceSize = TheFont->LoadGlyph(' ', ActualParams).Advance;
+		f32 LineSpace = (f32)TheFont->LineSpacing(ActualParams);
+		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', ActualParams).Advance;
 
 		GetUIText(Text, ActualParams);
 
@@ -810,20 +813,6 @@ namespace FlamingTorch
 			if(FileName.length() != 0)
 			{
 				DisposablePointer<Texture> SpriteTexture = GetUITexture(Path(FileName));
-
-				//Old method
-				/*
-				if(FileName.find('/') == 0)
-				{
-					SpriteTexture = ResourceManager::Instance.GetTextureFromPackage(FileName.substr(0, FileName.rfind('/') + 1),
-						FileName.substr(FileName.rfind('/') + 1));
-				}
-
-				if(!SpriteTexture.Get())
-				{
-					SpriteTexture = ResourceManager::Instance.GetTexture(FileName);
-				}
-				*/
 
 				if(!SpriteTexture.Get())
 				{
@@ -2470,6 +2459,29 @@ namespace FlamingTorch
 	DisposablePointer<GenericConfig> UIManager::GetSkin() const
 	{
 		return SkinValue;
+	}
+
+	void UIManager::ClearUnusedResources()
+	{
+		for (TextResourceMap::iterator it = TextResources.begin(); it != TextResources.end(); it++)
+		{
+			if (it->second.References == 0)
+			{
+				it->second.SourceTexture.Dispose();
+
+				TextResources.erase(it);
+
+				it = TextResources.begin();
+
+				if (it == TextResources.end())
+					break;
+			}
+		}
+
+		for (TextResourceMap::iterator it = TextResources.begin(); it != TextResources.end(); it++)
+		{
+			it->second.References = 0;
+		}
 	}
 #endif
 }
