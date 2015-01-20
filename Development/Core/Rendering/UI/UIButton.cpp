@@ -85,7 +85,7 @@ namespace FlamingTorch
 		UISprite::Draw(ParentPosition, Renderer);
 
 		TextParams Parameters;
-		Parameters.Font(ManagerValue->DefaultFontHandle).Color(FontColor).FontSize(FontSize);
+		Parameters.Font(ManagerValue->DefaultFont).Color(FontColor).FontSize(FontSize);
 
 		f32 Size = RenderTextUtils::MeasureTextSimple(Renderer, Caption, Parameters).Right;
 

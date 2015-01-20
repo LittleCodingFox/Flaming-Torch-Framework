@@ -3,10 +3,7 @@
 class ResourceManager : public SubSystem
 {
 private:
-#if USE_GRAPHICS
-
-	typedef std::map<StringID, FontHandle> FontMap;
-#endif
+	typedef std::map<StringID, DisposablePointer<Font>> FontMap;
 
 	typedef std::map<StringID, DisposablePointer<Texture> > TextureMap;
 	
@@ -16,9 +13,7 @@ private:
 
 	TexturePackerMap TexturePackers;
 
-#if USE_GRAPHICS
 	FontMap Fonts;
-#endif
 
 	ResourceManager() : SubSystem(RESOURCEMANAGER_PRIORITY) {}
 
@@ -41,12 +36,10 @@ public:
 	DisposablePointer<TexturePacker> GetTexturePackFromPackage(const Path &ThePath, GenericConfig *Config);
 
 #if USE_GRAPHICS
-	FontHandle GetFont(Renderer *TheRenderer, const std::string &FileName);
-	FontHandle GetFont(Renderer *TheRenderer, const Path &ThePath);
-	FontHandle GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName);
-	FontHandle GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath);
-
-	static void DisposeFont(Renderer *TheRenderer, FontHandle Handle);
+	DisposablePointer<Font> GetFont(Renderer *TheRenderer, const std::string &FileName);
+	DisposablePointer<Font> GetFont(Renderer *TheRenderer, const Path &ThePath);
+	DisposablePointer<Font> GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName);
+	DisposablePointer<Font> GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath);
 #endif
 
 	template<typename type>

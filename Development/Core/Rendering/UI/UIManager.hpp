@@ -78,7 +78,7 @@ private:
 	{
 		uint32 Character;
 		TextParams TextParameters;
-		TextGlyphInfo Info;
+		Glyph Info;
 
 		uint32 References;
 
@@ -114,7 +114,7 @@ public:
 	LayoutMap Layouts, DefaultLayouts;
 	Vector4 DefaultTextColor, DefaultTextSecondaryColor;
 	uint32 DefaultTextFontSize;
-	FontHandle DefaultFontHandle;
+	DisposablePointer<Font> DefaultFont;
 
 	UIManager(Renderer *TheOwner);
 	~UIManager();

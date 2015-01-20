@@ -3,29 +3,7 @@
 
 class Renderer;
 class TextureBuffer;
-
-struct TextGlyphInfo
-{
-	int32 Advance;
-	DisposablePointer<TextureBuffer> Pixels;
-	Vector2 Offset;
-
-	TextGlyphInfo() : Advance(0) {}
-};
-
-/*!
-*	Text Style
-*/
-namespace TextStyle
-{
-	enum TextStyle
-	{
-		Regular = FLAGVALUE(0),
-		Bold = FLAGVALUE(1),
-		Italic = FLAGVALUE(2),
-		Underline = FLAGVALUE(3)
-	};
-}
+class Font;
 
 /*!
 *	Text rendering parameters
@@ -36,15 +14,14 @@ public:
 	Vector4 TextColorValue, SecondaryTextColorValue, BorderColorValue;
 	Vector2 PositionValue;
 	f32 BorderSizeValue, RotationValue;
-	FontHandle FontValue;
+	DisposablePointer<Font> FontValue;
 	uint32 FontSizeValue;
-	uint32 StyleValue;
 
 	TextParams() : BorderSizeValue(0), TextColorValue(1, 1, 1, 1), SecondaryTextColorValue(1, 1, 1, 1), BorderColorValue(0, 0, 0, 1),
-		FontValue(0), FontSizeValue(12), StyleValue(TextStyle::Regular), RotationValue(0) {}
+		FontValue(0), FontSizeValue(12), RotationValue(0) {}
 	TextParams(const TextParams &o) : BorderSizeValue(o.BorderSizeValue), TextColorValue(o.TextColorValue),
 		SecondaryTextColorValue(o.SecondaryTextColorValue), BorderColorValue(o.BorderColorValue), PositionValue(o.PositionValue),
-		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), StyleValue(o.StyleValue), RotationValue(o.RotationValue) {}
+		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), RotationValue(o.RotationValue) {}
 
 	TextParams &operator=(const TextParams &o)
 	{
@@ -55,7 +32,6 @@ public:
 		PositionValue = o.PositionValue;
 		FontValue = o.FontValue;
 		FontSizeValue = o.FontSizeValue;
-		StyleValue = o.StyleValue;
 		RotationValue = o.RotationValue;
 
 		return *this;
@@ -73,23 +49,12 @@ public:
 	}
 
 	/*!
-	*	Sets the font style
-	*	\param Style one or more of sf::Style::*
-	*/
-	TextParams &Style(uint32 Style)
-	{
-		StyleValue = Style;
-
-		return *this;
-	}
-
-	/*!
 	*	Sets the text font
 	*	\param Font the text's font
 	*/
-	TextParams &Font(FontHandle Font)
+	TextParams &Font(DisposablePointer<Font> TheFont)
 	{
-		FontValue = Font;
+		FontValue = TheFont;
 
 		return *this;
 	}
@@ -169,7 +134,7 @@ public:
 class RenderTextUtils
 {
 public:
-	static FontHandle DefaultFont;
+	static DisposablePointer<Font> DefaultFont;
 
 	//Loads the default font
 	//Can be called several times, it'll only load it once

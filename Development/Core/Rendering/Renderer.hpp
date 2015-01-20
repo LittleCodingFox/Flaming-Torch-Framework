@@ -125,21 +125,6 @@ public:
 	*	\param p4 the fourth control point
 	*/
 	void RenderLines(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, const Vector3 &p4, uint32 Steps, const Vector4 &Color = Vector4(1, 1, 1, 1));
-
-	/*!
-	*	\param Character the character to get the glyph for
-	*	\param Parameters the text parameters
-	*	\return the Text Glyph Info of this glyph
-	*/
-	TextGlyphInfo GetTextGlyph(uint32 Character, const TextParams &Parameters);
-
-	/*!
-	*	\param Prev the previous character
-	*	\param Cur the current character
-	*	\param Parameters the text parameters
-	*	\return the kerning space between characters
-	*/
-	int32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters);
 	
 	/*!
 	*	Creates a Vertex Buffer
@@ -365,34 +350,6 @@ public:
 	*	\return true if there's a new event, false otherwise
 	*/
 	bool PollEvent(RendererEvent &Out);
-
-	/*!
-	*	Creates a Font from a Stream of Data
-	*	\param Data the data of the font
-	*	\return a FontHandle or 0xFFFFFFFF
-	*/
-	FontHandle CreateFont(Stream *Data);
-
-	/*!
-	*	Destroys a font
-	*	\param Handle the font's handle
-	*/
-	void DestroyFont(FontHandle Handle);
-
-	/*!
-	*	Measures Text
-	*	\param Text the text to measure
-	*	\param Parameters the text parameters to use
-	*	\return a rectangle with the text's bounds
-	*/
-	Rect MeasureText(const std::string &Text, const TextParams &Parameters);
-
-	/*!
-	*	Renders Text to the screen
-	*	\param Text the text to measure
-	*	\param Parameters the text parameters to use
-	*/
-	void RenderText(const std::string &Text, const TextParams &Parameters);
 
 	/*!
 	*	Gets the Native Window Handle of this Renderer

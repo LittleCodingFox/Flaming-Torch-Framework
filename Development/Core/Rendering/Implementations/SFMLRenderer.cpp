@@ -14,11 +14,9 @@ namespace FlamingTorch
 #	define BUFFER_OFFSET(x) ((char *)NULL + x)
 #	define SFML_RENDERER_VERSION_MAJOR 0
 #	define SFML_RENDERER_VERSION_MINOR 1
-#	define USE_TEXT_CACHE 0
 
 	bool SFMLRendererImplementation::FirstRenderer = true;
 	uint64 SFMLRendererImplementation::TextureCounter = 0;
-	uint64 SFMLRendererImplementation::FontCounter = 0;
 	uint64 SFMLRendererImplementation::VertexBufferCounter = 0;
 	uint64 SFMLRendererImplementation::FrameBufferCounter = 0;
 	bool SFMLRendererImplementation::ExtensionsAvailable = false;
@@ -85,15 +83,19 @@ namespace FlamingTorch
 
 	SFMLRendererImplementation::~SFMLRendererImplementation()
 	{
-		while(Fonts.size())
-		{
-			Fonts.begin()->second.ActualFont.Dispose();
-			Fonts.erase(Fonts.begin());
-		}
-
 		while(Textures.size())
 		{
 			DestroyTexture(Textures.begin()->first);
+		}
+
+		while (VertexBuffers.size())
+		{
+			DestroyVertexBuffer(VertexBuffers.begin()->first);
+		}
+
+		while (FrameBuffers.size())
+		{
+			DestroyFrameBuffer(FrameBuffers.begin()->first);
 		}
 	}
 
@@ -128,6 +130,7 @@ namespace FlamingTorch
 #if FLPLATFORM_ANDROID
 			ExtensionsAvailable = false;
 #else
+
 			if (PlatformInfo::PlatformType == PlatformType::Mobile)
 			{
 				ExtensionsAvailable = false;
@@ -243,6 +246,7 @@ namespace FlamingTorch
 #if FLPLATFORM_ANDROID
 			ExtensionsAvailable = false;
 #else
+
 			if (PlatformInfo::PlatformType == PlatformType::Mobile)
 			{
 				ExtensionsAvailable = false;
@@ -458,8 +462,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetVertexBufferData(VertexBufferHandle Handle, uint8 DetailsMode, VertexElementDescriptor *Elements, uint32 ElementCount, const void *Data, uint32 DataByteSize)
 	{
-		FlushRenderText();
-
 		FrameStatsValue.StateChanges++;
 
 		VertexBufferMap::iterator it = VertexBuffers.find(Handle);
@@ -791,8 +793,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyVertexBuffer(VertexBufferHandle Handle)
 	{
-		FlushRenderText();
-
 		FrameStatsValue.StateChanges++;
 
 		VertexBufferMap::iterator it = VertexBuffers.find(Handle);
@@ -812,8 +812,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End)
 	{
-		FlushRenderText();
-
 		FrameStatsValue.StateChanges++;
 
 		VertexBufferMap::iterator it = VertexBuffers.find(Buffer);
@@ -934,8 +932,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::StartClipping(const Rect &ClippingRect)
 	{
-		FlushRenderText();
-
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.ClippingChanges++;
 
@@ -952,8 +948,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::FinishClipping()
 	{
-		FlushRenderText();
-
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.ClippingChanges++;
 
@@ -964,8 +958,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::Clear(uint32 Buffers)
 	{
-		FlushRenderText();
-
 		FrameStatsValue.StateChanges++;
 
 		uint32 Mask = 0;
@@ -1013,16 +1005,8 @@ namespace FlamingTorch
 		PreviousFrameStatsValue = FrameStatsValue;
 		FrameStatsValue.Clear();
 
-		FlushRenderText();
-
-		FrameStatsValue.TotalResources = Fonts.size() + VertexBuffers.size() + Textures.size();
+		FrameStatsValue.TotalResources = VertexBuffers.size() + Textures.size();
 		FrameStatsValue.TotalResourceUsage = 0;
-
-		for(FontMap::iterator it = Fonts.begin(); it != Fonts.end(); it++)
-		{
-			//We cannot verify all textures so we'll only report the client usage...
-			FrameStatsValue.TotalResourceUsage += it->second.ResourceSize / ONE_MB_FLOAT;
-		}
 
 		for(VertexBufferMap::iterator it = VertexBuffers.begin(); it != VertexBuffers.end(); it++)
 		{
@@ -1057,7 +1041,6 @@ namespace FlamingTorch
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
 		SpriteCache::Instance.Flush(Target);
-		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
@@ -1073,7 +1056,6 @@ namespace FlamingTorch
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
 		SpriteCache::Instance.Flush(Target);
-		FlushRenderText();
 
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
@@ -1089,7 +1071,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetViewport(f32 x, f32 y, f32 Width, f32 Height)
 	{
-		FlushRenderText();
 		FrameStatsValue.StateChanges++;
 
 		glViewport((GLint)x, (GLint)y, (GLsizei)Width, (GLsizei)Height);
@@ -1120,10 +1101,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::DestroyTexture(TextureHandle Handle)
 	{
-		FlushRenderText();
-
-		FrameStatsValue.StateChanges++;
-
 		if(Handle == 0)
 			return;
 
@@ -1131,6 +1108,8 @@ namespace FlamingTorch
 
 		if(it == Textures.end())
 			return;
+
+		FrameStatsValue.StateChanges++;
 
 		glDeleteTextures(1, (GLuint *)&it->second.GLID);
 
@@ -1141,10 +1120,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 Width, uint32 Height)
 	{
-		FlushRenderText();
-
-		FrameStatsValue.StateChanges++;
-
 		TextureHandle Last = LastBoundTexture;
 
 		if (!IsTextureHandleValid(Handle))
@@ -1154,6 +1129,8 @@ namespace FlamingTorch
 
 			return;
 		}
+
+		FrameStatsValue.StateChanges++;
 
 		BindTexture(Handle);
 
@@ -1171,10 +1148,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureWrapMode(TextureHandle Handle, uint32 WrapMode)
 	{
-		FlushRenderText();
-
-		FrameStatsValue.StateChanges++;
-
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
@@ -1186,6 +1159,8 @@ namespace FlamingTorch
 
 			return;
 		}
+
+		FrameStatsValue.StateChanges++;
 
 		switch(WrapMode)
 		{
@@ -1231,8 +1206,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetTextureFiltering(TextureHandle Handle, uint32 Filter)
 	{
-		FrameStatsValue.StateChanges++;
-
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
@@ -1244,6 +1217,8 @@ namespace FlamingTorch
 
 			return;
 		}
+
+		FrameStatsValue.StateChanges++;
 
 		if(Filter == TextureFiltering::Nearest || Filter == TextureFiltering::Linear)
 		{
@@ -1274,12 +1249,10 @@ namespace FlamingTorch
 
 	bool SFMLRendererImplementation::CaptureScreen(uint8 *Pixels, uint32 BufferByteCount)
 	{
-		FlushRenderText();
-
-		FrameStatsValue.StateChanges++;
-
 		if(BufferByteCount != (uint32)(Window.getSize().x * Window.getSize().y * 4))
 			return false;
+
+		FrameStatsValue.StateChanges++;
 
 		GLCHECK();
 
@@ -1311,8 +1284,6 @@ namespace FlamingTorch
 		return false;
 #endif
 
-		FrameStatsValue.StateChanges++;
-
 		TextureHandle Last = LastBoundTexture;
 
 		BindTexture(Handle);
@@ -1336,6 +1307,8 @@ namespace FlamingTorch
 
 			return false;
 		}
+
+		FrameStatsValue.StateChanges++;
 
 #if !FLPLATFORM_ANDROID
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
@@ -1459,8 +1432,6 @@ namespace FlamingTorch
 				Out.JoystickButtonIndex = Event.joystickButton.button;
 
 				return true;
-
-				break;
 
 			case sf::Event::JoystickConnected:
 				Out.Type = RendererEventType::JoystickConnected;
@@ -1654,367 +1625,6 @@ namespace FlamingTorch
 	void SFMLRendererImplementation::SetFrameRate(uint32 FPS)
 	{
 		Window.setFramerateLimit(FPS);
-	}
-
-	FontHandle SFMLRendererImplementation::CreateFont(Stream *Data)
-	{
-		FrameStatsValue.StateChanges++;
-
-		FontCounter++;
-
-		FontInfo &TheFont = Fonts[FontCounter];
-
-		TheFont.ActualFont.Reset(new sf::Font());
-		TheFont.Data.resize((uint32)Data->Length());
-
-		Data->AsBuffer(&TheFont.Data[0], (uint32)Data->Length());
-
-		if(!TheFont.ActualFont->loadFromMemory(&TheFont.Data[0], TheFont.Data.size()))
-		{
-			Log::Instance.LogErr(TAG, "Failed to create a font from a stream '%s' of size '%d'", StringUtils::PointerString(Data).c_str(), Data->Length());
-
-			Fonts.erase(FontCounter);
-
-			return 0;
-		}
-
-		TheFont.ResourceSize = (uint32)Data->Length();
-
-		return FontCounter;
-	}
-
-	void SFMLRendererImplementation::DestroyFont(FontHandle Handle)
-	{
-		FrameStatsValue.StateChanges++;
-
-		FontMap::iterator it = Fonts.find(Handle);
-
-		if(it != Fonts.end())
-			Fonts.erase(it);
-	}
-
-	Rect SFMLRendererImplementation::MeasureText(const std::string &TheText, const TextParams &Parameters)
-	{
-		FrameStatsValue.StateChanges++;
-
-		//Workaround for newline strings
-		if(TheText.length() == 0)
-			return Rect(0, 0, 0, (f32)Parameters.FontSizeValue);
-
-		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
-
-		if(FontIterator == Fonts.end())
-			return Rect();
-
-		uint32 Style = sf::Text::Regular;
-
-		if(Parameters.StyleValue & TextStyle::Bold)
-		{
-			Style |= sf::Text::Bold;
-		}
-
-		if(Parameters.StyleValue & TextStyle::Italic)
-		{
-			Style |= sf::Text::Italic;
-		}
-
-		if(Parameters.StyleValue & TextStyle::Underline)
-		{
-			Style |= sf::Text::Underlined;
-		}
-
-		Window.pushGLStates();
-
-		sf::Text Text;
-		Text.setFont(*FontIterator->second.ActualFont);
-		Text.setCharacterSize(Parameters.FontSizeValue);
-		Text.setString(TheText);
-		Text.setStyle(Style);
-
-		sf::FloatRect InRect = Text.getLocalBounds();
-
-		Window.popGLStates();
-
-		//Width/Height are considering the left/top position, we have to consider that too
-		//We multiply by two because we not only need to add the width/height to top and bottom, but also
-		//the width and height already have that reduced as well, and we're working with LRTB, not LRWH
-		return Rect(InRect.left, InRect.width + InRect.left * 2, InRect.top, InRect.height + InRect.top * 2);
-	}
-
-	void SFMLRendererImplementation::RenderText(const std::string &TheText, const TextParams &Parameters)
-	{
-		FrameStatsValue.StateChanges++;
-		FrameStatsValue.TextureChanges++;
-
-		if(TheText.length() == 0)
-			return;
-
-		std::stringstream UniqueString;
-
-		UniqueString << "BC:" << Parameters.BorderColorValue.ToString() << "BS:" << Parameters.BorderSizeValue << "FS:" << Parameters.FontSizeValue << "FH:" << Parameters.FontValue <<
-			"TC:" << Parameters.TextColorValue.ToString() << "STC:" <<Parameters.SecondaryTextColorValue.ToString() << "SV: " << Parameters.StyleValue;
-
-		StringID UniqueStringID = MakeStringID(UniqueString.str());
-
-		if(UniqueStringID != UniqueCacheStringID)
-		{
-			FlushRenderText();
-
-			UniqueCacheStringID = UniqueStringID;
-		}
-
-		Vector2 ActualPosition = Parameters.PositionValue;
-
-		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
-
-		if(FontIterator == Fonts.end())
-			return;
-		
-		GLCHECK();
-
-		sf::Color Border((uint8)(Parameters.BorderColorValue.x * 255),
-			(uint8)(Parameters.BorderColorValue.y * 255),
-			(uint8)(Parameters.BorderColorValue.z * 255),
-			(uint8)(Parameters.BorderColorValue.w * 255));
-
-		sf::Color ActualTextColor((uint8)(Parameters.TextColorValue.x * 255),
-			(uint8)(Parameters.TextColorValue.y * 255),
-			(uint8)(Parameters.TextColorValue.z * 255),
-			(uint8)(Parameters.TextColorValue.w * 255));
-
-		sf::Color ActualTextColor2((uint8)(Parameters.SecondaryTextColorValue.x * 255),
-			(uint8)(Parameters.SecondaryTextColorValue.y * 255),
-			(uint8)(Parameters.SecondaryTextColorValue.z * 255),
-			(uint8)(Parameters.SecondaryTextColorValue.w * 255));
-
-		static sf::Text Text;
-
-		uint32 Style = sf::Text::Regular;
-
-		if(Parameters.StyleValue & TextStyle::Bold)
-		{
-			Style |= sf::Text::Bold;
-		}
-
-		if(Parameters.StyleValue & TextStyle::Italic)
-		{
-			Style |= sf::Text::Italic;
-		}
-
-		if(Parameters.StyleValue & TextStyle::Underline)
-		{
-			Style |= sf::Text::Underlined;
-		}
-
-		Window.pushGLStates();
-
-		Text.setFont(*FontIterator->second.ActualFont);
-		Text.setCharacterSize(Parameters.FontSizeValue);
-		Text.setColor(ActualTextColor);
-		Text.setColor2(ActualTextColor2);
-		Text.setBorderColor(Border);
-		Text.setBorderSize(Parameters.BorderSizeValue);
-		Text.setString(TheText);
-		Text.setStyle(Style);
-
-		const sf::VertexArray &Vertices = Text.getVertices();
-
-		uint32 VertexCount = Vertices.getVertexCount() / 4 * 6;
-		const sf::Texture *FontTexture = &FontIterator->second.ActualFont->getTexture(Text.getCharacterSize(), Text.getColor(), Text.getColor2(), Text.getBorderSize(), Text.getBorderColor());
-		Vector2 FontTextureSize((f32)FontTexture->getSize().x, (f32)FontTexture->getSize().y);
-
-		Window.popGLStates();
-
-		static std::vector<Vector2> Positions(VertexCount), TexCoords(VertexCount);
-		static std::vector<Vector4> Colors(VertexCount);
-
-		Positions.resize(VertexCount);
-		TexCoords.resize(VertexCount);
-		Colors.resize(VertexCount);
-
-		for(uint32 i = 0, index = 0; i < VertexCount; i+=6, index+=4)
-		{
-			Positions[i] = Positions[i + 5] = Vector2(Vertices[index].position.x, Vertices[index].position.y);
-			Positions[i + 1] = Vector2(Vertices[index + 3].position.x, Vertices[index + 3].position.y);
-			Positions[i + 2] = Positions[i + 3] = Vector2(Vertices[index + 2].position.x, Vertices[index + 2].position.y);
-			Positions[i + 4] = Vector2(Vertices[index + 1].position.x, Vertices[index + 1].position.y);
-
-			TexCoords[i] = TexCoords[i + 5] = Vector2(Vertices[index].texCoords.x, Vertices[index].texCoords.y) / FontTextureSize;
-			TexCoords[i + 1] = Vector2(Vertices[index + 3].texCoords.x, Vertices[index + 3].texCoords.y) / FontTextureSize;
-			TexCoords[i + 2] = TexCoords[i + 3] = Vector2(Vertices[index + 2].texCoords.x, Vertices[index + 2].texCoords.y) / FontTextureSize;
-			TexCoords[i + 4] = Vector2(Vertices[index + 1].texCoords.x, Vertices[index + 1].texCoords.y) / FontTextureSize;
-
-			Colors[i] = Colors[i + 5] = Vector4(Vertices[index].color.r / 255.f, Vertices[index].color.g / 255.f, Vertices[index].color.b / 255.f,
-				Vertices[index].color.a / 255.f);
-			Colors[i + 1] = Vector4(Vertices[index + 3].color.r / 255.f, Vertices[index + 3].color.g / 255.f, Vertices[index + 3].color.b / 255.f,
-				Vertices[index + 3].color.a / 255.f);;
-			Colors[i + 2] = Colors[i + 3] = Vector4(Vertices[index + 2].color.r / 255.f, Vertices[index + 2].color.g / 255.f, Vertices[index + 2].color.b / 255.f,
-				Vertices[index + 2].color.a / 255.f);
-			Colors[i + 4] = Vector4(Vertices[index + 1].color.r / 255.f, Vertices[index + 1].color.g / 255.f, Vertices[index + 1].color.b / 255.f,
-				Vertices[index + 1].color.a / 255.f);
-		}
-
-		if(!Positions.size())
-			return;
-
-		sf::FloatRect ObjectRect = Text.getLocalBounds();
-
-		Vector2 ObjectSize = Vector2(ObjectRect.left * 2 + ObjectRect.width, ObjectRect.top * 2 + ObjectRect.height) / 2;
-
-		if(Parameters.RotationValue != 0)
-		{
-			for(uint32 i = 0; i < VertexCount; i++)
-			{
-				Positions[i] = Vector2::Rotate(Positions[i] - ObjectSize, Parameters.RotationValue) + ObjectSize + ActualPosition;
-			}
-		}
-		else
-		{
-			for(uint32 i = 0; i < VertexCount; i++)
-			{
-				Positions[i] = Positions[i] + ActualPosition;
-			}
-		}
-		
-		SpriteCache::Instance.Flush(Target);
-
-		TheRenderTextCache.Positions.insert(TheRenderTextCache.Positions.end(), Positions.begin(), Positions.end());
-		TheRenderTextCache.Colors.insert(TheRenderTextCache.Colors.end(), Colors.begin(), Colors.end());
-		TheRenderTextCache.TexCoords.insert(TheRenderTextCache.TexCoords.end(), TexCoords.begin(), TexCoords.end());
-		TheRenderTextCache.TheTexture = const_cast<sf::Texture *>(FontTexture);
-
-#if USE_TEXT_CACHE
-		ReportSkippedDrawCall();
-		SavedTextDrawcalls++;
-#else
-		FlushRenderText();
-#endif
-	}
-
-	TextGlyphInfo SFMLRendererImplementation::GetTextGlyph(uint32 Character, const TextParams &Parameters)
-	{
-		TextGlyphInfo Out;
-
-		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
-
-		if(FontIterator == Fonts.end())
-			return Out;
-
-		Window.pushGLStates();
-
-		sf::String str(Character);
-
-		GLCHECK();
-
-		sf::Color Border((uint8)(Parameters.BorderColorValue.x * 255),
-			(uint8)(Parameters.BorderColorValue.y * 255),
-			(uint8)(Parameters.BorderColorValue.z * 255),
-			(uint8)(Parameters.BorderColorValue.w * 255));
-
-		sf::Color ActualTextColor((uint8)(Parameters.TextColorValue.x * 255),
-			(uint8)(Parameters.TextColorValue.y * 255),
-			(uint8)(Parameters.TextColorValue.z * 255),
-			(uint8)(Parameters.TextColorValue.w * 255));
-
-		sf::Color ActualTextColor2((uint8)(Parameters.SecondaryTextColorValue.x * 255),
-			(uint8)(Parameters.SecondaryTextColorValue.y * 255),
-			(uint8)(Parameters.SecondaryTextColorValue.z * 255),
-			(uint8)(Parameters.SecondaryTextColorValue.w * 255));
-
-		bool Bold = !!(Parameters.StyleValue & TextStyle::Bold);
-		const sf::Glyph &TheGlyph = FontIterator->second.ActualFont->getGlyph(Character, Parameters.FontSizeValue, Bold, ActualTextColor, ActualTextColor2, Parameters.BorderSizeValue, Border);
-
-		if (TheGlyph.pixels.size())
-		{
-			DisposablePointer<TextureBuffer> Pixels(TextureBuffer::CreateFromData(&TheGlyph.pixels[0], TheGlyph.textureRect.width - 2, TheGlyph.textureRect.height - 2));
-
-			Out.Pixels = Pixels;
-		}
-
-		Out.Advance = TheGlyph.advance;
-		Out.Offset = Vector2((f32)TheGlyph.bounds.left, (f32)Parameters.FontSizeValue + TheGlyph.bounds.top);
-
-		Window.popGLStates();
-
-		return Out;
-	}
-
-	int32 SFMLRendererImplementation::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
-	{
-		FontMap::iterator FontIterator = Fonts.find(Parameters.FontValue);
-
-		if (FontIterator == Fonts.end())
-			return 0;
-
-		GLCHECK();
-
-		Window.pushGLStates();
-
-		int32 Kerning = FontIterator->second.ActualFont->getKerning(Prev, Cur, Parameters.FontSizeValue);
-
-		Window.popGLStates();
-
-		return Kerning;
-	}
-
-	void SFMLRendererImplementation::FlushRenderText()
-	{
-		/*
-		if(UniqueCacheStringID == 0 || TheRenderTextCache.Positions.size() == 0)
-			return;
-
-		FrameStatsValue.DrawCalls++;
-		FrameStatsValue.TextureChanges += 2;
-		FrameStatsValue.VertexCount += TheRenderTextCache.Positions.size();
-
-		UniqueCacheStringID = 0;
-
-		LastBoundVBO = 0;
-
-		if(SupportsVBOs)
-		{
-			FrameStatsValue.StateChanges++;
-
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		}
-
-		TextureHandle PreviousTexture = LastBoundTexture;
-
-		BindTexture((TextureHandle)0);
-
-		if(TheRenderTextCache.TheTexture)
-			sf::Texture::bind(TheRenderTextCache.TheTexture);
-
-		EnableState(GL_VERTEX_ARRAY);
-		EnableState(GL_TEXTURE_COORD_ARRAY);
-		EnableState(GL_COLOR_ARRAY);
-		DisableState(GL_NORMAL_ARRAY);
-
-		bool TextureWasEnabled = IsStateEnabled(GL_TEXTURE_2D);
-
-		EnableState(GL_TEXTURE_2D);
-
-		glVertexPointer(2, GL_FLOAT, 0, &TheRenderTextCache.Positions[0]);
-		glTexCoordPointer(2, GL_FLOAT, 0, &TheRenderTextCache.TexCoords[0]);
-		glColorPointer(4, GL_FLOAT, 0, &TheRenderTextCache.Colors[0]);
-
-		glDrawArrays(GL_TRIANGLES, 0, TheRenderTextCache.Positions.size());
-
-		if(PreviousTexture != 0)
-		{
-			BindTexture(PreviousTexture);
-		}
-
-		if(!TextureWasEnabled)
-		{
-			DisableState(GL_TEXTURE_2D);
-		}
-
-		TheRenderTextCache.Positions.resize(0);
-		TheRenderTextCache.Colors.resize(0);
-		TheRenderTextCache.TexCoords.resize(0);
-		TheRenderTextCache.TheTexture = NULL;
-		*/
 	}
 
 	bool SFMLRendererImplementation::IsStateEnabled(uint32 ID) const

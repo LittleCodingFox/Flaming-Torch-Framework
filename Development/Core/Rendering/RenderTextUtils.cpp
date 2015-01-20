@@ -2,7 +2,7 @@
 namespace FlamingTorch
 {
 #if USE_GRAPHICS
-	FontHandle RenderTextUtils::DefaultFont = 0;
+	DisposablePointer<Font> RenderTextUtils::DefaultFont;
 
 	bool RenderTextUtils::LoadDefaultFont(Renderer *TheRenderer, const std::string &FileName)
 	{
@@ -28,7 +28,64 @@ namespace FlamingTorch
 	{
 		PROFILE("RenderTextUtils MeasureTextSimple", StatTypes::Rendering);
 
-		return TheRenderer->MeasureText(Str, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
+		DisposablePointer<Font> TheFont = Params.FontValue.Get() ? Params.FontValue : DefaultFont;
+
+		if (!TheFont.Get())
+			return Rect();
+
+		f32 LineSpacing = (f32)TheFont->LineSpacing(Params);
+		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', Params).Advance;
+
+		Vector2 Position, Min(999999, 999999), Max(-999999, -999999);
+
+		std::vector<std::string> Lines(StringUtils::Split(StringUtils::Strip(Str, '\r'), '\n'));
+
+		for (uint32 i = 0; i < Lines.size(); i++)
+		{
+			f32 LineHeight = LineSpacing;
+
+			for (uint32 j = 0; j < Lines[i].length(); j++)
+			{
+				Glyph TheGlyph = TheFont->LoadGlyph(Lines[i][j], Params);
+
+				switch (Lines[i][j])
+				{
+				case ' ':
+					Position.x = Position.x + SpaceSize;
+
+					break;
+
+				default:
+					{
+						if (j > 0)
+							Position.x += TheFont->Kerning(Lines[i][j - 1], Lines[i][j], Params);
+
+						Position.x = Position.x + TheGlyph.Advance;
+
+						LineHeight = LineHeight < TheGlyph.Bounds.Bottom ? TheGlyph.Bounds.Bottom : LineHeight;
+					}
+
+					break;
+				}
+			}
+
+			if (Position.x < Min.x)
+				Min.x = Position.x;
+
+			if (Position.x > Max.x)
+				Max.x = Position.x;
+
+			if (Position.y + LineHeight < Min.y)
+				Min.y = Position.y + LineHeight;
+
+			if (Position.y + LineHeight > Max.y)
+				Max.y = Position.y + LineHeight;
+
+			Position.x = 0;
+			Position.y += LineSpacing;
+		}
+
+		return Rect(Min.x, Max.x, Min.y, Max.y);
 	}
 
 	void RenderTextUtils::FitTextAroundLength(Renderer *TheRenderer, const std::string &Str, TextParams Params, const f32 &LengthInPixels, int32 *OutFontSize)
@@ -42,7 +99,7 @@ namespace FlamingTorch
 
 		Vector2 MeasuredText;
 
-		while(MeasureTextSimple(TheRenderer, Str, Params.FontSize(*OutFontSize)).Size().x > LengthInPixels)
+		while(MeasureTextSimple(TheRenderer, Str, Params.FontSize(*OutFontSize)).Right > LengthInPixels)
 		{
 			(*OutFontSize)--;
 		}

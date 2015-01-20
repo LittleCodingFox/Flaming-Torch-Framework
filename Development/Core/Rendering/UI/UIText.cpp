@@ -18,7 +18,7 @@ namespace FlamingTorch
 
 		SkinValue = Skin;
 
-		TextParameters.Font(ManagerValue->DefaultFontHandle).FontSize(ManagerValue->DefaultTextFontSize).Color(ManagerValue->DefaultTextColor).SecondaryColor(ManagerValue->DefaultTextSecondaryColor);
+		TextParameters.Font(ManagerValue->DefaultFont).FontSize(ManagerValue->DefaultTextFontSize).Color(ManagerValue->DefaultTextColor).SecondaryColor(ManagerValue->DefaultTextSecondaryColor);
 	}
 
 	void UIText::SetText(const std::string &String)

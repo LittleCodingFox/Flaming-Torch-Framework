@@ -258,16 +258,6 @@ namespace FlamingTorch
 		RenderVertices(VertexModes::Lines, LineBuffer, 0, Geometry.size());
 	}
 
-	TextGlyphInfo Renderer::GetTextGlyph(uint32 Character, const TextParams &Parameters)
-	{
-		return Impl->GetTextGlyph(Character, Parameters);
-	}
-
-	int32 Renderer::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
-	{
-		return Impl->GetTextKerning(Prev, Cur, Parameters);
-	}
-
 	RendererHandle RendererManager::AddRenderer(const char *Title, uint32 Width, uint32 Height, uint32 Style, RendererCapabilities Caps)
 	{
 		FLASSERT(&Instance == this, "We're not our own instance!");
@@ -905,26 +895,6 @@ namespace FlamingTorch
 	bool Renderer::PollEvent(RendererEvent &Out)
 	{
 		return Impl->PollEvent(Out);
-	}
-
-	FontHandle Renderer::CreateFont(Stream *Data)
-	{
-		return Impl->CreateFont(Data);
-	}
-
-	void Renderer::DestroyFont(FontHandle Handle)
-	{
-		Impl->DestroyFont(Handle);
-	}
-
-	Rect Renderer::MeasureText(const std::string &Text, const TextParams &Parameters)
-	{
-		return Impl->MeasureText(Text, Parameters);
-	}
-
-	void Renderer::RenderText(const std::string &Text, const TextParams &Parameters)
-	{
-		Impl->RenderText(Text, Parameters);
 	}
 
 	void *Renderer::WindowHandle() const

@@ -237,24 +237,19 @@ namespace FlamingTorch
 	}
 
 #if USE_GRAPHICS
-	void ResourceManager::DisposeFont(Renderer *TheRenderer, FontHandle Handle)
-	{
-		TheRenderer->DestroyFont(Handle);
-	}
-
-	FontHandle ResourceManager::GetFont(Renderer *TheRenderer, const std::string &FileName)
+	DisposablePointer<Font> ResourceManager::GetFont(Renderer *TheRenderer, const std::string &FileName)
 	{
 		if(!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return 0;
+			return DisposablePointer<Font>();
 		}
 
 		StringID RealName = MakeStringID(FileName);
 		FontMap::iterator it = Fonts.find(RealName);
 
-		if(it == Fonts.end() || it->second == 0)
+		if(it == Fonts.end() || it->second.Get() == NULL)
 		{
 			Log::Instance.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
@@ -264,16 +259,16 @@ namespace FlamingTorch
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
-				return 0;
+				return DisposablePointer<Font>();
 			}
 
-			FontHandle Out = TheRenderer->CreateFont(TheStream);
+			DisposablePointer<Font> Out(new Font());
 
-			if(Out == 0)
+			if(!Out->FromStream(TheStream))
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
 
-				return 0;
+				return DisposablePointer<Font>();
 			}
 
 			Fonts[RealName] = Out;
@@ -284,24 +279,24 @@ namespace FlamingTorch
 		return it->second;
 	}
 
-	FontHandle ResourceManager::GetFont(Renderer *TheRenderer, const Path &ThePath)
+	DisposablePointer<Font> ResourceManager::GetFont(Renderer *TheRenderer, const Path &ThePath)
 	{
 		return GetFont(TheRenderer, ThePath.FullPath());
 	}
 
-	FontHandle ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName)
+	DisposablePointer<Font> ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName)
 	{
 		if(!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return 0;
+			return DisposablePointer<Font>();
 		}
 
 		StringID RealName = MakeStringID("PACKAGE:" + Directory + "_" + FileName);
 		FontMap::iterator it = Fonts.find(RealName);
 
-		if(it == Fonts.end() || it->second == 0)
+		if(it == Fonts.end() || it->second.Get() == NULL)
 		{
 			Log::Instance.LogDebug(TAG, "Loading a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
@@ -311,16 +306,16 @@ namespace FlamingTorch
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
-				return 0;
+				return DisposablePointer<Font>();
 			}
 
-			FontHandle Out = TheRenderer->CreateFont(TheStream);
+			DisposablePointer<Font> Out(new Font());
 
-			if(Out == 0)
+			if(!Out->FromStream(TheStream))
 			{
 				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
 
-				return 0;
+				return DisposablePointer<Font>();
 			}
 
 			Fonts[RealName] = Out;
@@ -331,7 +326,7 @@ namespace FlamingTorch
 		return it->second;
 	}
 
-	FontHandle ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath)
+	DisposablePointer<Font> ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath)
 	{
 		return GetFontFromPackage(TheRenderer, ThePath.Directory, ThePath.BaseName);
 	}
@@ -431,12 +426,7 @@ namespace FlamingTorch
 				break;
 		}
 
-		uint32 CurrentObjects = Textures.size() + TexturePackers.size() + 
-#if USE_GRAPHICS
-			Fonts.size();
-#else
-			0;
-#endif
+		uint32 CurrentObjects = Textures.size() + TexturePackers.size() + Fonts.size();
 
 		if(CurrentObjects != TotalObjects)
 		{

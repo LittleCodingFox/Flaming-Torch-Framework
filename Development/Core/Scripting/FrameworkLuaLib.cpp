@@ -1705,12 +1705,10 @@ namespace FlamingTorch
 
 			//ResourceManager
 			luabind::class_<ResourceManager, SubSystem>("ResourceManager")
-#if USE_GRAPHICS
-				.def("GetFont", (FontHandle (ResourceManager::*)(Renderer *, const std::string &))&ResourceManager::GetFont)
-				.def("GetFont", (FontHandle (ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFont)
-				.def("GetFontFromPackage", (FontHandle (ResourceManager::*)(Renderer *, const std::string &, const std::string &))&ResourceManager::GetFontFromPackage)
-				.def("GetFontFromPackage", (FontHandle (ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFontFromPackage)
-#endif
+				.def("GetFont", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const std::string &))&ResourceManager::GetFont)
+				.def("GetFont", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFont)
+				.def("GetFontFromPackage", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const std::string &, const std::string &))&ResourceManager::GetFontFromPackage)
+				.def("GetFontFromPackage", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFontFromPackage)
 				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &))&ResourceManager::GetTexture)
 				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTexture)
 				.def("GetTextureFromPackage", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &, const std::string &))&ResourceManager::GetTextureFromPackage)
@@ -1728,10 +1726,6 @@ namespace FlamingTorch
 					luabind::def("IsSameTexture", &ResourceManager::IsSameTexture),
 					luabind::def("DisposeTexture", &ResourceManager::DisposeResource<Texture>),
 					luabind::def("DisposeTexturePack", &ResourceManager::DisposeResource<TexturePacker>)
-#if USE_GRAPHICS
-                    ,
-					luabind::def("DisposeFont", &ResourceManager::DisposeFont)
-#endif
 				],
 
 			//ConsoleCommand
@@ -1994,10 +1988,6 @@ namespace FlamingTorch
 				.def("SetTextureFiltering", &Renderer::SetTextureFiltering)
 				.def("SetBlendingMode", &Renderer::SetBlendingMode)
 				.def("PollEvent", &Renderer::PollEvent)
-				.def("CreateFont", &Renderer::CreateFont)
-				.def("DestroyFont", &Renderer::DestroyFont)
-				.def("MeasureText", &Renderer::MeasureText)
-				.def("RenderText", &Renderer::RenderText)
 				.def("SetMousePosition", &Renderer::SetMousePosition)
 				.def("SetFrameRate", &Renderer::SetFrameRate)
 				.def("ScaleCoordinate", &Renderer::ScaleCoordinate)
@@ -2016,11 +2006,9 @@ namespace FlamingTorch
 						.def_readwrite("BorderSizeValue", &TextParams::BorderSizeValue)
 						.def_readwrite("FontSizeValue", &TextParams::FontSizeValue)
 						.def_readwrite("FontValue", &TextParams::FontValue)
-						.def_readwrite("StyleValue", &TextParams::StyleValue)
 						.def_readwrite("RotationValue", &TextParams::RotationValue)
 						.def(luabind::constructor<>())
 						.def(luabind::constructor<const TextParams &>())
-						.def("Style", &TextParams::Style, luabind::return_reference_to(_1))
 						.def("Font", &TextParams::Font, luabind::return_reference_to(_1))
 						.def("FontSize", &TextParams::FontSize, luabind::return_reference_to(_1))
 						.def("Color", &TextParams::Color, luabind::return_reference_to(_1))

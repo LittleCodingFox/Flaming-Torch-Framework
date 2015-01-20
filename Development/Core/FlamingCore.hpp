@@ -21,6 +21,8 @@ extern "C"
 #	include <luabind/out_value_policy.hpp>
 #	include <luabind/return_reference_to_policy.hpp>
 #	include <json/json.h>
+#	include <ft2build.h>
+#	include FT_FREETYPE_H
 namespace FlamingTorch
 {
 #	undef DrawText
@@ -28,7 +30,7 @@ namespace FlamingTorch
 #	undef CreateDirectory
 #	define INVALID_FTGHANDLE 0
 
-	typedef uint64 FontHandle, TextureHandle, VertexBufferHandle, RendererHandle, SoundHandle, MusicHandle, FrameBufferHandle;
+	typedef uint64 TextureHandle, VertexBufferHandle, RendererHandle, SoundHandle, MusicHandle, FrameBufferHandle;
 
 #	include "System/DisposablePointer.hpp"
 #	include "System/MiniDump.hpp"
@@ -50,7 +52,6 @@ namespace FlamingTorch
 #
 #	include "Rendering/Texture.hpp"
 #
-#	include "System/ResourceManager.hpp"
 #	include "System/PerlinNoise.hpp"
 #
 #	include "Rendering/FrustumCuller.hpp"
@@ -61,6 +62,8 @@ namespace FlamingTorch
 #
 #	include "Rendering/Input.hpp"
 #	include "Rendering/RenderTextUtils.hpp"
+#	include "Rendering/Text.hpp"
+#	include "System/ResourceManager.hpp"
 #	include "Rendering/RenderBase.hpp"
 #
 #	include "Game/GameInterface.hpp"

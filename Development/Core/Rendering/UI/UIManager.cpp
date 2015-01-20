@@ -280,8 +280,7 @@ namespace FlamingTorch
 	bool TextParamsAreSimilar(const TextParams &A, const TextParams &B)
 	{
 		return A.BorderColorValue == B.BorderColorValue && A.BorderSizeValue == B.BorderSizeValue && A.FontSizeValue == B.FontSizeValue &&
-			A.FontValue == B.FontValue && A.SecondaryTextColorValue == B.SecondaryTextColorValue && A.StyleValue == B.StyleValue &&
-			A.TextColorValue == B.TextColorValue;
+			A.FontValue.Get() == B.FontValue.Get() && A.SecondaryTextColorValue == B.SecondaryTextColorValue && A.TextColorValue == B.TextColorValue;
 	}
 
 #define COPYOFFSET(var, type)\
@@ -300,10 +299,9 @@ namespace FlamingTorch
 		COPYOFFSET(Parameters.BorderColorValue, Vector4);
 		COPYOFFSET(Parameters.BorderSizeValue, f32);
 		COPYOFFSET(Parameters.FontSizeValue, uint32);
-		COPYOFFSET(Parameters.FontValue, FontHandle);
+		COPYOFFSET(*Parameters.FontValue.Get(), intptr_t);
 		COPYOFFSET(Parameters.SecondaryTextColorValue, Vector4);
 		COPYOFFSET(Parameters.TextColorValue, Vector4);
-		COPYOFFSET(Parameters.StyleValue, uint32);
 
 		return CRC32::Instance.CRC(Buffer, Size);
 	}
@@ -395,7 +393,7 @@ namespace FlamingTorch
 				TheResource.TextParameters = Parameters;
 				TheResource.References = 1;
 
-				TheResource.Info = Owner->GetTextGlyph(Text[i], Parameters);
+				TheResource.Info = const_cast<Font *>(Parameters.FontValue.Get())->LoadGlyph(Text[i], Parameters);
 
 				if (TheResource.Info.Pixels.Get())
 					TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(Texture::CreateFromBuffer(TheResource.Info.Pixels)));
@@ -410,9 +408,13 @@ namespace FlamingTorch
 		static Sprite TheSprite;
 
 		TextParams ActualParams = Params.FontValue ? Params : TextParams(Params).Font(RenderTextUtils::DefaultFont);
+
+		DisposablePointer<Font> TheFont = ActualParams.FontValue;
+
 		Vector2 Position = Params.PositionValue, InitialPosition = Position;
 
-		uint32 SpaceSize = Owner->GetTextGlyph(' ', ActualParams).Advance;
+		f32 LineSpace = TheFont->LineSpacing(ActualParams);
+		f32 SpaceSize = TheFont->LoadGlyph(' ', ActualParams).Advance;
 
 		GetUIText(Text, ActualParams);
 
@@ -435,11 +437,11 @@ namespace FlamingTorch
 						TextResourceMap::iterator it = TextResources.find(ID);
 
 						if (j > 0)
-							Position.x += Owner->GetTextKerning(Lines[i][j - 1], Lines[i][j], ActualParams);
+							Position.x += TheFont->Kerning(Lines[i][j - 1], Lines[i][j], ActualParams);
 
 						if (it != TextResources.end())
 						{
-							TheSprite.Options.Position(Position + it->second.Info.Offset);
+							TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, LineSpace - it->second.Info.Bounds.Top));
 							TheSprite.SpriteTexture = it->second.InstanceTexture;
 
 							TheSprite.Draw(Owner);
@@ -521,13 +523,13 @@ namespace FlamingTorch
 
 		if(Property == "Font")
 		{
-			FontHandle Handle = ResourceManager::Instance.GetFontFromPackage(Owner, Path(Value));
+			DisposablePointer<Font> TheFont = ResourceManager::Instance.GetFontFromPackage(Owner, Path(Value));
 
-			if(Handle == 0)
+			if(TheFont.Get() == NULL)
 			{
-				Handle = ResourceManager::Instance.GetFont(Owner, Path(Value));
+				TheFont = ResourceManager::Instance.GetFont(Owner, Path(Value));
 
-				if(Handle == 0)
+				if(TheFont.Get() == NULL)
 				{
 					Log::Instance.LogWarn(TAG, "Unable to load font '%s'", Value.c_str());
 
@@ -535,7 +537,7 @@ namespace FlamingTorch
 				}
 			}
 
-			TheText->TextParameters.Font(Handle);
+			TheText->TextParameters.Font(TheFont);
 		}
 		else if(Property == "FontSize")
 		{
@@ -549,54 +551,6 @@ namespace FlamingTorch
 		else if(Property == "Text")
 		{
 			TheText->SetText(Value);
-		}
-		else if(Property == "Bold")
-		{
-			uint32 IntValue = 0;
-
-			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
-			{
-				if(!!IntValue)
-				{
-					TheText->TextParameters.StyleValue |= TextStyle::Bold;
-				}
-				else
-				{
-					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Bold;
-				}
-			}
-		}
-		else if(Property == "Italic")
-		{
-			uint32 IntValue = 0;
-
-			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
-			{
-				if(!!IntValue)
-				{
-					TheText->TextParameters.StyleValue |= TextStyle::Italic;
-				}
-				else
-				{
-					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Italic;
-				}
-			}
-		}
-		else if(Property == "Underline")
-		{
-			uint32 IntValue = 0;
-
-			if(1 == sscanf(Value.c_str(), "%u", &IntValue))
-			{
-				if(!!IntValue)
-				{
-					TheText->TextParameters.StyleValue |= TextStyle::Underline;
-				}
-				else
-				{
-					TheText->TextParameters.StyleValue = TheText->TextParameters.StyleValue & ~TextStyle::Underline;
-				}
-			}
 		}
 		else if(Property == "Alignment")
 		{
@@ -2470,11 +2424,11 @@ namespace FlamingTorch
 
 		Path DefaultFontPath = Path(Skin->GetString("General", "DefaultFont", "/DefaultFont.ttf"));
 
-		DefaultFontHandle = ResourceManager::Instance.GetFontFromPackage(Owner, DefaultFontPath);
+		DefaultFont = ResourceManager::Instance.GetFontFromPackage(Owner, DefaultFontPath);
 
-		if (DefaultFontHandle == INVALID_FTGHANDLE)
+		if (DefaultFont.Get() == NULL)
 		{
-			DefaultFontHandle = ResourceManager::Instance.GetFont(Owner, DefaultFontPath);
+			DefaultFont = ResourceManager::Instance.GetFont(Owner, DefaultFontPath);
 		}
 
 		if (1 != sscanf(Skin->GetString("General", "DefaultFontSize", "12").c_str(), "%u", &DefaultTextFontSize))

@@ -53,7 +53,7 @@ namespace FlamingTorch
 	{
 		static Vector2 Out;
 
-		Out = UISprite::Size() + Vector2(Padding, Padding);
+		Out = UISprite::Size() + Vector2((f32)Padding, (f32)Padding);
 
 		return Out;
 	}
@@ -99,7 +99,7 @@ namespace FlamingTorch
 			}
 
 			Rect TextSize = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualString.substr(TextOffset),
-				TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+				TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
 			Vector2 ActualTextSize = TextSize.Position() + TextSize.Size();
 
@@ -109,7 +109,7 @@ namespace FlamingTorch
 				for (unsigned long i = 0; i < ActualString.size() - TextOffset; i++, Count++)
 				{
 					Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(),
-						ActualString.substr(TextOffset, i + 1), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+						ActualString.substr(TextOffset, i + 1), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
 					Vector2 Size(TextRect.Right, TextRect.Bottom);
 
@@ -118,7 +118,7 @@ namespace FlamingTorch
 				}
 			}
 
-			ManagerValue->DrawText(ActualString.substr(TextOffset, Count), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize)
+			ManagerValue->DrawText(ActualString.substr(TextOffset, Count), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize)
 				.Color(Vector4(0, 0, 0, 1)).Position(ActualPosition + Offset));
 		}
 
@@ -130,7 +130,7 @@ namespace FlamingTorch
 			for (unsigned long i = 0; i < CursorPosition; i++)
 			{
 				Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(),
-					ActualString.substr(TextOffset, i + 1), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+					ActualString.substr(TextOffset, i + 1), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
 				Vector2 Size(TextRect.Right, TextRect.Bottom);
 
@@ -141,7 +141,7 @@ namespace FlamingTorch
 			}
 
 			Sprite TheSprite;
-			TheSprite.Options.Position(ActualPosition + Vector2(X + Offset.x, Offset.y)).Scale(Vector2(2, FontSize)).Color(Vector4(0, 0, 0, 1));
+			TheSprite.Options.Position(ActualPosition + Vector2(X + Offset.x, Offset.y)).Scale(Vector2(2, (f32)FontSize)).Color(Vector4(0, 0, 0, 1));
 
 			TheSprite.Draw(Renderer);
 		}
@@ -177,12 +177,12 @@ namespace FlamingTorch
 
 					unsigned long X = 0;
 
-					Rect TextSize = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), TempText.substr(TextOffset), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+					Rect TextSize = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), TempText.substr(TextOffset), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
 					for (unsigned long i = 0; i < TempText.length() - TextOffset; i++)
 					{
 						TextSize = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), TempText.substr(TextOffset, i + 1),
-							TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+							TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
 						Vector2 Size = Vector2(TextSize.Right, TextSize.Bottom);
 
@@ -229,7 +229,7 @@ namespace FlamingTorch
 
 					std::string str = ActualText.substr(TextOffset, CursorPosition + 1);
 
-					Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), str, TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+					Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), str, TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 					Vector2 TextSize(TextRect.Right, TextRect.Bottom);
 
 					if(TextSize.x >= SizeValue.x)
@@ -253,7 +253,7 @@ namespace FlamingTorch
 
 					for (uint32 i = 0; i < ActualText.length(); i++)
 					{
-						Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualText.substr(0, i), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+						Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualText.substr(0, i), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 						Vector2 TextSize(TextRect.Right, TextRect.Bottom);
 
 						if (TextSize.x >= SizeValue.x)
@@ -307,13 +307,13 @@ namespace FlamingTorch
 				}
 				else
 				{
-					Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualText.substr(TextOffset), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+					Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualText.substr(TextOffset), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 					Vector2 TextSize(TextRect.Right, TextRect.Bottom);
 
 					ActualText = ActualText.substr(0, TextOffset + CursorPosition) + (char)RendererManager::Instance.Input.Character +
 						ActualText.substr(TextOffset + CursorPosition);
 					
-					TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualText.substr(TextOffset), TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+					TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualText.substr(TextOffset), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
 					f32 Difference = TextRect.Right - TextSize.x;
 
@@ -321,9 +321,10 @@ namespace FlamingTorch
 
 					if (TextRect.Right >= SizeValue.x)
 					{
-						TextGlyphInfo Info = ManagerValue->GetOwner()->GetTextGlyph(RendererManager::Instance.Input.Character, TextParams().Font(ManagerValue->DefaultFontHandle).FontSize(FontSize));
+						Glyph Info = ManagerValue->DefaultFont->LoadGlyph(RendererManager::Instance.Input.Character, TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
-						f32 Size = MathUtils::Min(Info.Pixels->Width(), Info.Advance);
+						//FIXME: What if there's no pixels?
+						f32 Size = MathUtils::Min((f32)Info.Pixels->Width(), (f32)Info.Advance);
 
 						for (f32 i = 0; i < Difference; i += Size)
 						{

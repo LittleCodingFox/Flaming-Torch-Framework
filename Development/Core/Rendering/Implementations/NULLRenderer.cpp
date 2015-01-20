@@ -34,18 +34,6 @@ namespace FlamingTorch
 		return Vector2(1, 1);
 	}
 
-	TextGlyphInfo NULLRendererImplementation::GetTextGlyph(uint32 Character, const TextParams &Parameters)
-	{
-		static TextGlyphInfo Info;
-
-		return Info;
-	}
-
-	int32 NULLRendererImplementation::GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters)
-	{
-		return 0;
-	}
-
 	VertexBufferHandle NULLRendererImplementation::CreateVertexBuffer()
 	{
 		return 1;
@@ -130,20 +118,6 @@ namespace FlamingTorch
 	{
 		return false;
 	}
-
-	FontHandle NULLRendererImplementation::CreateFont(Stream *Data)
-	{
-		return 1;
-	}
-
-	void NULLRendererImplementation::DestroyFont(FontHandle Handle) {}
-
-	Rect NULLRendererImplementation::MeasureText(const std::string &Text, const TextParams &Parameters)
-	{
-		return Rect();
-	}
-
-	void NULLRendererImplementation::RenderText(const std::string &Text, const TextParams &Parameters) {}
 
 	void *NULLRendererImplementation::WindowHandle() const
 	{

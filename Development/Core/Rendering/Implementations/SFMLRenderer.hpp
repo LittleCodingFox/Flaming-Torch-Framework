@@ -14,24 +14,12 @@ namespace FlamingTorch
 	private:
 		static bool FirstRenderer;
 
-		static uint64 TextureCounter, FontCounter, VertexBufferCounter, FrameBufferCounter;
+		static uint64 TextureCounter, VertexBufferCounter, FrameBufferCounter;
 		static bool SupportsVBOs, ExtensionsAvailable, SupportsFBOs;
 	public:
 		static GLint MaximumTextureSize;
 
 		RendererFrameStats FrameStatsValue, PreviousFrameStatsValue;
-
-		class FontInfo
-		{
-		public:
-			DisposablePointer<sf::Font> ActualFont;
-			std::vector<uint8> Data;
-
-			uint32 ResourceSize;
-
-			FontInfo() : ResourceSize(0) {}
-			~FontInfo() { ActualFont.Dispose(); }
-		};
 
 		class TextureInfo
 		{
@@ -60,18 +48,6 @@ namespace FlamingTorch
 			uint32 VBOID;
 		};
 
-		class RenderTextCache
-		{
-		public:
-			const sf::Texture *TheTexture;
-			std::vector<Vector2> Positions, TexCoords;
-			std::vector<Vector4> Colors;
-
-			RenderTextCache() : TheTexture(NULL) {}
-		};
-
-		RenderTextCache TheRenderTextCache;
-
 		sf::RenderWindow Window;
 		TextureHandle LastBoundTexture;
 		uint32 LastBoundVBO;
@@ -79,9 +55,6 @@ namespace FlamingTorch
 		StringID UniqueCacheStringID;
 
 		uint32 SavedTextDrawcalls;
-
-		typedef std::map<FontHandle, FontInfo> FontMap;
-		FontMap Fonts;
 
 		typedef std::map<TextureHandle, TextureInfo> TextureMap;
 		TextureMap Textures;
@@ -106,16 +79,6 @@ namespace FlamingTorch
 
 		SFMLRendererImplementation();
 		~SFMLRendererImplementation();
-
-		/*
-		*	PRIVATE METHODS	
-		*/
-
-		void FlushRenderText();
-
-		/*
-		*	END PRIVATE METHODS
-		*/
 
 		/*!
 		*	Creates a renderer from a Window Handle
@@ -153,21 +116,6 @@ namespace FlamingTorch
 		*	Render Window Size
 		*/
 		virtual Vector2 Size() const override;
-
-		/*!
-		*	\param Character the character to get the glyph for
-		*	\param Parameters the text parameters
-		*	\return the Text Glyph Info of this glyph
-		*/
-		virtual TextGlyphInfo GetTextGlyph(uint32 Character, const TextParams &Parameters) override;
-
-		/*!
-		*	\param Prev the previous character
-		*	\param Cur the current character
-		*	\param Parameters the text parameters
-		*	\return the kerning space between characters
-		*/
-		virtual int32 GetTextKerning(uint32 Prev, uint32 Cur, const TextParams &Parameters) override;
 
 		/*!
 		*	Creates a Vertex Buffer
@@ -357,34 +305,6 @@ namespace FlamingTorch
 		*	\return true if there's a new event, false otherwise
 		*/
 		virtual bool PollEvent(RendererEvent &Out) override;
-
-		/*!
-		*	Creates a Font from a Stream of Data
-		*	\param Data the data of the font
-		*	\return a FontHandle or 0xFFFFFFFF
-		*/
-		virtual FontHandle CreateFont(Stream *Data) override;
-
-		/*!
-		*	Destroys a font
-		*	\param Handle the font's handle
-		*/
-		virtual void DestroyFont(FontHandle Handle) override;
-
-		/*!
-		*	Measures Text
-		*	\param Text the text to measure
-		*	\param Parameters the text parameters to use
-		*	\return a rectangle with the text's bounds
-		*/
-		virtual Rect MeasureText(const std::string &Text, const TextParams &Parameters) override;
-
-		/*!
-		*	Renders Text to the screen
-		*	\param Text the text to measure
-		*	\param Parameters the text parameters to use
-		*/
-		virtual void RenderText(const std::string &Text, const TextParams &Parameters) override;
 
 		/*!
 		*	Sets the current Mouse Position
