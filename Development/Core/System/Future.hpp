@@ -17,7 +17,7 @@ class Future : public SubSystem
 		FutureInfo(const FutureInfo &o) {}
 	};
 
-	std::list<FutureInfo> Futures;
+	std::list<DisposablePointer<FutureInfo> > Futures;
 
 	Future(const Future &);
 	Future &operator=(const Future &);

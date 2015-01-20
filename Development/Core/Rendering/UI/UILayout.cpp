@@ -80,7 +80,7 @@ namespace FlamingTorch
 				PerformStartupEvents(ParentElement->Child(i));
 			}
 
-			ParentElement->OnEvent(UIEventType::Start, {});
+			ParentElement->OnEvent(ParentElement, UIEventType::Start, {});
 		}
 		else
 		{

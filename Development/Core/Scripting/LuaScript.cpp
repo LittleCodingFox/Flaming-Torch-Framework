@@ -191,6 +191,43 @@ namespace FlamingTorch
 		return Error;
 	}
 
+	luabind::object LuaScriptManager::DoStream(Stream *In, lua_State *State)
+	{
+		if (In == NULL)
+			return luabind::object();
+
+		std::string Content = In->AsString();
+
+		static std::stringstream str;
+		str.str("");
+
+		std::string FunctionName = "LoadStreamContent_" + StringUtils::PointerString(In);
+
+		str << "function " << FunctionName << "()\n" << Content << "\nend\n";
+
+		if (0 != luaL_dostring(State, str.str().c_str()))
+		{
+			return luabind::object();
+		}
+
+		luabind::object Globals = luabind::globals(State);
+
+		luabind::object FunctionInstance = Globals[FunctionName];
+
+		if (!FunctionInstance)
+			return luabind::object();
+
+		try
+		{
+			return FunctionInstance();
+		}
+		catch (std::exception &)
+		{
+		}
+
+		return luabind::object();
+	}
+
 	DisposablePointer<LuaScript> LuaScriptManager::CreateScript(const std::string &Code, LuaLib **Libs, uint32 LibCount)
 	{
 		FLASSERT(WasStarted, "Lua ScriptManager not yet started!");
@@ -297,46 +334,5 @@ namespace FlamingTorch
 		SubSystem::Update(Priority);
 
 		SUBSYSTEM_PRIORITY_CHECK();
-	}
-
-	int32 LuaScriptManager::PerformMainLoop(DisposablePointer<LuaScript> LoopScript)
-	{
-		FLASSERT(LoopScript.Get(), "Invalid Loop Script!");
-
-		luabind::object ScriptInit = luabind::globals(LoopScript->State)["ScriptInit"];
-		luabind::object ScriptLoop = luabind::globals(LoopScript->State)["ScriptLoop"];
-		luabind::object ScriptShutdown = luabind::globals(LoopScript->State)["ScriptShutdown"];
-
-		if(!ScriptInit || !ScriptLoop || !ScriptShutdown)
-		{
-			Log::Instance.LogErr(TAG, "Missing script init, loop, or shutdown functions!");
-			DeInitSubsystems();
-
-			return 1;
-		}
-
-		if(!ProtectedLuaCast<bool>(ScriptInit()))
-		{
-			Log::Instance.LogErr(TAG, "Failed to init main loop from a script: ScriptInit returned an error");
-			DeInitSubsystems();
-
-			return 1;
-		}
-
-		for(;;)
-		{
-			UpdateSubsystems();
-
-			if(!ProtectedLuaCast<bool>(ScriptLoop()))
-				break;
-		}
-
-		ScriptShutdown();
-
-		Log::Instance.LogInfo(TAG, "End of Main Loop");
-
-		DeInitSubsystems();
-
-		return 0;
 	}
 }

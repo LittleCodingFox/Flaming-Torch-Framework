@@ -156,7 +156,7 @@ public:
 };
 
 /*!
-	Script Manager
+*	Script Manager
 */
 class LuaScriptManager : public SubSystem
 {
@@ -170,26 +170,25 @@ public:
 	LuaScriptManager() : SubSystem(LUASCRIPTMANAGER_PRIORITY) {}
 
 	/*!
-		Creates a script
-		\param Code the Script's code
-		\param Libs is the LuaLibs to use (FrameworkLib is not used by default)
-		\param LibCount is how many libs we are using
-		\sa FrameworkLib
+	*	Creates a script
+	*	\param Code the Script's code
+	*	\param Libs is the LuaLibs to use (FrameworkLib is not used by default)
+	*	\param LibCount is how many libs we are using
+	*	\sa FrameworkLib
 	*/
 	DisposablePointer<LuaScript> CreateScript(const std::string &Code, LuaLib **Libs, uint32 LibCount);
+
+	/*!
+	*	Loads a stream and runs whatever code is inside it, returning the result
+	*	Behaves similar to loading packages in lua
+	*/
+	static luabind::object DoStream(Stream *In, lua_State *State);
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
 
 	void LogError(const std::string &Message);
-
-	/*!
-		Performs the Main Loop of the application from a script
-		\param LoopScript the Script used for the main loop
-		\return 0 if we succeeded, non-0 on failure
-	*/
-	int32 PerformMainLoop(DisposablePointer<LuaScript> LoopScript);
 };
 
 /*!

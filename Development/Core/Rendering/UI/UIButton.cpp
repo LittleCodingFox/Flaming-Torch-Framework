@@ -102,7 +102,7 @@ namespace FlamingTorch
 		return Caption;
 	}
 
-	void UIButton::PrivOnEvent(uint32 EventType, std::vector<void *> Arguments)
+	void UIButton::PrivOnEvent(UIElement *Self, uint32 EventType, std::vector<void *> Arguments)
 	{
 		switch(EventType)
 		{

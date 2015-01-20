@@ -15,7 +15,7 @@ protected:
 
 	Vector2 LastSizeValue;
 
-	virtual void PrivOnEvent(uint32 EventType, std::vector<void *> Arguments);
+	virtual void PrivOnEvent(UIElement *Self, uint32 EventType, std::vector<void *> Arguments);
 
 public:
 

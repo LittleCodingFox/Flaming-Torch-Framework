@@ -28,7 +28,7 @@ protected:
 
 	void OnConstructed();
 
-	void OnEventPrivate(uint32 EventType, std::vector<void *> Arguments);
+	void OnEventPrivate(UIElement *Self, uint32 EventType, std::vector<void *> Arguments);
 
 	typedef std::map<uint32, bool> EventErrorCacheMap;
 	EventErrorCacheMap EventErrorCache;
@@ -59,7 +59,7 @@ public:
 	*/
 	luabind::object PropertyValues;
 
-	SimpleDelegate::SimpleDelegate<uint32, std::vector<void *> > OnEvent;
+	SimpleDelegate::SimpleDelegate<UIElement *, uint32, std::vector<void *> > OnEvent;
 
 	UIElement(const std::string &NativeTypeName, UIManager *_Manager);
 

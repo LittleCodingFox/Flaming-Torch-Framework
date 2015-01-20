@@ -147,7 +147,7 @@ namespace FlamingTorch
 		}
 	}
 
-	void UITextBox::PrivOnEvent(uint32 EventType, std::vector<void *> Arguments)
+	void UITextBox::PrivOnEvent(UIElement *Self, uint32 EventType, std::vector<void *> Arguments)
 	{
 		switch (EventType)
 		{

@@ -34,13 +34,13 @@ namespace FlamingTorch
 		{
 			Found = false;
 
-			for(std::list<FutureInfo>::reverse_iterator rit = Futures.rbegin(); rit != Futures.rend(); rit++)
+			for(std::list<DisposablePointer<FutureInfo> >::reverse_iterator rit = Futures.rbegin(); rit != Futures.rend(); rit++)
 			{
-				if(GameClockDiff(rit->StartTime) >= rit->Length)
+				if(GameClockDiff(rit->Get()->StartTime) >= rit->Get()->Length)
 				{
-					std::list<FutureInfo>::iterator it = --rit.base();
+					std::list<DisposablePointer<FutureInfo> >::iterator it = --rit.base();
 
-					rit->Signal(rit->Stream);
+					rit->Get()->Signal(rit->Get()->Stream);
 
 					Futures.erase(it);
 
@@ -61,14 +61,16 @@ namespace FlamingTorch
 			return;
 		}
 
-		FutureInfo Future;
-		Future.StartTime = GameClockTime();
-		Future.Length = 0;
-		Future.Stream = Stream;
-		Future.Stream.Seek(0);
-		Future.Signal.Connect(Ptr);
+		DisposablePointer<FutureInfo> Future(new FutureInfo());
+		Future->StartTime = GameClockTimeNoPause();
+		Future->Length = 0;
+		Future->Stream = Stream;
+		Future->Stream.Seek(0);
+		Future->Signal.Connect(Ptr);
 
 		Futures.push_back(Future);
+
+		return;
 	}
 
 	void Future::PostDelayed(FutureFn Ptr, uint32 Length, const MemoryStream &Stream)
@@ -80,12 +82,12 @@ namespace FlamingTorch
 			return;
 		}
 
-		FutureInfo Future;
-		Future.StartTime = GameClockTime();
-		Future.Length = Length;
-		Future.Stream = Stream;
-		Future.Stream.Seek(0);
-		Future.Signal.Connect(Ptr);
+		DisposablePointer<FutureInfo> Future(new FutureInfo());
+		Future->StartTime = GameClockTimeNoPause();
+		Future->Length = Length;
+		Future->Stream = Stream;
+		Future->Stream.Seek(0);
+		Future->Signal.Connect(Ptr);
 
 		Futures.push_back(Future);
 	}

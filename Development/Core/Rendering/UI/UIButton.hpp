@@ -14,7 +14,7 @@ protected:
 	Vector4 FontColor;
 	Vector2 LabelOffset;
 
-	virtual void PrivOnEvent(uint32 EventType, std::vector<void *> Arguments);
+	virtual void PrivOnEvent(UIElement *Self, uint32 EventType, std::vector<void *> Arguments);
 public:
 
 	UIButton(UIManager *Manager);

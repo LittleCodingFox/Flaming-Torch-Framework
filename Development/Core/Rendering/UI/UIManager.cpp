@@ -33,21 +33,21 @@ namespace FlamingTorch
 			{
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyJustPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::KeyJustPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
 				}
 			}
 			else if(Key.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::KeyPressed, { const_cast<InputCenter::KeyInfo *>(&Key) });
 				}
 			}
 			else if(Key.JustReleased)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::KeyReleased, { const_cast<InputCenter::KeyInfo *>(&Key) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::KeyReleased, { const_cast<InputCenter::KeyInfo *>(&Key) });
 				}
 			}
 
@@ -70,14 +70,14 @@ namespace FlamingTorch
 
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchJustPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::TouchJustPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				}
 			}
 			else if (Touch.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::TouchPressed, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				}
 			}
 
@@ -85,7 +85,7 @@ namespace FlamingTorch
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchDragged, { const_cast<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::TouchDragged, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				}
 			}
 			
@@ -93,7 +93,7 @@ namespace FlamingTorch
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::TouchReleased, { const_cast<InputCenter::TouchInfo *>(&Touch) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::TouchReleased, { const_cast<InputCenter::TouchInfo *>(&Touch) });
 				}
 			}
 
@@ -116,21 +116,21 @@ namespace FlamingTorch
 
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseJustPressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::MouseJustPressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
 				}
 			}
 			else if(Button.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MousePressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::MousePressed, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
 				}
 			}
 			else if(Button.JustReleased)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseReleased, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::MouseReleased, { const_cast<InputCenter::MouseButtonInfo *>(&Button) });
 				}
 			}
 
@@ -151,21 +151,21 @@ namespace FlamingTorch
 			{
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonJustPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::JoystickButtonJustPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
 				}
 			}
 			else if(Button.Pressed)
 			{
 				if (TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::JoystickButtonPressed, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
 				}
 			}
 			else if(Button.JustReleased)
 			{
 				if(TheGUIManager.GetFocusedElement().Get())
 				{
-					TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickButtonReleased, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
+					TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::JoystickButtonReleased, { const_cast<InputCenter::JoystickButtonInfo *>(&Button) });
 				}
 			}
 
@@ -184,7 +184,7 @@ namespace FlamingTorch
 
 			if(TheGUIManager.GetFocusedElement().Get())
 			{
-				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickAxisMoved, { const_cast<InputCenter::JoystickAxisInfo *>(&Axis) });
+				TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::JoystickAxisMoved, { const_cast<InputCenter::JoystickAxisInfo *>(&Axis) });
 			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -202,7 +202,7 @@ namespace FlamingTorch
 
 			if(TheGUIManager.GetFocusedElement().Get())
 			{
-				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickConnected, { &Index });
+				TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::JoystickConnected, { &Index });
 			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -218,7 +218,7 @@ namespace FlamingTorch
 
 			if (TheGUIManager.GetFocusedElement().Get())
 			{
-				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::JoystickDisconnected, { &Index });
+				TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::JoystickDisconnected, { &Index });
 			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -234,7 +234,7 @@ namespace FlamingTorch
 
 			if (TheGUIManager.GetFocusedElement().Get())
 			{
-				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::MouseMoved, { });
+				TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::MouseMoved, {});
 			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -251,7 +251,7 @@ namespace FlamingTorch
 			if (TheGUIManager.GetFocusedElement().Get())
 			{
 				char c = (char)Character;
-				TheGUIManager.GetFocusedElement()->OnEvent(UIEventType::CharacterEntered, { &c });
+				TheGUIManager.GetFocusedElement()->OnEvent(TheGUIManager.GetFocusedElement(), UIEventType::CharacterEntered, { &c });
 			}
 
 			if(TheGUIManager.GetInputBlocker().Get())
@@ -1930,6 +1930,10 @@ namespace FlamingTorch
 				CHECKJSONVALUE(Value, "TooltipPosition", string);
 			}
 
+#if FLPLATFORM_DEBUG
+			TheLayout->NamedElements[ElementIDName] = Element;
+#endif
+
 			Json::Value Children = Data.get("Children", Json::Value());
 
 			if(!Children.isArray())
@@ -2113,18 +2117,18 @@ namespace FlamingTorch
 		if(MouseOverElement != FoundElement)
 		{
 			if (MouseOverElement.Get() != nullptr)
-				MouseOverElement->OnEvent(UIEventType::MouseLeft, {});
+				MouseOverElement->OnEvent(MouseOverElement, UIEventType::MouseLeft, {});
 		}
 		else if(MouseOverElement)
 		{
-			MouseOverElement->OnEvent(UIEventType::MouseOver, {});
+			MouseOverElement->OnEvent(MouseOverElement, UIEventType::MouseOver, {});
 		}
 
 		if(FoundElement && Elements[FoundElement->ID()].Get())
 		{
 			if (MouseOverElement != FoundElement)
 			{
-				FoundElement->OnEvent(UIEventType::MouseEntered, {});
+				FoundElement->OnEvent(FoundElement, UIEventType::MouseEntered, {});
 			}
 
 			MouseOverElement = FoundElement;
@@ -2275,14 +2279,14 @@ namespace FlamingTorch
 
 		if (PreviouslyFocusedElement && PreviouslyFocusedElement.Get() != FocusedElementValue.Get())
 		{
-			PreviouslyFocusedElement->OnEvent(UIEventType::LostFocus, {});
+			PreviouslyFocusedElement->OnEvent(PreviouslyFocusedElement, UIEventType::LostFocus, {});
 
 			if (FocusedElementValue.Get())
-				FocusedElementValue->OnEvent(UIEventType::GainedFocus, {});
+				FocusedElementValue->OnEvent(FocusedElementValue, UIEventType::GainedFocus, {});
 		}
 		else if (PreviouslyFocusedElement.Get() == nullptr && FocusedElementValue)
 		{
-			FocusedElementValue->OnEvent(UIEventType::GainedFocus, {});
+			FocusedElementValue->OnEvent(FocusedElementValue, UIEventType::GainedFocus, {});
 		}
 	}
 
@@ -2425,7 +2429,7 @@ namespace FlamingTorch
 	void UIManager::ClearFocus()
 	{
 		if(FocusedElementValue.Get())
-			FocusedElementValue->OnEvent(UIEventType::LostFocus, {});
+			FocusedElementValue->OnEvent(FocusedElementValue, UIEventType::LostFocus, {});
 
 		FocusedElementValue = DisposablePointer<UIElement>();
 	}
