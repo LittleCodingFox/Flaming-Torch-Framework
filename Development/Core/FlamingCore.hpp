@@ -1,4 +1,9 @@
 #include "FlamingConfig.hpp"
+#
+#ifdef EMSCRIPTEN
+#	include <emscripten.h>
+#endif
+#
 #include "System/CoreVersion.hpp"
 #include <vector>
 #include <map>

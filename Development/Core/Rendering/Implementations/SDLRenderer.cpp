@@ -413,7 +413,7 @@ namespace FlamingTorch
 		{
 			FirstRenderer = false;
 
-#if FLPLATFORM_ANDROID
+#if FLPLATFORM_ANDROID || FLPLATFORM_EMSCRIPTEN
 			ExtensionsAvailable = false;
 #else
 
@@ -458,6 +458,7 @@ namespace FlamingTorch
 
 		uint32 ActualStyle = SDL_WINDOW_OPENGL;
 
+#if !FLPLATFORM_EMSCRIPTEN
 		switch(Style)
 		{
 		case RendererWindowStyle::FullScreen:
@@ -471,6 +472,7 @@ namespace FlamingTorch
 
 			break;
 		}
+#endif
 
 		if (FirstRenderer)
 		{
@@ -1714,6 +1716,7 @@ namespace FlamingTorch
 		{
 			switch(Event.type)
 			{
+#if !FLPLATFORM_EMSCRIPTEN
 			case SDL_JOYBUTTONDOWN:
 				Out.Type = RendererEventType::JoystickButtonPressed;
 				Out.JoystickIndex = Event.jdevice.which;
@@ -1755,6 +1758,7 @@ namespace FlamingTorch
 				}
 
 				return true;
+#endif
 
 			case SDL_KEYDOWN:
 				{

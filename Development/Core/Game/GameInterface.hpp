@@ -195,3 +195,5 @@ public:
 
 	int32 Run(int32 argc, char **argv) override;
 };
+
+void GameInterfaceSingleFrame();

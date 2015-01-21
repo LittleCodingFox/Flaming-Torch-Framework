@@ -56,12 +56,12 @@ public:
 			return;
 		}
 
-		FutureInfo Future;
-		Future.StartTime = GameClockTime();
-		Future.Length = 0;
-		Future.Stream = Stream;
-		Future.Stream.Seek(0);
-		Future.Signal.Connect(Instance, Function);
+		DisposablePointer<FutureInfo> Future(new FutureInfo());
+		Future->StartTime = GameClockTime();
+		Future->Length = 0;
+		Future->Stream = Stream;
+		Future->Stream.Seek(0);
+		Future->Signal.Connect(Instance, Function);
 
 		Futures.push_back(Future);
 	}
@@ -76,12 +76,12 @@ public:
 			return;
 		}
 
-		FutureInfo Future;
-		Future.StartTime = GameClockTime();
-		Future.Length = Length;
-		Future.Stream = Stream;
-		Future.Stream.Seek(0);
-		Future.Signal.Connect(Instance, Function);
+		DisposablePointer<FutureInfo> Future(new FutureInfo());
+		Future->StartTime = GameClockTime();
+		Future->Length = Length;
+		Future->Stream = Stream;
+		Future->Stream.Seek(0);
+		Future->Signal.Connect(Instance, Function);
 
 		Futures.push_back(Future);
 	}

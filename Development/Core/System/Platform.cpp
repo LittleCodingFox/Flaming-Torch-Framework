@@ -3,7 +3,7 @@
 #	include <windows.h>
 #	include "dbghelp.h"
 #	pragma comment(lib, "dbghelp.lib")
-#elif !ANDROID
+#elif !FLPLATFORM_ANDROID && !FLPLATFORM_EMSCRIPTEN
 #	include <execinfo.h>
 #endif
 #include <stdio.h>
@@ -191,7 +191,7 @@ namespace FlamingTorch
 
 		SymCleanup(Process);
 	}
-#elif !ANDROID
+#elif !FLPLATFORM_ANDROID && !FLPLATFORM_EMSCRIPTEN
 	void PrintStack()
 	{
 		void* Stack[1024];
@@ -226,7 +226,7 @@ namespace FlamingTorch
 
 		Log::Instance.LogErr("Core", "Assertion failed on '%s' (FN: '%s'; F: '%s:%d' R: '%s').", Variable, Function, FileName, Line, Buffer);
 
-#if !ANDROID
+#if !FLPLATFORM_ANDROID && !FLPLATFORM_EMSCRIPTEN
 		PrintStack();
 #endif
 

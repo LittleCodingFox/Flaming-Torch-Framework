@@ -314,6 +314,18 @@ namespace FlamingTorch
 	}
 #endif
 
+	void GameInterfaceSingleFrame()
+	{
+		UpdateSubsystems();
+
+		while (GameClockMayPerformFixedTimeStep())
+		{
+			GameInterface::Instance->OnFixedUpdate();
+		}
+
+		GameInterface::Instance->OnFrameUpdate();
+	}
+
 	int32 NativeGameInterface::Run(int32 argc, char **argv)
 	{
 		GameInterface::Run(argc, argv);
@@ -378,16 +390,12 @@ namespace FlamingTorch
 		}
 #endif
 
-		for(;;)
+#if FLPLATFORM_EMSCRIPTEN
+		emscripten_set_main_loop(GameInterfaceSingleFrame, 30, 1);
+#else
+		for (;;)
 		{
-			UpdateSubsystems();
-
-			while(GameClockMayPerformFixedTimeStep())
-			{
-				OnFixedUpdate();
-			}
-
-			OnFrameUpdate();
+			GameInterfaceSingleFrame();
 
 			if(ShouldQuit())
 				break;
@@ -397,6 +405,7 @@ namespace FlamingTorch
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 #endif
 		}
+#endif
 
 		if(!DeInitialize())
 		{
@@ -729,16 +738,12 @@ namespace FlamingTorch
 		}
 #endif
 
+#if FLPLATFORM_EMSCRIPTEN
+		emscripten_set_main_loop(GameInterfaceSingleFrame, 30, 1);
+#else
 		for (;;)
 		{
-			UpdateSubsystems();
-
-			while (GameClockMayPerformFixedTimeStep())
-			{
-				OnFixedUpdate();
-			}
-
-			OnFrameUpdate();
+			GameInterfaceSingleFrame();
 
 			if (ShouldQuit())
 				break;
@@ -748,6 +753,7 @@ namespace FlamingTorch
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 #endif
 		}
+#endif
 
 		if(DeInitFunction)
 		{

@@ -59,6 +59,12 @@
 #	define DEBUG_BREAK __asm__("int $3\n" : : );
 #	define FLDLLEXPORT extern "C"
 #
+#elif defined(EMSCRIPTEN)
+#	define FLPLATFORM_EMSCRIPTEN 1
+#	define FLPLATFORM_PATHSPLIT '/'
+#	define FLPLATFORM_PATHSPLITSTRING "/"
+#	define DEBUG_BREAK __asm__("int $3\n" : : );
+#	define FLDLLEXPORT extern "C"
 #else
 #	error Unknown or unsupported platform
 #endif
