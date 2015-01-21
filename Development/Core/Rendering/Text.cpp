@@ -90,7 +90,7 @@ namespace FlamingTorch
 		return Face->size->metrics.height >> 6;
 	}
 
-	uint32 Font::Kerning(uint32 From, uint32 To, const TextParams &Params)
+	int32 Font::Kerning(uint32 From, uint32 To, const TextParams &Params)
 	{
 		if (Face == NULL || !FT_HAS_KERNING(Face))
 			return 0;
@@ -104,7 +104,9 @@ namespace FlamingTorch
 		if(FT_Get_Kerning(Face, FromIndex, ToIndex, FT_KERNING_DEFAULT, &Kerning) != FT_Err_Ok)
 			return 0;
 
-		return Kerning.x >> 6;
+		int32 Out = Kerning.x >> 6;
+
+		return Out;
 	}
 
 	Glyph Font::LoadGlyph(uint32 Character, const TextParams &Params)

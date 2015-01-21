@@ -414,10 +414,10 @@ namespace FlamingTorch
 
 		DisposablePointer<Font> TheFont = ActualParams.FontValue;
 
-		Vector2 Position = Params.PositionValue, InitialPosition = Position;
-
 		f32 LineSpace = (f32)TheFont->LineSpacing(ActualParams);
 		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', ActualParams).Advance;
+
+		Vector2 Position = Vector2(Params.PositionValue.x, Params.PositionValue.y + Params.FontSizeValue), InitialPosition = Position;
 
 		GetUIText(Text, ActualParams);
 
@@ -444,7 +444,7 @@ namespace FlamingTorch
 
 						if (it != TextResources.end())
 						{
-							TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, LineSpace - it->second.Info.Bounds.Top));
+							TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, -it->second.Info.Bounds.Top));
 							TheSprite.SpriteTexture = it->second.InstanceTexture;
 
 							TheSprite.Draw(Owner);
@@ -474,7 +474,7 @@ namespace FlamingTorch
 			}
 
 			Position.x = InitialPosition.x;
-			Position.y += Params.FontSizeValue;
+			Position.y += LineSpace;
 		}
 	}
 
@@ -2481,6 +2481,45 @@ namespace FlamingTorch
 		for (TextResourceMap::iterator it = TextResources.begin(); it != TextResources.end(); it++)
 		{
 			it->second.References = 0;
+		}
+
+		for (ElementMap::iterator it = Elements.begin(); it != Elements.end(); it++)
+		{
+			it->second->Element->ReportResourceUsage();
+		}
+
+		for (TextureResourceMap::iterator it = TextureResources.begin(); it != TextureResources.end(); it++)
+		{
+			if (it->second.References == 0)
+			{
+				it->second.SourceTexture.Dispose();
+
+				TextureResources.erase(it);
+
+				it = TextureResources.begin();
+
+				if (it == TextureResources.end())
+					break;
+			}
+		}
+
+		for (TextureResourceMap::iterator it = TextureResources.begin(); it != TextureResources.end(); it++)
+		{
+			it->second.References = 0;
+		}
+	}
+
+	void UIManager::ReportTextureUse(DisposablePointer<Texture> TheTexture)
+	{
+		if (TheTexture.Get() == NULL)
+			return;
+
+		for (TextureResourceMap::iterator it = TextureResources.begin(); it != TextureResources.end(); it++)
+		{
+			if (it->second.InstanceTexture.Get() == TheTexture.Get())
+			{
+				it->second.References++;
+			}
 		}
 	}
 #endif

@@ -28,6 +28,6 @@ public:
 	void Clear();
 	void SetSize(uint32 Size);
 	uint32 LineSpacing(const TextParams &Params);
-	uint32 Kerning(uint32 From, uint32 To, const TextParams &Params);
+	int32 Kerning(uint32 From, uint32 To, const TextParams &Params);
 	Glyph LoadGlyph(uint32 Character, const TextParams &Params);
 };

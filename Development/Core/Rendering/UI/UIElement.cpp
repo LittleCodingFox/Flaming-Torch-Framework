@@ -453,7 +453,7 @@ namespace FlamingTorch
 			while(ParentPanel.Get())
 			{
 				if(ParentPanel->ParentPosition() == GlobalPosition)
-					IndicatorPosition += RenderTextUtils::MeasureTextSimple(Renderer, StringUtils::MakeIntString(ParentCounter), TextParams()).Size().x + 5;
+					IndicatorPosition += RenderTextUtils::MeasureTextSimple(Renderer, StringUtils::MakeIntString(ParentCounter), TextParams()).Right + 5;
 
 				ParentCounter++;
 

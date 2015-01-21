@@ -60,5 +60,7 @@ public:
 		this->Text = Text;
 		CursorPosition = TextOffset = 0;
 	}
+	
+	virtual void ReportResourceUsage() override;
 };
 #endif

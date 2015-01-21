@@ -23,5 +23,6 @@ public:
 	virtual void Draw(const Vector2 &ParentPosition, Renderer *Renderer) override;
 	virtual void SetCaption(const std::string &Caption);
 	virtual const std::string &GetCaption() const;
+	virtual void ReportResourceUsage() override;
 };
 #endif

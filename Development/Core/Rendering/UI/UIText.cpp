@@ -49,10 +49,10 @@ namespace FlamingTorch
 
 		for(uint32 i = 0; i < Strings.size(); i++)
 		{
-			Size.y += (Strings[i].Size.Size().y < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Size().y);
+			Size.y += (Strings[i].Size.Bottom < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Bottom);
 
-			if (Size.x < Strings[i].Size.Size().x)
-				Size.x = Strings[i].Size.Size().x;
+			if (Size.x < Strings[i].Size.Right)
+				Size.x = Strings[i].Size.Right;
 		}
 
 		return Size;
@@ -80,7 +80,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue);
+				YOffset += MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.FontSizeValue);
 			}
 
 			YOffset = MathUtils::Clamp((SizeValue.y - YOffset) / 2, 0, SizeValue.y);
@@ -89,7 +89,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue);
+				YOffset += MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.FontSizeValue);
 			}
 
 			YOffset = SizeValue.y - YOffset;
@@ -99,18 +99,18 @@ namespace FlamingTorch
 
 		for (uint32 i = 0; i < Strings.size(); TextYOffset += (Strings[i].Size.Size().y < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Size().y), i++)
 		{
-			if(TextYOffset + MathUtils::Max(Strings[i].Size.Size().y, (f32)TextParameters.FontSizeValue) > SizeValue.y)
+			if(TextYOffset + MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.FontSizeValue) > SizeValue.y)
 				break;
 
 			Vector2 ChildrenPosition;
 
 			if(TextAlignment & UITextAlignment::Center)
 			{
-				ChildrenPosition = Vector2((SizeValue.x - Strings[i].Size.Size().x) / 2, (f32)TextYOffset);
+				ChildrenPosition = Vector2((SizeValue.x - Strings[i].Size.Right) / 2, (f32)TextYOffset);
 			}
 			else if(TextAlignment & UITextAlignment::Right)
 			{
-				ChildrenPosition = Vector2(SizeValue.x - Strings[i].Size.Size().x, (f32)TextYOffset);
+				ChildrenPosition = Vector2(SizeValue.x - Strings[i].Size.Right, (f32)TextYOffset);
 			}
 			else
 			{

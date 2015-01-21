@@ -57,7 +57,8 @@ public:
 	*/
 	void SetIgnoreHeightBounds(bool Value);
 
-	void Update(const Vector2 &ParentPosition);
-	void Draw(const Vector2 &ParentPosition, Renderer *Renderer);
+	void Update(const Vector2 &ParentPosition) override;
+	void Draw(const Vector2 &ParentPosition, Renderer *Renderer) override;
+	virtual void ReportResourceUsage() override {}
 };
 #endif

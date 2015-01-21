@@ -36,7 +36,7 @@ namespace FlamingTorch
 		f32 LineSpacing = (f32)TheFont->LineSpacing(Params);
 		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', Params).Advance;
 
-		Vector2 Position, Min(999999, 999999), Max(-999999, -999999);
+		Vector2 Position(0, Params.FontSizeValue), Min, Max;
 
 		std::vector<std::string> Lines(StringUtils::Split(StringUtils::Strip(Str, '\r'), '\n'));
 
@@ -47,6 +47,14 @@ namespace FlamingTorch
 			for (uint32 j = 0; j < Lines[i].length(); j++)
 			{
 				Glyph TheGlyph = TheFont->LoadGlyph(Lines[i][j], Params);
+
+				if (i == 0 && j == 0)
+				{
+					Min.x = TheGlyph.Bounds.Left;
+					Min.y = TheGlyph.Bounds.Top;
+					Max.x = TheGlyph.Bounds.Right;
+					Max.y = Position.y - TheGlyph.Bounds.Bottom;
+				}
 
 				switch (Lines[i][j])
 				{
@@ -61,8 +69,6 @@ namespace FlamingTorch
 							Position.x += TheFont->Kerning(Lines[i][j - 1], Lines[i][j], Params);
 
 						Position.x = Position.x + TheGlyph.Advance;
-
-						LineHeight = LineHeight < TheGlyph.Bounds.Bottom ? TheGlyph.Bounds.Bottom : LineHeight;
 					}
 
 					break;
@@ -75,11 +81,11 @@ namespace FlamingTorch
 			if (Position.x > Max.x)
 				Max.x = Position.x;
 
-			if (Position.y + LineHeight < Min.y)
-				Min.y = Position.y + LineHeight;
+			if (Position.y < Min.y)
+				Min.y = Position.y;
 
-			if (Position.y + LineHeight > Max.y)
-				Max.y = Position.y + LineHeight;
+			if (Position.y > Max.y)
+				Max.y = Position.y;
 
 			Position.x = 0;
 			Position.y += LineSpacing;
@@ -185,10 +191,10 @@ namespace FlamingTorch
 
 			for (uint32 j = 0; j < Words.size(); j++)
 			{
-				Stream << (j > 0 ? " " : "") << Words[j];
+				Stream << (Stream.str().length() ? " " : "") << Words[j];
 				
 				MeasuredRect = RenderTextUtils::MeasureTextSimple(TheRenderer, Stream.str(), Params);
-				MeasuredSize = MeasuredRect.Size();
+				MeasuredSize = Vector2(MeasuredRect.Right, MeasuredRect.Bottom);
 
 				if(MeasuredSize.x > Size.x)
 				{

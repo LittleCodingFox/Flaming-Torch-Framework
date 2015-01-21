@@ -123,6 +123,11 @@ public:
 	~UIManager();
 
 	/*!
+	*	Used internally by UIElements to report that we're using a texture
+	*/
+	void ReportTextureUse(DisposablePointer<Texture> TheTexture);
+
+	/*!
 	*	\return the active UI texture resources
 	*/
 	inline uint32 ActiveTextureResources()

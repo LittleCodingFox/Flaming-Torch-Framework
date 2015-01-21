@@ -141,5 +141,12 @@ namespace FlamingTorch
 			break;
 		}
 	}
+
+	void UIButton::ReportResourceUsage()
+	{
+		ManagerValue->ReportTextureUse(Normal);
+		ManagerValue->ReportTextureUse(Down);
+		ManagerValue->ReportTextureUse(Over);
+	}
 #endif
 }

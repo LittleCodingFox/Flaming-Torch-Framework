@@ -74,5 +74,10 @@ namespace FlamingTorch
 			ChildrenValue[i]->Draw(ActualPosition, Renderer);
 		}
 	}
+
+	void UISprite::ReportResourceUsage()
+	{
+		ManagerValue->ReportTextureUse(TheSprite.SpriteTexture);
+	}
 #endif
 }

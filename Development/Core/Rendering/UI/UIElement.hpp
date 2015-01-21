@@ -321,5 +321,11 @@ public:
 	*	Focuses this element
 	*/
 	virtual void Focus();
+
+	/*!
+	*	Used to report which resources are being used
+	*	Called by UIManager every frame
+	*/
+	virtual void ReportResourceUsage() = 0;
 };
 #endif

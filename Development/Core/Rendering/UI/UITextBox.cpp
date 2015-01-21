@@ -101,21 +101,19 @@ namespace FlamingTorch
 			Rect TextSize = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(), ActualString.substr(TextOffset),
 				TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
-			Vector2 ActualTextSize = TextSize.Position() + TextSize.Size();
+			Vector2 ActualTextSize(TextSize.Right, TextSize.Bottom);
 
-			unsigned long Count = 0;
+			uint32 Count = 0;
 
+			for (uint32 i = 0; i < ActualString.size() - TextOffset; i++, Count++)
 			{
-				for (unsigned long i = 0; i < ActualString.size() - TextOffset; i++, Count++)
-				{
-					Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(),
-						ActualString.substr(TextOffset, i + 1), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
+				Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(),
+					ActualString.substr(TextOffset, i + 1), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
 
-					Vector2 Size(TextRect.Right, TextRect.Bottom);
+				Vector2 Size(TextRect.Right, TextRect.Bottom);
 
-					if (Size.x >= SizeValue.x)
-						break;
-				}
+				if (Size.x >= SizeValue.x)
+					break;
 			}
 
 			ManagerValue->DrawText(ActualString.substr(TextOffset, Count), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize)
@@ -125,9 +123,9 @@ namespace FlamingTorch
 		if (this == ManagerValue->GetFocusedElement())
 		{
 			//Draw cursor
-			float X = 0;
+			f32 X = 0;
 
-			for (unsigned long i = 0; i < CursorPosition; i++)
+			for (uint32 i = 0; i < CursorPosition; i++)
 			{
 				Rect TextRect = RenderTextUtils::MeasureTextSimple(ManagerValue->GetOwner(),
 					ActualString.substr(TextOffset, i + 1), TextParams().Font(ManagerValue->DefaultFont).FontSize(FontSize));
@@ -339,6 +337,12 @@ namespace FlamingTorch
 
 			break;
 		}
+	}
+
+	void UITextBox::ReportResourceUsage()
+	{
+		ManagerValue->ReportTextureUse(Background);
+		ManagerValue->ReportTextureUse(BackgroundMultiline);
 	}
 
 #endif

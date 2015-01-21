@@ -60,7 +60,8 @@ namespace FlamingTorch
 			return;
 		}
 
-		Vector2 TextSize = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), Text, Params).Size();
+		Rect TextRect = RenderTextUtils::MeasureTextSimple(Manager()->GetOwner(), Text, Params);
+		Vector2 TextSize(TextRect.Right, TextRect.Bottom);
 
 		if(!IgnoreHeightBoundsValue && LastPosition.y + Params.PositionValue.y + TextSize.y > SizeValue.y)
 			return;
