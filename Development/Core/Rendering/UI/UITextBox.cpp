@@ -153,7 +153,7 @@ namespace FlamingTorch
 			{
 				const InputCenter::MouseButtonInfo &o = *static_cast<const InputCenter::MouseButtonInfo *>(Arguments[0]);
 
-				if (this == ManagerValue->GetFocusedElement() && Text.length() > 0 && o.Name == sf::Mouse::Left)
+				if (this == ManagerValue->GetFocusedElement() && Text.length() > 0 && o.Name == InputMouseButton::Left)
 				{
 					//Since we're already pressed, we must be inside it, so we just need to care about the X axis
 

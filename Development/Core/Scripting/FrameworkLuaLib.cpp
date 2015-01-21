@@ -1793,9 +1793,9 @@ namespace FlamingTorch
 			//SoundManager
 			luabind::class_<SoundManager, SubSystem>("SoundManager")
 				.enum_("constants") [
-					luabind::value("Status_Stopped", sf::SoundSource::Stopped),
-					luabind::value("Status_Paused", sf::SoundSource::Paused),
-					luabind::value("Status_Playing", sf::SoundSource::Playing)
+					luabind::value("Status_Stopped", SoundStatus::Stopped),
+					luabind::value("Status_Paused", SoundStatus::Paused),
+					luabind::value("Status_Playing", SoundStatus::Playing)
 				]
 				.scope [
 					luabind::class_<SoundManager::Sound, DisposablePointer<SoundManager::Sound> >("Sound")

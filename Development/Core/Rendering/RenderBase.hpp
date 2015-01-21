@@ -126,6 +126,12 @@ class IRendererImplementation;
 #include "RendererManager.hpp"
 #include "IRendererImplementation.hpp"
 
+#if USE_SDL_RENDERER
+#	include "Implementations/SDLRenderer.hpp"
+#	undef DEFAULT_RENDERER_IMPLEMENTATION
+#	define DEFAULT_RENDERER_IMPLEMENTATION SDLRendererImplementation
+#endif
+
 #if USE_SFML_RENDERER
 #	include "Implementations/SFMLRenderer.hpp"
 #	undef DEFAULT_RENDERER_IMPLEMENTATION

@@ -393,8 +393,8 @@ namespace FlamingTorch
 				break;
 
 #if USE_GRAPHICS
-			if(PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
-				sf::sleep(sf::milliseconds(1000));
+			if (PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 #endif
 		}
 
@@ -745,7 +745,7 @@ namespace FlamingTorch
 
 #if USE_GRAPHICS
 			if (PlatformInfo::PlatformType == PlatformType::Mobile && !RendererManager::Instance.Input.HasFocus)
-				sf::sleep(sf::milliseconds(1000));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 #endif
 		}
 

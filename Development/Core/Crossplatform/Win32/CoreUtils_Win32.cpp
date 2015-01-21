@@ -1,6 +1,7 @@
 #include "FlamingCore.hpp"
 #if FLPLATFORM_WINDOWS
 #include <windows.h>
+#include <shellapi.h>
 
 namespace FlamingTorch
 {
