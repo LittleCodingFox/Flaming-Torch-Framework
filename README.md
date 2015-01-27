@@ -2,8 +2,8 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/3228/badge.svg"/>
 </a>
-Flaming-Torch-Framework
-=======================
+Flaming-Torch-Framework (Generation 1)
+======================================
 
 Open Source 2D Game Framework under zlib/libpng license (currently pre-alpha)
 
