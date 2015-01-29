@@ -44,6 +44,7 @@ public:
 	DisposablePointer<ObjectFeature> Clone() override;
 };
 
+#if USE_GRAPHICS
 class SpriteFeature : public ObjectFeature
 {
 public:
@@ -54,26 +55,7 @@ public:
 	bool RespondsToMessage(uint32 MessageID) override;
 	DisposablePointer<ObjectFeature> Clone() override;
 };
-
-class PhysicsFeature : public ObjectFeature
-{
-public:
-	DisposablePointer<PhysicsBody> Body;
-	Vector2 Size;
-	Vector2 Position;
-	bool Dynamic;
-	f32 Angle;
-	bool FixedRotation;
-	f32 Density;
-	f32 Friction;
-
-	PhysicsFeature();
-	~PhysicsFeature();
-	void OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments) override;
-	bool RespondsToMessage(uint32 MessageID) override;
-	void OnStart(DisposablePointer<ObjectDef> Def) override;
-	DisposablePointer<ObjectFeature> Clone() override;
-};
+#endif
 
 class ScriptedFeature : public ObjectFeature
 {

@@ -1705,10 +1705,12 @@ namespace FlamingTorch
 
 			//ResourceManager
 			luabind::class_<ResourceManager, SubSystem>("ResourceManager")
+#if USE_GRAPHICS
 				.def("GetFont", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const std::string &))&ResourceManager::GetFont)
 				.def("GetFont", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFont)
 				.def("GetFontFromPackage", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const std::string &, const std::string &))&ResourceManager::GetFontFromPackage)
 				.def("GetFontFromPackage", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFontFromPackage)
+#endif
 				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &))&ResourceManager::GetTexture)
 				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTexture)
 				.def("GetTextureFromPackage", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &, const std::string &))&ResourceManager::GetTextureFromPackage)
@@ -1778,16 +1780,6 @@ namespace FlamingTorch
 					luabind::def("MakeFloatString", &StringUtils::MakeFloatString),
 					luabind::def("Split", &StringUtilsSplit)
 				],
-
-			//PhysicsBody
-			luabind::class_<PhysicsBody>("PhysicsBody")
-				.property("Position", &PhysicsBody::Position, &PhysicsBody::SetPosition)
-				.property("Rotation", &PhysicsBody::Rotation, &PhysicsBody::SetRotation),
-
-			//PhysicsWorld
-			luabind::class_<PhysicsWorld, SubSystem>("PhysicsWorld")
-				.def_readwrite("Gravity", &PhysicsWorld::Gravity)
-				.def("MakeBody", &PhysicsWorld::MakeBody),
 
 #if USE_SOUND
 			//SoundManager
@@ -2441,7 +2433,6 @@ namespace FlamingTorch
 		Globals["g_LuaScriptManager"] = &LuaScriptManager::Instance;
 		Globals["g_GameInterface"] = GameInterface::Instance.Get();
 		Globals["Game"] = GameInterface::Instance.Get();
-		Globals["g_Physics"] = &PhysicsWorld::Instance;
 
 #if !FLPLATFORM_ANDROID
 		Globals["g_FileSystemWatcher"] = &FileSystemWatcher::Instance;

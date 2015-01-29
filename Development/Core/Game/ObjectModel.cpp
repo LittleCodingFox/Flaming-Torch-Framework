@@ -107,20 +107,11 @@ namespace FlamingTorch
 				.def_readwrite("Rotation", &TransformFeature::Rotation)
 				.def_readwrite("Scale", &TransformFeature::Scale),
 
+#if USE_GRAPHICS
 			luabind::class_<SpriteFeature, ObjectFeature, DisposablePointer<ObjectFeature> >("SpriteFeature")
 				.def(luabind::constructor<>())
 				.def_readwrite("Sprite", &SpriteFeature::TheSprite),
-
-			luabind::class_<PhysicsFeature, ObjectFeature, DisposablePointer<ObjectFeature> >("PhysicsFeature")
-				.def(luabind::constructor<>())
-				.def_readonly("Body", &PhysicsFeature::Body)
-				.def_readwrite("Size", &PhysicsFeature::Size)
-				.def_readwrite("Position", &PhysicsFeature::Position)
-				.def_readwrite("Dynamic", &PhysicsFeature::Dynamic)
-				.def_readwrite("Angle", &PhysicsFeature::Angle)
-				.def_readwrite("FixedRotation", &PhysicsFeature::FixedRotation)
-				.def_readwrite("Density", &PhysicsFeature::Density)
-				.def_readwrite("Friction", &PhysicsFeature::Friction),
+#endif
 
 			luabind::class_<ScriptedFeature, ObjectFeature, DisposablePointer<ObjectFeature> >("ScriptedFeature")
 				.def(luabind::constructor<const std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>())
@@ -323,6 +314,7 @@ namespace FlamingTorch
 
 						Feature->OnMessage(Def, MessageID, Arguments);
 
+#if USE_GRAPHICS
 						if (MessageID == FeatureMessage::FrameDraw && !!Console::Instance.GetVariable("r_drawobjectsdebug") && Console::Instance.GetVariable("r_drawobjectsdebug")->UIntValue == 1)
 						{
 							DisposablePointer<TransformFeature> Transform = Def->GetFeature("Transform");
@@ -348,6 +340,7 @@ namespace FlamingTorch
 
 							TheSprite.Draw(RendererManager::Instance.ActiveRenderer());
 						}
+#endif
 					}
 				}
 			}
@@ -365,12 +358,14 @@ namespace FlamingTorch
 		Log::Instance.LogInfo(TAG, "Initializing ObjectModel...");
 
 		DisposablePointer<ObjectFeature> Transform(new TransformFeature());
-		DisposablePointer<ObjectFeature> Sprite(new SpriteFeature());
-		DisposablePointer<ObjectFeature> Physics(new PhysicsFeature());
 
 		RegisterObjectFeature(Transform);
+
+#if USE_GRAPHICS
+		DisposablePointer<ObjectFeature> Sprite(new SpriteFeature());
+
 		RegisterObjectFeature(Sprite);
-		RegisterObjectFeature(Physics);
+#endif
 	}
 
 	void ObjectModelManager::Shutdown(uint32 Priority)
@@ -492,6 +487,7 @@ namespace FlamingTorch
 		return Out;
 	}
 
+#if USE_GRAPHICS
 	SpriteFeature::SpriteFeature() : ObjectFeature()
 	{
 		Name = "Sprite";
@@ -532,64 +528,7 @@ namespace FlamingTorch
 
 		return Out;
 	}
-
-	PhysicsFeature::PhysicsFeature() : ObjectFeature(), Dynamic(false), FixedRotation(false), Density(0), Friction(0), Angle(0)
-	{
-		Name = "Physics";
-	}
-
-	PhysicsFeature::~PhysicsFeature()
-	{
-		Body.Dispose();
-	}
-
-	void PhysicsFeature::OnMessage(DisposablePointer<ObjectDef> Def, uint32 MessageID, const std::vector<void *> &Arguments)
-	{
-		if (Body.Get() == NULL)
-			return;
-
-		switch (MessageID)
-		{
-		case FeatureMessage::FrameUpdate:
-			{
-				DisposablePointer<TransformFeature> Transform = Def->GetFeature("Transform");
-
-				if (Transform.Get())
-				{
-					Transform->Position = Body->Position();
-					Transform->Rotation.z = Body->Rotation();
-				}
-			}
-
-			break;
-		}
-	}
-
-	bool PhysicsFeature::RespondsToMessage(uint32 MessageID)
-	{
-		return MessageID == FeatureMessage::FrameUpdate;
-	}
-
-	void PhysicsFeature::OnStart(DisposablePointer<ObjectDef> Def)
-	{
-		Body = PhysicsWorld::Instance.MakeBody(Dynamic, Position, Size, Angle, FixedRotation, Density, Friction);
-	}
-
-	DisposablePointer<ObjectFeature> PhysicsFeature::Clone()
-	{
-		DisposablePointer<PhysicsFeature> Out(new PhysicsFeature);
-
-		Out->ID = ID;
-		Out->Angle = Angle;
-		Out->Density = Density;
-		Out->Dynamic = Dynamic;
-		Out->FixedRotation = FixedRotation;
-		Out->Friction = Friction;
-		Out->Position = Position;
-		Out->Size = Size;
-
-		return Out;
-	}
+#endif
 
 	ScriptedFeature::ScriptedFeature(const std::string &Name, luabind::object OnMessageFn, luabind::object RespondsToMessageFn,
 		luabind::object OnAttachedFn, luabind::object OnDetachedFn, luabind::object OnStartFn) : ObjectFeature()

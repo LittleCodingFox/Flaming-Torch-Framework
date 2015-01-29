@@ -8,7 +8,6 @@ GamePreInitialize = function()
 	g_RendererManager:Register()
 	g_Console:Register()
 	g_ObjectModel:Register()
-	g_Physics:Register()
 	
 	if PlatformInfo.PlatformType() == PlatformInfo.PlatformType_PC then
 		g_FileSystemWatcher:Register()
@@ -45,14 +44,8 @@ GameInitialize = function(Arguments)
 	
 	local Transform = TransformFeature()
 	local LogoSpriteFeature = SpriteFeature()
-	local Physics = PhysicsFeature()
 	
 	LogoSpriteFeature.Sprite.Texture = LogoTexture
-	
-	Physics.Dynamic = true
-	Physics.Size = LogoTexture.Size
-	Physics.Density = 1
-	Physics.FixedRotation = true
 	
 	LogoEntityDef = ObjectDef()
 
@@ -60,7 +53,6 @@ GameInitialize = function(Arguments)
 	
 	LogoEntityDef:AddFeature(Transform)
 	LogoEntityDef:AddFeature(LogoSpriteFeature)
-	LogoEntityDef:AddFeature(Physics)
 	
 	g_ObjectModel:RegisterObjectDef(LogoEntityDef)
 	
@@ -126,9 +118,9 @@ GameFrameUpdate = function()
 	if MakeNew then
 		local Entity = LogoEntityDef:Clone()
 
-		local Physics = Entity:GetFeature("Physics")
+		local Transform = Entity:GetFeature("Transform")
 		
-		Physics.Position = Position
+		Transform.Position = Vector3(Position)
 		
 		g_ObjectModel:RegisterObject(Entity)
 	end

@@ -66,14 +66,12 @@ namespace FlamingTorch
 #	include "Audio/SoundManager.hpp"
 #
 #	include "Rendering/Input.hpp"
-#	include "Rendering/RenderTextUtils.hpp"
 #	include "Rendering/Text.hpp"
+#	include "Rendering/RenderTextUtils.hpp"
 #	include "System/ResourceManager.hpp"
 #	include "Rendering/RenderBase.hpp"
 #
 #	include "Game/GameInterface.hpp"
-#
-#	include "Game/Physics.hpp"
 #
 #	include "Rendering/Sprite.hpp"
 #	include "Rendering/TiledMap.hpp"

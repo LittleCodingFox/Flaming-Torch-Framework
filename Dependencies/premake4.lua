@@ -16,7 +16,6 @@ solution "Dependencies"
 			"Headers/**.hpp",
 			"Source/base64/**.c",
 			"Source/base64/**.cpp",
-			"Source/Box2D/**.cpp",
 			"Source/enet/**.c",
 			"Source/enet/**.cpp",
 			"Source/jsoncpp/**.c",
