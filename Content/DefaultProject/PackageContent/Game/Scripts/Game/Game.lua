@@ -124,7 +124,6 @@ GameFrameUpdate = function()
 		
 		g_ObjectModel:RegisterObject(Entity)
 	end
-	
 end
 
 GameDeInitialize = function()

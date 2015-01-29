@@ -11,7 +11,6 @@ int main(int argc, char **argv)
 	ResourceManager::Instance.Register();
 	Console::Instance.Register();
 	ObjectModelManager::Instance.Register();
-	PhysicsWorld::Instance.Register();
 	LuaScriptManager::Instance.Register();
 	PackageFileSystemManager::Instance.Register();
 

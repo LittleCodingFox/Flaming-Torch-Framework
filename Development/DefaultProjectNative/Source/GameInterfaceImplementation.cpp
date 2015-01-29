@@ -54,20 +54,13 @@ namespace FlamingTorch
 
 		DisposablePointer<TransformFeature> Transform(new TransformFeature());
 		DisposablePointer<SpriteFeature> LogoSpriteFeature(new SpriteFeature());
-		DisposablePointer<PhysicsFeature> Physics(new PhysicsFeature());
 
 		LogoSpriteFeature->TheSprite.SpriteTexture = LogoTexture;
-
-		Physics->Dynamic = true;
-		Physics->Size = LogoTexture->Size();
-		Physics->Density = 1;
-		Physics->FixedRotation = true;
 
 		LogoEntityDef.Reset(new ObjectDef());
 		LogoEntityDef->Name = "LogoEntity";
 		LogoEntityDef->Features.push_back(Transform);
 		LogoEntityDef->Features.push_back(LogoSpriteFeature);
-		LogoEntityDef->Features.push_back(Physics);
 
 		ObjectModelManager::Instance.RegisterObjectDef(LogoEntityDef);
 
@@ -169,11 +162,11 @@ namespace FlamingTorch
 		{
 			DisposablePointer<ObjectDef> Entity = LogoEntityDef->Clone();
 
-			DisposablePointer<PhysicsFeature> Physics = Entity->GetFeature("Physics");
+			DisposablePointer<TransformFeature> Transform = Entity->GetFeature("Transform");
 
-			Physics->Position = Position;
+			Transform->Position = Position;
 
-			ObjectModelManager::Instance.RegisterObject(Physics);
+			ObjectModelManager::Instance.RegisterObject(Transform);
 		}
 	}
 
