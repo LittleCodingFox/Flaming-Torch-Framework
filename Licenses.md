@@ -8,7 +8,6 @@ Flaming Torch Framework is licensed under the [zlib/libpng license](http://opens
 FTGF depends on the following libraries which are already included:
 
  - [Boost](http://www.boost.org/users/license.html) Boost License
- - [ENet](http://enet.bespin.org/License.html) zlib License
  - [SimpleFileWatcher](https://code.google.com/p/simplefilewatcher/) MIT License
  - [Freetype](http://www.freetype.org/license.html) FTL License
  - [GLEW](http://glew.sourceforge.net/credits.html) Modified BSD/MIT License
@@ -22,3 +21,5 @@ FTGF depends on the following libraries which are already included:
  - [TMXParser](https://github.com/andrewrk/tmxparser) zlib License
  - [OpenAL](http://en.wikipedia.org/wiki/OpenAL) LGPL License
  - [libsndfile](http://en.wikipedia.org/wiki/Libsndfile) LGPL License
+ - [TurboBadger](https://github.com/fruxo/turbobadger) zlib License
+ - [SDL](http://www.libsdl.org) zlib License
