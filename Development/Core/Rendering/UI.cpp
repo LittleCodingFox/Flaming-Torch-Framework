@@ -1,0 +1,533 @@
+#include "FlamingCore.hpp"
+
+namespace tb
+{
+	using namespace ::FlamingTorch;
+
+	class FTGImageLoader : public TBImageLoader
+	{
+	public:
+		DisposablePointer<TextureBuffer> Buffer;
+
+		virtual int Width() { return Buffer.Get() ? Buffer->Width() : 0; }
+		virtual int Height() { return Buffer.Get() ? Buffer->Height() : 0; }
+		virtual uint32 *Data() { return (uint32*)&Buffer->Data[0]; }
+	};
+
+	TBImageLoader *TBImageLoader::CreateFromFile(const char *Name)
+	{
+		DisposablePointer<Stream> In = PackageFileSystemManager::Instance.GetFile(Path(Name));
+
+		if (!In.Get())
+		{
+			In.Reset(new FileStream());
+
+			if (!In.AsDerived<FileStream>()->Open(Name, StreamFlags::Read))
+				return nullptr;
+		}
+
+		DisposablePointer<TextureBuffer> Buffer = TextureBuffer::CreateFromStream(In);
+
+		if (!Buffer.Get())
+			return nullptr;
+
+		FTGImageLoader *Out = new FTGImageLoader();
+
+		Out->Buffer = Buffer;
+
+		return Out;
+	}
+
+	void TBSystemCallback(MemoryStream &Stream)
+	{
+		TBMessageHandler::ProcessMessages();
+	}
+
+	void TBSystem::RescheduleTimer(double fire_time)
+	{
+		if (fire_time == 0)
+		{
+			Future::Instance.Post(TBSystemCallback);
+		}
+		else if (fire_time != TB_NOT_SOON)
+		{
+			Future::Instance.PostDelayed(TBSystemCallback, (uint32)(fire_time * 1000));
+		}
+	}
+
+	class TBStreamFile : public TBFile
+	{
+	public:
+		DisposablePointer<Stream> TheStream;
+
+		virtual long Size()
+		{
+			return TheStream.Get() ? (long)TheStream->Length() : 0;
+		}
+
+		virtual size_t Read(void *buf, size_t elemSize, size_t count)
+		{
+			return TheStream->Read(buf, elemSize, count) ? count : 0;
+		}
+	};
+
+	TBFile *TBFile::Open(const char *Name, TBFileMode Mode)
+	{
+		Path FilePath(Name), PackagePath(Name[0] == '/' ? Name : std::string("/") + Name);
+
+		DisposablePointer<Stream> In = PackageFileSystemManager::Instance.GetFile(PackagePath);
+
+		if (!In)
+		{
+			In.Reset(new FileStream());
+
+			if (!In.AsDerived<FileStream>()->Open(FilePath.FullPath(), StreamFlags::Read))
+				return nullptr;
+		}
+
+		TBStreamFile *Out = new TBStreamFile();
+
+		Out->TheStream = In;
+
+		return Out;
+	}
+}
+
+namespace FlamingTorch
+{
+	void UIRootWidget::OnInvalid()
+	{
+		//Do nothing for now
+	}
+
+	UIBitmap::~UIBitmap()
+	{
+		Owner->FlushBitmap(this);
+	}
+
+	bool UIBitmap::Init(int width, int height, uint32 *data)
+	{
+		DisposablePointer<TextureBuffer> Buffer = TextureBuffer::CreateFromData((const uint8 *)data, width, height);
+
+		if (!Buffer.Get())
+			return false;
+
+		ContainedTexture = Texture::CreateFromBuffer(Buffer);
+
+		return ContainedTexture;
+	}
+
+	int UIBitmap::Width()
+	{
+		return ContainedTexture.Get() ? ContainedTexture->Width() : 0;
+	}
+
+	int UIBitmap::Height()
+	{
+		return ContainedTexture.Get() ? ContainedTexture->Height() : 0;
+	}
+
+	void UIBitmap::SetData(uint32 *data)
+	{
+		Owner->FlushBitmap(this);
+
+		if (ContainedTexture.Get())
+		{
+			DisposablePointer<TextureBuffer> Buffer = TextureBuffer::CreateFromData((const uint8 *)data, ContainedTexture->Width(), ContainedTexture->Height());
+
+			if (!Buffer.Get())
+				return;
+
+			ContainedTexture = Texture::CreateFromBuffer(Buffer);
+		}
+	}
+
+	UIRenderer::UIRenderer() : VertexHandle(INVALID_FTGHANDLE)
+	{
+	}
+
+	void UIRenderer::BeginPaint(int render_target_w, int render_target_h)
+	{
+		TBRendererBatcher::BeginPaint(render_target_w, render_target_h);
+
+		Owner->PushMatrices();
+		Owner->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, (f32)render_target_w, (f32)render_target_h, 0, -1, 1));
+		Owner->SetWorldMatrix(Matrix4x4());
+		Owner->SetViewport(0, 0, (f32)render_target_w, (f32)render_target_h);
+	}
+
+	void UIRenderer::EndPaint()
+	{
+		Owner->PopMatrices();
+
+		TBRendererBatcher::EndPaint();
+	}
+
+	TBBitmap *UIRenderer::CreateBitmap(int width, int height, uint32 *data)
+	{
+		UIBitmap *Bitmap = new UIBitmap();
+		Bitmap->Owner = this;
+
+		if (!Bitmap || !Bitmap->Init(width, height, data))
+		{
+			delete Bitmap;
+			return nullptr;
+		}
+
+		return Bitmap;
+	}
+
+	VertexElementDescriptor UIFormat[] = {
+		{ 0, VertexElementType::Position, VertexElementDataType::Float2 },
+		{ sizeof(Vector2), VertexElementType::TexCoord, VertexElementDataType::Float2 },
+		{ sizeof(Vector2[2]), VertexElementType::Color, VertexElementDataType::Float4 },
+	};
+
+	struct UIVertex
+	{
+		Vector2 Position, TexCoord;
+		Vector4 Color;
+	};
+
+	void UIRenderer::RenderBatch(Batch *batch)
+	{
+		if (VertexHandle == INVALID_FTGHANDLE)
+		{
+			VertexHandle = Owner->CreateVertexBuffer();
+		}
+
+		static std::vector<UIVertex> VertexData;
+
+		VertexData.resize(batch->vertex_count);
+
+		for (uint32 i = 0; i < VertexData.size(); i++)
+		{
+			VertexData[i].Position.x = batch->vertex[i].x;
+			VertexData[i].Position.y = batch->vertex[i].y;
+
+			VertexData[i].TexCoord.x = batch->vertex[i].u;
+			VertexData[i].TexCoord.y = batch->vertex[i].v;
+
+			VertexData[i].Color.x = batch->vertex[i].r / 255.f;
+			VertexData[i].Color.y = batch->vertex[i].g / 255.f;
+			VertexData[i].Color.z = batch->vertex[i].b / 255.f;
+			VertexData[i].Color.w = batch->vertex[i].a / 255.f;
+		}
+
+		Owner->SetVertexBufferData(VertexHandle, VertexDetailsMode::Mixed, UIFormat, sizeof(UIFormat) / sizeof(UIFormat[0]), &VertexData[0], VertexData.size() * sizeof(VertexData[0]));
+
+		UIBitmap *TheBitmap = (UIBitmap *)batch->bitmap;
+
+		if (TheBitmap)
+		{
+			TheBitmap->ContainedTexture->Bind();
+		}
+		else
+		{
+			Owner->BindTexture((TextureHandle)INVALID_FTGHANDLE);
+		}
+
+		Owner->RenderVertices(VertexModes::Triangles, VertexHandle, 0, VertexData.size());
+	}
+
+	void UIRenderer::SetClipRect(const TBRect &rect)
+	{
+		Owner->SetClipRect(Rect((f32)rect.x, (f32)rect.x + (f32)rect.w, (f32)rect.y, (f32)rect.y + (f32)rect.h));
+	}
+
+	MODIFIER_KEYS MapTBModifiers(const InputCenter::KeyInfo &Key)
+	{
+		MODIFIER_KEYS Out = TB_MODIFIER_NONE;
+
+		if (Key.Alt)
+			Out |= TB_ALT;
+
+		if (Key.Control)
+			Out |= TB_CTRL;
+
+		if (Key.Shift)
+			Out |= TB_SHIFT;
+
+		return Out;
+	}
+
+	SPECIAL_KEY MapTBSpecialKey(const InputCenter::KeyInfo &Key)
+	{
+		switch (Key.Name)
+		{
+		case InputKey::F1:
+
+			return TB_KEY_F1;
+
+		case InputKey::F2:
+
+			return TB_KEY_F2;
+
+		case InputKey::F3:
+
+			return TB_KEY_F3;
+
+		case InputKey::F4:
+
+			return TB_KEY_F4;
+
+		case InputKey::F5:
+
+			return TB_KEY_F5;
+
+		case InputKey::F6:
+
+			return TB_KEY_F6;
+
+		case InputKey::F7:
+
+			return TB_KEY_F7;
+
+		case InputKey::F8:
+
+			return TB_KEY_F8;
+
+		case InputKey::F9:
+
+			return TB_KEY_F9;
+
+		case InputKey::F10:
+
+			return TB_KEY_F10;
+
+		case InputKey::F11:
+
+			return TB_KEY_F11;
+
+		case InputKey::F12:
+
+			return TB_KEY_F12;
+
+		case InputKey::Left:
+
+			return TB_KEY_LEFT;
+
+		case InputKey::Right:
+
+			return TB_KEY_RIGHT;
+
+		case InputKey::Up:
+
+			return TB_KEY_UP;
+
+		case InputKey::Down:
+
+			return TB_KEY_DOWN;
+
+		case InputKey::PageUp:
+
+			return TB_KEY_PAGE_UP;
+
+		case InputKey::PageDown:
+
+			return TB_KEY_PAGE_DOWN;
+
+		case InputKey::Home:
+
+			return TB_KEY_HOME;
+
+		case InputKey::End:
+
+			return TB_KEY_END;
+
+		case InputKey::Insert:
+
+			return TB_KEY_INSERT;
+
+		case InputKey::Tab:
+
+			return TB_KEY_TAB;
+
+		case InputKey::Delete:
+
+			return TB_KEY_DELETE;
+
+		case InputKey::BackSpace:
+
+			return TB_KEY_BACKSPACE;
+
+		case InputKey::Return:
+
+			return TB_KEY_ENTER;
+
+		case InputKey::Escape:
+
+			return TB_KEY_ESC;
+		}
+
+		return TB_KEY_UNDEFINED;
+	}
+
+	uint32 MapTBKey(const InputCenter::KeyInfo &Key)
+	{
+		//TODO
+
+		return 0;
+	}
+
+	UIInputProcessor::UIInputProcessor() : CurrentModifiers(TB_MODIFIER_NONE)
+	{
+	}
+
+	bool UIInputProcessor::OnKey(const InputCenter::KeyInfo &Key)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+
+		bool Consume = false;
+
+		CurrentModifiers = MapTBModifiers(Key);
+
+		//TODO
+		if (Key.JustPressed)
+		{
+			Consume = UIRoot->InvokeKey(MapTBKey(Key), MapTBSpecialKey(Key), CurrentModifiers, true);
+		}
+		else if (Key.Pressed)
+		{
+			//Consume = UIRoot->InvokeKey(MapTBKey(Key), MapTBSpecialKey(Key), CurrentModifiers, true);
+		}
+		else if (Key.JustReleased)
+		{
+			Consume = UIRoot->InvokeKey(MapTBKey(Key), MapTBSpecialKey(Key), CurrentModifiers, false);
+		}
+
+		if (Consume)
+		{
+			TheManager.Input.ConsumeInput();
+		}
+
+		return Consume;
+	}
+
+	bool UIInputProcessor::OnTouch(const InputCenter::TouchInfo &Touch)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+
+		//TODO: Figure out if pointer was consumed
+		bool Consume = false;
+
+		//TODO
+		if (Touch.JustPressed)
+		{
+			UIRoot->InvokePointerDown((int32)Touch.Position.x, (int32)Touch.Position.y, 1, CurrentModifiers, true);
+		}
+		else if (Touch.Pressed)
+		{
+			//Ignored
+		}
+
+		if (Touch.Dragged)
+		{
+			UIRoot->InvokePointerMove((int32)Touch.Position.x, (int32)Touch.Position.y, CurrentModifiers, true);
+		}
+
+		if (Touch.JustReleased)
+		{
+			UIRoot->InvokePointerUp((int32)Touch.Position.x, (int32)Touch.Position.y, CurrentModifiers, true);
+		}
+
+		if (Consume)
+		{
+			TheManager.Input.ConsumeInput();
+		}
+
+		return TheManager.Input.InputConsumed();
+	}
+
+	bool UIInputProcessor::OnMouseButton(const InputCenter::MouseButtonInfo &Button)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+
+		bool Consumed = false;
+
+		if (Button.JustPressed)
+		{
+			UIRoot->InvokePointerDown((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, 1, CurrentModifiers, false);
+		}
+		else if (Button.Pressed)
+		{
+		}
+		else if (Button.JustReleased)
+		{
+			UIRoot->InvokePointerUp((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, CurrentModifiers, false);
+		}
+
+		return TheManager.Input.InputConsumed();
+	}
+
+	bool UIInputProcessor::OnJoystickButton(const InputCenter::JoystickButtonInfo &Button)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+
+		//TODO
+		if (Button.JustPressed)
+		{
+		}
+		else if (Button.Pressed)
+		{
+		}
+		else if (Button.JustReleased)
+		{
+		}
+
+		return TheManager.Input.InputConsumed();
+	}
+
+	bool UIInputProcessor::OnJoystickAxis(const InputCenter::JoystickAxisInfo &Axis)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+
+		//TODO
+
+		return TheManager.Input.InputConsumed();
+	}
+
+	void UIInputProcessor::OnJoystickConnected(uint8 Index)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+	}
+
+	void UIInputProcessor::OnJoystickDisconnected(uint8 Index)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+	}
+
+	void UIInputProcessor::OnMouseMove(const Vector2 &Position)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+
+		UIRoot->InvokePointerMove((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, CurrentModifiers, false);
+
+		if (TheManager.Input.MouseWheel != 0)
+		{
+			UIRoot->InvokeWheel((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, 0, -(int32)TheManager.Input.MouseWheel, CurrentModifiers);
+		}
+	}
+
+	void UIInputProcessor::OnCharacterEntered(wchar_t Character)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+
+		UIRoot->InvokeKey(Character, TB_KEY_UNDEFINED, TB_MODIFIER_NONE, true);
+		UIRoot->InvokeKey(Character, TB_KEY_UNDEFINED, TB_MODIFIER_NONE, false);
+	}
+
+	void UIInputProcessor::OnAction(const InputCenter::Action &TheAction)
+	{
+		RendererManager &TheManager = RendererManager::Instance;
+		//TODO
+	}
+
+	void UIInputProcessor::OnGainFocus() {}
+	void UIInputProcessor::OnLoseFocus() {}
+}

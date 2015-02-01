@@ -181,16 +181,11 @@ namespace FlamingTorch
 		virtual void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End) override;
 
 		/*!
-		*	Start clipping the rendering to a rectangle
+		*	Clips the rendering to a rectangle
 		*	\param ClippingRect the clipping rectangle
 		*	\note The orientation is always from bottom left and up, so e.g., to clip a 100x100 rect on the top right of a screen of 1000x1000px size, you must pass a rect of (900, 100, 900, 100)
 		*/
-		virtual void StartClipping(const Rect &ClippingRect) override;
-
-		/*!
-		*	Finishes clipping the rendering from a rectangle
-		*/
-		virtual void FinishClipping() override;
+		virtual void SetClipRect(const Rect &ClippingRect) override;
 
 		/*!
 		*	Clear a render buffer

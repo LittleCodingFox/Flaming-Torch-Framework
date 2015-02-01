@@ -129,24 +129,11 @@ namespace FlamingTorch
 
 	void GameInterface::ReloadGUI()
 	{
-		RendererManager::Instance.ActiveRenderer()->UI->ClearLayouts();
+		RendererManager::Instance.ActiveRenderer()->UIRoot->DeleteAllChildren();
 
-		DisposablePointer<FileStream> InputStream(new FileStream());
-
-		if(!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "DefaultLayout.resource", StreamFlags::Read | StreamFlags::Text) ||
-			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream, DisposablePointer<UIElement>(), true))
+		if (!g_widgets_reader->LoadFile(RendererManager::Instance.ActiveRenderer()->UIRoot, (FileSystemUtils::ResourcesDirectory() + "/GUILayout.resource").c_str()))
 		{
-			Log::Instance.LogErr(TAG, "Failed to reload our Default GUI Layouts!");
-
-			return;
-		}
-
-		if(!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text) ||
-			!RendererManager::Instance.ActiveRenderer()->UI->LoadLayouts(InputStream))
-		{
-			Log::Instance.LogErr(TAG, "Failed to reload our GUI Layouts!");
-
-			return;
+			Log::Instance.LogErr(TAG, "Failed to reload the GUI Layout file!");
 		}
 	}
 
@@ -244,6 +231,7 @@ namespace FlamingTorch
 			TheRenderer->SetViewport(0, 0, TheRenderer->Size().x, TheRenderer->Size().y);
 		}
 
+		/*
 		{
 			PROFILE("Update UI", StatTypes::Rendering);
 			TheRenderer->UI->Update();
@@ -253,6 +241,7 @@ namespace FlamingTorch
 			PROFILE("Render UI", StatTypes::Rendering);
 			TheRenderer->UI->Draw();
 		}
+		*/
 
 		static std::stringstream str;
 
@@ -264,10 +253,9 @@ namespace FlamingTorch
 
 			str << "Renderer: " << Stats.RendererName << " version " << Stats.RendererVersion << " on " << CoreUtils::PlatformString() << "\n" << Stats.RendererCustomMessage << (Stats.RendererCustomMessage.length() ? "\n\n" : "\n");
 			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "/" << Stats.DrawCalls + Stats.SkippedDrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges << 
-				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\nActive UI Resources: " <<
-				(TheRenderer->UI->ActiveTextResources() + TheRenderer->UI->ActiveTextureResources()) << " (" << TheRenderer->UI->ActiveTextureResources() << " Textures, " << TheRenderer->UI->ActiveTextResources() << " Glyphs)";
+				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\n";
 
-			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(UIELEMENT_DEFAULT_FONT_SIZE).Color(Vector4(1, 1, 1, 1))
+			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(20).Color(Vector4(1, 1, 1, 1))
 				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
 		}
 
@@ -284,7 +272,7 @@ namespace FlamingTorch
 
 			str << GameName() << " (" << GAMEINTERFACE_BUILD_TYPE << ") - " << FPSCounter::Instance.FPS() << " FPS (" << 1000.f / FPSCounter::Instance.FPS() << " ms)";
 
-			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(UIELEMENT_DEFAULT_FONT_SIZE).Color(Vector4(1, 1, 1, 1))
+			RenderTextUtils::RenderText(TheRenderer, str.str(), TextParams().FontSize(20).Color(Vector4(1, 1, 1, 1))
 				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, TheRenderer->Size().y - 20.0f)));
 
 			static DisposablePointer<Texture> Logo;

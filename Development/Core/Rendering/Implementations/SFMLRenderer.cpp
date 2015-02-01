@@ -162,6 +162,7 @@ namespace FlamingTorch
 		}
 
 		glDisable(GL_DEPTH_TEST);
+		glClearColor(Renderer::DefaultClearColor.x, Renderer::DefaultClearColor.y, Renderer::DefaultClearColor.z, Renderer::DefaultClearColor.w);
 
 		return true;
 	}
@@ -278,6 +279,7 @@ namespace FlamingTorch
 		}
 
 		glDisable(GL_DEPTH_TEST);
+		glClearColor(Renderer::DefaultClearColor.x, Renderer::DefaultClearColor.y, Renderer::DefaultClearColor.z, Renderer::DefaultClearColor.w);
 
 		return true;
 	}
@@ -930,7 +932,7 @@ namespace FlamingTorch
 		GLCHECK();
 	}
 
-	void SFMLRendererImplementation::StartClipping(const Rect &ClippingRect)
+	void SFMLRendererImplementation::SetClipRect(const Rect &ClippingRect)
 	{
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.ClippingChanges++;
@@ -942,16 +944,6 @@ namespace FlamingTorch
 		GLsizei Width = (GLsizei)(ClippingRect.Right - ClippingRect.Left), Height = (GLsizei)(ClippingRect.Bottom - ClippingRect.Top);
 
 		glScissor(x, y, Width, Height);
-
-		GLCHECK();
-	}
-
-	void SFMLRendererImplementation::FinishClipping()
-	{
-		FrameStatsValue.StateChanges++;
-		FrameStatsValue.ClippingChanges++;
-
-		DisableState(GL_SCISSOR_TEST);
 
 		GLCHECK();
 	}

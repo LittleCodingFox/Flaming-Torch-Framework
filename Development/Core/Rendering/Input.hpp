@@ -324,7 +324,7 @@ public:
 		virtual bool OnJoystickAxis(const JoystickAxisInfo &Axis) = 0;
 		virtual void OnJoystickConnected(uint8 Index) = 0;
 		virtual void OnJoystickDisconnected(uint8 Index) = 0;
-		virtual void OnMouseMove(const Vector3 &Position) = 0;
+		virtual void OnMouseMove(const Vector2 &Position) = 0;
 		virtual void OnCharacterEntered(wchar_t Character) = 0;
 		virtual void OnAction(const Action &TheAction) = 0;
 		virtual void OnGainFocus() = 0;
@@ -345,7 +345,7 @@ public:
 			Name = _Name;
 		}
 
-		bool OnKey(const KeyInfo &Key)
+		bool OnKey(const KeyInfo &Key) override
 		{
 			if(OnKeyFunction)
 			{
@@ -362,7 +362,7 @@ public:
 			return false;
 		}
 
-		bool OnMouseButton(const MouseButtonInfo &Button)
+		bool OnMouseButton(const MouseButtonInfo &Button) override
 		{
 			if(OnMouseButtonFunction)
 			{
@@ -379,7 +379,7 @@ public:
 			return false;
 		}
 
-		bool OnTouch(const TouchInfo &Touch)
+		bool OnTouch(const TouchInfo &Touch) override
 		{
 			if(OnTouchFunction)
 			{
@@ -396,7 +396,7 @@ public:
 			return false;
 		}
 
-		bool OnJoystickButton(const JoystickButtonInfo &Button)
+		bool OnJoystickButton(const JoystickButtonInfo &Button) override
 		{
 			if(OnJoystickButtonFunction)
 			{
@@ -413,7 +413,7 @@ public:
 			return false;
 		}
 
-		bool OnJoystickAxis(const JoystickAxisInfo &Axis)
+		bool OnJoystickAxis(const JoystickAxisInfo &Axis) override
 		{
 			if(OnJoystickAxisFunction)
 			{
@@ -430,7 +430,7 @@ public:
 			return false;
 		}
 
-		void OnJoystickConnected(uint8 Index)
+		void OnJoystickConnected(uint8 Index) override
 		{
 			if(OnJoystickConnectedFunction)
 			{
@@ -445,7 +445,7 @@ public:
 			}
 		}
 
-		void OnJoystickDisconnected(uint8 Index)
+		void OnJoystickDisconnected(uint8 Index) override
 		{
 			if(OnJoystickDisconnectedFunction)
 			{
@@ -460,7 +460,7 @@ public:
 			}
 		}
 
-		void OnMouseMove(const Vector3 &Position)
+		void OnMouseMove(const Vector2 &Position) override
 		{
 			if(OnMouseMoveFunction)
 			{
@@ -475,7 +475,7 @@ public:
 			}
 		}
 
-		void OnCharacterEntered(wchar_t Character)
+		void OnCharacterEntered(wchar_t Character) override
 		{
 			if(OnCharacterEnteredFunction)
 			{
@@ -490,7 +490,7 @@ public:
 			}
 		}
 
-		void OnAction(const Action &TheAction)
+		void OnAction(const Action &TheAction) override
 		{
 			if(OnActionFunction)
 			{
@@ -505,7 +505,7 @@ public:
 			}
 		}
 
-		void OnGainFocus()
+		void OnGainFocus() override
 		{
 			if(OnGainFocusFunction)
 			{
@@ -520,7 +520,7 @@ public:
 			}
 		}
 
-		void OnLoseFocus()
+		void OnLoseFocus() override
 		{
 			if(OnLoseFocusFunction)
 			{
@@ -553,9 +553,9 @@ public:
 	*/
 	f32 MouseWheel;
 	/*!
-	*	Per-frame Mouse Movement (X,Y = Position, Z = Wheel)
+	*	Per-frame Mouse Movement (X,Y = Position)
 	*/
-	Vector3 MouseMovement;
+	Vector2 MouseMovement;
 
 	/*!
 	*	Center the mouse cursor

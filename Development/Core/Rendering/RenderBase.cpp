@@ -1,9 +1,14 @@
 #include "FlamingCore.hpp"
+
+void register_freetype_font_renderer();
+
 namespace FlamingTorch
 {
 #	if USE_GRAPHICS
 #	define PROFILER_FONT_SIZE 14
 #	define TAG "RendererManager"
+
+	Vector4 Renderer::DefaultClearColor(1, 1, 1, 1);
 
 	RendererHandle Counter = 0, Active = 0;
 	RendererManager RendererManager::Instance;
@@ -20,7 +25,7 @@ namespace FlamingTorch
 		{
 		}
 
-		bool OnKey(const InputCenter::KeyInfo &Key)
+		bool OnKey(const InputCenter::KeyInfo &Key) override
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 
@@ -133,41 +138,41 @@ namespace FlamingTorch
 			return false;
 		}
 
-		bool OnMouseButton(const InputCenter::MouseButtonInfo &Button)
+		bool OnMouseButton(const InputCenter::MouseButtonInfo &Button) override
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 
 			return TheManager.ShowConsole;
 		}
 
-		bool OnJoystickButton(const InputCenter::JoystickButtonInfo &Button)
+		bool OnJoystickButton(const InputCenter::JoystickButtonInfo &Button) override
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 
 			return TheManager.ShowConsole;
 		}
 		
-		bool OnJoystickAxis(const InputCenter::JoystickAxisInfo &Axis)
+		bool OnJoystickAxis(const InputCenter::JoystickAxisInfo &Axis) override
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 
 			return TheManager.ShowConsole;
 		}
 
-		bool OnTouch(const InputCenter::TouchInfo &Touch)
+		bool OnTouch(const InputCenter::TouchInfo &Touch) override
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 
 			return TheManager.ShowConsole;
 		}
 
-		void OnJoystickConnected(uint8 Index) {}
+		void OnJoystickConnected(uint8 Index) override {}
 
-		void OnJoystickDisconnected(uint8 Index) {}
+		void OnJoystickDisconnected(uint8 Index) override {}
 
-		void OnMouseMove(const Vector3 &Position) {}
+		void OnMouseMove(const Vector2 &Position) override {}
 
-		void OnCharacterEntered(wchar_t Character)
+		void OnCharacterEntered(wchar_t Character) override
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 
@@ -191,7 +196,7 @@ namespace FlamingTorch
 			}
 		}
 
-		void OnAction(const InputCenter::Action &TheAction)
+		void OnAction(const InputCenter::Action &TheAction) override
 		{
 			RendererManager &TheManager = RendererManager::Instance;
 
@@ -208,8 +213,8 @@ namespace FlamingTorch
 			}
 		}
 
-		void OnGainFocus() {}
-		void OnLoseFocus() {}
+		void OnGainFocus() override {}
+		void OnLoseFocus() override {}
 	};
 
 	RendererHandle Renderer::Handle() const
@@ -267,6 +272,7 @@ namespace FlamingTorch
 		DisposablePointer<Renderer> *Info = &Renderers[Out];
 		Info->Reset(new Renderer(new DEFAULT_RENDERER_IMPLEMENTATION()));
 		Info->Get()->HandleValue = Out;
+		Info->Get()->UIRoot.Reset(new UIRootWidget());
 
 		Log::Instance.LogInfo(TAG, "Attempting to create a Renderer ('%s'; (%dx%d))", Title, Width, Height);
 
@@ -277,7 +283,7 @@ namespace FlamingTorch
 			return 0;
 		}
 
-		Info->Get()->UI.Reset(new UIManager(Info->Get()));
+		Info->Get()->UIRoot->SetRect(TBRect(0, 0, Info->Get()->Size().x, Info->Get()->Size().y));
 
 		return Out;
 	}
@@ -291,6 +297,7 @@ namespace FlamingTorch
 		DisposablePointer<Renderer> *Info = &Renderers[Out];
 		Info->Reset(new Renderer(new DEFAULT_RENDERER_IMPLEMENTATION()));
 		Info->Get()->HandleValue = Out;
+		Info->Get()->UIRoot.Reset(new UIRootWidget());
 
 		Log::Instance.LogInfo(TAG, "Attempting to create a Renderer (WND: 0x%08x)", StringUtils::PointerString(Window).c_str());
 
@@ -301,7 +308,7 @@ namespace FlamingTorch
 			return 0;
 		}
 
-		Info->Get()->UI.Reset(new UIManager(Info->Get()));
+		Info->Get()->UIRoot->SetRect(TBRect(0, 0, Info->Get()->Size().x, Info->Get()->Size().y));
 
 		return Out;
 	}
@@ -402,6 +409,21 @@ namespace FlamingTorch
 				Renderer->ScenePasses[i]->Unbind(Renderer);
 			}
 		}
+
+		UI->Owner = Renderer;
+
+		TBAnimationManager::Update();
+		Renderer->UIRoot->InvokeProcessStates();
+		Renderer->UIRoot->InvokeProcess();
+
+		UI->BeginPaint(Renderer->Size().x, Renderer->Size().y);
+		Renderer->UIRoot->InvokePaint(TBWidget::PaintProps());
+		UI->EndPaint();
+
+		if (TBAnimationManager::HasAnimationsRunning())
+			Renderer->UIRoot->Invalidate();
+
+		TBMessageHandler::ProcessMessages();
 
 		//TODO: Optimize this to prevent doing it twice per frame on dev mode?
 		bool PushOrtho = Renderer->MatrixStackSize() == 0;
@@ -514,8 +536,6 @@ namespace FlamingTorch
 		}
 
 		Renderer->Display();
-
-		Renderer->UI->ClearUnusedResources();
 
 		return ReturnValue;
 	}
@@ -688,75 +708,11 @@ namespace FlamingTorch
 		Impl->SetMousePosition(Position);
 	}
 
-	void Renderer::StartClipping(const Rect &_ClippingRect)
+	void Renderer::SetClipRect(const Rect &_ClippingRect)
 	{
 		SpriteCache::Instance.Flush(this);
 
-		//Disabled for now
-		/*
-		FLASSERT(_ClippingRect.Bottom > _ClippingRect.Top, "Expected a larger Bottom coordinate on ClippingRect");
-		FLASSERT(_ClippingRect.Right > _ClippingRect.Left, "Expected a larger Right coordinate on ClippingRect");
-
-		if(_ClippingRect.Bottom <= _ClippingRect.Top || _ClippingRect.Right <= _ClippingRect.Left)
-			return;
-
-		Rect ClippingRect = _ClippingRect;
-
-		//Clip this rect with the previous rect so that we don't actually clip things that don't make sense
-		if(ClippingStack.size())
-		{
-			const Rect &Parent = ClippingStack.back();
-
-			if(ClippingRect.Left < Parent.Left)
-				ClippingRect.Left = Parent.Left;
-
-			if(ClippingRect.Top < Parent.Top)
-				ClippingRect.Top = Parent.Top;
-
-			if(ClippingRect.Right > Parent.Right)
-				ClippingRect.Right = Parent.Right;
-
-			if(ClippingRect.Bottom > Parent.Bottom)
-				ClippingRect.Bottom = Parent.Bottom;
-		}
-
-		//Add this even if invalid, since this way we will be able to FinishClipping with no issues of a missing clipping stack frame
-		ClippingStack.push_back(ClippingRect);
-
-		//Might be entirely out of the parent area, so check again and skip if necessary
-		if(ClippingRect.Bottom <= ClippingRect.Top || ClippingRect.Right <= ClippingRect.Left)
-			return;
-
-		SpriteCache::Instance.Flush(this);
-
-		Impl->StartClipping(ClippingRect);
-		*/
-	}
-
-	void Renderer::FinishClipping()
-	{
-		SpriteCache::Instance.Flush(this);
-
-		//Disabled for now
-		/*
-		SpriteCache::Instance.Flush(this);
-
-		if(!ClippingStack.size())
-			return;
-
-		ClippingStack.pop_back();
-
-		if(ClippingStack.size())
-		{
-			const Rect &ClippingRect = ClippingStack.back();
-
-			Impl->StartClipping(ClippingRect);
-		}
-		else
-		{
-			Impl->FinishClipping();
-		}
-		*/
+		Impl->SetClipRect(_ClippingRect);
 	}
 
 	void Renderer::Clear(uint32 ID)
@@ -978,6 +934,39 @@ namespace FlamingTorch
 #if PROFILER_ENABLED
 		Profiler::Instance.OnFinishFrame.Connect<RendererManager, &RendererManager::OnGetProfilerPackets>(this);
 #endif
+
+		UI.Reset(new UIRenderer());
+
+		if (!tb_core_init(UI.Get(), "/UIResources/language/lng_en.tb.txt"))
+		{
+			Log::Instance.LogErr(TAG, "Failed to initialize TurboBadger, UI is not available!");
+		}
+
+		TBWidgetsAnimationManager::Init();
+
+		if (!g_tb_skin->Load("/UIResources/default_skin/skin.tb.txt"))
+		{
+			Log::Instance.LogErr(TAG, "Failed to load the TurboBadger Skin, UI is not available!");
+		}
+
+		register_freetype_font_renderer();
+
+		g_font_manager->AddFontInfo("/DefaultFont.ttf", "DefaultFont");
+
+		// Set the default font description for widgets to one of the fonts we just added
+		TBFontDescription fd;
+		fd.SetID(TBIDC("DefaultFont"));
+		fd.SetSize(g_tb_skin->GetDimensionConverter()->DpToPx(14));
+		g_font_manager->SetDefaultFontDescription(fd);
+
+		// Create the font now.
+		TBFontFace *font = g_font_manager->CreateFontFace(g_font_manager->GetDefaultFontDescription());
+
+		UIInput.Reset(new UIInputProcessor());
+		UIInput->Name = "GUIPROCESSOR";
+
+		RendererManager::Instance.Input.AddContext(UIInput);
+		RendererManager::Instance.Input.EnableContext(MakeStringID(UIInput->Name));
 	}
 
 	void RendererManager::Shutdown(uint32 Priority)
@@ -999,6 +988,12 @@ namespace FlamingTorch
 #if PROFILER_ENABLED
 		Profiler::Instance.OnFinishFrame.Disconnect<RendererManager, &RendererManager::OnGetProfilerPackets>(this);
 #endif
+
+		Input.DisableContext(MakeStringID("GUIPROCESSOR"));
+
+		TBWidgetsAnimationManager::Shutdown();
+
+		tb_core_shutdown();
 	}
 
 	void RendererManager::Update(uint32 Priority)

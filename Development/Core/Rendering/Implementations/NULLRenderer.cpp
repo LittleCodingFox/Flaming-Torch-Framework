@@ -64,9 +64,7 @@ namespace FlamingTorch
 
 	void NULLRendererImplementation::RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End) {}
 
-	void NULLRendererImplementation::StartClipping(const Rect &ClippingRect) {}
-
-	void NULLRendererImplementation::FinishClipping() {}
+	void NULLRendererImplementation::SetClipRect(const Rect &ClippingRect) {}
 
 	void NULLRendererImplementation::Clear(uint32 Buffers) {}
 

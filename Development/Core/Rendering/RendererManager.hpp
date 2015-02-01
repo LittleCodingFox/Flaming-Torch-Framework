@@ -16,9 +16,6 @@ private:
 	
 	RendererMap Renderers;
 
-public:
-	bool ShowProfiler, ShowConsole;
-
 private:
 	std::string ConsoleText;
 	uint32 ConsoleCursorPosition, ConsoleLogOffset;
@@ -27,13 +24,21 @@ private:
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
+
+	DisposablePointer<UIInputProcessor> UIInput;
 public:
+
+	static RendererManager Instance;
+
 	/*!
 	*	The Input Processor
 	*/
 	InputCenter Input;
 
-	static RendererManager Instance;
+	bool ShowProfiler;
+	bool ShowConsole;
+
+	DisposablePointer<UIRenderer> UI;
 
 	/*!
 	*	Add a renderer whose window will be created

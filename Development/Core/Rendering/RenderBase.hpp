@@ -8,7 +8,6 @@
 
 class InputCenter;
 class Texture;
-class UIManager;
 
 #define JOYSTICKDEADZONE 30
 
@@ -122,6 +121,7 @@ class IRendererImplementation;
 #include "RendererCapabilities.hpp"
 #include "ScenePass.hpp"
 #include "FrameBufferCreationInfo.hpp"
+#include "UI.hpp"
 #include "Renderer.hpp"
 #include "RendererManager.hpp"
 #include "IRendererImplementation.hpp"

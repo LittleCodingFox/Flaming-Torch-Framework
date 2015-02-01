@@ -28,6 +28,23 @@ extern "C"
 #	include <json/json.h>
 #	include <ft2build.h>
 #	include FT_FREETYPE_H
+#	if USE_GRAPHICS
+#		include <tb/tb_renderer.h>
+#		include <tb/tb_system.h>
+#		include <tb/tb_bitmap_fragment.h>
+#		include <tb/tb_skin.h>
+#		include <tb/tb_widgets.h>
+#		include <tb/tb_msg.h>
+#		include <tb/tb_font_renderer.h>
+#		include <tb/tb_widgets_reader.h>
+#		include <tb/tb_widgets.h>
+#		include <tb/tb_window.h>
+#		include <tb/animation/tb_widget_animation.h>
+#		include <tb/renderers/tb_renderer_batcher.h>
+#
+using namespace tb;
+#
+#	endif
 namespace FlamingTorch
 {
 #	undef DrawText
@@ -75,19 +92,6 @@ namespace FlamingTorch
 #
 #	include "Rendering/Sprite.hpp"
 #	include "Rendering/TiledMap.hpp"
-#
-#	include "Rendering/UI/UIUtils.hpp"
-#	include "Rendering/UI/UIElement.hpp"
-#	include "Rendering/UI/UIText.hpp"
-#	include "Rendering/UI/UIGroup.hpp"
-#	include "Rendering/UI/UIHorizontalGroup.hpp"
-#	include "Rendering/UI/UIVerticalGroup.hpp"
-#	include "Rendering/UI/UISprite.hpp"
-#	include "Rendering/UI/UIButton.hpp"
-#	include "Rendering/UI/UITextBox.hpp"
-#	include "Rendering/UI/UITextComposer.hpp"
-#	include "Rendering/UI/UILayout.hpp"
-#	include "Rendering/UI/UIManager.hpp"
 #
 #	include "Game/Console.hpp"
 #	include "Game/ObjectModel.hpp"

@@ -8,6 +8,7 @@ GamePreInitialize = function()
 	g_RendererManager:Register()
 	g_Console:Register()
 	g_ObjectModel:Register()
+	g_Future:Register()
 	
 	if PlatformInfo.PlatformType() == PlatformInfo.PlatformType_PC then
 		g_FileSystemWatcher:Register()
@@ -59,15 +60,6 @@ GameInitialize = function(Arguments)
 	LogoEntity = LogoEntityDef:Clone()
 	
 	g_ObjectModel:RegisterObject(LogoEntity)
-	
-	local SkinStream = g_PackageManager:GetFile(MakeStringID("/UIThemes/PolyCode/"), MakeStringID("skin.cfg"))
-	local SkinConfig = GenericConfig()
-	
-	if SkinStream == nil or not SkinConfig:DeSerialize(SkinStream) then
-		return false
-	end
-	
-	Renderer.UI.Skin = SkinConfig
 	
 	GameResize(Renderer, Renderer.Size.x, Renderer.Size.y)
 

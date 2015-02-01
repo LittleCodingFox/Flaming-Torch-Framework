@@ -116,7 +116,7 @@ namespace FlamingTorch
 		PROFILE("RenderTextUtils RenderText", StatTypes::Rendering);
 
 		//TheRenderer->RenderText(String, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
-		TheRenderer->UI->DrawText(String, Params);
+		//TheRenderer->UI->DrawText(String, Params);
 	}
 
 	Rect RenderTextUtils::MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params)

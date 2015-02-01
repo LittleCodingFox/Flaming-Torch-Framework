@@ -28,6 +28,7 @@ solution "Dependencies"
 			"Source/luabind/**.cpp",
 			"Source/SimpleFileWatcher/**.c",
 			"Source/SimpleFileWatcher/**.cpp",
+			"Source/tb/**.cpp",
 			"Source/tinyxml/**.c",
 			"Source/tinyxml/**.cpp",
 			"Source/webp/**.c",

@@ -251,7 +251,7 @@ namespace FlamingTorch
 
 		Character = L'\0';
 
-		MouseMovement = Vector3(MousePosition.x, MousePosition.y, (float)MouseWheel);
+		MouseMovement = Vector2(MousePosition.x, MousePosition.y);
 
 		MouseWheel = 0;
 
@@ -460,18 +460,18 @@ namespace FlamingTorch
 
 		InputConsumedValue = false;
 
-		Vector3 NewFrameMouseMovement(MousePosition.x, MousePosition.y, (f32)MouseWheel);
+		Vector2 NewFrameMouseMovement(MousePosition.x, MousePosition.y);
 		MouseMovement = NewFrameMouseMovement - MouseMovement;
 
-		if(MouseMovement != Vector3(0, 0, 0))
+		if(MouseMovement != Vector2() || MouseWheel != 0)
 		{
 			for(uint32 i = 0; i < EnabledContexts.size(); i++)
 			{
 				Contexts[EnabledContexts[i]]->OnMouseMove(MouseMovement);
 
-				if(MouseMovement.z != 0 && !InputConsumed())
+				if(MouseWheel != 0 && !InputConsumed())
 				{
-					FireAction(MouseMovement.z);
+					FireAction(MouseWheel);
 				}
 			}
 		}

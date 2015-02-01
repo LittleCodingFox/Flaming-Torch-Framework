@@ -31,12 +31,16 @@ private:
 	Matrix4x4 LastWorldMatrix, LastProjectionMatrix;
 	Rect LastViewport;
 
-	std::vector<Rect> ClippingStack;
 	std::vector<DisposablePointer<ScenePass> > ScenePasses;
 
 	VertexBufferHandle LineBuffer;
+
 public:
+	static Vector4 DefaultClearColor;
+
 	Camera RenderCamera;
+
+	DisposablePointer<UIRootWidget> UIRoot;
 
 	/*!
 	*	OnFrameStarted should be used to do stuff before we render the main frame such as clearing the screen
@@ -57,11 +61,6 @@ public:
 	*	Might be removed later on
 	*/
 	SimpleDelegate::SimpleDelegate<Renderer *> OnResourcesReloaded;
-
-	/*!
-	*	UI Manager
-	*/
-	DisposablePointer<UIManager> UI;
 
 	/*!
 	*	\return the Renderer Handle
@@ -190,17 +189,12 @@ public:
 	void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End);
 
 	/*!
-	*	Start clipping the rendering to a rectangle
+	*	Clips the rendering to a rectangle
 	*	\param ClippingRect the clipping rectangle
 	*	\note The orientation is always from bottom left and up, so e.g., to clip a 100x100 rect on the top right of a screen of 1000x1000px size, you must pass a rect of (900, 1000, 1000, 900)
 	*	Therefore to keep up with the usual orientation we use (+y is "down" in the window), we emulate that orientation by flipping the top/bottom fields of Rect. So now the previous example becomes (900, 1000, 900, 1000)
 	*/
-	void StartClipping(const Rect &ClippingRect);
-
-	/*!
-	*	Finishes clipping the rendering from a rectangle
-	*/
-	void FinishClipping();
+	void SetClipRect(const Rect &ClippingRect);
 
 	/*!
 	*	Clear a render buffer
