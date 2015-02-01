@@ -22,4 +22,7 @@ FTGF depends on the following libraries which are already included:
  - [OpenAL](http://en.wikipedia.org/wiki/OpenAL) LGPL License
  - [libsndfile](http://en.wikipedia.org/wiki/Libsndfile) LGPL License
  - [TurboBadger](https://github.com/fruxo/turbobadger) zlib License
+
+FTGF also depends on the following libraries which are *not* included:
+
  - [SDL](http://www.libsdl.org) zlib License
