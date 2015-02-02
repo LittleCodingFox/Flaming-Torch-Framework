@@ -363,8 +363,16 @@ namespace FlamingTorch
 		return TB_KEY_UNDEFINED;
 	}
 
+	bool IsTBSpecialKey(const InputCenter::KeyInfo &Key)
+	{
+		return TB_KEY_UNDEFINED != MapTBSpecialKey(Key);
+	}
+
 	uint32 MapTBKey(const InputCenter::KeyInfo &Key)
 	{
+		if (IsTBSpecialKey(Key))
+			return 0;
+
 		//TODO
 
 		return 0;
@@ -416,7 +424,7 @@ namespace FlamingTorch
 		//TODO
 		if (Touch.JustPressed)
 		{
-			UIRoot->InvokePointerDown((int32)Touch.Position.x, (int32)Touch.Position.y, 1, CurrentModifiers, true);
+			Consume = UIRoot->InvokePointerDown((int32)Touch.Position.x, (int32)Touch.Position.y, 1, CurrentModifiers, true);
 		}
 		else if (Touch.Pressed)
 		{
@@ -430,7 +438,7 @@ namespace FlamingTorch
 
 		if (Touch.JustReleased)
 		{
-			UIRoot->InvokePointerUp((int32)Touch.Position.x, (int32)Touch.Position.y, CurrentModifiers, true);
+			Consume = UIRoot->InvokePointerUp((int32)Touch.Position.x, (int32)Touch.Position.y, CurrentModifiers, true);
 		}
 
 		if (Consume)
@@ -446,18 +454,23 @@ namespace FlamingTorch
 		RendererManager &TheManager = RendererManager::Instance;
 		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
 
-		bool Consumed = false;
+		bool Consume = false;
 
 		if (Button.JustPressed)
 		{
-			UIRoot->InvokePointerDown((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, 1, CurrentModifiers, false);
+			Consume = UIRoot->InvokePointerDown((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, 1, CurrentModifiers, false);
 		}
 		else if (Button.Pressed)
 		{
 		}
 		else if (Button.JustReleased)
 		{
-			UIRoot->InvokePointerUp((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, CurrentModifiers, false);
+			Consume = UIRoot->InvokePointerUp((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, CurrentModifiers, false);
+		}
+
+		if (Consume)
+		{
+			TheManager.Input.ConsumeInput();
 		}
 
 		return TheManager.Input.InputConsumed();
@@ -518,8 +531,22 @@ namespace FlamingTorch
 		RendererManager &TheManager = RendererManager::Instance;
 		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
 
-		UIRoot->InvokeKey(Character, TB_KEY_UNDEFINED, TB_MODIFIER_NONE, true);
-		UIRoot->InvokeKey(Character, TB_KEY_UNDEFINED, TB_MODIFIER_NONE, false);
+		SPECIAL_KEY Special = TB_KEY_UNDEFINED;
+
+		switch (Character)
+		{
+		case 8: //Backspace
+			Special = TB_KEY_BACKSPACE;
+			Character = 0;
+
+			break;
+		}
+
+		//Special Keys trigger their effect twice for some reason
+		if (Character != 0)
+			UIRoot->InvokeKey(Character, Special, TB_MODIFIER_NONE, true);
+
+		UIRoot->InvokeKey(Character, Special, TB_MODIFIER_NONE, false);
 	}
 
 	void UIInputProcessor::OnAction(const InputCenter::Action &TheAction)
