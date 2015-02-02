@@ -540,6 +540,11 @@ namespace FlamingTorch
 			Character = 0;
 
 			break;
+		case 13: //Return
+			Special = TB_KEY_ENTER;
+			Character = 0;
+
+			break;
 		}
 
 		//Special Keys trigger their effect twice for some reason
