@@ -477,7 +477,7 @@ namespace FlamingTorch
 			TheClickCounter.ClickTimer = GameClockTimeNoPause();
 
 			//For debugging
-			//Log::Instance.LogInfo("UIInputProcessor", "Found Mouse Down from UI, ClickCounter Count: %d", TheClickCounter.Count);
+			//Log::Instance.LogInfo("UIInputProcessor", "Found Touch Down from UI, ClickCounter for touch TOUCH_%s count is %d", Touch.NameAsString().c_str(), TheClickCounter.Count);
 
 			Consume = UIRoot->InvokePointerDown((int32)Touch.Position.x, (int32)Touch.Position.y, TheClickCounter.Count, CurrentModifiers, true);
 		}
@@ -523,7 +523,7 @@ namespace FlamingTorch
 			TheClickCounter.ClickTimer = GameClockTimeNoPause();
 
 			//For debugging
-			//Log::Instance.LogInfo("UIInputProcessor", "Found Mouse Down from UI, ClickCounter Count: %d", TheClickCounter.Count);
+			//Log::Instance.LogInfo("UIInputProcessor", "Found Mouse Down from UI, ClickCounter for button MOUSEBUTTON_%s count is %d", Button.NameAsString().c_str(), TheClickCounter.Count);
 
 			Consume = UIRoot->InvokePointerDown((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, TheClickCounter.Count, CurrentModifiers, false);
 		}
