@@ -1035,7 +1035,6 @@ namespace FlamingTorch
 			luabind::class_<Path>("Path")
 				.def(luabind::constructor<>())
 				.def(luabind::constructor<const std::string &>())
-				.def(luabind::constructor<const std::string &, const std::string &>())
 				.property("FullPath", &Path::FullPath)
 				.property("Extension", &Path::Extension)
 				.def_readwrite("Directory", &Path::Directory)
@@ -1710,19 +1709,10 @@ namespace FlamingTorch
 			//ResourceManager
 			luabind::class_<ResourceManager, SubSystem>("ResourceManager")
 #if USE_GRAPHICS
-				.def("GetFont", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const std::string &))&ResourceManager::GetFont)
 				.def("GetFont", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFont)
-				.def("GetFontFromPackage", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const std::string &, const std::string &))&ResourceManager::GetFontFromPackage)
-				.def("GetFontFromPackage", (DisposablePointer<Font>(ResourceManager::*)(Renderer *, const Path &))&ResourceManager::GetFontFromPackage)
 #endif
-				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &))&ResourceManager::GetTexture)
 				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTexture)
-				.def("GetTextureFromPackage", (DisposablePointer<Texture> (ResourceManager::*)(const std::string &, const std::string &))&ResourceManager::GetTextureFromPackage)
-				.def("GetTextureFromPackage", (DisposablePointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTextureFromPackage)
-				.def("GetTexturePack", (DisposablePointer<TexturePacker>(ResourceManager::*)(const std::string &, GenericConfig *))&ResourceManager::GetTexturePack)
 				.def("GetTexturePack", (DisposablePointer<TexturePacker>(ResourceManager::*)(const Path &, GenericConfig *))&ResourceManager::GetTexturePack)
-				.def("GetTexturePackFromPackage", (DisposablePointer<TexturePacker>(ResourceManager::*)(const std::string &, const std::string &, GenericConfig *))&ResourceManager::GetTexturePackFromPackage)
-				.def("GetTexturePackFromPackage", (DisposablePointer<TexturePacker>(ResourceManager::*)(const Path &, GenericConfig *))&ResourceManager::GetTexturePackFromPackage)
 				.def("PrepareResourcesReload", &ResourceManager::PrepareResourceReload)
 				.def("ReloadResources", &ResourceManager::ReloadResources)
 				.def("Cleanup", &ResourceManager::Cleanup)

@@ -90,5 +90,11 @@ public:
 	*	Gets the amount of renderers we already are managing
 	*/
 	uint32 RendererCount() const;
+
+	/*!
+	*	Loads the UI Skin from a Filename
+	*	\param FileName the filename to load from
+	*/
+	void LoadUISkin(const Path &FileName);
 };
 #endif

@@ -78,32 +78,13 @@ namespace FlamingTorch
 	{
 	}
 
-	Path::Path(const std::string &_Directory, const std::string &_BaseName)
-	{
-		std::string PathName = Normalize(_Directory + PathSeparator + _BaseName);
-
-		int32 DirectorySeparator = PathName.rfind(Path::PathSeparator);
-
-		if(DirectorySeparator == -1)
-		{
-			BaseName = PathName;
-		}
-		else
-		{
-			Directory = PathName.substr(0, DirectorySeparator + 1);
-
-			if(DirectorySeparator + 1 < (int32)PathName.length())
-				BaseName = PathName.substr(DirectorySeparator + 1);
-		}
-	}
-
-	Path::Path(const std::string &_PathName)
+	Path::Path(const char *_PathName)
 	{
 		std::string PathName = Normalize(_PathName);
 
 		int32 DirectorySeparator = PathName.rfind(Path::PathSeparator);
 
-		if(DirectorySeparator == -1)
+		if (DirectorySeparator == -1)
 		{
 			BaseName = PathName;
 		}
@@ -111,9 +92,13 @@ namespace FlamingTorch
 		{
 			Directory = PathName.substr(0, DirectorySeparator + 1);
 
-			if(DirectorySeparator + 1 < (int32)PathName.length())
+			if (DirectorySeparator + 1 < (int32)PathName.length())
 				BaseName = PathName.substr(DirectorySeparator + 1);
 		}
+	}
+
+	Path::Path(const std::string &PathName) : Path(PathName.c_str())
+	{
 	}
 
 	std::string Path::FullPath() const
@@ -137,10 +122,10 @@ namespace FlamingTorch
 
 		if(Index != std::string::npos)
 		{
-			return Path(Directory, BaseName.substr(0, Index + 1) + NewExtension);
+			return Path((Directory + BaseName.substr(0, Index + 1) + NewExtension).c_str());
 		}
 
-		return Path(Directory, BaseName + "." + NewExtension);
+		return Path((Directory + BaseName + "." + NewExtension).c_str());
 	}
 
 	Path Path::StripExtension() const
@@ -149,7 +134,7 @@ namespace FlamingTorch
 
 		if(Index != std::string::npos)
 		{
-			return Path(Directory, BaseName.substr(0, Index));
+			return Path((Directory + BaseName.substr(0, Index)).c_str());
 		}
 
 		return *this;
@@ -339,7 +324,7 @@ namespace FlamingTorch
 
     bool FileSystemUtils::CopyDirectory(const std::string &_From, const std::string &_To, bool Recursive)
     {
-		std::string From = Path(_From).FullPath(), To = Path(_To).FullPath();
+		std::string From = Path(_From.c_str()).FullPath(), To = Path(_To.c_str()).FullPath();
 
 		if(From == To)
             return false;
@@ -373,7 +358,7 @@ namespace FlamingTorch
             
             if(!Out.Open(OutFileName, StreamFlags::Write))
             {
-				std::string DirectoryName = Path(OutFileName).Directory;
+				std::string DirectoryName = Path(OutFileName.c_str()).Directory;
                 
                 std::vector<std::string> MissingDirectories = StringUtils::Split(DirectoryName.substr(To.length() + 1), '/');
                 
@@ -630,14 +615,14 @@ namespace FlamingTorch
 			if(Log::Instance.FolderName.length())
 			{
 				ActualStorageDirectory += "/" + Log::Instance.FolderName;
-				ActualStorageDirectory = Path(ActualStorageDirectory).FullPath();
+				ActualStorageDirectory = Path(ActualStorageDirectory.c_str()).FullPath();
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			}
 			else if(GameInterface::Instance.Get())
 			{
 				ActualStorageDirectory += "/" + GameInterface::Instance->GameName() + "_files";
-				ActualStorageDirectory = Path(ActualStorageDirectory).FullPath();
+				ActualStorageDirectory = Path(ActualStorageDirectory.c_str()).FullPath();
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			}
@@ -882,6 +867,16 @@ namespace FlamingTorch
 		return Data;
 	}
 
+	DisposablePointer<Stream> FileStream::FromPath(const Path &ThePath, uint8 Flags)
+	{
+		DisposablePointer<FileStream> Out(new FileStream);
+
+		if (!Out->Open(ThePath, Flags))
+			return DisposablePointer<FileStream>();
+
+		return Out;
+	}
+
 	FileStream::FileStream() : Handle(NULL), _Length(0), _Position(0), IsBasic(false) {}
 
 	FileStream::~FileStream()
@@ -889,11 +884,11 @@ namespace FlamingTorch
 		Close(); 
 	}
 
-	bool FileStream::Open(const std::string &_name, uint8 Flags)
+	bool FileStream::Open(const Path &ThePath, uint8 Flags)
 	{
-		FLASSERT(_name.length(), "Invalid Filename!");
+		FLASSERT(ThePath.FullPath().length(), "Invalid Filename!");
 
-		std::string name = Path(_name).FullPath();
+		std::string name = ThePath.FullPath();
 
 		Close();
 

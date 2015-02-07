@@ -13,8 +13,6 @@ GamePreInitialize = function()
 	if PlatformInfo.PlatformType() == PlatformInfo.PlatformType_PC then
 		g_FileSystemWatcher:Register()
 	end
-	
-	Game.DevelopmentBuild = true
 
 	return true
 end
@@ -26,6 +24,8 @@ GameInitialize = function(Arguments)
 			
 			g_Console:GetVariable("r_drawuirects").UintValue = 1
 			g_Console:GetVariable("r_drawuifocuszones").UintValue = 1
+		elseif Arguments[i] == "-dev" then
+			Game.DevelopmentBuild = true
 		end
 	end
 	

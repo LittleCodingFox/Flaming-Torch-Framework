@@ -18,10 +18,7 @@ namespace FlamingTorch
 
 	bool DefaultProject::Initialize(int32 argc, char **argv)
 	{
-		if (!LoadPackage("Content/Default.package"))
-			return false;
-
-		if (!LoadPackage("Content/Game.package"))
+		if (!LoadPackage(FileSystemUtils::ResourcesDirectory() + "/Content/Game.package"))
 			return false;
 
 		for (int32 i = 1; i < argc; i++)
@@ -47,7 +44,7 @@ namespace FlamingTorch
 
 		Renderer *TheRenderer = CreateRenderer(Options);
 
-		DisposablePointer<Texture> LogoTexture = ResourceManager::Instance.GetTextureFromPackage("/", "torch_small.png");
+		DisposablePointer<Texture> LogoTexture = ResourceManager::Instance.GetTexture("/torch_small.png");
 
 		if (LogoTexture.Get() == NULL)
 			return false;
@@ -67,14 +64,6 @@ namespace FlamingTorch
 		LogoEntity = LogoEntityDef->Clone();
 
 		ObjectModelManager::Instance.RegisterObject(LogoEntity);
-
-		DisposablePointer<Stream> SkinStream = PackageFileSystemManager::Instance.GetFile(MakeStringID("/UIThemes/PolyCode/"), MakeStringID("skin.cfg"));
-		DisposablePointer<GenericConfig> SkinConfig(new GenericConfig());
-
-		if (SkinStream.Get() == NULL || !SkinConfig->DeSerialize(SkinStream))
-			return false;
-
-		TheRenderer->UI->SetSkin(SkinConfig);
 
 		OnResize(TheRenderer, (uint32)TheRenderer->Size().x, (uint32)TheRenderer->Size().y);
 

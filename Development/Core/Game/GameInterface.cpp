@@ -99,6 +99,45 @@ namespace FlamingTorch
 			PlatformInfo::ResolutionOverrideHeight = OverrideHeight;
 		}
 
+		Log::Instance.Register();
+		PackageFileSystemManager::Instance.Register();
+
+		InitSubsystems();
+
+		if (!LoadPackage(FileSystemUtils::ResourcesDirectory() + "/Content/Default.package"))
+		{
+			Log::Instance.LogErr(TAG, "Failed to perform basic initialization, quitting...");
+
+			Instance.Dispose();
+
+			DeInitSubsystems();
+
+			return 1;
+		}
+
+		GameClock::Instance.Register();
+		FPSCounter::Instance.Register();
+		ResourceManager::Instance.Register();
+		Console::Instance.Register();
+		ObjectModelManager::Instance.Register();
+		LuaScriptManager::Instance.Register();
+		Future::Instance.Register();
+		Profiler::Instance.Register();
+
+#if USE_SOUND
+		SoundManager::Instance.Register();
+#endif
+
+#if !FLPLATFORM_MOBILE
+		FileSystemWatcher::Instance.Register();
+#endif
+
+#if USE_GRAPHICS
+		RendererManager::Instance.Register();
+#endif
+
+		InitSubsystems();
+
 		return 0;
 	}
 
@@ -231,18 +270,6 @@ namespace FlamingTorch
 			TheRenderer->SetViewport(0, 0, TheRenderer->Size().x, TheRenderer->Size().y);
 		}
 
-		/*
-		{
-			PROFILE("Update UI", StatTypes::Rendering);
-			TheRenderer->UI->Update();
-		}
-
-		{
-			PROFILE("Render UI", StatTypes::Rendering);
-			TheRenderer->UI->Draw();
-		}
-		*/
-
 		static std::stringstream str;
 
 		if(!!Console::Instance.GetVariable("r_drawrenderstats") && Console::Instance.GetVariable("r_drawrenderstats")->UIntValue != 0)
@@ -282,7 +309,7 @@ namespace FlamingTorch
 			{
 				TriedLoadLogo = true;
 
-				Logo = ResourceManager::Instance.GetTextureFromPackage("/", "torch_small.png");
+				Logo = ResourceManager::Instance.GetTexture("/torch_small.png");
 			}
 
 			if(Logo.Get())
@@ -316,9 +343,10 @@ namespace FlamingTorch
 
 	int32 NativeGameInterface::Run(int32 argc, char **argv)
 	{
-		GameInterface::Run(argc, argv);
+		int32 Result = GameInterface::Run(argc, argv);
 
-		InitSubsystems();
+		if (Result != 0)
+			return Result;
 
 		if(!Initialize(argc, argv))
 		{
@@ -432,24 +460,14 @@ namespace FlamingTorch
 
 	int32 ScriptedGameInterface::Run(int32 argc, char **argv)
 	{
-		GameInterface::Run(argc, argv);
-		PackageFileSystemManager::Instance.Register();
+		int32 Result = GameInterface::Run(argc, argv);
 
-		InitSubsystems();
-
-		std::string DefaultPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Default.package";
+		if (Result != 0)
+			return Result;
 
 		std::string ConfigurationPackageFileName = FileSystemUtils::ResourcesDirectory() + "/Content/Configuration.package";
 
-		if (!LoadPackage(DefaultPackageFileName))
-		{
-			Instance.Dispose();
-
-			DeInitSubsystems();
-
-			return 1;
-		}
-		else if (!LoadPackage(ConfigurationPackageFileName))
+		if (!LoadPackage(ConfigurationPackageFileName))
 		{
 			Instance.Dispose();
 
@@ -547,10 +565,6 @@ namespace FlamingTorch
 			}
 		}
 
-		LuaScriptManager::Instance.Register();
-
-		InitSubsystems();
-
 		{
 			LuaLib *Libs[] = {
 				&FrameworkLib::Instance,
@@ -583,7 +597,6 @@ namespace FlamingTorch
 
 			luabind::object Globals = luabind::globals(ScriptInstance->State);
 
-			PreInitFunction = Globals["GamePreInitialize"];
 			InitFunction = Globals["GameInitialize"];
 			DeInitFunction = Globals["GameDeInitialize"];
 			OnFixedUpdateFunction = Globals["GameFixedUpdate"];
@@ -597,45 +610,6 @@ namespace FlamingTorch
 		}
 
 		bool Success = false;
-
-		if (!PreInitFunction)
-		{
-			LuaScriptManager::Instance.LogError("Failed to find script 'GamePreInitialize' function");
-
-			Instance.Dispose();
-
-			DeInitSubsystems();
-
-			return 1;
-		}
-
-		try
-		{
-			Success = ProtectedLuaCast<bool>(PreInitFunction());
-		}
-		catch (std::exception &)
-		{
-			Instance.Dispose();
-
-			DeInitSubsystems();
-
-			return 1;
-		}
-
-		if (!Success)
-		{
-			LuaScriptManager::Instance.LogError("GamePreInitialize failed");
-
-			Instance.Dispose();
-
-			DeInitSubsystems();
-
-			return 1;
-		}
-
-		InitSubsystems();
-
-		Success = false;
 
 		if (!InitFunction)
 		{

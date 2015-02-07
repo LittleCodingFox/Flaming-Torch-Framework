@@ -11,7 +11,7 @@ namespace FlamingTorch
 		if(DefaultFont)
 			return true;
 
-		DefaultFont = ResourceManager::Instance.GetFontFromPackage(TheRenderer, "/", FileName);
+		DefaultFont = ResourceManager::Instance.GetFont(TheRenderer, "/" + FileName);
 
 		if(!DefaultFont)
 		{

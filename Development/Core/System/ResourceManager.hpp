@@ -26,20 +26,11 @@ public:
 	static bool IsSameTexture(Texture *Self, Texture *Other);
 	static DisposablePointer<Texture> InvalidTexture;
 
-	DisposablePointer<Texture> GetTexture(const std::string &FileName);
 	DisposablePointer<Texture> GetTexture(const Path &ThePath);
-	DisposablePointer<Texture> GetTextureFromPackage(const std::string &Directory, const std::string &FileName);
-	DisposablePointer<Texture> GetTextureFromPackage(const Path &ThePath);
-	DisposablePointer<TexturePacker> GetTexturePack(const std::string &FileName, GenericConfig *Config);
 	DisposablePointer<TexturePacker> GetTexturePack(const Path &ThePath, GenericConfig *Config);
-	DisposablePointer<TexturePacker> GetTexturePackFromPackage(const std::string &Directory, const std::string &FileName, GenericConfig *Config);
-	DisposablePointer<TexturePacker> GetTexturePackFromPackage(const Path &ThePath, GenericConfig *Config);
 
 #if USE_GRAPHICS
-	DisposablePointer<Font> GetFont(Renderer *TheRenderer, const std::string &FileName);
 	DisposablePointer<Font> GetFont(Renderer *TheRenderer, const Path &ThePath);
-	DisposablePointer<Font> GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName);
-	DisposablePointer<Font> GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath);
 #endif
 
 	template<typename type>

@@ -16,8 +16,8 @@ public:
 	std::string Directory, BaseName;
 
 	Path();
+	Path(const char *PathName);
 	Path(const std::string &PathName);
-	Path(const std::string &Directory, const std::string &BaseName);
 
 	/*!
 	*	Gets the combined full path as a string
@@ -398,14 +398,24 @@ private:
 	uint64 _Length, _Position;
 	bool IsBasic;
 public:
-	FileStream();
-	~FileStream();
+
 	/*!
-	*	tries to open a file
-	*	\param Name the File Name
+	*	Tries to open a file
+	*	\param ThePath the File Path
 	*	\param Flags one or several of StreamFlags::*
 	*/
-	bool Open(const std::string &Name, uint8 Flags);
+	static DisposablePointer<Stream> FromPath(const Path &ThePath, uint8 Flags);
+
+	FileStream();
+	~FileStream();
+
+	/*!
+	*	Tries to open a file
+	*	\param ThePath the File Path
+	*	\param Flags one or several of StreamFlags::*
+	*/
+	bool Open(const Path &ThePath, uint8 Flags);
+
 	/*!
 	*	Close this file stream
 	*/

@@ -944,10 +944,7 @@ namespace FlamingTorch
 
 		TBWidgetsAnimationManager::Init();
 
-		if (!g_tb_skin->Load("/UIResources/default_skin/skin.tb.txt"))
-		{
-			Log::Instance.LogErr(TAG, "Failed to load the TurboBadger Skin, UI is not available!");
-		}
+		LoadUISkin(Path("/UIResources/default_skin/skin.tb.txt"));
 
 		register_freetype_font_renderer();
 
@@ -1001,6 +998,11 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 
 		SubSystem::Update(Priority);
+	}
+
+	void RendererManager::LoadUISkin(const Path &FileName)
+	{
+		g_tb_skin->Load(FileName.FullPath().c_str());
 	}
 
 	RendererManager::RendererManager() : SubSystem(RENDERERMANAGER_PRIORITY), ShowProfiler(false), ShowConsole(false),

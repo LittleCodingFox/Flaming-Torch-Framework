@@ -52,141 +52,47 @@ namespace FlamingTorch
 		Cleanup();
 	}
 
-	DisposablePointer<Texture> ResourceManager::GetTexture(const std::string &FileName)
-	{
-		if(!WasStarted)
-		{
-			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
-
-			return DisposablePointer<Texture>();
-		}
-
-		StringID RealName = MakeStringID(FileName);
-		TextureMap::iterator it =
-			Textures.find(RealName);
-
-		if(it == Textures.end() || it->second.Get() == NULL)
-		{
-			Log::Instance.LogDebug(TAG, "Loading Texture '%s' (H: '0x%08x').", FileName.c_str(),
-				RealName);
-
-			DisposablePointer<Texture> _Texture(new Texture());
-
-			if(!_Texture->FromFile(FileName.c_str()))
-			{
-				Log::Instance.LogErr(TAG, "Failed to load texture '%s' (H: '0x%08x').", FileName.c_str(), RealName);
-
-				return DisposablePointer<Texture>();
-			}
-
-			Textures[RealName] = _Texture;
-
-			return _Texture;
-		}
-
-		return it->second;
-	}
-
 	DisposablePointer<Texture> ResourceManager::GetTexture(const Path &ThePath)
-	{
-		return GetTexture(ThePath.FullPath());
-	}
-
-	DisposablePointer<Texture> ResourceManager::GetTextureFromPackage(const std::string &Directory, const std::string &FileName)
-	{
-		if(!WasStarted)
-		{
-			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
-
-			return DisposablePointer<Texture>();
-		}
-
-		StringID RealName = MakeStringID("PACKAGE:" + Directory + "_" + FileName);
-		TextureMap::iterator it =
-			Textures.find(RealName);
-
-		if(it == Textures.end() || it->second.Get() == NULL)
-		{
-			Log::Instance.LogDebug(TAG, "Loading Texture from '%s%s' (H: '0x%08x').", Directory.c_str(),
-				FileName.c_str(), RealName);
-
-			DisposablePointer<Texture> _Texture(new Texture());
-
-			if(!_Texture->FromPackage(Directory, FileName))
-			{
-				Log::Instance.LogErr(TAG, "Failed to load texture '%s%s' (H: '0x%08x').", Directory.c_str(),
-					FileName.c_str(), RealName);
-
-				return DisposablePointer<Texture>();
-			}
-
-			Textures[RealName] = _Texture;
-
-			return _Texture;
-		}
-
-		return it->second;
-	}
-
-	DisposablePointer<Texture> ResourceManager::GetTextureFromPackage(const Path &ThePath)
-	{
-		return GetTextureFromPackage(ThePath.Directory, ThePath.BaseName);
-	}
-
-	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const std::string &FileName, GenericConfig *Config)
 	{
 		if (!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return DisposablePointer<TexturePacker>();
+			return DisposablePointer<Texture>();
 		}
 
-		if(!Config)
-			return DisposablePointer<TexturePacker>();
+		std::string FileName = ThePath.FullPath();
+		StringID RealName = MakeStringID(FileName);
+		TextureMap::iterator it = Textures.find(RealName);
 
-		StringID RealName = MakeStringID(FileName + "_" + StringUtils::MakeIntString(Config->CRC()));
-		TexturePackerMap::iterator it =
-			TexturePackers.find(RealName);
-
-		if (it == TexturePackers.end() || it->second.Get() == NULL)
+		if (it == Textures.end() || it->second.Get() == NULL)
 		{
-			Log::Instance.LogDebug(TAG, "Loading Texture Packer '%s' (H: '0x%08x').", FileName.c_str(),
+			Log::Instance.LogDebug(TAG, "Loading Texture '%s' (H: '0x%08x').", FileName.c_str(),
 				RealName);
 
-			DisposablePointer<Texture> In = GetTexture(FileName);
+			DisposablePointer<Texture> _Texture = Texture::CreateFromStream(PackageFileSystemManager::Instance.GetFile(ThePath));
 
-			if(!In)
-				return DisposablePointer<TexturePacker>();
-
-			DisposablePointer<TexturePacker> Packer = TexturePacker::FromConfig(In, *Config);
-
-			if (!Packer.Get())
+			if (!_Texture)
 			{
-				Log::Instance.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", FileName.c_str(), RealName);
+				_Texture = Texture::CreateFromStream(FileStream::FromPath(ThePath, StreamFlags::Read));
 
-				return DisposablePointer<TexturePacker>();
+				if (!_Texture)
+				{
+					Log::Instance.LogErr(TAG, "Failed to load texture '%s' (H: '0x%08x').", FileName.c_str(), RealName);
+
+					return DisposablePointer<Texture>();
+				}
 			}
 
-			TexturePackers[RealName] = Packer;
+			Textures[RealName] = _Texture;
 
-			return Packer;
+			return _Texture;
 		}
 
 		return it->second;
 	}
 
 	DisposablePointer<TexturePacker> ResourceManager::GetTexturePack(const Path &ThePath, GenericConfig *Config)
-	{
-		return GetTexturePack(ThePath.FullPath(), Config);
-	}
-
-	DisposablePointer<TexturePacker> ResourceManager::GetTexturePackFromPackage(const std::string &Directory, const std::string &FileName, GenericConfig *Config)
-	{
-		return GetTexturePackFromPackage(Path(Directory + Path::PathSeparator + FileName), Config);
-	}
-
-	DisposablePointer<TexturePacker> ResourceManager::GetTexturePackFromPackage(const Path &ThePath, GenericConfig *Config)
 	{
 		if (!WasStarted)
 		{
@@ -198,23 +104,22 @@ namespace FlamingTorch
 		if (!Config)
 			return DisposablePointer<TexturePacker>();
 
-		StringID RealName = MakeStringID("PACKAGE:" + ThePath.FullPath() + "_" + StringUtils::MakeIntString(Config->CRC()));
-		TexturePackerMap::iterator it =
-			TexturePackers.find(RealName);
+		StringID RealName = MakeStringID(ThePath.FullPath() + "_" + StringUtils::MakeIntString(Config->CRC()));
+		TexturePackerMap::iterator it = TexturePackers.find(RealName);
 
 		if (it == TexturePackers.end() || it->second.Get() == NULL)
 		{
 			Log::Instance.LogDebug(TAG, "Loading Texture Packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(),
 				RealName);
 
-			DisposablePointer<Texture> In = GetTextureFromPackage(ThePath);
+			DisposablePointer<Texture> In = GetTexture(ThePath);
 
 			if (!In)
 				return DisposablePointer<TexturePacker>();
 
 			DisposablePointer<TexturePacker> Packer = TexturePacker::FromConfig(In, *Config);
 
-			if(!Packer.Get())
+			if (!Packer.Get())
 			{
 				Log::Instance.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(), RealName);
 
@@ -227,65 +132,11 @@ namespace FlamingTorch
 		}
 
 		return it->second;
-
-		DisposablePointer<Texture> In = GetTextureFromPackage(ThePath);
-
-		if (!In)
-			return DisposablePointer<TexturePacker>();
-
-		return TexturePacker::FromConfig(In, *Config);
 	}
 
 #if USE_GRAPHICS
-	DisposablePointer<Font> ResourceManager::GetFont(Renderer *TheRenderer, const std::string &FileName)
-	{
-		if(!WasStarted)
-		{
-			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
-
-			return DisposablePointer<Font>();
-		}
-
-		StringID RealName = MakeStringID(FileName);
-		FontMap::iterator it = Fonts.find(RealName);
-
-		if(it == Fonts.end() || it->second.Get() == NULL)
-		{
-			Log::Instance.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
-
-			DisposablePointer<FileStream> TheStream(new FileStream());
-
-			if(!TheStream->Open(FileName, StreamFlags::Read))
-			{
-				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
-
-				return DisposablePointer<Font>();
-			}
-
-			DisposablePointer<Font> Out(new Font());
-
-			if(!Out->FromStream(TheStream))
-			{
-				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", FileName.c_str(), RealName);
-
-				return DisposablePointer<Font>();
-			}
-
-			Fonts[RealName] = Out;
-
-			return Out;
-		}
-
-		return it->second;
-	}
-
 	DisposablePointer<Font> ResourceManager::GetFont(Renderer *TheRenderer, const Path &ThePath)
 	{
-		return GetFont(TheRenderer, ThePath.FullPath());
-	}
-
-	DisposablePointer<Font> ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const std::string &Directory, const std::string &FileName)
-	{
 		if(!WasStarted)
 		{
 			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
@@ -293,27 +144,32 @@ namespace FlamingTorch
 			return DisposablePointer<Font>();
 		}
 
-		StringID RealName = MakeStringID("PACKAGE:" + Directory + "_" + FileName);
+		StringID RealName = MakeStringID(ThePath.FullPath());
 		FontMap::iterator it = Fonts.find(RealName);
 
 		if(it == Fonts.end() || it->second.Get() == NULL)
 		{
-			Log::Instance.LogDebug(TAG, "Loading a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
+			Log::Instance.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
-			DisposablePointer<Stream> TheStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Directory), MakeStringID(FileName));
+			DisposablePointer<FileStream> TheStream = PackageFileSystemManager::Instance.GetFile(ThePath);
 
-			if(!TheStream.Get())
+			if (!TheStream.Get())
 			{
-				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
+				TheStream = FileStream::FromPath(ThePath, StreamFlags::Read);
 
-				return DisposablePointer<Font>();
+				if (!TheStream.Get())
+				{
+					Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
+
+					return DisposablePointer<Font>();
+				}
 			}
 
 			DisposablePointer<Font> Out(new Font());
 
 			if(!Out->FromStream(TheStream))
 			{
-				Log::Instance.LogErr(TAG, "Failed to load a font '%s%s' (H: 0x%08x)", Directory.c_str(), FileName.c_str(), RealName);
+				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
 				return DisposablePointer<Font>();
 			}
@@ -325,12 +181,6 @@ namespace FlamingTorch
 
 		return it->second;
 	}
-
-	DisposablePointer<Font> ResourceManager::GetFontFromPackage(Renderer *TheRenderer, const Path &ThePath)
-	{
-		return GetFontFromPackage(TheRenderer, ThePath.Directory, ThePath.BaseName);
-	}
-
 #endif
 
 	void ResourceManager::PrepareResourceReload()

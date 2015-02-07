@@ -395,7 +395,7 @@ namespace FlamingTorch
 
 			for(uint32 i = 0; i < Options.PackageDirectoriesValue.size(); i++)
 			{
-				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTextureFromPackage(Options.PackageDirectoriesValue[i], TileSet.UniqueTilesetTextureName + ".png");
+				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(Options.PackageDirectoriesValue[i] + "/" + TileSet.UniqueTilesetTextureName + ".png");
 
 				if(TileSet.UniqueTilesetTexture.Get())
 				{
