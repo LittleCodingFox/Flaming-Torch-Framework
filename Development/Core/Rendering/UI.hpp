@@ -44,6 +44,18 @@ public:
 class UIInputProcessor : public InputCenter::Context
 {
 public:
+	struct ClickCounter
+	{
+		uint32 Count;
+		uint64 ClickTimer;
+
+		ClickCounter() : Count(0), ClickTimer(GameClockTimeNoPause()) {}
+	};
+
+	typedef std::map<uint8, ClickCounter> MouseClickMap;
+	
+	MouseClickMap MouseClicks;
+
 	MODIFIER_KEYS CurrentModifiers;
 
 	UIInputProcessor();

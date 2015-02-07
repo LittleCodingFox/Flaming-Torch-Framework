@@ -16,8 +16,6 @@ namespace tb
 
 	TBImageLoader *TBImageLoader::CreateFromFile(const char *Name)
 	{
-		static uint64 Counter = 0;
-
 		DisposablePointer<Stream> In = PackageFileSystemManager::Instance.GetFile(Path(Name));
 
 		if (!In.Get())
@@ -26,7 +24,7 @@ namespace tb
 
 			if (!In.AsDerived<FileStream>()->Open(Name, StreamFlags::Read))
 			{
-				Log::Instance.LogInfo("TBImageLoader", "Failed to load image '%s'", Name);
+				Log::Instance.LogErr("TBImageLoader", "Failed to load image '%s'", Name);
 
 				return nullptr;
 			}
@@ -36,7 +34,7 @@ namespace tb
 
 		if (!Buffer.Get())
 		{
-			Log::Instance.LogInfo("TBImageLoader", "Failed to load image '%s'", Name);
+			Log::Instance.LogErr("TBImageLoader", "Failed to load image '%s'", Name);
 
 			return nullptr;
 		}
@@ -44,17 +42,6 @@ namespace tb
 		FTGImageLoader *Out = new FTGImageLoader();
 
 		Out->Buffer = Buffer;
-
-		Log::Instance.LogInfo("TBImageLoader", "Loaded image '%s' (%lld total)", Name, ++Counter);
-
-		FILE *OutFile = fopen("loadedtb.txt", "a+");
-
-		if (!OutFile)
-			return Out;
-
-		fprintf(OutFile, "%s\n", Name);
-		
-		fclose(OutFile);
 
 		return Out;
 	}
@@ -474,14 +461,25 @@ namespace FlamingTorch
 	{
 		RendererManager &TheManager = RendererManager::Instance;
 		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+		ClickCounter &TheClickCounter = MouseClicks[Touch.Index];
 
-		//TODO: Figure out if pointer was consumed
 		bool Consume = false;
 
 		//TODO
 		if (Touch.JustPressed)
 		{
-			Consume = UIRoot->InvokePointerDown((int32)Touch.Position.x, (int32)Touch.Position.y, 1, CurrentModifiers, true);
+			if (GameClockDiffNoPause(TheClickCounter.ClickTimer) > 600)
+			{
+				TheClickCounter.Count = 0;
+			}
+
+			TheClickCounter.Count++;
+			TheClickCounter.ClickTimer = GameClockTimeNoPause();
+
+			//For debugging
+			//Log::Instance.LogInfo("UIInputProcessor", "Found Mouse Down from UI, ClickCounter Count: %d", TheClickCounter.Count);
+
+			Consume = UIRoot->InvokePointerDown((int32)Touch.Position.x, (int32)Touch.Position.y, TheClickCounter.Count, CurrentModifiers, true);
 		}
 		else if (Touch.Pressed)
 		{
@@ -510,12 +508,24 @@ namespace FlamingTorch
 	{
 		RendererManager &TheManager = RendererManager::Instance;
 		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+		ClickCounter &TheClickCounter = MouseClicks[Button.Name];
 
 		bool Consume = false;
 
 		if (Button.JustPressed)
 		{
-			Consume = UIRoot->InvokePointerDown((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, 1, CurrentModifiers, false);
+			if (GameClockDiffNoPause(TheClickCounter.ClickTimer) > 600)
+			{
+				TheClickCounter.Count = 0;
+			}
+
+			TheClickCounter.Count++;
+			TheClickCounter.ClickTimer = GameClockTimeNoPause();
+
+			//For debugging
+			//Log::Instance.LogInfo("UIInputProcessor", "Found Mouse Down from UI, ClickCounter Count: %d", TheClickCounter.Count);
+
+			Consume = UIRoot->InvokePointerDown((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, TheClickCounter.Count, CurrentModifiers, false);
 		}
 		else if (Button.Pressed)
 		{
