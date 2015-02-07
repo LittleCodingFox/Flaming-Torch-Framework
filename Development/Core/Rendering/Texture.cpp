@@ -994,8 +994,17 @@ namespace FlamingTorch
 	void Texture::Bind()
 	{
 #if USE_GRAPHICS
+		GET_OWNER_IF_NOT_VALID();
+
 		if (Owner)
+		{
+			if (HandleValue == INVALID_FTGHANDLE && Buffer.Get())
+			{
+				UpdateData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
+			}
+
 			Owner->BindTexture(HandleValue);
+		}
 #endif
 	}
 

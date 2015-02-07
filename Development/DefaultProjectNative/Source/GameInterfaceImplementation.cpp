@@ -32,9 +32,12 @@ namespace FlamingTorch
 				Console::Instance.GetVariable("r_drawuirects")->UIntValue = 1;
 				Console::Instance.GetVariable("r_drawuifocuszones")->UIntValue = 1;
 			}
+			else if (Argument == "-dev")
+			{
+				DevelopmentBuild = true;
+			}
 		}
 
-		DevelopmentBuild = true;
 
 		RenderCreateOptions Options;
 		Options.Title = GameName();

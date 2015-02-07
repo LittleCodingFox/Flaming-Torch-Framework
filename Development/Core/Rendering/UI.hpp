@@ -29,6 +29,7 @@ class UIRenderer : public TBRendererBatcher
 public:
 	Renderer *Owner;
 	VertexBufferHandle VertexHandle;
+	bool FirstBatch; //For Debugging
 
 	UIRenderer();
 	virtual void BeginPaint(int render_target_w, int render_target_h) override;

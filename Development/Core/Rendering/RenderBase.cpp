@@ -411,6 +411,7 @@ namespace FlamingTorch
 		}
 
 		UI->Owner = Renderer;
+		UI->FirstBatch = true;
 
 		TBAnimationManager::Update();
 		Renderer->UIRoot->InvokeProcessStates();
@@ -1002,7 +1003,8 @@ namespace FlamingTorch
 
 	void RendererManager::LoadUISkin(const Path &FileName)
 	{
-		g_tb_skin->Load(FileName.FullPath().c_str());
+		if (!g_tb_skin->Load(FileName.FullPath().c_str()))
+			Log::Instance.LogErr(TAG, "Failed to load skin '%s'", FileName.FullPath().c_str());
 	}
 
 	RendererManager::RendererManager() : SubSystem(RENDERERMANAGER_PRIORITY), ShowProfiler(false), ShowConsole(false),

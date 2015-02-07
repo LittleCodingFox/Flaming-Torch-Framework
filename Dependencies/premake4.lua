@@ -13,7 +13,6 @@ solution "Dependencies"
 		})
 		
 		files {
-			"Headers/**.hpp",
 			"Source/base64/**.c",
 			"Source/base64/**.cpp",
 			"Source/enet/**.c",

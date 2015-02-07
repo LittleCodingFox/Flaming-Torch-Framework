@@ -16,6 +16,8 @@ namespace tb
 
 	TBImageLoader *TBImageLoader::CreateFromFile(const char *Name)
 	{
+		static uint64 Counter = 0;
+
 		DisposablePointer<Stream> In = PackageFileSystemManager::Instance.GetFile(Path(Name));
 
 		if (!In.Get())
@@ -23,17 +25,36 @@ namespace tb
 			In.Reset(new FileStream());
 
 			if (!In.AsDerived<FileStream>()->Open(Name, StreamFlags::Read))
+			{
+				Log::Instance.LogInfo("TBImageLoader", "Failed to load image '%s'", Name);
+
 				return nullptr;
+			}
 		}
 
 		DisposablePointer<TextureBuffer> Buffer = TextureBuffer::CreateFromStream(In);
 
 		if (!Buffer.Get())
+		{
+			Log::Instance.LogInfo("TBImageLoader", "Failed to load image '%s'", Name);
+
 			return nullptr;
+		}
 
 		FTGImageLoader *Out = new FTGImageLoader();
 
 		Out->Buffer = Buffer;
+
+		Log::Instance.LogInfo("TBImageLoader", "Loaded image '%s' (%lld total)", Name, ++Counter);
+
+		FILE *OutFile = fopen("loadedtb.txt", "a+");
+
+		if (!OutFile)
+			return Out;
+
+		fprintf(OutFile, "%s\n", Name);
+		
+		fclose(OutFile);
 
 		return Out;
 	}
@@ -67,6 +88,16 @@ namespace tb
 
 		virtual size_t Read(void *buf, size_t elemSize, size_t count)
 		{
+			if (TheStream->Length() - TheStream->Position() < elemSize * count)
+			{
+				size_t Remaining = (size_t)(TheStream->Length() - TheStream->Position()) / elemSize;
+
+				if (Remaining == 0)
+					return 0;
+
+				return TheStream->Read(buf, elemSize, Remaining) ? Remaining : 0;
+			}
+
 			return TheStream->Read(buf, elemSize, count) ? count : 0;
 		}
 	};
@@ -191,6 +222,14 @@ namespace FlamingTorch
 
 	void UIRenderer::RenderBatch(Batch *batch)
 	{
+		//For Debugging
+		/*
+		if (!FirstBatch)
+			return;
+
+		FirstBatch = false;
+		*/
+
 		if (VertexHandle == INVALID_FTGHANDLE)
 		{
 			VertexHandle = Owner->CreateVertexBuffer();
@@ -214,7 +253,20 @@ namespace FlamingTorch
 			VertexData[i].Color.w = batch->vertex[i].a / 255.f;
 		}
 
+		//For Debugging
+		UIVertex FullScreenQuad[6] = {
+			Vector2(), Vector2(), Vector4(1, 1, 1, 1),
+			Vector2(0, Owner->Size().y), Vector2(0, 1), Vector4(1, 1, 1, 1),
+			Owner->Size(), Vector2(1, 1), Vector4(1, 1, 1, 1),
+			Owner->Size(), Vector2(1, 1), Vector4(1, 1, 1, 1),
+			Vector2(Owner->Size().x, 0), Vector2(1, 0), Vector4(1, 1, 1, 1),
+			Vector2(), Vector2(), Vector4(1, 1, 1, 1)
+		};
+
 		Owner->SetVertexBufferData(VertexHandle, VertexDetailsMode::Mixed, UIFormat, sizeof(UIFormat) / sizeof(UIFormat[0]), &VertexData[0], VertexData.size() * sizeof(VertexData[0]));
+
+		//For Debugging
+		//Owner->SetVertexBufferData(VertexHandle, VertexDetailsMode::Mixed, UIFormat, sizeof(UIFormat) / sizeof(UIFormat[0]), &FullScreenQuad[0], sizeof(FullScreenQuad));
 
 		UIBitmap *TheBitmap = (UIBitmap *)batch->bitmap;
 
@@ -227,7 +279,12 @@ namespace FlamingTorch
 			Owner->BindTexture((TextureHandle)INVALID_FTGHANDLE);
 		}
 
+		Owner->SetBlendingMode(BlendingMode::Alpha);
+
 		Owner->RenderVertices(VertexModes::Triangles, VertexHandle, 0, VertexData.size());
+
+		//For Debugging
+		//Owner->RenderVertices(VertexModes::Triangles, VertexHandle, 0, 6);
 	}
 
 	void UIRenderer::SetClipRect(const TBRect &rect)
