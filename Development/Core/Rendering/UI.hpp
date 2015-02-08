@@ -41,6 +41,12 @@ public:
 	virtual void SetClipRect(const TBRect &rect) override;
 };
 
+class UILayout
+{
+public:
+
+};
+
 class UIInputProcessor : public InputCenter::Context
 {
 public:

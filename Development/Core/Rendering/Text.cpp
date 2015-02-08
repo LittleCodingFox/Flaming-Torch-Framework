@@ -364,4 +364,160 @@ namespace FlamingTorch
 	Glyph::Glyph() : Advance(0)
 	{
 	}
+
+#define COPYOFFSET(var, type)\
+	memcpy(&Buffer[Offset], &var, sizeof(type));\
+	\
+	Offset += sizeof(type);
+
+	StringID MakeTextResourceString(uint32 Character, const TextParams &Parameters)
+	{
+		const uint32 Size = sizeof(uint32) + sizeof(TextParams) - sizeof(f32) - sizeof(Vector2);
+		static uint8 Buffer[Size];
+
+		uint32 Offset = 0;
+
+		COPYOFFSET(Character, uint32);
+		COPYOFFSET(Parameters.BorderColorValue, Vector4);
+		COPYOFFSET(Parameters.BorderSizeValue, f32);
+		COPYOFFSET(Parameters.FontSizeValue, uint32);
+		COPYOFFSET(*Parameters.FontValue.Get(), intptr_t);
+		COPYOFFSET(Parameters.SecondaryTextColorValue, Vector4);
+		COPYOFFSET(Parameters.TextColorValue, Vector4);
+
+		return CRC32::Instance.CRC(Buffer, Size);
+	}
+
+	void TextRenderer::ClearUnusedResources()
+	{
+		for (TextResourceMap::iterator it = TextResources.begin(); it != TextResources.end(); it++)
+		{
+			if (it->second.References == 0)
+			{
+				it->second.SourceTexture.Dispose();
+
+				TextResources.erase(it);
+
+				it = TextResources.begin();
+
+				if (it == TextResources.end())
+					break;
+			}
+		}
+
+		for (TextResourceMap::iterator it = TextResources.begin(); it != TextResources.end(); it++)
+		{
+			it->second.References = 0;
+		}
+	}
+
+	void TextRenderer::GetText(const std::string &Text, const TextParams &Parameters)
+	{
+		for (uint32 i = 0; i < Text.size(); i++)
+		{
+			if (Text[i] == ' ' || Text[i] == '\n' || Text[i] == '\r')
+				continue;
+
+			StringID ID = MakeTextResourceString(Text[i], Parameters);
+			TextResourceMap::iterator it = TextResources.find(ID);
+
+			if (it != TextResources.end())
+			{
+				it->second.References++;
+			}
+			else
+			{
+				TextResourceInfo TheResource;
+
+				TheResource.Character = Text[i];
+				TheResource.TextParameters = Parameters;
+				TheResource.References = 1;
+
+				TheResource.Info = const_cast<Font *>(Parameters.FontValue.Get())->LoadGlyph(Text[i], Parameters);
+
+				if (TheResource.Info.Pixels.Get())
+				{
+					TheResource.SourceTexture = Texture::CreateFromBuffer(TheResource.Info.Pixels);
+					TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(TheResource.SourceTexture));
+				}
+
+				TextResources[ID] = TheResource;
+			}
+		}
+	}
+
+	void TextRenderer::DrawText(const std::string &Text, const TextParams &Params)
+	{
+		static Sprite TheSprite;
+
+		TextParams ActualParams = Params.FontValue ? Params : TextParams(Params).Font(RenderTextUtils::DefaultFont);
+
+		DisposablePointer<Font> TheFont = ActualParams.FontValue;
+
+		if (TheFont.Get() == nullptr)
+			return;
+
+		f32 LineSpace = (f32)TheFont->LineSpacing(ActualParams);
+		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', ActualParams).Advance;
+
+		Vector2 Position = Vector2(Params.PositionValue.x, Params.PositionValue.y + Params.FontSizeValue), InitialPosition = Position;
+
+		GetText(Text, ActualParams);
+
+		std::vector<std::string> Lines(StringUtils::Split(StringUtils::Strip(Text, '\r'), '\n'));
+
+		for (uint32 i = 0; i < Lines.size(); i++)
+		{
+			for (uint32 j = 0; j < Lines[i].length(); j++)
+			{
+				switch (Lines[i][j])
+				{
+				case ' ':
+					Position.x = Position.x + SpaceSize;
+
+					break;
+
+				default:
+				{
+					StringID ID = MakeTextResourceString(Lines[i][j], ActualParams);
+					TextResourceMap::iterator it = TextResources.find(ID);
+
+					if (j > 0)
+						Position.x += TheFont->Kerning(Lines[i][j - 1], Lines[i][j], ActualParams);
+
+					if (it != TextResources.end())
+					{
+						TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, -it->second.Info.Bounds.Top));
+						TheSprite.SpriteTexture = it->second.InstanceTexture;
+
+						TheSprite.Draw(Owner);
+
+#if DEBUG_DRAWTEXT
+						if (TheSprite.SpriteTexture.Get())
+						{
+							TheSprite.Options.Scale(Vector2(TheSprite.SpriteTexture->Size())).Color(Vector4(1, 1, 0, 1)).Wireframe(true);
+							TheSprite.SpriteTexture = DisposablePointer<Texture>();
+
+							TheSprite.Draw(Owner);
+
+							TheSprite.Options.Scale(Vector2(1, 1)).Color(Vector4(1, 1, 1, 1)).Wireframe(false);
+						}
+#endif
+
+						Position.x = Position.x + it->second.Info.Advance;
+					}
+					else
+					{
+						Position.x = Position.x + SpaceSize;
+					}
+				}
+
+				break;
+				}
+			}
+
+			Position.x = InitialPosition.x;
+			Position.y += LineSpace;
+		}
+	}
 }

@@ -160,3 +160,40 @@ public:
 	int32 Kerning(uint32 From, uint32 To, const TextParams &Params);
 	Glyph LoadGlyph(uint32 Character, const TextParams &Params);
 };
+
+class TextRenderer
+{
+	friend class RendererManager;
+	friend class Renderer;
+private:
+	struct TextResourceInfo
+	{
+		uint32 Character;
+		TextParams TextParameters;
+		Glyph Info;
+
+		uint32 References;
+
+		DisposablePointer<Texture> SourceTexture, InstanceTexture;
+
+		TextResourceInfo() : References(0), Character(0) {}
+	};
+
+	typedef std::map<StringID, TextResourceInfo> TextResourceMap;
+
+	TextResourceMap TextResources;
+
+	DisposablePointer<TextureGroup> ResourcesGroup;
+
+	Renderer *Owner;
+
+	void ClearUnusedResources();
+	void GetText(const std::string &Text, const TextParams &Parameters);
+public:
+
+	/*!
+	*	\param Text the text string to draw
+	*	\param Params the text parameters
+	*/
+	void DrawText(const std::string &Text, const TextParams &Params);
+};

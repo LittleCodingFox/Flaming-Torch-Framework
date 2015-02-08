@@ -283,7 +283,7 @@ namespace FlamingTorch
 			return 0;
 		}
 
-		Info->Get()->UIRoot->SetRect(TBRect(0, 0, Info->Get()->Size().x, Info->Get()->Size().y));
+		Info->Get()->UIRoot->SetRect(TBRect(0, 0, (int)Info->Get()->Size().x, (int)Info->Get()->Size().y));
 
 		return Out;
 	}
@@ -308,7 +308,7 @@ namespace FlamingTorch
 			return 0;
 		}
 
-		Info->Get()->UIRoot->SetRect(TBRect(0, 0, Info->Get()->Size().x, Info->Get()->Size().y));
+		Info->Get()->UIRoot->SetRect(TBRect(0, 0, (int)Info->Get()->Size().x, (int)Info->Get()->Size().y));
 
 		return Out;
 	}
@@ -417,7 +417,7 @@ namespace FlamingTorch
 		Renderer->UIRoot->InvokeProcessStates();
 		Renderer->UIRoot->InvokeProcess();
 
-		UI->BeginPaint(Renderer->Size().x, Renderer->Size().y);
+		UI->BeginPaint((int)Renderer->Size().x, (int)Renderer->Size().y);
 		Renderer->UIRoot->InvokePaint(TBWidget::PaintProps());
 		UI->EndPaint();
 
@@ -429,7 +429,7 @@ namespace FlamingTorch
 		//TODO: Optimize this to prevent doing it twice per frame on dev mode?
 		bool PushOrtho = Renderer->MatrixStackSize() == 0;
 
-		if(PushOrtho)
+		if (PushOrtho)
 		{
 			Rect ScreenRect(PlatformInfo::RotateScreen(Rect(0, Renderer->Size().x, Renderer->Size().y, 0)));
 
@@ -437,6 +437,32 @@ namespace FlamingTorch
 			Renderer->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(ScreenRect.Left, ScreenRect.Right, ScreenRect.Bottom, ScreenRect.Top, -1, 1));
 			Renderer->SetWorldMatrix(Matrix4x4());
 			Renderer->SetViewport(0, 0, Renderer->Size().x, Renderer->Size().y);
+		}
+
+		static std::stringstream str;
+
+		if (!!Console::Instance.GetVariable("r_drawrenderstats") && Console::Instance.GetVariable("r_drawrenderstats")->UIntValue != 0)
+		{
+			str.str("");
+
+			const RendererFrameStats &Stats = Renderer->FrameStats();
+
+			str << "Renderer: " << Stats.RendererName << " version " << Stats.RendererVersion << " on " << CoreUtils::PlatformString() << "\n" << Stats.RendererCustomMessage << (Stats.RendererCustomMessage.length() ? "\n\n" : "\n");
+			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "/" << Stats.DrawCalls + Stats.SkippedDrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges <<
+				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\n";
+
+			RenderTextUtils::RenderText(Renderer, str.str(), TextParams().FontSize(20).Color(Vector4(1, 1, 1, 1))
+				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
+		}
+
+		if (GameInterface::Instance.Get() && GameInterface::Instance->DevelopmentBuild)
+		{
+			str.str("");
+
+			str << FPSCounter::Instance.FPS() << " / " << 1000.f / FPSCounter::Instance.FPS() << "";
+
+			RenderTextUtils::RenderText(Renderer, str.str(), TextParams().FontSize(10).Color(Vector4(1, 1, 1, 1))
+				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, Renderer->Size().y - 10.0f)));
 		}
 
 #if PROFILER_ENABLED
@@ -582,6 +608,9 @@ namespace FlamingTorch
 		if(Result)
 		{
 			BaseResolutionValue = Size();
+
+			RenderText.Owner = this;
+			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
 		}
 
 		return Result;
@@ -608,6 +637,9 @@ namespace FlamingTorch
 		if(Result)
 		{
 			BaseResolutionValue = Size();
+
+			RenderText.Owner = this;
+			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
 		}
 
 		return Result;
@@ -697,6 +729,8 @@ namespace FlamingTorch
 		SpriteCache::Instance.Flush(this);
 
 		Impl->Display();
+
+		RenderText.ClearUnusedResources();
 	}
 
 	const RendererFrameStats &Renderer::FrameStats() const
@@ -853,7 +887,14 @@ namespace FlamingTorch
 
 	bool Renderer::PollEvent(RendererEvent &Out)
 	{
-		return Impl->PollEvent(Out);
+		bool Result = Impl->PollEvent(Out);
+
+		if (Result && Out.Type == RendererEventType::WindowResized) //Make sure we support resizing of the UI
+		{
+			UIRoot->SetRect(TBRect(0, 0, (int)Size().x, (int)Size().y));
+		}
+
+		return Result;
 	}
 
 	void *Renderer::WindowHandle() const

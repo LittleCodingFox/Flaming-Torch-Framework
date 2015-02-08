@@ -151,7 +151,7 @@ namespace FlamingTorch
 		{
 			Log::Instance.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
-			DisposablePointer<FileStream> TheStream = PackageFileSystemManager::Instance.GetFile(ThePath);
+			DisposablePointer<Stream> TheStream = PackageFileSystemManager::Instance.GetFile(ThePath);
 
 			if (!TheStream.Get())
 			{

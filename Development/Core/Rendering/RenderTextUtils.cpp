@@ -15,10 +15,7 @@ namespace FlamingTorch
 
 		if(!DefaultFont)
 		{
-			DefaultFont = ResourceManager::Instance.GetFont(TheRenderer, FileName);
-
-			if(!DefaultFont)
-				return false;
+			return false;
 		}
 
 		return true;
@@ -115,8 +112,7 @@ namespace FlamingTorch
 	{
 		PROFILE("RenderTextUtils RenderText", StatTypes::Rendering);
 
-		//TheRenderer->RenderText(String, Params.Font(Params.FontValue ? Params.FontValue : DefaultFont));
-		//TheRenderer->UI->DrawText(String, Params);
+		TheRenderer->RenderText.DrawText(String, Params);
 	}
 
 	Rect RenderTextUtils::MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params)

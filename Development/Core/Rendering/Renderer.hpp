@@ -42,6 +42,8 @@ public:
 
 	DisposablePointer<UIRootWidget> UIRoot;
 
+	TextRenderer RenderText;
+
 	/*!
 	*	OnFrameStarted should be used to do stuff before we render the main frame such as clearing the screen
 	*	OnFrameEnded should be used to draw stuff after the frame has ended, such as our HUD
