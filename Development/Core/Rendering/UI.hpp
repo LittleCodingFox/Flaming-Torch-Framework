@@ -27,7 +27,6 @@ public:
 class UIRenderer : public TBRendererBatcher
 {
 public:
-	Renderer *Owner;
 	VertexBufferHandle VertexHandle;
 	bool FirstBatch; //For Debugging
 
@@ -41,7 +40,7 @@ public:
 	virtual void SetClipRect(const TBRect &rect) override;
 };
 
-class UIInputProcessor : public InputCenter::Context
+class UIInputProcessor : public Input::Context
 {
 public:
 	struct ClickCounter
@@ -59,16 +58,16 @@ public:
 	MODIFIER_KEYS CurrentModifiers;
 
 	UIInputProcessor();
-	bool OnKey(const InputCenter::KeyInfo &Key) override;
-	bool OnTouch(const InputCenter::TouchInfo &Touch) override;
-	bool OnMouseButton(const InputCenter::MouseButtonInfo &Button) override;
-	bool OnJoystickButton(const InputCenter::JoystickButtonInfo &Button) override;
-	bool OnJoystickAxis(const InputCenter::JoystickAxisInfo &Axis) override;
+	bool OnKey(const Input::KeyInfo &Key) override;
+	bool OnTouch(const Input::TouchInfo &Touch) override;
+	bool OnMouseButton(const Input::MouseButtonInfo &Button) override;
+	bool OnJoystickButton(const Input::JoystickButtonInfo &Button) override;
+	bool OnJoystickAxis(const Input::JoystickAxisInfo &Axis) override;
 	void OnJoystickConnected(uint8 Index) override;
 	void OnJoystickDisconnected(uint8 Index) override;
 	void OnMouseMove(const Vector2 &Position) override;
-	void OnCharacterEntered(wchar_t Character) override;
-	void OnAction(const InputCenter::Action &TheAction) override;
+	void OnCharacterEntered(uint32 Character) override;
+	void OnAction(const Input::Action &TheAction) override;
 	void OnGainFocus() override;
 	void OnLoseFocus() override;
 };

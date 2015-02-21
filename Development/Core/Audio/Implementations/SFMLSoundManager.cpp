@@ -4,7 +4,7 @@ namespace FlamingTorch
 {
 #	define TAG "SFMLSoundManager"
 
-#	define REPORT_INVALID() Log::Instance.LogWarn(TAG, "%s call to invalid handle", __FUNCTION__);
+#	define REPORT_INVALID() g_Log.LogWarn(TAG, "%s call to invalid handle", __FUNCTION__);
 
 	uint64 SFMLSoundManagerImplementation::SoundCounter = 0, SFMLSoundManagerImplementation::MusicCounter = 0;
 

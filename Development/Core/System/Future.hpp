@@ -21,16 +21,14 @@ class Future : public SubSystem
 
 	Future(const Future &);
 	Future &operator=(const Future &);
-public:
-	typedef void (*FutureFn)(MemoryStream &Arguments);
-
-	static Future Instance;
-
-	Future() : SubSystem(FUTURE_PRIORITY) {}
 
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
+public:
+	typedef void (*FutureFn)(MemoryStream &Arguments);
+
+	Future() : SubSystem(FUTURE_PRIORITY) {}
 
 	/*!
 	*	Registers a function and a memory stream with arguments to be run immediately after the next frame
@@ -51,7 +49,7 @@ public:
 	{
 		if(!WasStarted)
 		{
-			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
+			g_Log.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
 		}
@@ -71,7 +69,7 @@ public:
 	{
 		if(!WasStarted)
 		{
-			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
+			g_Log.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
 		}
@@ -86,3 +84,5 @@ public:
 		Futures.push_back(Future);
 	}
 };
+
+extern Future g_Future;

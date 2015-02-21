@@ -2,45 +2,55 @@
 namespace FlamingTorch
 {
 #	if USE_GRAPHICS
-#	define TAG "InputCenter"
+#	define TAG "Input"
 
-	InputCenter::InfoNameMap InputCenter::KeyInfo::Names;
-	InputCenter::InfoNameMap InputCenter::JoystickAxisInfo::Names;
-	InputCenter::InfoNameMap InputCenter::MouseButtonInfo::Names;
-	InputCenter::InfoNameMap InputCenter::TouchInfo::Names;
+	Input g_Input;
 
-	std::string InputCenter::KeyInfo::NameAsString() const
+	Input::InfoNameMap Input::KeyInfo::Names;
+	Input::InfoNameMap Input::JoystickAxisInfo::Names;
+	Input::InfoNameMap Input::MouseButtonInfo::Names;
+	Input::InfoNameMap Input::TouchInfo::Names;
+
+	std::string Input::KeyInfo::NameAsString() const
 	{
 		return Names.find(Name) != Names.end() ? Names[Name] : "UNKNOWN";
 	}
 
-	std::string InputCenter::TouchInfo::NameAsString() const
+	std::string Input::TouchInfo::NameAsString() const
 	{
 		return Names.find(Index) != Names.end() ? Names[Index] : "UNKNOWN";
 	}
 
-	std::string InputCenter::MouseButtonInfo::NameAsString() const
+	std::string Input::MouseButtonInfo::NameAsString() const
 	{
 		return Names.find(Name) != Names.end() ? Names[Name] : "UNKNOWN";
 	}
 
-	std::string InputCenter::JoystickButtonInfo::NameAsString() const
+	std::string Input::JoystickButtonInfo::NameAsString() const
 	{
 		return "BUTTON" + StringUtils::MakeIntString((uint32)Name);
 	}
 
-	std::string InputCenter::JoystickAxisInfo::NameAsString() const
+	std::string Input::JoystickAxisInfo::NameAsString() const
 	{
 		return Names.find(Name) != Names.end() ? "AXIS" + Names[Name] : "UNKNOWN";
 	}
 
-	InputCenter::InputCenter() : HasFocus(true), InputConsumedValue(false), Character(false), MouseWheel(false)
+	Input::Input() : SubSystem(INPUT_PRIORITY), HasFocus(true), InputConsumedValue(false), Character(0), MouseWheel(false)
 	{
 	}
 
-	void InputCenter::Initialize()
+	void Input::StartUp(uint32 Priority)
 	{
-		for(wchar_t i = 0; i < InputKey::Count; i++)
+		SUBSYSTEM_STARTUP_CHECK();
+
+		SubSystem::StartUp(Priority);
+
+		SUBSYSTEM_PRIORITY_CHECK();
+
+		g_Log.LogInfo(TAG, "Starting Input System");
+
+		for(uint32 i = 0; i < InputKey::Count; i++)
 		{
 			Keys[i].Name = i;
 		}
@@ -219,12 +229,9 @@ namespace FlamingTorch
 		REGISTER_TOUCH_NAME(9);
 	}
 
-	bool InputCenter::Update(Renderer *TheRenderer)
+	void Input::Update(uint32 Priority)
 	{
-		FLASSERT(TheRenderer != NULL, "Invalid renderer passed to an InputCenter!");
-
-		if(TheRenderer == NULL)
-			return false;
+		SUBSYSTEM_PRIORITY_CHECK();
 
 		for(uint32 i = 0; i < InputKey::Count; i++)
 		{
@@ -260,7 +267,7 @@ namespace FlamingTorch
 		bool HasPendingResize = false, HadFocus = HasFocus;
 		Vector2 PendingResizeSize;
 
-		while(TheRenderer->PollEvent(Event))
+		while(g_Renderer.PollEvent(Event))
 		{
 			InputConsumedValue = false;
 
@@ -410,7 +417,10 @@ namespace FlamingTorch
 				break;
 
 			case RendererEventType::WindowClosed:
-				return false;
+				if (g_Game.Get())
+				{
+					g_Game->QuitFlag = true;
+				}
 
 				break;
 
@@ -439,7 +449,7 @@ namespace FlamingTorch
 
 		if(HasPendingResize)
 		{
-			TheRenderer->OnResized(TheRenderer, (uint32)PendingResizeSize.x, (uint32)PendingResizeSize.y);
+			g_Renderer.OnResized((uint32)PendingResizeSize.x, (uint32)PendingResizeSize.y);
 		}
 
 		if(HadFocus != HasFocus)
@@ -596,50 +606,33 @@ namespace FlamingTorch
 				}
 			}
 		}
-
-		InputConsumedValue = false;
-
-		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
-		{
-			if(it->second.Type == InputActionType::Sequence)
-			{
-				if(it->second.CurrentSequenceIndex == it->second.Sequence.size() && it->second.CurrentSequenceIndex > 0)
-				{
-					for(uint32 i = 0; i < EnabledContexts.size(); i++)
-					{
-						Contexts[EnabledContexts[i]]->OnAction(it->second);
-					}
-
-					it->second.CurrentSequenceIndex = 0;
-				}
-				else if(GameClockDiffNoPause(it->second.LastSequenceTime) >= it->second.MaxTimeBetweenSequenceKeyPresses)
-				{
-					it->second.CurrentSequenceIndex = 0;
-				}
-			}
-		}
-
-		return true;
 	}
 
-	void InputCenter::CenterMouse(Renderer *TheRenderer)
+	void Input::Shutdown(uint32 Priority)
 	{
-		TheRenderer->SetMousePosition(TheRenderer->Size() / 2);
+		SUBSYSTEM_PRIORITY_CHECK();
 
-		RendererManager::Instance.Input.MousePosition = TheRenderer->Size() / 2;
+		g_Log.LogInfo(TAG, "Shutting down Input System");
 	}
 
-	bool InputCenter::InputConsumed()
+	void Input::CenterMouse()
+	{
+		g_Renderer.SetMousePosition(g_Renderer.Size() / 2);
+
+		MousePosition = g_Renderer.Size() / 2;
+	}
+
+	bool Input::InputConsumed()
 	{
 		return InputConsumedValue;
 	}
 
-	void InputCenter::ConsumeInput()
+	void Input::ConsumeInput()
 	{
 		InputConsumedValue = true;
 	}
 
-	void InputCenter::RegisterAction(const Action &TheAction)
+	void Input::RegisterAction(const Action &TheAction)
 	{
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
@@ -660,7 +653,7 @@ namespace FlamingTorch
 		Actions[MakeStringID(TheAction.Name)] = TheAction;
 	}
 
-	void InputCenter::UnregisterAction(const std::string &Name)
+	void Input::UnregisterAction(const std::string &Name)
 	{
 		ActionMap::iterator it = Actions.find(MakeStringID(Name));
 
@@ -668,11 +661,11 @@ namespace FlamingTorch
 		{
 			Actions.erase(it);
 
-			Log::Instance.LogDebug(TAG, "Removed action '%s'", Name.c_str());
+			g_Log.LogDebug(TAG, "Removed action '%s'", Name.c_str());
 		}
 	}
 
-	void InputCenter::FireAction(const JoystickAxisInfo &Axis)
+	void Input::FireAction(const JoystickAxisInfo &Axis)
 	{
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
@@ -688,38 +681,10 @@ namespace FlamingTorch
 					return;
 				}
 			}
-			else if(fabs(Axis.Position) >= 0.8f && it->second.Type == InputActionType::Sequence)
-			{
-				if(GameClockDiffNoPause(it->second.LastSequenceTime) >= it->second.MaxTimeBetweenSequenceKeyPresses)
-				{
-					it->second.LastSequenceTime = GameClockTimeNoPause();
-					it->second.CurrentSequenceIndex = 0;
-				}
-				
-				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
-					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::JoystickAxis &&
-					((it->second.Sequence[it->second.CurrentSequenceIndex].PositiveValues && Axis.Position > 0) ||
-					(!it->second.Sequence[it->second.CurrentSequenceIndex].PositiveValues && Axis.Position < 0)))
-				{
-					if(it->second.Sequence[it->second.CurrentSequenceIndex].SecondaryIndex == Axis.Name &&
-						GameClockDiffNoPause(it->second.LastSequenceTime) < it->second.MaxTimeBetweenSequenceKeyPresses)
-					{
-						it->second.CurrentSequenceIndex++;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-					else
-					{
-						it->second.CurrentSequenceIndex = 0;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-
-					return;
-				}
-			}
 		}
 	}
 
-	void InputCenter::FireAction(const JoystickButtonInfo &Button)
+	void Input::FireAction(const JoystickButtonInfo &Button)
 	{
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
@@ -734,36 +699,10 @@ namespace FlamingTorch
 
 				return;
 			}
-			else if(Button.FirstPress && it->second.Type == InputActionType::Sequence)
-			{
-				if(GameClockDiffNoPause(it->second.LastSequenceTime) >= it->second.MaxTimeBetweenSequenceKeyPresses)
-				{
-					it->second.LastSequenceTime = GameClockTimeNoPause();
-					it->second.CurrentSequenceIndex = 0;
-				}
-
-				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
-					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::JoystickButton)
-				{
-					if(it->second.Sequence[it->second.CurrentSequenceIndex].Index == Button.Name &&
-						GameClockDiffNoPause(it->second.LastSequenceTime) < it->second.MaxTimeBetweenSequenceKeyPresses)
-					{
-						it->second.CurrentSequenceIndex++;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-					else
-					{
-						it->second.CurrentSequenceIndex = 0;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-
-					return;
-				}
-			}
 		}
 	}
 
-	void InputCenter::FireAction(const MouseButtonInfo &Button)
+	void Input::FireAction(const MouseButtonInfo &Button)
 	{
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
@@ -776,36 +715,10 @@ namespace FlamingTorch
 
 				return;
 			}
-			else if(Button.FirstPress && it->second.Type == InputActionType::Sequence)
-			{
-				if(GameClockDiffNoPause(it->second.LastSequenceTime) >= it->second.MaxTimeBetweenSequenceKeyPresses)
-				{
-					it->second.LastSequenceTime = GameClockTimeNoPause();
-					it->second.CurrentSequenceIndex = 0;
-				}
-
-				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
-					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::MouseButton)
-				{
-					if(it->second.Sequence[it->second.CurrentSequenceIndex].Index == Button.Name &&
-						GameClockDiffNoPause(it->second.LastSequenceTime) < it->second.MaxTimeBetweenSequenceKeyPresses)
-					{
-						it->second.CurrentSequenceIndex++;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-					else
-					{
-						it->second.CurrentSequenceIndex = 0;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-
-					return;
-				}
-			}
 		}
 	}
 	
-	void InputCenter::FireAction(const TouchInfo &Touch)
+	void Input::FireAction(const TouchInfo &Touch)
 	{
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
@@ -825,7 +738,7 @@ namespace FlamingTorch
 		}
 	}
 
-	void InputCenter::FireAction(f32 MouseScrollDelta)
+	void Input::FireAction(f32 MouseScrollDelta)
 	{
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
@@ -839,37 +752,10 @@ namespace FlamingTorch
 
 				return;
 			}
-			else if(it->second.Type == InputActionType::Sequence)
-			{
-				if(GameClockDiffNoPause(it->second.LastSequenceTime) >= it->second.MaxTimeBetweenSequenceKeyPresses)
-				{
-					it->second.LastSequenceTime = GameClockTimeNoPause();
-					it->second.CurrentSequenceIndex = 0;
-				}
-
-				if(it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
-					it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::MouseScroll)
-				{
-					if(((it->second.Sequence[it->second.CurrentSequenceIndex].PositiveValues && MouseScrollDelta > 0) ||
-						(!it->second.Sequence[it->second.CurrentSequenceIndex].PositiveValues && MouseScrollDelta < 0)) &&
-						GameClockDiffNoPause(it->second.LastSequenceTime) < it->second.MaxTimeBetweenSequenceKeyPresses)
-					{
-						it->second.CurrentSequenceIndex++;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-					else
-					{
-						it->second.CurrentSequenceIndex = 0;
-						it->second.LastSequenceTime = GameClockTimeNoPause();
-					}
-
-					return;
-				}
-			}
 		}
 	}
 
-	void InputCenter::FireAction(const KeyInfo &Key)
+	void Input::FireAction(const KeyInfo &Key)
 	{
 		for(ActionMap::iterator it = Actions.begin(); it != Actions.end(); it++)
 		{
@@ -882,130 +768,87 @@ namespace FlamingTorch
 
 				return;
 			}
-			else if(Key.FirstPress && it->second.Type == InputActionType::Sequence && it->second.CurrentSequenceIndex < it->second.Sequence.size() &&
-				it->second.Sequence[it->second.CurrentSequenceIndex].Type == InputActionType::Keyboard)
-			{
-				if(GameClockDiffNoPause(it->second.LastSequenceTime) >= it->second.MaxTimeBetweenSequenceKeyPresses)
-				{
-					it->second.LastSequenceTime = GameClockTimeNoPause();
-					it->second.CurrentSequenceIndex = 0;
-				}
-
-				if(it->second.Sequence[it->second.CurrentSequenceIndex].Index == Key.Name &&
-					GameClockDiffNoPause(it->second.LastSequenceTime) < it->second.MaxTimeBetweenSequenceKeyPresses)
-				{
-					it->second.CurrentSequenceIndex++;
-					it->second.LastSequenceTime = GameClockTimeNoPause();
-				}
-				else
-				{
-					it->second.CurrentSequenceIndex = 0;
-					it->second.LastSequenceTime = GameClockTimeNoPause();
-				}
-
-				return;
-			}
 		}
 	}
 
-	const InputCenter::Action *const InputCenter::GetAction(StringID Name)
+	const Input::Action *const Input::GetAction(StringID Name)
 	{
 		ActionMap::iterator it = Actions.find(Name);
 
 		return it != Actions.end() ? &it->second : NULL;
 	}
 
-	InputCenter::KeyInfo *InputCenter::Action::Key() const
+	Input::KeyInfo *Input::Action::Key() const
 	{
-		return Type == InputActionType::Keyboard ? &RendererManager::Instance.Input.Keys[Index] : NULL;
+		return Type == InputActionType::Keyboard ? &g_Input.Keys[Index] : NULL;
 	}
 
-	InputCenter::TouchInfo *InputCenter::Action::Touch() const
+	Input::TouchInfo *Input::Action::Touch() const
 	{
 		return (Type == InputActionType::TouchDown || Type == InputActionType::TouchUp || Type == InputActionType::TouchDrag) ?
-			&RendererManager::Instance.Input.Touches[Index] : NULL;
+			&g_Input.Touches[Index] : NULL;
 	}
 
-	InputCenter::MouseButtonInfo *InputCenter::Action::MouseButton() const
+	Input::MouseButtonInfo *Input::Action::MouseButton() const
 	{
-		return Type == InputActionType::MouseButton ? &RendererManager::Instance.Input.MouseButtons[Index] : NULL;
+		return Type == InputActionType::MouseButton ? &g_Input.MouseButtons[Index] : NULL;
 	}
 
-	InputCenter::JoystickButtonInfo *InputCenter::Action::JoystickButton() const
+	Input::JoystickButtonInfo *Input::Action::JoystickButton() const
 	{
-		return Type == InputActionType::JoystickButton ? &RendererManager::Instance.Input.JoystickButtons[Index][SecondaryIndex] : NULL;
+		return Type == InputActionType::JoystickButton ? &g_Input.JoystickButtons[Index][SecondaryIndex] : NULL;
 	}
 
-	InputCenter::JoystickAxisInfo *InputCenter::Action::JoystickAxis() const
+	Input::JoystickAxisInfo *Input::Action::JoystickAxis() const
 	{
-		return Type == InputActionType::JoystickAxis ? &RendererManager::Instance.Input.JoystickAxis[Index][SecondaryIndex] : NULL;
+		return Type == InputActionType::JoystickAxis ? &g_Input.JoystickAxis[Index][SecondaryIndex] : NULL;
 	}
 
-	std::string InputCenter::Action::AsString() const
+	std::string Input::Action::AsString() const
 	{
 		switch(Type)
 		{
 		case InputActionType::Keyboard:
+
 			return Key()->NameAsString();
 
-			break;
-
 		case InputActionType::MouseButton:
+
 			return "MOUSE " + MouseButton()->NameAsString();
 
-			break;
-
 		case InputActionType::JoystickButton:
+
 			return JoystickButton()->NameAsString();
 
-			break;
-
 		case InputActionType::JoystickAxis:
-			return JoystickAxis()->NameAsString() + (PositiveValues ? "+" : "-");
 
-			break;
+			return JoystickAxis()->NameAsString() + (PositiveValues ? "+" : "-");
 
 		case InputActionType::TouchDown:
 		case InputActionType::TouchUp:
 		case InputActionType::TouchDrag:
+
 			return Touch()->NameAsString();
-
-			break;
-
-		case InputActionType::Sequence:
-			{
-				static std::stringstream str;
-				str.str("");
-
-				for(uint32 i = 0; i < Sequence.size(); i++)
-				{
-					str << (i > 0 ? " + " : "") << Sequence[i].AsString();
-				}
-
-				return str.str();
-			}
-
-			break;
 		}
 
 		return "UNKNOWN";
 	}
 
-	const InputCenter::Context *const InputCenter::GetContext(StringID Name)
+	const Input::Context *const Input::GetContext(StringID Name)
 	{
 		ContextMap::iterator it = Contexts.find(Name);
 
 		return it != Contexts.end() ? it->second.Get() : NULL;
 	}
 
-	void InputCenter::AddContext(DisposablePointer<Context> TheContext)
+	void Input::AddContext(DisposablePointer<Context> TheContext)
 	{
 		FLASSERT(TheContext.Get(), "Invalid Context!");
 
 		Contexts[MakeStringID(TheContext->Name)] = TheContext;
 	}
 
-	void InputCenter::EnableContext(StringID Name, bool ToFront)
+	void Input::EnableContext(StringID Name, bool ToFront)
 	{
 		if(Contexts.find(Name) == Contexts.end())
 			return;
@@ -1026,7 +869,7 @@ namespace FlamingTorch
 		}
 	}
 
-	void InputCenter::DisableContext(StringID Name)
+	void Input::DisableContext(StringID Name)
 	{
 		for(uint32 i = 0; i < EnabledContexts.size(); i++)
 		{

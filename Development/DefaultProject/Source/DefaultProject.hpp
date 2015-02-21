@@ -1,29 +1,35 @@
 #ifndef __DEFAULTPROJECT_HPP__
 #define __DEFAULTPROJECT_HPP__
 
-//Lousy Win32 defs...
-#ifdef CreateDirectory
-#undef CreateDirectory
-#endif
-
-#ifdef SetMenu
-#undef SetMenu
-#endif
-
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
-
-#define GAME_WINDOW_WIDTH 960
-#define GAME_WINDOW_HEIGHT 600
 
 namespace FlamingTorch
 {
 #	define TAG "DefaultProject"
 
-	class DefaultProject : public ScriptedGameInterface
+	class DefaultProject : public NativeGameInterface
 	{
 	public:
-		bool Register(lua_State *State) { return true; };
+		std::string GameNameValue;
+
+		DefaultProject();
+		bool Register(lua_State *State);
+		const std::string &GameName() override;
+		int32 FixedUpdateRate() override;
+		void OnFixedUpdate() override;
+		void OnFrameUpdate() override;
+		bool ShouldQuit() override;
+		bool Initialize(int32 argc, char **argv) override;
+		bool DeInitialize() override;
+
+#if USE_GRAPHICS
+		void OnFrameBegin() override;
+		void OnFrameDraw() override;
+		void OnFrameEnd() override;
+		void OnResize(uint32 Width, uint32 Height) override;
+		void OnResourcesReloaded() override;
+#endif
 	};
 };
 

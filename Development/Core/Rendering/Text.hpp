@@ -163,7 +163,6 @@ public:
 
 class TextRenderer
 {
-	friend class RendererManager;
 	friend class Renderer;
 private:
 	struct TextResourceInfo

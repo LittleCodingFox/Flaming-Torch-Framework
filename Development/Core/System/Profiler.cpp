@@ -2,7 +2,7 @@
 namespace FlamingTorch
 {
 #if PROFILER_ENABLED
-	Profiler Profiler::Instance;
+	Profiler g_Profiler;
 
 	void Profiler::StartUp(uint32 Priority)
 	{
@@ -14,7 +14,7 @@ namespace FlamingTorch
 
 		UpdateTimer = GameClockTimeNoPause();
 
-		Log::Instance.LogInfo("Profiler", "Starting Profiler Subsystem");
+		g_Log.LogInfo("Profiler", "Starting Profiler Subsystem");
 	}
 
 	void Profiler::Shutdown(uint32 Priority)
@@ -23,7 +23,7 @@ namespace FlamingTorch
 
 		SubSystem::Shutdown(Priority);
 
-		Log::Instance.LogInfo("Profiler", "Terminating Profiler Subsystem");
+		g_Log.LogInfo("Profiler", "Terminating Profiler Subsystem");
 
 		WasStarted = false;
 
@@ -36,7 +36,7 @@ namespace FlamingTorch
 			str.str("");
 			str << "[" << Profiler::StatTypeString(it->second.Type) << "] " << it->first << " " << it->second.ms << " (" << Average << " avg)";
 
-			Log::Instance.LogInfo("Profiler", str.str().c_str());
+			g_Log.LogInfo("Profiler", str.str().c_str());
 		}
 	}
 
@@ -107,20 +107,20 @@ namespace FlamingTorch
 		return "UNKNOWN";
 	}
 
-	ProfilerFragment::ProfilerFragment(const char *Name, uint32 Type) : Start(GameClock::Instance.CurrentTime()),
+	ProfilerFragment::ProfilerFragment(const char *Name, uint32 Type) : Start(g_Clock.CurrentTime()),
 		NameString(Name), FragmentType(Type) {}
 	ProfilerFragment::~ProfilerFragment()
 	{
-		uint64 CurrentTime = GameClock::Instance.CurrentTime();
+		uint64 CurrentTime = g_Clock.CurrentTime();
 
 		uint64 ms = CurrentTime - Start;
 
-		Profiler::Instance.ReportStat(NameString, FragmentType, ms);
+		g_Profiler.ReportStat(NameString, FragmentType, ms);
 	}
 
 	void ProfilerFragment::ReportPercentage(uint32 Percentage)
 	{
-		uint64 CurrentTime = GameClock::Instance.CurrentTime();
+		uint64 CurrentTime = g_Clock.CurrentTime();
 
 		uint64 ms = CurrentTime - Start;
 
@@ -128,7 +128,7 @@ namespace FlamingTorch
 
 		str.str("");
 		str << NameString << " @ " << Percentage;
-		Profiler::Instance.ReportStat(str.str(), FragmentType, ms);
+		g_Profiler.ReportStat(str.str(), FragmentType, ms);
 	}
 #endif
 }

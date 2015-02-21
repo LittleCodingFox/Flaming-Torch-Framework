@@ -3,14 +3,7 @@ namespace FlamingTorch
 {
 #	define TAG "ResourceManager"
 
-	ResourceManager ResourceManager::Instance;
-
-	DisposablePointer<Texture> ResourceManager::InvalidTexture;
-
-	bool ResourceManager::IsSameTexture(Texture *Self, Texture *Other)
-	{
-		return Self == Other;
-	}
+	ResourceManager g_ResourceManager;
 
 	void ResourceManager::StartUp(uint32 Priority)
 	{
@@ -20,16 +13,14 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAG, "Starting Resource Manager Subsystem");
-
-		InvalidTexture.Reset(new Texture());
+		g_Log.LogInfo(TAG, "Starting Resource Manager Subsystem");
 	}
 
 	void ResourceManager::Shutdown(uint32 Priority)
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAG, "Terminating Resource Manager Subsystem");
+		g_Log.LogInfo(TAG, "Terminating Resource Manager Subsystem");
 
 		SubSystem::Shutdown(Priority);
 
@@ -56,7 +47,7 @@ namespace FlamingTorch
 	{
 		if (!WasStarted)
 		{
-			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
+			g_Log.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return DisposablePointer<Texture>();
 		}
@@ -67,10 +58,10 @@ namespace FlamingTorch
 
 		if (it == Textures.end() || it->second.Get() == NULL)
 		{
-			Log::Instance.LogDebug(TAG, "Loading Texture '%s' (H: '0x%08x').", FileName.c_str(),
+			g_Log.LogDebug(TAG, "Loading Texture '%s' (H: '0x%08x').", FileName.c_str(),
 				RealName);
 
-			DisposablePointer<Texture> _Texture = Texture::CreateFromStream(PackageFileSystemManager::Instance.GetFile(ThePath));
+			DisposablePointer<Texture> _Texture = Texture::CreateFromStream(g_PackageManager.GetFile(ThePath));
 
 			if (!_Texture)
 			{
@@ -78,7 +69,7 @@ namespace FlamingTorch
 
 				if (!_Texture)
 				{
-					Log::Instance.LogErr(TAG, "Failed to load texture '%s' (H: '0x%08x').", FileName.c_str(), RealName);
+					g_Log.LogErr(TAG, "Failed to load texture '%s' (H: '0x%08x').", FileName.c_str(), RealName);
 
 					return DisposablePointer<Texture>();
 				}
@@ -96,7 +87,7 @@ namespace FlamingTorch
 	{
 		if (!WasStarted)
 		{
-			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
+			g_Log.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return DisposablePointer<TexturePacker>();
 		}
@@ -109,7 +100,7 @@ namespace FlamingTorch
 
 		if (it == TexturePackers.end() || it->second.Get() == NULL)
 		{
-			Log::Instance.LogDebug(TAG, "Loading Texture Packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(),
+			g_Log.LogDebug(TAG, "Loading Texture Packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(),
 				RealName);
 
 			DisposablePointer<Texture> In = GetTexture(ThePath);
@@ -121,7 +112,7 @@ namespace FlamingTorch
 
 			if (!Packer.Get())
 			{
-				Log::Instance.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(), RealName);
+				g_Log.LogErr(TAG, "Failed to load texture packer '%s' (H: '0x%08x').", ThePath.FullPath().c_str(), RealName);
 
 				return DisposablePointer<TexturePacker>();
 			}
@@ -135,11 +126,11 @@ namespace FlamingTorch
 	}
 
 #if USE_GRAPHICS
-	DisposablePointer<Font> ResourceManager::GetFont(Renderer *TheRenderer, const Path &ThePath)
+	DisposablePointer<Font> ResourceManager::GetFont(const Path &ThePath)
 	{
 		if(!WasStarted)
 		{
-			Log::Instance.LogErr(TAG, "This Subsystem has not yet been initialized!");
+			g_Log.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
 			return DisposablePointer<Font>();
 		}
@@ -149,9 +140,9 @@ namespace FlamingTorch
 
 		if(it == Fonts.end() || it->second.Get() == NULL)
 		{
-			Log::Instance.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
+			g_Log.LogDebug(TAG, "Loading a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
-			DisposablePointer<Stream> TheStream = PackageFileSystemManager::Instance.GetFile(ThePath);
+			DisposablePointer<Stream> TheStream = g_PackageManager.GetFile(ThePath);
 
 			if (!TheStream.Get())
 			{
@@ -159,7 +150,7 @@ namespace FlamingTorch
 
 				if (!TheStream.Get())
 				{
-					Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
+					g_Log.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
 					return DisposablePointer<Font>();
 				}
@@ -169,7 +160,7 @@ namespace FlamingTorch
 
 			if(!Out->FromStream(TheStream))
 			{
-				Log::Instance.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
+				g_Log.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
 				return DisposablePointer<Font>();
 			}
@@ -231,9 +222,7 @@ namespace FlamingTorch
 		}
 
 #if USE_GRAPHICS
-		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
-
-		TheRenderer->OnResourcesReloaded(TheRenderer);
+		g_Renderer.OnResourcesReloaded();
 #endif
 	}
 
@@ -280,7 +269,7 @@ namespace FlamingTorch
 
 		if(CurrentObjects != TotalObjects)
 		{
-			Log::Instance.LogDebug(TAG, "Cleared %d objects (Prev: %d/Now: %d)", TotalObjects - CurrentObjects, TotalObjects, CurrentObjects);
+			g_Log.LogDebug(TAG, "Cleared %d objects (Prev: %d/Now: %d)", TotalObjects - CurrentObjects, TotalObjects, CurrentObjects);
 		}
 	}
 }

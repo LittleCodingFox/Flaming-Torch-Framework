@@ -25,8 +25,6 @@ public:
 	*/
 	std::string FolderName;
 
-	static Log Instance;
-
 	Log() : SubSystem(LOG_PRIORITY), LogFile(NULL), PrintTime(false) {}
 
 	/*!
@@ -62,3 +60,5 @@ public:
 	void StartUp(uint32 Priority);
 	void Shutdown(uint32 Priority);
 };
+
+extern Log g_Log;

@@ -40,48 +40,12 @@ public:
 	virtual ~ConsoleCommand() {}
 };
 
-class ScriptedConsoleCommand : public ConsoleCommand
-{
-public:
-	luabind::object ScriptedMethod;
-
-	void ScriptedMethodProxy(const std::vector<std::string> &Parameters)
-	{
-		if(!ScriptedMethod)
-			return;
-
-		try
-		{
-			luabind::object ActualParameters = luabind::newtable(GameInterface::Instance.AsDerived<ScriptedGameInterface>()->ScriptInstance.Get()->State);
-
-			for(uint32 i = 0; i < Parameters.size(); i++)
-			{
-				ActualParameters[i + 1] = Parameters[i];
-			}
-
-			ScriptedMethod(ActualParameters);
-		}
-		catch(std::exception &e)
-		{
-			LuaScriptManager::Instance.LogError("Console Command [" + Name + "]: Scripting Error: " + e.what());
-		}
-	}
-
-	ScriptedConsoleCommand()
-	{
-		Method.Connect<ScriptedConsoleCommand, &ScriptedConsoleCommand::ScriptedMethodProxy>(this);
-	}
-};
-
 /*!
 *	Console Subsystem
 *	Used to store game vars and commands
 */
 class Console : public SubSystem
 {
-public:
-	static Console Instance;
-
 private:
 	std::vector<ConsoleVariable> ConsoleVariables;
 	std::vector<DisposablePointer<ConsoleCommand> > ConsoleCommands;
@@ -134,3 +98,5 @@ public:
 	*/
 	void RunConsoleCommand(const std::string &Command);
 };
+
+extern Console g_Console;

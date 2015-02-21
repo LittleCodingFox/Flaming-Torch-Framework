@@ -1,24 +1,29 @@
 #if USE_GRAPHICS
 
-#	define SCENEPASS_END "END"
-
 /*!
-*	Renderer is a rendering class that takes care of windowing and OpenGL Contexts
+*	Renderer is a rendering class that takes care of windowing and graphics
 */
-class Renderer
+class Renderer : public SubSystem
 {
-	friend class RendererManager;
-	friend class InputCenter;
+	friend class Input;
 	friend class Texture;
 	friend class GameInterface;
+	friend class RendererInputProcessor;
+public:
+#if PROFILER_ENABLED
+	Profiler::PacketMap ProfilerPackets;
+
+	void OnGetProfilerPackets(const Profiler::PacketMap &Packets);
+#endif
+
 private:
+	std::string ConsoleText;
+	uint32 ConsoleCursorPosition, ConsoleLogOffset;
+
+	DisposablePointer<UIInputProcessor> UIInput;
+
 	IRendererImplementation *Impl;
 	Vector2 BaseResolutionValue;
-
-	Renderer(IRendererImplementation *_Impl);
-	Renderer(const Renderer &o);
-	Renderer &operator=(const Renderer &o);
-	RendererHandle HandleValue;
 
 	struct MatrixStackElement
 	{
@@ -31,12 +36,29 @@ private:
 	Matrix4x4 LastWorldMatrix, LastProjectionMatrix;
 	Rect LastViewport;
 
-	std::vector<DisposablePointer<ScenePass> > ScenePasses;
-
 	VertexBufferHandle LineBuffer;
 
+	DisposablePointer<UIRenderer> UI;
+
+	Renderer(const Renderer &o);
+	Renderer &operator=(const Renderer &o);
+
+	void StartUp(uint32 Priority);
+	void Shutdown(uint32 Priority);
+	void Update(uint32 Priority);
+
+	VertexBufferHandle CacheVertexBuffer;
+	uint32 CacheBlendingMode;
+	Texture *CacheTexture;
+	uint32 CacheVertexMode;
+	uint8 CacheBuffer[MAX_VERTEX_CACHE_SIZE];
+	std::vector<VertexElementDescriptor> CacheVertexFormat;
+	uint32 CacheIndex;
 public:
 	static Vector4 DefaultClearColor;
+
+	bool ShowProfiler;
+	bool ShowConsole;
 
 	Camera RenderCamera;
 
@@ -48,38 +70,22 @@ public:
 	*	OnFrameStarted should be used to do stuff before we render the main frame such as clearing the screen
 	*	OnFrameEnded should be used to draw stuff after the frame has ended, such as our HUD
 	*	OnFrameDraw should be used for drawing the main content of the frame
-	*	\note the ScenePass might have a hardcoded name of END, which means it will display its contents on the screen afterwards
 	*/
-	SimpleDelegate::SimpleDelegate<Renderer *, const std::string &> OnFrameStarted, OnFrameEnded, OnFrameDraw;
+	SimpleDelegate::SimpleDelegate<> OnFrameStarted, OnFrameEnded, OnFrameDraw;
 
 	/*!
 	*	OnResized should be used to reset your camera and projection matrix
 	*	Parameters are Renderer, Width, Height
 	*/
-	SimpleDelegate::SimpleDelegate<Renderer *, uint32, uint32> OnResized;
+	SimpleDelegate::SimpleDelegate<uint32, uint32> OnResized;
 
 	/*!
 	*	On Resources Reloaded should be used to reset any states that are not usually saved by the renderer
 	*	Might be removed later on
 	*/
-	SimpleDelegate::SimpleDelegate<Renderer *> OnResourcesReloaded;
+	SimpleDelegate::SimpleDelegate<> OnResourcesReloaded;
 
-	/*!
-	*	\return the Renderer Handle
-	*/
-	RendererHandle Handle() const;
-
-	/*!
-	*	Adds a scene pass
-	*	\param Name the name of the scene pass to add
-	*/
-	void AddScenePass(const std::string &Name);
-
-	/*!
-	*	Removes a scene pass
-	*	\param Name the name of the scene pass to remove
-	*/
-	void RemoveScenePass(const std::string &Name);
+	Renderer();
 
 	/*!
 	*	Creates a renderer from a Window Handle
@@ -157,31 +163,6 @@ public:
 	void DestroyVertexBuffer(VertexBufferHandle Handle);
 
 	/*!
-	*	Creates a Frame Buffer
-	*	\param Info the creation info for the buffer
-	*	\return a FrameBufferHandle or INVALID_FTGHANDLE
-	*/
-	FrameBufferHandle CreateFrameBuffer(const FrameBufferCreationInfo &Info);
-
-	/*!
-	*	\param Handle the FrameBufferHandle to bind
-	*	\return whether Handle is valid
-	*/
-	bool IsFrameBufferValid(FrameBufferHandle Handle);
-
-	/*!
-	*	Binds a FrameBuffer for rendering
-	*	\param Handle the FrameBufferHandle to bind
-	*/
-	void BindFrameBuffer(FrameBufferHandle Handle);
-
-	/*!
-	*	Destroys a Frame Buffer
-	*	\param Handle the FrameBufferHandle to destroy
-	*/
-	void DestroyFrameBuffer(FrameBufferHandle Handle);
-
-	/*!
 	*	Render vertices
 	*	\param VertexMode one of VertexModes::*
 	*	\param Buffer is the handle of the Vertex Buffer
@@ -189,6 +170,23 @@ public:
 	*	\param End the ending vertex
 	*/
 	void RenderVertices(uint32 VertexMode, VertexBufferHandle Buffer, uint32 Start, uint32 End);
+
+	/*!
+	*	Render cached vertices
+	*	\param VertexMode one of VertexModes::*
+	*	\param Data the vertex data
+	*	\param DataSize the vertex data size
+	*	\param Format the vertex format
+	*	\param FormatSize the total format elements
+	*	\param ActiveTexture the active texture to be used for rendering
+	*	\param BlendingMode the blending mode to use
+	*/
+	void RenderCachedVertices(uint32 VertexMode, const void *Data, uint32 DataSize, VertexElementDescriptor *Format, uint32 FormatSize, Texture *ActiveTexture, uint32 BlendingMode);
+
+	/*!
+	*	Flushes the cached vertices
+	*/
+	void FlushCachedVertices();
 
 	/*!
 	*	Clips the rendering to a rectangle
@@ -388,5 +386,19 @@ public:
 	*	\param Coordinate the coordinate to scale by the base resolution
 	*/
 	Vector2 ScaleCoordinate(const Vector2 &Coordinate) const;
+
+	/*!
+	*	Requests a frame to be rendered
+	*/
+	void RequestFrame();
+
+	/*!
+	*	Loads the UI Skin from a Filename
+	*	\param FileName the filename to load from
+	*/
+	void LoadUISkin(const Path &FileName);
 };
+
+extern Renderer g_Renderer;
+
 #endif

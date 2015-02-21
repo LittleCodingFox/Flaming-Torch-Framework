@@ -68,31 +68,6 @@ public:
 	void DestroyVertexBuffer(VertexBufferHandle Handle) override;
 
 	/*!
-	*	Creates a Frame Buffer
-	*	\param Info the creation info for the buffer
-	*	\return a FrameBufferHandle or INVALID_FTGHANDLE
-	*/
-	FrameBufferHandle CreateFrameBuffer(const FrameBufferCreationInfo &Info) override;
-
-	/*!
-	*	\param Handle the FrameBufferHandle to bind
-	*	\return whether Handle is valid
-	*/
-	bool IsFrameBufferValid(FrameBufferHandle Handle) override;
-
-	/*!
-	*	Binds a FrameBuffer for rendering
-	*	\param Handle the FrameBufferHandle to bind
-	*/
-	void BindFrameBuffer(FrameBufferHandle Handle) override;
-
-	/*!
-	*	Destroys a Frame Buffer
-	*	\param Handle the FrameBufferHandle to destroy
-	*/
-	void DestroyFrameBuffer(FrameBufferHandle Handle) override;
-
-	/*!
 	*	Render vertices
 	*	\param VertexMode one of VertexModes::*
 	*	\param Buffer is the handle of the Vertex Buffer

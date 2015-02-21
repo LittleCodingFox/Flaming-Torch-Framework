@@ -52,7 +52,7 @@ namespace FlamingTorch
 
 		if(Header.ID != CoreUtils::MakeIntFromBytes('F', 'T', 'T', 'M'))
 		{
-			Log::Instance.LogErr(TAG, "Unable to deserialize a Tiled Map: Invalid ID '%04x', should be '%04x'", Header.ID,
+			g_Log.LogErr(TAG, "Unable to deserialize a Tiled Map: Invalid ID '%04x', should be '%04x'", Header.ID,
 				CoreUtils::MakeIntFromBytes('F', 'T', 'T', 'M'));
 
 			return false;
@@ -60,7 +60,7 @@ namespace FlamingTorch
 
 		if(Header.Version != CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR))
 		{
-			Log::Instance.LogErr(TAG, "Unable to deserialize a tiled map: Invalid Version '%08x': Should be '%08x'", Header.Version,
+			g_Log.LogErr(TAG, "Unable to deserialize a tiled map: Invalid Version '%08x': Should be '%08x'", Header.Version,
 				CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR));
 
 			return false;
@@ -275,7 +275,7 @@ namespace FlamingTorch
 							break;
 
 						default:
-							Log::Instance.LogDebug(TAG, "Unknown Tiled Map Order '%d'", TileOrder);
+							g_Log.LogDebug(TAG, "Unknown Tiled Map Order '%d'", TileOrder);
 
 							break;
 					}
@@ -395,17 +395,17 @@ namespace FlamingTorch
 
 			for(uint32 i = 0; i < Options.PackageDirectoriesValue.size(); i++)
 			{
-				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(Options.PackageDirectoriesValue[i] + "/" + TileSet.UniqueTilesetTextureName + ".png");
+				TileSet.UniqueTilesetTexture = g_ResourceManager.GetTexture(Options.PackageDirectoriesValue[i] + "/" + TileSet.UniqueTilesetTextureName + ".png");
 
 				if(TileSet.UniqueTilesetTexture.Get())
 				{
 					TileSet.UniqueTilesetTexture->SetTextureFiltering(TextureFiltering::Nearest);
 
-					DisposablePointer<Stream> ConfigurationStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(Options.PackageDirectoriesValue[i]), MakeStringID(TileSet.UniqueTilesetTextureName + ".cfg"));
+					DisposablePointer<Stream> ConfigurationStream = g_PackageManager.GetFile(MakeStringID(Options.PackageDirectoriesValue[i]), MakeStringID(TileSet.UniqueTilesetTextureName + ".cfg"));
 
 					if(!ConfigurationStream.Get() || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
 					{
-						Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+						g_Log.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
 
 						TileSet.UniqueTilesetTexture.Dispose();
 
@@ -420,11 +420,11 @@ namespace FlamingTorch
 
 			if(!Found)
 			{
-				TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(TileSet.UniqueTilesetTextureName + ".png");
+				TileSet.UniqueTilesetTexture = g_ResourceManager.GetTexture(TileSet.UniqueTilesetTextureName + ".png");
 
 				if(!TileSet.UniqueTilesetTexture.Get())
 				{
-					Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Texture '%s.png'", TileSet.UniqueTilesetTextureName.c_str());
+					g_Log.LogErr(TAG, "Unable to load Unique Tileset Texture '%s.png'", TileSet.UniqueTilesetTextureName.c_str());
 
 					Texture::KeepData = KeepData;
 
@@ -437,7 +437,7 @@ namespace FlamingTorch
 
 				if(!ConfigurationStream.AsDerived<FileStream>()->Open((TileSet.UniqueTilesetTextureName + ".cfg").c_str(), StreamFlags::Read | StreamFlags::Text) || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
 				{
-					Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+					g_Log.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
 
 					TileSet.UniqueTilesetTexture.Dispose();
 
@@ -447,11 +447,11 @@ namespace FlamingTorch
 		}
 		else
 		{
-			TileSet.UniqueTilesetTexture = ResourceManager::Instance.GetTexture(TileSet.UniqueTilesetTextureName + ".png");
+			TileSet.UniqueTilesetTexture = g_ResourceManager.GetTexture(TileSet.UniqueTilesetTextureName + ".png");
 
 			if(!TileSet.UniqueTilesetTexture.Get())
 			{
-				Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Texture '%s.png'", TileSet.UniqueTilesetTextureName.c_str());
+				g_Log.LogErr(TAG, "Unable to load Unique Tileset Texture '%s.png'", TileSet.UniqueTilesetTextureName.c_str());
 
 				Texture::KeepData = KeepData;
 
@@ -464,7 +464,7 @@ namespace FlamingTorch
 
 			if(!ConfigurationStream.AsDerived<FileStream>()->Open((TileSet.UniqueTilesetTextureName + ".cfg").c_str(), StreamFlags::Read | StreamFlags::Text) || !TileSet.UniqueTilesetConfig.DeSerialize(ConfigurationStream))
 			{
-				Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+				g_Log.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
 
 				TileSet.UniqueTilesetTexture.Dispose();
 
@@ -476,7 +476,7 @@ namespace FlamingTorch
 
 		if(!TileSet.UniqueTilesetTexturePacker.Get())
 		{
-			Log::Instance.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
+			g_Log.LogErr(TAG, "Unable to load Unique Tileset Config '%s.cfg'", TileSet.UniqueTilesetTextureName.c_str());
 
 			TileSet.UniqueTilesetTexture.Dispose();
 
@@ -485,7 +485,7 @@ namespace FlamingTorch
 
 		Texture::KeepData = KeepData;
 
-		ResourceManager::Instance.Cleanup();
+		g_ResourceManager.Cleanup();
 
 		ResourcesInitedValue = true;
 
@@ -501,23 +501,21 @@ namespace FlamingTorch
 		if(!ResourcesInitedValue || Layer >= Layers.size() || Layers[Layer]->Visible == false || Layers[Layer]->Vertices.size() == 0)
 			return;
 
-		SpriteCache::Instance.Flush(Renderer);
-
 		bool DoTranslation = Translation != Vector2() || Scale != Vector2(1, 1);
 
 		if(DoTranslation)
 		{
-			Renderer->PushMatrices();
-			Renderer->SetWorldMatrix(Renderer->WorldMatrix() * Matrix4x4::Scale(Vector4(Scale, 1, 1)) * Matrix4x4::Translate(Vector4(Translation, 0, 1)));
+			g_Renderer.PushMatrices();
+			g_Renderer.SetWorldMatrix(g_Renderer.WorldMatrix() * Matrix4x4::Scale(Vector4(Scale, 1, 1)) * Matrix4x4::Translate(Vector4(Translation, 0, 1)));
 		}
 
-		if(!Renderer->IsVertexBufferHandleValid(TiledMapVertexBuffer))
+		if(!g_Renderer.IsVertexBufferHandleValid(TiledMapVertexBuffer))
 		{
-			TiledMapVertexBuffer = Renderer->CreateVertexBuffer();
+			TiledMapVertexBuffer = g_Renderer.CreateVertexBuffer();
 		}
 
 		//TODO: Optimize this
-		static std::vector<SpriteVertex> Vertices;
+		static std::vector<PosTexCol> Vertices;
 
 		Vertices.resize(Layers[Layer]->Vertices.size());
 
@@ -528,18 +526,18 @@ namespace FlamingTorch
 			Vertices[i].TexCoord = Layers[Layer]->TexCoords[i];
 		}
 
-		Renderer->SetBlendingMode(BlendingMode::Alpha);
-		Renderer->SetVertexBufferData(TiledMapVertexBuffer, VertexDetailsMode::Mixed, SpriteVertexDescriptor, sizeof(SpriteVertexDescriptor) / sizeof(SpriteVertexDescriptor[0]), &Vertices[0], sizeof(SpriteVertex) * Vertices.size());
+		g_Renderer.SetBlendingMode(BlendingMode::Alpha);
+		g_Renderer.SetVertexBufferData(TiledMapVertexBuffer, VertexDetailsMode::Mixed, PosTexColFormat, sizeof(PosTexColFormat) / sizeof(PosTexColFormat[0]), &Vertices[0], sizeof(PosTexCol) * Vertices.size());
 
-		Renderer->BindTexture(TileSet.UniqueTilesetTexture.Get());
+		g_Renderer.BindTexture(TileSet.UniqueTilesetTexture.Get());
 
-		Renderer->RenderVertices(VertexModes::Triangles, TiledMapVertexBuffer, 0, Vertices.size());
+		g_Renderer.RenderVertices(VertexModes::Triangles, TiledMapVertexBuffer, 0, Vertices.size());
 
 		Layers[Layer]->OnLayerDraw(this, Layer, Renderer);
 
 		if(DoTranslation)
 		{
-			Renderer->PopMatrices();
+			g_Renderer.PopMatrices();
 		}
 	}
 

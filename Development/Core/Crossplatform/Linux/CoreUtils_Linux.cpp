@@ -18,7 +18,7 @@ namespace FlamingTorch
 	{
 		std::string ExePath = _ExePath;
 
-		Log::Instance.LogDebug("Core", "Running Program '%s' with arguments '%s' (WD: '%s')", ExePath.c_str(), Parameters.c_str(),
+		g_Log.LogDebug("Core", "Running Program '%s' with arguments '%s' (WD: '%s')", ExePath.c_str(), Parameters.c_str(),
 			WorkingDirectory.c_str());
 
 		std::string CommandString = "\"" + ExePath + "\" " + Parameters;

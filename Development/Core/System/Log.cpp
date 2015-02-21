@@ -10,7 +10,7 @@
 #include <time.h>
 namespace FlamingTorch
 {
-	Log Log::Instance;
+	Log g_Log;
 
 	namespace LoggingLevel
 	{

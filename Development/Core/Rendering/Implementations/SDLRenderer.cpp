@@ -316,17 +316,17 @@ namespace FlamingTorch
 
 	void DumpRendererStats()
 	{
-		Log::Instance.LogInfo(TAG, "GL Info");
-		Log::Instance.LogInfo(TAG, "   Renderer: %s", glGetString(GL_RENDERER));
-		Log::Instance.LogInfo(TAG, "   Vendor: %s", glGetString(GL_VENDOR));
-		Log::Instance.LogInfo(TAG, "   Version: %s", glGetString(GL_VERSION));
+		g_Log.LogInfo(TAG, "GL Info");
+		g_Log.LogInfo(TAG, "   Renderer: %s", glGetString(GL_RENDERER));
+		g_Log.LogInfo(TAG, "   Vendor: %s", glGetString(GL_VENDOR));
+		g_Log.LogInfo(TAG, "   Version: %s", glGetString(GL_VERSION));
 
 		int32 t, t2, t3;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &SDLRendererImplementation::MaximumTextureSize);
 
 		GLCHECK();
 
-		Log::Instance.LogInfo(TAG, "   Max Texture Size: %d", SDLRendererImplementation::MaximumTextureSize);
+		g_Log.LogInfo(TAG, "   Max Texture Size: %d", SDLRendererImplementation::MaximumTextureSize);
 
 		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &t);
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &t2);
@@ -334,13 +334,13 @@ namespace FlamingTorch
 
 		GLCHECK();
 
-		Log::Instance.LogInfo(TAG, "   Max Texture Units: %d (%d vs, %d ps)", t, t3, t2);
+		g_Log.LogInfo(TAG, "   Max Texture Units: %d (%d vs, %d ps)", t, t3, t2);
 
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &t);
 
 		GLCHECK();
 
-		Log::Instance.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
+		g_Log.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
 	}
 
 	SDLRendererImplementation::SDLRendererImplementation() : LastBoundTexture(0), LastBoundVBO(0), 
@@ -375,7 +375,7 @@ namespace FlamingTorch
 		{
 			if (SDL_Init(SDL_INIT_VIDEO) < 0)
 			{
-				Log::Instance.LogErr(TAG, "Failed to initialize video!");
+				g_Log.LogErr(TAG, "Failed to initialize video!");
 
 				return false;
 			}
@@ -388,7 +388,7 @@ namespace FlamingTorch
 
 		if (!Window)
 		{
-			Log::Instance.LogErr(TAG, "Unable to create the rendering window.");
+			g_Log.LogErr(TAG, "Unable to create the rendering window.");
 
 			return false;
 		}
@@ -397,7 +397,7 @@ namespace FlamingTorch
 
 		if (GLContext == NULL)
 		{
-			Log::Instance.LogErr(TAG, "Unable to create the rendering window.");
+			g_Log.LogErr(TAG, "Unable to create the rendering window.");
 
 			SDL_DestroyWindow(Window);
 
@@ -427,7 +427,7 @@ namespace FlamingTorch
 
 				if (GLEW_OK != err)
 				{
-					Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
+					g_Log.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
 						glewGetErrorString(err));
 
 					ExtensionsAvailable = false;
@@ -479,7 +479,7 @@ namespace FlamingTorch
 		{
 			if(SDL_Init(SDL_INIT_VIDEO) < 0)
 			{
-				Log::Instance.LogErr(TAG, "Failed to initialize video!");
+				g_Log.LogErr(TAG, "Failed to initialize video!");
 
 				return false;
 			}
@@ -514,7 +514,7 @@ namespace FlamingTorch
 
 		if (!Window)
 		{
-			Log::Instance.LogErr(TAG, "Unable to create the rendering window.");
+			g_Log.LogErr(TAG, "Unable to create the rendering window.");
 
 			return false;
 		}
@@ -523,7 +523,7 @@ namespace FlamingTorch
 
 		if (GLContext == NULL)
 		{
-			Log::Instance.LogErr(TAG, "Unable to create the rendering window.");
+			g_Log.LogErr(TAG, "Unable to create the rendering window.");
 
 			SDL_DestroyWindow(Window);
 
@@ -553,7 +553,7 @@ namespace FlamingTorch
 
 				if (GLEW_OK != err)
 				{
-					Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
+					g_Log.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
 						glewGetErrorString(err));
 
 					ExtensionsAvailable = false;
@@ -786,14 +786,14 @@ namespace FlamingTorch
 		{
 			if(Elements[i].Offset != LastOffset + LastElementSize)
 			{
-				Log::Instance.LogErr(TAG, "Expected a list of connected Offsets; Offset '%d' is not valid: Should be '%d'", Elements[i].Offset, LastOffset + LastElementSize);
+				g_Log.LogErr(TAG, "Expected a list of connected Offsets; Offset '%d' is not valid: Should be '%d'", Elements[i].Offset, LastOffset + LastElementSize);
 
 				return;
 			}
 
 			if(Elements[i].DataType >= VertexElementDataType::Count)
 			{
-				Log::Instance.LogErr(TAG, "Unknown data type '%d'", Elements[i].DataType);
+				g_Log.LogErr(TAG, "Unknown data type '%d'", Elements[i].DataType);
 
 				return;
 			}
@@ -803,7 +803,7 @@ namespace FlamingTorch
 			case VertexElementType::Position:
 				if(PositionOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for POSITION");
+					g_Log.LogErr(TAG, "Found duplicate element for POSITION");
 
 					return;
 				}
@@ -816,7 +816,7 @@ namespace FlamingTorch
 			case VertexElementType::TexCoord:
 				if(TexCoordOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for TEXCOORD");
+					g_Log.LogErr(TAG, "Found duplicate element for TEXCOORD");
 
 					return;
 				}
@@ -830,7 +830,7 @@ namespace FlamingTorch
 			case VertexElementType::Normal:
 				if(NormalOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for NORMAL");
+					g_Log.LogErr(TAG, "Found duplicate element for NORMAL");
 
 					return;
 				}
@@ -844,7 +844,7 @@ namespace FlamingTorch
 			case VertexElementType::Color:
 				if(ColorOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for COLOR");
+					g_Log.LogErr(TAG, "Found duplicate element for COLOR");
 
 					return;
 				}
@@ -856,7 +856,7 @@ namespace FlamingTorch
 				break;
 
 			default:
-				Log::Instance.LogErr(TAG, "Unknown element type '%d'", Elements[i].Type);
+				g_Log.LogErr(TAG, "Unknown element type '%d'", Elements[i].Type);
 
 				return;
 			}
@@ -867,7 +867,7 @@ namespace FlamingTorch
 
 		if(PositionOffset == -1)
 		{
-			Log::Instance.LogErr(TAG, "Expected a Position in this buffer");
+			g_Log.LogErr(TAG, "Expected a Position in this buffer");
 
 			return;
 		}
@@ -879,14 +879,14 @@ namespace FlamingTorch
 
 		if(VertexSize == 0)
 		{
-			Log::Instance.LogErr(TAG, "Vertex Size is 0");
+			g_Log.LogErr(TAG, "Vertex Size is 0");
 
 			return;
 		}
 
 		if(DataByteSize % VertexSize != 0)
 		{
-			Log::Instance.LogErr(TAG, "Data Byte Size is incompatible with estimated Vertex Size '%d': Not a multiple of Vertex Size.", VertexSize);
+			g_Log.LogErr(TAG, "Data Byte Size is incompatible with estimated Vertex Size '%d': Not a multiple of Vertex Size.", VertexSize);
 
 			return;
 		}
@@ -1126,21 +1126,21 @@ namespace FlamingTorch
 
 		if(it == VertexBuffers.end())
 		{
-			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Buffer", Buffer);
+			g_Log.LogErr(TAG, "Unable to render a buffer '%d': Invalid Buffer", Buffer);
 
 			return;
 		}
 
 		if(VertexMode >= VertexModes::Count)
 		{
-			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Vertex Mode '%d'", Buffer, VertexMode);
+			g_Log.LogErr(TAG, "Unable to render a buffer '%d': Invalid Vertex Mode '%d'", Buffer, VertexMode);
 
 			return;
 		}
 
 		if(End <= Start)
 		{
-			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Start/End Pair '%d, %d'", Buffer, Start, End);
+			g_Log.LogErr(TAG, "Unable to render a buffer '%d': Invalid Start/End Pair '%d, %d'", Buffer, Start, End);
 
 			return;
 		}
@@ -1568,7 +1568,7 @@ namespace FlamingTorch
 	bool SDLRendererImplementation::GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount)
 	{
 #if FLPLATFORM_ANDROID
-		Log::Instance.LogErr(TAG, "Unable to GetTextureData on GLES");
+		g_Log.LogErr(TAG, "Unable to GetTextureData on GLES");
 
 		return false;
 #endif
@@ -1783,7 +1783,7 @@ namespace FlamingTorch
 				{
 					for (uint32 i = 0; i < InputMouseButton::Count; i++)
 					{
-						if (RendererManager::Instance.Input.MouseButtons[i].Pressed)
+						if (g_Input.MouseButtons[i].Pressed)
 						{
 							Out.Type = RendererEventType::TouchDrag;
 							Out.TouchIndex = i;

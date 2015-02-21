@@ -64,7 +64,7 @@ public:
 	/*!
 	*	Last Typed Character
 	*/
-	wchar_t TypedCharacter;
+	uint32 TypedCharacter;
 
 	/*!
 	*	Current Keypress Keycode

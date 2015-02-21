@@ -30,13 +30,13 @@ int main(int argc, char **argv)
 	EnableMinidumps(FLGameName().c_str(), CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
 #endif
 
-	Log::Instance.Register();
+	g_Log.Register();
 
-	Log::Instance.FolderName = FLGameName();
+	g_Log.FolderName = FLGameName();
 
 	InitSubsystems();
 
-	Log::Instance.LogInfo(TAG, "Version %s starting up", CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
+	g_Log.LogInfo(TAG, "Version %s starting up", CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
 
 	for(uint32 i = 1; i < (uint32)argc; i++)
 	{
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 		};
 	};
 
-	Log::Instance.LogInfo(TAG, "Searching PackageData Directories...");
+	g_Log.LogInfo(TAG, "Searching PackageData Directories...");
 
     FileStream ConfigStream;
     GenericConfig Configuration;
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 
     if(!ConfigStream.Open(FileSystemUtils::ResourcesDirectory() + "/Baker.cfg", StreamFlags::Read | StreamFlags::Text) || !Configuration.DeSerialize(&ConfigStream))
     {
-        Log::Instance.LogErr(TAG, "Failed to load Baker.cfg");
+        g_Log.LogErr(TAG, "Failed to load Baker.cfg");
         
         DeInitSubsystems();
         
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
         if(Pieces.size() != 2)
             continue;
         
-        Log::Instance.LogInfo(TAG, "Added Map Folder '%s' => '%s'", Pieces[0].c_str(), Pieces[1].c_str());
+        g_Log.LogInfo(TAG, "Added Map Folder '%s' => '%s'", Pieces[0].c_str(), Pieces[1].c_str());
         
         MapDirectories.push_back(std::pair<std::string, std::string>(Pieces[0], Pieces[1]));
     };
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         if(Pieces.size() != 2)
             continue;
         
-        Log::Instance.LogInfo(TAG, "Added Texture Packing Folder '%s' => '%s'", Pieces[0].c_str(), Pieces[1].c_str());
+        g_Log.LogInfo(TAG, "Added Texture Packing Folder '%s' => '%s'", Pieces[0].c_str(), Pieces[1].c_str());
         
         TexturePackDirectories.push_back(std::pair<std::string, std::string>(Pieces[0], Pieces[1]));
     };
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 
 	for(GenericConfig::Section::ValueMap::iterator it = ResourceDirectoriesSection.Values.begin(); it != ResourceDirectoriesSection.Values.end(); it++)
     {
-		Log::Instance.LogInfo(TAG, "Added Resource Directory '%s'", it->second.Content.c_str());
+		g_Log.LogInfo(TAG, "Added Resource Directory '%s'", it->second.Content.c_str());
 
 		ResourceDirectories.push_back(it->second.Content);
 	};
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	std::string TexturePackerPath = Configuration.GetString("Tools", "TexturePacker", "../../Binaries/TexturePacker/Release/TexturePacker");
 	std::string AndroidPath = Configuration.GetString("Android", "ProjectPath", "Android");
     
-    Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
+    g_Log.LogInfo(TAG, "... Deleting Temporary PackageData");
 
     FileSystemUtils::DeleteDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/");
     
@@ -116,20 +116,20 @@ int main(int argc, char **argv)
     
     FileSystemUtils::CreateDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/");
     
-    Log::Instance.LogInfo(TAG, "... Copying '%d' Directories", CopyDirectories.size());
+    g_Log.LogInfo(TAG, "... Copying '%d' Directories", CopyDirectories.size());
     
     for(uint32 i = 0; i < CopyDirectories.size(); i++)
     {
         std::string DirectoryName = CopyDirectories[i].substr((FileSystemUtils::ResourcesDirectory() + "/PackageContent/").length());
         std::string TargetDirectory = FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/" + DirectoryName;
         
-        Log::Instance.LogInfo(TAG, "... %s", DirectoryName.c_str());
+        g_Log.LogInfo(TAG, "... %s", DirectoryName.c_str());
 
         if(!FileSystemUtils::CopyDirectory(CopyDirectories[i], TargetDirectory, true))
         {
             FileSystemUtils::DeleteDirectory(FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData");
             
-            Log::Instance.LogErr(TAG, "Unable to copy all data to Temporary PackageData Folder");
+            g_Log.LogErr(TAG, "Unable to copy all data to Temporary PackageData Folder");
             
             DeInitSubsystems();
 
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 
 			if(FileSystemUtils::DirectoryExists(ResourceDirectoryName))
 			{
-				Log::Instance.LogInfo(TAG, "... Added valid resource directory '%s'", ResourceDirectoryName.c_str());
+				g_Log.LogInfo(TAG, "... Added valid resource directory '%s'", ResourceDirectoryName.c_str());
 
 				ValidResourceDirectories[DirectoryName].push_back(ResourceDirectoryName);
 			};
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
         std::string DirectoryName = CopyDirectories[i].substr((FileSystemUtils::ResourcesDirectory() + "/PackageContent/").length());
         std::string TargetDirectory = FileSystemUtils::ResourcesDirectory() + "/PackageContent/PackageData/" + DirectoryName;
 
-		Log::Instance.LogInfo(TAG, "... Processing %s", DirectoryName.c_str());
+		g_Log.LogInfo(TAG, "... Processing %s", DirectoryName.c_str());
 
 		std::vector<std::string> PrioritizedResourceDirectories;
 
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 			};
 		};
         
-        Log::Instance.LogInfo(TAG, "...    Compiling Maps (if any)");
+        g_Log.LogInfo(TAG, "...    Compiling Maps (if any)");
         
         for(uint32 j = 0; j < MapDirectories.size(); j++)
         {
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
             
             for(uint32 k = 0; k < MapFiles.size(); k++)
             {
-				Log::Instance.LogInfo(TAG, "...    Converting Map '%s'", Path(MapFiles[k]).BaseName.c_str());
+				g_Log.LogInfo(TAG, "...    Converting Map '%s'", Path(MapFiles[k]).BaseName.c_str());
 
 				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TiledConverterPath;
 				std::string Parameters = "-dir \"" + TargetDirectory + "/" +  MapDirectories[j].second + "\"";
@@ -202,20 +202,20 @@ int main(int argc, char **argv)
 				
 				Parameters += " \"" + MapFiles[k] + "\"";
 
-				Log::Instance.LogInfo(TAG, "...    Calling TiledConverter with arguments '%s'", Parameters.c_str());
+				g_Log.LogInfo(TAG, "...    Calling TiledConverter with arguments '%s'", Parameters.c_str());
 
 				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 				if(0 != ExitCode)
 				{
-					Log::Instance.LogErr(TAG, "...    Unable to run TiledConverter: Exit Code '%d'", ExitCode);
+					g_Log.LogErr(TAG, "...    Unable to run TiledConverter: Exit Code '%d'", ExitCode);
 
 					continue;
 				};
             };
         };
         
-        Log::Instance.LogInfo(TAG, "...    Packing Textures (if any)");
+        g_Log.LogInfo(TAG, "...    Packing Textures (if any)");
 
 		for(uint32 j = 0; j < TexturePackDirectories.size(); j++)
 		{
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 
 			if(TexturePackFiles.size() == 0)
 			{
-				Log::Instance.LogInfo(TAG, "...    No Config files found at '%s'", TexturePackDirectories[j].first.c_str());
+				g_Log.LogInfo(TAG, "...    No Config files found at '%s'", TexturePackDirectories[j].first.c_str());
 
 				continue;
 			};
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
             
 			for(uint32 k = 0; k < TexturePackFiles.size(); k++)
             {
-				Log::Instance.LogInfo(TAG, "...    Texture Packing '%s'", Path(TexturePackFiles[k]).BaseName.c_str());
+				g_Log.LogInfo(TAG, "...    Texture Packing '%s'", Path(TexturePackFiles[k]).BaseName.c_str());
 
 				std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + TexturePackerPath;
 				std::string Parameters = "-dir \"" + Path(TargetDirectory + "/" +  TexturePackDirectories[j].second).FullPath() + "\"";
@@ -244,13 +244,13 @@ int main(int argc, char **argv)
 				
 				Parameters += " \"" + TexturePackFiles[k] + "\"";
 
-				Log::Instance.LogInfo(TAG, "...    Calling TexturePacker with arguments '%s'", Parameters.c_str());
+				g_Log.LogInfo(TAG, "...    Calling TexturePacker with arguments '%s'", Parameters.c_str());
 
 				int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 				if(0 != ExitCode)
 				{
-					Log::Instance.LogErr(TAG, "...    Unable to run TexturePacker: Exit Code '%d'", ExitCode);
+					g_Log.LogErr(TAG, "...    Unable to run TexturePacker: Exit Code '%d'", ExitCode);
 
 					continue;
 				};
@@ -259,23 +259,23 @@ int main(int argc, char **argv)
 
 		for(uint32 j = 0; j < ValidResourceDirectories[DirectoryName].size(); j++)
 		{
-			Log::Instance.LogInfo(TAG, "...    Deleting Resource Directory '%s'", Path(ValidResourceDirectories[DirectoryName][j]).BaseName.c_str());
+			g_Log.LogInfo(TAG, "...    Deleting Resource Directory '%s'", Path(ValidResourceDirectories[DirectoryName][j]).BaseName.c_str());
 
 			FileSystemUtils::DeleteDirectory(Path(ValidResourceDirectories[DirectoryName][j]).FullPath());
 		};
         
-        Log::Instance.LogInfo(TAG, "...    Packing...");
+        g_Log.LogInfo(TAG, "...    Packing...");
 
 		std::string ExePath = FileSystemUtils::ResourcesDirectory() + "/" + PackerPath;
 		std::string Parameters = "-dir \"" + TargetDirectory + "\" \"\" -out \"Content/" + DirectoryName + ".package\"";
 
-		Log::Instance.LogInfo(TAG, "...    Calling Packer with arguments '%s'", Parameters.c_str());
+		g_Log.LogInfo(TAG, "...    Calling Packer with arguments '%s'", Parameters.c_str());
 
 		int32 ExitCode = CoreUtils::RunProgram(ExePath, Parameters, FileSystemUtils::ResourcesDirectory());
 
 		if(0 != ExitCode)
 		{
-			Log::Instance.LogErr(TAG, "...    Unable to run Packer: Exit Code '%d'", ExitCode);
+			g_Log.LogErr(TAG, "...    Unable to run Packer: Exit Code '%d'", ExitCode);
 
 			continue;
 		};
@@ -284,11 +284,11 @@ int main(int argc, char **argv)
 
 		if(FileSystemUtils::DirectoryExists(Path(FinalAndroidPath).FullPath()))
 		{
-			Log::Instance.LogInfo(TAG, "...    Processing for Android...");
+			g_Log.LogInfo(TAG, "...    Processing for Android...");
 
 			if(!FileSystemUtils::DirectoryExists(FinalAndroidPath))
 			{
-				Log::Instance.LogWarn(TAG, "Android Path '%s' not found!", AndroidPath.c_str());
+				g_Log.LogWarn(TAG, "Android Path '%s' not found!", AndroidPath.c_str());
 			}
 			else
 			{
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
 
 				if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
 				{
-					Log::Instance.LogWarn(TAG, "Android: Unable to create Assets folder");
+					g_Log.LogWarn(TAG, "Android: Unable to create Assets folder");
 
 					continue;
 				};
@@ -305,7 +305,7 @@ int main(int argc, char **argv)
 
 				if(!FileSystemUtils::DirectoryExists(AssetsPath) && !FileSystemUtils::CreateDirectory(AssetsPath))
 				{
-					Log::Instance.LogWarn(TAG, "Android: Unable to create Content folder");
+					g_Log.LogWarn(TAG, "Android: Unable to create Content folder");
 
 					continue;
 				};
@@ -315,7 +315,7 @@ int main(int argc, char **argv)
 				if(!OutStream.Open(Path(AssetsPath + "/" + DirectoryName + ".package.gif").FullPath(), StreamFlags::Write) ||
 					!InStream.Open(Path(FileSystemUtils::ResourcesDirectory() + "/Content/" + DirectoryName + ".package").FullPath(), StreamFlags::Read) || !InStream.CopyTo(&OutStream))
 				{
-					Log::Instance.LogErr(TAG, "Android: Unable to create copy package '%s'", DirectoryName.c_str());
+					g_Log.LogErr(TAG, "Android: Unable to create copy package '%s'", DirectoryName.c_str());
 
 					continue;
 				};
@@ -323,7 +323,7 @@ int main(int argc, char **argv)
 		};
 	};
     
-    Log::Instance.LogInfo(TAG, "... Deleting Temporary PackageData");
+    g_Log.LogInfo(TAG, "... Deleting Temporary PackageData");
     
 	if(!DontCleanup)
 	{

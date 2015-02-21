@@ -489,7 +489,6 @@ public:
 	};
 private:
 	friend class Package;
-	PackageFileSystemManager() : SubSystem(PACKAGE_FILESYSTEM_PRIORITY) {}
 
 	typedef std::map<StringID, std::pair<Package *, Package::FileEntry *> > FileMap;
 	typedef std::map<StringID, FileMap> EntryMap;
@@ -500,7 +499,7 @@ private:
 
 	void ClearPackageData(Package *p);
 public:
-	static PackageFileSystemManager Instance;
+	PackageFileSystemManager() : SubSystem(PACKAGE_FILESYSTEM_PRIORITY) {}
 
 	/*!
 	*	Creates a new empty package
@@ -563,6 +562,8 @@ public:
 	void Update(uint32 Priority);
 };
 
+extern PackageFileSystemManager g_PackageManager;
+
 #if !FLPLATFORM_ANDROID
 namespace FileSystemWatcherAction
 {
@@ -581,8 +582,6 @@ namespace FileSystemWatcherAction
 class FileSystemWatcher : public SubSystem
 {
 public:
-	static FileSystemWatcher Instance;
-
 	//!<Directory, FileName, Action
 	SimpleDelegate::SimpleDelegate<const std::string &, const std::string &, uint32> OnAction;
 
@@ -599,5 +598,7 @@ public:
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
 };
+
+extern FileSystemWatcher g_FileWatcher;
 #endif
 

@@ -24,7 +24,7 @@
 {\
 	if(!(var))\
 	{\
-		FlamingTorch::LibWarning(__LINE__,__FILE__,__FUNCTION__,#var, __VA_ARGS__);\
+		FlamingTorch::CoreUtils::Assert(__LINE__,__FILE__,__FUNCTION__,#var, __VA_ARGS__);\
 	}\
 }
 

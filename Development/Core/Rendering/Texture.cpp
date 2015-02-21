@@ -26,14 +26,14 @@ namespace FlamingTorch
 
 		if(HDR.ID != CoreUtils::MakeIntFromBytes('F', 'T', 'I', 'H'))
 		{
-			Log::Instance.LogErr(TAG, "While reading a FTI Image: Invalid ID for this file!");
+			g_Log.LogErr(TAG, "While reading a FTI Image: Invalid ID for this file!");
 
 			return false;
 		}
 
 		if(HDR.Version != CoreUtils::MakeVersion(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR))
 		{
-			Log::Instance.LogErr(TAG, "While reading a FTI Image: Invalid Version for this file!");
+			g_Log.LogErr(TAG, "While reading a FTI Image: Invalid Version for this file!");
 			
 			return false;
 		}
@@ -71,7 +71,7 @@ namespace FlamingTorch
 
 		if(!WebPInitDecoderConfig(&config))
 		{
-			Log::Instance.LogErr(TAGBUFFER, "@LoadWebP: Failed to load a webP stream due to invalid decoder");
+			g_Log.LogErr(TAGBUFFER, "@LoadWebP: Failed to load a webP stream due to invalid decoder");
 
 			return false;
 		}
@@ -92,7 +92,7 @@ namespace FlamingTorch
 		{
 			WebPFreeDecBuffer(output_buffer);
 
-			Log::Instance.LogErr(TAGBUFFER, "@LoadWebP: Unable to decode animated webP");
+			g_Log.LogErr(TAGBUFFER, "@LoadWebP: Unable to decode animated webP");
 
 			return false;
 		}
@@ -146,7 +146,7 @@ namespace FlamingTorch
 
 		if(!WebPPictureInit(&picture) || !WebPConfigInit(&config))
 		{
-			Log::Instance.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to init picture/config");
+			g_Log.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to init picture/config");
 			
 			return false;
 		}
@@ -162,7 +162,7 @@ namespace FlamingTorch
 
 		if(!WebPValidateConfig(&config) || !WebPPictureAlloc(&picture))
 		{
-			Log::Instance.LogErr(TAGBUFFER,
+			g_Log.LogErr(TAGBUFFER,
 				"@WriteWebP: Failed to write a webP stream: Failed to init validate config or alloc picture");
 			
 			return false;
@@ -171,7 +171,7 @@ namespace FlamingTorch
 		if(!WebPPictureImportRGBA(&picture, &Data[0], Data.size() / Height))
 		{
 			WebPPictureFree(&picture);
-			Log::Instance.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to import RGBA");
+			g_Log.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to import RGBA");
 
 			return false;
 		}
@@ -182,7 +182,7 @@ namespace FlamingTorch
 			{
 				WebPPictureFree(&picture);
 
-				Log::Instance.LogErr(TAGBUFFER,
+				g_Log.LogErr(TAGBUFFER,
 					"@WriteWebP: Failed to write a webP stream: Failed to rescale picture from %dx%d to %dx%d",
 					Width, Height, TargetWidth, TargetHeight);
 
@@ -192,7 +192,7 @@ namespace FlamingTorch
 
 		if(!WebPEncode(&config, &picture))
 		{
-			Log::Instance.LogErr(TAGBUFFER, "@WriteWebP: Failed to encode the final picture");
+			g_Log.LogErr(TAGBUFFER, "@WriteWebP: Failed to encode the final picture");
 			
 			return false;
 		}
@@ -299,7 +299,7 @@ namespace FlamingTorch
 			png_destroy_read_struct(&png_ptr, &info_ptr,  NULL);
 			png_destroy_info_struct(png_ptr, &info_ptr);
 
-			Log::Instance.LogErr(TAGBUFFER, "@LoadPNG: Failed to read a PNG stream: Invalid Color Mode 0x%08x", ColorType);
+			g_Log.LogErr(TAGBUFFER, "@LoadPNG: Failed to read a PNG stream: Invalid Color Mode 0x%08x", ColorType);
 			
 
 			return false;
@@ -317,7 +317,7 @@ namespace FlamingTorch
 
 		if(!pngstruct)
 		{
-			Log::Instance.LogErr(TAGBUFFER, "@WritePNG: Failed to write a PNG stream: Failed to init PNG");
+			g_Log.LogErr(TAGBUFFER, "@WritePNG: Failed to write a PNG stream: Failed to init PNG");
 			
 			return false;
 		}
@@ -328,7 +328,7 @@ namespace FlamingTorch
 		{
 			png_destroy_write_struct(&pngstruct, NULL);
 
-			Log::Instance.LogErr(TAGBUFFER, "@WritePNG: Failed to write a PNG stream: Failed to init PNG");
+			g_Log.LogErr(TAGBUFFER, "@WritePNG: Failed to write a PNG stream: Failed to init PNG");
 
 			return false;
 		}
@@ -404,7 +404,7 @@ namespace FlamingTorch
 
 		if (!png_ptr)
 		{
-			Log::Instance.LogErr("TextureBuffer", "Unable to init PNG");
+			g_Log.LogErr("TextureBuffer", "Unable to init PNG");
 
 			return false;
 		}
@@ -416,7 +416,7 @@ namespace FlamingTorch
 			png_destroy_read_struct(&png_ptr,
 				(png_infopp)NULL, (png_infopp)NULL);
 
-			Log::Instance.LogErr("TextureBuffer", "Unable to init PNG");
+			g_Log.LogErr("TextureBuffer", "Unable to init PNG");
 
 			return false;
 		}
@@ -427,7 +427,7 @@ namespace FlamingTorch
 		
 		if(!Stream->Read2<uint8>(Signature, 4))
 		{
-			Log::Instance.LogInfo("TextureBuffer", "Unable to read texture signature");
+			g_Log.LogInfo("TextureBuffer", "Unable to read texture signature");
 
 			return false;
 		}
@@ -446,7 +446,7 @@ namespace FlamingTorch
 				png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 				png_destroy_info_struct(png_ptr, &info_ptr);
 
-				Log::Instance.LogErr("TextureBuffer", "Unable to read Stream '0x%08x' as a PNG.", Stream);
+				g_Log.LogErr("TextureBuffer", "Unable to read Stream '0x%08x' as a PNG.", Stream);
 
 				return false;
 			}
@@ -461,7 +461,7 @@ namespace FlamingTorch
 
 				if(!LoadFTI(Stream, WidthValue, HeightValue, ColorTypeValue, Data))
 				{
-					Log::Instance.LogWarn("TextureBuffer", "Unable to read Stream '0x%08x' as a webP or FTI.", Stream);
+					g_Log.LogWarn("TextureBuffer", "Unable to read Stream '0x%08x' as a webP or FTI.", Stream);
 
 					return false;
 				}
@@ -617,7 +617,7 @@ namespace FlamingTorch
 
 		if(!Pixels || Width == 0 || Height == 0)
 		{
-			Log::Instance.LogErr(TAGBUFFER, "@FromData: Invalid Pixels: 0x%08x; Width: %d; Height: %d;", Pixels, Width, Height);
+			g_Log.LogErr(TAGBUFFER, "@FromData: Invalid Pixels: 0x%08x; Width: %d; Height: %d;", Pixels, Width, Height);
 			
 			return false;
 		}
@@ -699,18 +699,9 @@ namespace FlamingTorch
 		return false;
 	}
 
-#if USE_GRAPHICS
-#	define GET_OWNER_IF_NOT_VALID()\
-	if(!Owner && RendererManager::Instance.RendererCount())\
-		Owner = RendererManager::Instance.ActiveRenderer();
-#else
-#	define GET_OWNER_IF_NOT_VALID()
-#endif
-
 	Texture::Texture() : HandleValue(0), WidthValue(0), HeightValue(0), ColorTypeValue(ColorType::RGBA8),
 		TextureFilter(TextureFiltering::Nearest), TextureWrap(TextureWrapMode::Clamp)
 	{
-		GET_OWNER_IF_NOT_VALID();
 	}
 
 	Texture::~Texture()
@@ -809,8 +800,7 @@ namespace FlamingTorch
 		Index.Index = -1;
 
 #if USE_GRAPHICS
-		if(Owner)
-			Owner->DestroyTexture(HandleValue);
+		g_Renderer.DestroyTexture(HandleValue);
 
 		HandleValue = 0;
 #endif
@@ -833,7 +823,7 @@ namespace FlamingTorch
 
 		if(!Buffer->FromStream(Stream))
 		{
-			Log::Instance.LogErr(TAGBUFFER, "@FromSteam: Failed to load a buffer from the stream");
+			g_Log.LogErr(TAGBUFFER, "@FromSteam: Failed to load a buffer from the stream");
 			
 			return false;
 		}
@@ -858,14 +848,14 @@ namespace FlamingTorch
 
 		if(!In.Open(FileName, StreamFlags::Read))
 		{
-			Log::Instance.LogErr(TAG, "Unable to open '%s' for reading.", FileName.c_str());
+			g_Log.LogErr(TAG, "Unable to open '%s' for reading.", FileName.c_str());
 
 			return false;
 		}
 
 		if(!FromStream(&In))
 		{
-			Log::Instance.LogInfo(TAG, "Unable to read '%s' as a PNG.", FileName.c_str());
+			g_Log.LogInfo(TAG, "Unable to read '%s' as a PNG.", FileName.c_str());
 
 			return false;
 		}
@@ -880,12 +870,7 @@ namespace FlamingTorch
 		Destroy();
 
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
-
-		if(Owner)
-		{
-			HandleValue = Owner->CreateTexture();
-		}
+		HandleValue = g_Renderer.CreateTexture();
 #endif
 
 		UpdateData(Pixels, Width, Height);
@@ -907,14 +892,8 @@ namespace FlamingTorch
 		ColorTypeValue = RGBA ? ColorType::RGBA8 : ColorType::RGB8;
 
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
-
-		if(Owner)
-		{
-			HandleValue = Owner->CreateTexture();
-
-			Owner->SetTextureData(HandleValue, NULL, Width, Height);
-		}
+		HandleValue = g_Renderer.CreateTexture();
+		g_Renderer.SetTextureData(HandleValue, NULL, Width, Height);
 
 		SetTextureFiltering(TextureFiltering::Linear_Mipmap);
 		SetWrapMode(TextureWrap);
@@ -934,15 +913,10 @@ namespace FlamingTorch
 		}
 
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
+		if(!g_Renderer.IsTextureHandleValid(HandleValue))
+			HandleValue = g_Renderer.CreateTexture();
 
-		if(Owner)
-		{
-			if(!Owner->IsTextureHandleValid(HandleValue))
-				HandleValue = Owner->CreateTexture();
-
-			Owner->SetTextureData(HandleValue, (uint8 *)Pixels, Width, Height);
-		}
+		g_Renderer.SetTextureData(HandleValue, (uint8 *)Pixels, Width, Height);
 
 		SetTextureFiltering(TextureFilter);
 		SetWrapMode(TextureWrap);
@@ -994,17 +968,12 @@ namespace FlamingTorch
 	void Texture::Bind()
 	{
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
-
-		if (Owner)
+		if (HandleValue == INVALID_FTGHANDLE && Buffer.Get())
 		{
-			if (HandleValue == INVALID_FTGHANDLE && Buffer.Get())
-			{
-				UpdateData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
-			}
-
-			Owner->BindTexture(HandleValue);
+			UpdateData(&Buffer->Data[0], Buffer->Width(), Buffer->Height());
 		}
+
+		g_Renderer.BindTexture(HandleValue);
 #endif
 	}
 
@@ -1018,12 +987,9 @@ namespace FlamingTorch
 		}
 
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
-
 		TextureWrap = WrapMode;
 
-		if(Owner)
-			Owner->SetTextureWrapMode(HandleValue, WrapMode);
+		g_Renderer.SetTextureWrapMode(HandleValue, WrapMode);
 #endif
 	}
 
@@ -1064,12 +1030,9 @@ namespace FlamingTorch
 		}
 
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
-
 		TextureFilter = Filter;
 
-		if(Owner)
-			Owner->SetTextureFiltering(HandleValue, Filter);
+		g_Renderer.SetTextureFiltering(HandleValue, Filter);
 #endif
 	}
 
@@ -1088,12 +1051,12 @@ namespace FlamingTorch
 		if(ActualDirectory[ActualDirectory.length() - 1] != '/')
 			ActualDirectory += "/";
 
-		DisposablePointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(MakeStringID(ActualDirectory),
+		DisposablePointer<Stream> PackageStream = g_PackageManager.GetFile(MakeStringID(ActualDirectory),
 			MakeStringID(Name));
 
 		if(PackageStream.Get() == NULL)
 		{
-			Log::Instance.LogErr(TAG, "Package Stream for '%s%s' was not found", ActualDirectory.c_str(),
+			g_Log.LogErr(TAG, "Package Stream for '%s%s' was not found", ActualDirectory.c_str(),
 				Name.c_str());
 
 			return false;
@@ -1105,17 +1068,14 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	bool Texture::FromScreen()
 	{
-		GET_OWNER_IF_NOT_VALID();
-
 		Index.Index = -1;
 
 		DisposablePointer<TextureBuffer> TempBuffer(new TextureBuffer());
 
 		TempBuffer->CreateEmpty(Width(), Height());
 
-		if(Owner)
-			if(!Owner->CaptureScreen(&TempBuffer->Data[0], TempBuffer->Width() * TempBuffer->Height() * 4))
-				return false;
+		if(!g_Renderer.CaptureScreen(&TempBuffer->Data[0], TempBuffer->Width() * TempBuffer->Height() * 4))
+			return false;
 
 		return FromBuffer(TempBuffer);
 	}
@@ -1167,8 +1127,6 @@ namespace FlamingTorch
 		PROFILE("Texture::Blur", StatTypes::Rendering);
 
 #if USE_GRAPHICS
-		GET_OWNER_IF_NOT_VALID();
-
 		bool RequiredBufferPlacement = false;
 
 		if(Buffer.Get() == NULL && WidthValue != 0)
@@ -1179,14 +1137,13 @@ namespace FlamingTorch
 
 			Buffer->CreateEmpty(WidthValue, HeightValue);
 
-			if(Owner)
-				Owner->GetTextureData(HandleValue, &Buffer->Data[0], WidthValue * HeightValue * 4);
+			g_Renderer.GetTextureData(HandleValue, &Buffer->Data[0], WidthValue * HeightValue * 4);
 		}
 #endif
 
 		if(!Buffer.Get())
 		{
-			Log::Instance.LogErr(TAG, "@Blur: Failed to blur due to invalid Buffer");
+			g_Log.LogErr(TAG, "@Blur: Failed to blur due to invalid Buffer");
 
 			return;
 		}

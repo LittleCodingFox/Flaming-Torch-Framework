@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
 	DisposablePointer<DefaultProject> InterfaceInstance(new DefaultProject());
 
-	GameInterface::SetInstance(InterfaceInstance);
+	g_Game = InterfaceInstance;
 
-	return GameInterface::Instance->Run(argc, argv);
+	return g_Game->Run(argc, argv);
 };

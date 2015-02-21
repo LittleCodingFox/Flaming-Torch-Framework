@@ -1,4 +1,5 @@
 #include "FlamingCore.hpp"
+#if USE_GRAPHICS
 
 namespace tb
 {
@@ -16,7 +17,7 @@ namespace tb
 
 	TBImageLoader *TBImageLoader::CreateFromFile(const char *Name)
 	{
-		DisposablePointer<Stream> In = PackageFileSystemManager::Instance.GetFile(Path(Name));
+		DisposablePointer<Stream> In = g_PackageManager.GetFile(Path(Name));
 
 		if (!In.Get())
 		{
@@ -24,7 +25,7 @@ namespace tb
 
 			if (!In.AsDerived<FileStream>()->Open(Name, StreamFlags::Read))
 			{
-				Log::Instance.LogErr("TBImageLoader", "Failed to load image '%s'", Name);
+				g_Log.LogErr("TBImageLoader", "Failed to load image '%s'", Name);
 
 				return nullptr;
 			}
@@ -34,7 +35,7 @@ namespace tb
 
 		if (!Buffer.Get())
 		{
-			Log::Instance.LogErr("TBImageLoader", "Failed to load image '%s'", Name);
+			g_Log.LogErr("TBImageLoader", "Failed to load image '%s'", Name);
 
 			return nullptr;
 		}
@@ -55,11 +56,11 @@ namespace tb
 	{
 		if (fire_time == 0)
 		{
-			Future::Instance.Post(TBSystemCallback);
+			g_Future.Post(TBSystemCallback);
 		}
 		else if (fire_time != TB_NOT_SOON)
 		{
-			Future::Instance.PostDelayed(TBSystemCallback, (uint32)(fire_time * 1000));
+			g_Future.PostDelayed(TBSystemCallback, (uint32)(fire_time * 1000));
 		}
 	}
 
@@ -93,7 +94,7 @@ namespace tb
 	{
 		Path FilePath(Name), PackagePath(Name[0] == '/' ? Name : std::string("/") + Name);
 
-		DisposablePointer<Stream> In = PackageFileSystemManager::Instance.GetFile(PackagePath);
+		DisposablePointer<Stream> In = g_PackageManager.GetFile(PackagePath);
 
 		if (!In)
 		{
@@ -168,15 +169,15 @@ namespace FlamingTorch
 	{
 		TBRendererBatcher::BeginPaint(render_target_w, render_target_h);
 
-		Owner->PushMatrices();
-		Owner->SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, (f32)render_target_w, (f32)render_target_h, 0, -1, 1));
-		Owner->SetWorldMatrix(Matrix4x4());
-		Owner->SetViewport(0, 0, (f32)render_target_w, (f32)render_target_h);
+		g_Renderer.PushMatrices();
+		g_Renderer.SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(0, (f32)render_target_w, (f32)render_target_h, 0, -1, 1));
+		g_Renderer.SetWorldMatrix(Matrix4x4());
+		g_Renderer.SetViewport(0, 0, (f32)render_target_w, (f32)render_target_h);
 	}
 
 	void UIRenderer::EndPaint()
 	{
-		Owner->PopMatrices();
+		g_Renderer.PopMatrices();
 
 		TBRendererBatcher::EndPaint();
 	}
@@ -219,7 +220,7 @@ namespace FlamingTorch
 
 		if (VertexHandle == INVALID_FTGHANDLE)
 		{
-			VertexHandle = Owner->CreateVertexBuffer();
+			VertexHandle = g_Renderer.CreateVertexBuffer();
 		}
 
 		static std::vector<UIVertex> VertexData;
@@ -243,17 +244,17 @@ namespace FlamingTorch
 		//For Debugging
 		UIVertex FullScreenQuad[6] = {
 			Vector2(), Vector2(), Vector4(1, 1, 1, 1),
-			Vector2(0, Owner->Size().y), Vector2(0, 1), Vector4(1, 1, 1, 1),
-			Owner->Size(), Vector2(1, 1), Vector4(1, 1, 1, 1),
-			Owner->Size(), Vector2(1, 1), Vector4(1, 1, 1, 1),
-			Vector2(Owner->Size().x, 0), Vector2(1, 0), Vector4(1, 1, 1, 1),
+			Vector2(0, g_Renderer.Size().y), Vector2(0, 1), Vector4(1, 1, 1, 1),
+			g_Renderer.Size(), Vector2(1, 1), Vector4(1, 1, 1, 1),
+			g_Renderer.Size(), Vector2(1, 1), Vector4(1, 1, 1, 1),
+			Vector2(g_Renderer.Size().x, 0), Vector2(1, 0), Vector4(1, 1, 1, 1),
 			Vector2(), Vector2(), Vector4(1, 1, 1, 1)
 		};
 
-		Owner->SetVertexBufferData(VertexHandle, VertexDetailsMode::Mixed, UIFormat, sizeof(UIFormat) / sizeof(UIFormat[0]), &VertexData[0], VertexData.size() * sizeof(VertexData[0]));
+		g_Renderer.SetVertexBufferData(VertexHandle, VertexDetailsMode::Mixed, UIFormat, sizeof(UIFormat) / sizeof(UIFormat[0]), &VertexData[0], VertexData.size() * sizeof(VertexData[0]));
 
 		//For Debugging
-		//Owner->SetVertexBufferData(VertexHandle, VertexDetailsMode::Mixed, UIFormat, sizeof(UIFormat) / sizeof(UIFormat[0]), &FullScreenQuad[0], sizeof(FullScreenQuad));
+		//g_Renderer.SetVertexBufferData(VertexHandle, VertexDetailsMode::Mixed, UIFormat, sizeof(UIFormat) / sizeof(UIFormat[0]), &FullScreenQuad[0], sizeof(FullScreenQuad));
 
 		UIBitmap *TheBitmap = (UIBitmap *)batch->bitmap;
 
@@ -263,23 +264,23 @@ namespace FlamingTorch
 		}
 		else
 		{
-			Owner->BindTexture((TextureHandle)INVALID_FTGHANDLE);
+			g_Renderer.BindTexture((TextureHandle)INVALID_FTGHANDLE);
 		}
 
-		Owner->SetBlendingMode(BlendingMode::Alpha);
+		g_Renderer.SetBlendingMode(BlendingMode::Alpha);
 
-		Owner->RenderVertices(VertexModes::Triangles, VertexHandle, 0, VertexData.size());
+		g_Renderer.RenderVertices(VertexModes::Triangles, VertexHandle, 0, VertexData.size());
 
 		//For Debugging
-		//Owner->RenderVertices(VertexModes::Triangles, VertexHandle, 0, 6);
+		//g_Renderer.RenderVertices(VertexModes::Triangles, VertexHandle, 0, 6);
 	}
 
 	void UIRenderer::SetClipRect(const TBRect &rect)
 	{
-		Owner->SetClipRect(Rect((f32)rect.x, (f32)rect.x + (f32)rect.w, (f32)rect.y, (f32)rect.y + (f32)rect.h));
+		g_Renderer.SetClipRect(Rect((f32)rect.x, (f32)rect.x + (f32)rect.w, (f32)rect.y, (f32)rect.y + (f32)rect.h));
 	}
 
-	MODIFIER_KEYS MapTBModifiers(const InputCenter::KeyInfo &Key)
+	MODIFIER_KEYS MapTBModifiers(const Input::KeyInfo &Key)
 	{
 		MODIFIER_KEYS Out = TB_MODIFIER_NONE;
 
@@ -295,7 +296,7 @@ namespace FlamingTorch
 		return Out;
 	}
 
-	SPECIAL_KEY MapTBSpecialKey(const InputCenter::KeyInfo &Key)
+	SPECIAL_KEY MapTBSpecialKey(const Input::KeyInfo &Key)
 	{
 		switch (Key.Name)
 		{
@@ -407,12 +408,12 @@ namespace FlamingTorch
 		return TB_KEY_UNDEFINED;
 	}
 
-	bool IsTBSpecialKey(const InputCenter::KeyInfo &Key)
+	bool IsTBSpecialKey(const Input::KeyInfo &Key)
 	{
 		return TB_KEY_UNDEFINED != MapTBSpecialKey(Key);
 	}
 
-	uint32 MapTBKey(const InputCenter::KeyInfo &Key)
+	uint32 MapTBKey(const Input::KeyInfo &Key)
 	{
 		if (IsTBSpecialKey(Key))
 			return 0;
@@ -426,10 +427,9 @@ namespace FlamingTorch
 	{
 	}
 
-	bool UIInputProcessor::OnKey(const InputCenter::KeyInfo &Key)
+	bool UIInputProcessor::OnKey(const Input::KeyInfo &Key)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
-		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+		DisposablePointer<TBWidget> UIRoot = g_Renderer.UIRoot;
 
 		bool Consume = false;
 
@@ -451,16 +451,15 @@ namespace FlamingTorch
 
 		if (Consume)
 		{
-			TheManager.Input.ConsumeInput();
+			g_Input.ConsumeInput();
 		}
 
 		return Consume;
 	}
 
-	bool UIInputProcessor::OnTouch(const InputCenter::TouchInfo &Touch)
+	bool UIInputProcessor::OnTouch(const Input::TouchInfo &Touch)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
-		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+		DisposablePointer<TBWidget> UIRoot = g_Renderer.UIRoot;
 		ClickCounter &TheClickCounter = MouseClicks[Touch.Index];
 
 		bool Consume = false;
@@ -477,7 +476,7 @@ namespace FlamingTorch
 			TheClickCounter.ClickTimer = GameClockTimeNoPause();
 
 			//For debugging
-			//Log::Instance.LogInfo("UIInputProcessor", "Found Touch Down from UI, ClickCounter for touch TOUCH_%s count is %d", Touch.NameAsString().c_str(), TheClickCounter.Count);
+			//g_Log.LogInfo("UIInputProcessor", "Found Touch Down from UI, ClickCounter for touch TOUCH_%s count is %d", Touch.NameAsString().c_str(), TheClickCounter.Count);
 
 			Consume = UIRoot->InvokePointerDown((int32)Touch.Position.x, (int32)Touch.Position.y, TheClickCounter.Count, CurrentModifiers, true);
 		}
@@ -498,16 +497,15 @@ namespace FlamingTorch
 
 		if (Consume)
 		{
-			TheManager.Input.ConsumeInput();
+			g_Input.ConsumeInput();
 		}
 
-		return TheManager.Input.InputConsumed();
+		return g_Input.InputConsumed();
 	}
 
-	bool UIInputProcessor::OnMouseButton(const InputCenter::MouseButtonInfo &Button)
+	bool UIInputProcessor::OnMouseButton(const Input::MouseButtonInfo &Button)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
-		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+		DisposablePointer<TBWidget> UIRoot = g_Renderer.UIRoot;
 		ClickCounter &TheClickCounter = MouseClicks[Button.Name];
 
 		bool Consume = false;
@@ -523,30 +521,28 @@ namespace FlamingTorch
 			TheClickCounter.ClickTimer = GameClockTimeNoPause();
 
 			//For debugging
-			//Log::Instance.LogInfo("UIInputProcessor", "Found Mouse Down from UI, ClickCounter for button MOUSEBUTTON_%s count is %d", Button.NameAsString().c_str(), TheClickCounter.Count);
+			//g_Log.LogInfo("UIInputProcessor", "Found Mouse Down from UI, ClickCounter for button MOUSEBUTTON_%s count is %d", Button.NameAsString().c_str(), TheClickCounter.Count);
 
-			Consume = UIRoot->InvokePointerDown((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, TheClickCounter.Count, CurrentModifiers, false);
+			Consume = UIRoot->InvokePointerDown((int32)g_Input.MousePosition.x, (int32)g_Input.MousePosition.y, TheClickCounter.Count, CurrentModifiers, false);
 		}
 		else if (Button.Pressed)
 		{
 		}
 		else if (Button.JustReleased)
 		{
-			Consume = UIRoot->InvokePointerUp((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, CurrentModifiers, false);
+			Consume = UIRoot->InvokePointerUp((int32)g_Input.MousePosition.x, (int32)g_Input.MousePosition.y, CurrentModifiers, false);
 		}
 
 		if (Consume)
 		{
-			TheManager.Input.ConsumeInput();
+			g_Input.ConsumeInput();
 		}
 
-		return TheManager.Input.InputConsumed();
+		return g_Input.InputConsumed();
 	}
 
-	bool UIInputProcessor::OnJoystickButton(const InputCenter::JoystickButtonInfo &Button)
+	bool UIInputProcessor::OnJoystickButton(const Input::JoystickButtonInfo &Button)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
-
 		//TODO
 		if (Button.JustPressed)
 		{
@@ -558,45 +554,39 @@ namespace FlamingTorch
 		{
 		}
 
-		return TheManager.Input.InputConsumed();
+		return g_Input.InputConsumed();
 	}
 
-	bool UIInputProcessor::OnJoystickAxis(const InputCenter::JoystickAxisInfo &Axis)
+	bool UIInputProcessor::OnJoystickAxis(const Input::JoystickAxisInfo &Axis)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
-
 		//TODO
 
-		return TheManager.Input.InputConsumed();
+		return g_Input.InputConsumed();
 	}
 
 	void UIInputProcessor::OnJoystickConnected(uint8 Index)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
 	}
 
 	void UIInputProcessor::OnJoystickDisconnected(uint8 Index)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
 	}
 
 	void UIInputProcessor::OnMouseMove(const Vector2 &Position)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
-		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+		DisposablePointer<TBWidget> UIRoot = g_Renderer.UIRoot;
 
-		UIRoot->InvokePointerMove((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, CurrentModifiers, false);
+		UIRoot->InvokePointerMove((int32)g_Input.MousePosition.x, (int32)g_Input.MousePosition.y, CurrentModifiers, false);
 
-		if (TheManager.Input.MouseWheel != 0)
+		if (g_Input.MouseWheel != 0)
 		{
-			UIRoot->InvokeWheel((int32)TheManager.Input.MousePosition.x, (int32)TheManager.Input.MousePosition.y, 0, -(int32)TheManager.Input.MouseWheel, CurrentModifiers);
+			UIRoot->InvokeWheel((int32)g_Input.MousePosition.x, (int32)g_Input.MousePosition.y, 0, -(int32)g_Input.MouseWheel, CurrentModifiers);
 		}
 	}
 
-	void UIInputProcessor::OnCharacterEntered(wchar_t Character)
+	void UIInputProcessor::OnCharacterEntered(uint32 Character)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
-		DisposablePointer<TBWidget> UIRoot = TheManager.ActiveRenderer()->UIRoot;
+		DisposablePointer<TBWidget> UIRoot = g_Renderer.UIRoot;
 
 		SPECIAL_KEY Special = TB_KEY_UNDEFINED;
 
@@ -621,12 +611,12 @@ namespace FlamingTorch
 		UIRoot->InvokeKey(Character, Special, TB_MODIFIER_NONE, false);
 	}
 
-	void UIInputProcessor::OnAction(const InputCenter::Action &TheAction)
+	void UIInputProcessor::OnAction(const Input::Action &TheAction)
 	{
-		RendererManager &TheManager = RendererManager::Instance;
 		//TODO
 	}
 
 	void UIInputProcessor::OnGainFocus() {}
 	void UIInputProcessor::OnLoseFocus() {}
 }
+#endif

@@ -2,7 +2,7 @@
 #define TAG "Console"
 namespace FlamingTorch
 {
-	Console Console::Instance;
+	Console g_Console;
 
 	void Console::HelpCommand(const std::vector<std::string> &Parameters)
 	{
@@ -16,7 +16,7 @@ namespace FlamingTorch
 
 	void Console::VersionCommand(const std::vector<std::string> &Parameters)
 	{
-		LogConsole(std::string("> ") + (GameInterface::Instance ? GameInterface::Instance->GameName() : "(No Game)") +
+		LogConsole(std::string("> ") + (g_Game ? g_Game->GameName() : "(No Game)") +
 			" using core version " + CoreUtils::MakeVersionString(FTSTD_VERSION_MAJOR, FTSTD_VERSION_MINOR));
 	}
 
@@ -29,7 +29,7 @@ namespace FlamingTorch
 
 		uint32 Counter = 0;
 
-		for(InputCenter::InfoNameMap::iterator it = InputCenter::KeyInfo::Names.begin(); it != InputCenter::KeyInfo::Names.end(); it++, Counter++)
+		for(Input::InfoNameMap::iterator it = Input::KeyInfo::Names.begin(); it != Input::KeyInfo::Names.end(); it++, Counter++)
 		{
 			if(!First)
 			{
@@ -55,7 +55,7 @@ namespace FlamingTorch
 		{
 			std::string Action = StringUtils::ToUpperCase(Parameters[0]);
 
-			const InputCenter::Action *const TheAction = RendererManager::Instance.Input.GetAction(MakeStringID(Action));
+			const Input::Action *const TheAction = g_Input.GetAction(MakeStringID(Action));
 
 			if(TheAction)
 			{
@@ -109,7 +109,7 @@ namespace FlamingTorch
 
 		std::string Action = StringUtils::ToUpperCase(Parameters[0]), Target = StringUtils::ToUpperCase(Parameters[1]);
 
-		InputCenter::Action TheAction;
+		Input::Action TheAction;
 		TheAction.Name = Action;
 
 		if(Target.find("JOY") == 0 && Target.find("AXIS") == 4)
@@ -146,7 +146,7 @@ namespace FlamingTorch
 			bool Found = false;
 			uint32 Counter = 0;
 
-			for(InputCenter::InfoNameMap::iterator it = InputCenter::JoystickAxisInfo::Names.begin(); it != InputCenter::JoystickAxisInfo::Names.end();
+			for(Input::InfoNameMap::iterator it = Input::JoystickAxisInfo::Names.begin(); it != Input::JoystickAxisInfo::Names.end();
 				it++, Counter++)
 			{
 				if(it->second == Target)
@@ -215,7 +215,7 @@ namespace FlamingTorch
 				bool Found = false;
 				uint32 Counter = 0;
 
-				for(InputCenter::InfoNameMap::iterator it = InputCenter::MouseButtonInfo::Names.begin(); it != InputCenter::MouseButtonInfo::Names.end();
+				for(Input::InfoNameMap::iterator it = Input::MouseButtonInfo::Names.begin(); it != Input::MouseButtonInfo::Names.end();
 					it++, Counter++)
 				{
 					if(it->second == Target)
@@ -245,7 +245,7 @@ namespace FlamingTorch
 			bool Found = false;
 			uint32 Counter = 0;
 
-			for(InputCenter::InfoNameMap::iterator it = InputCenter::KeyInfo::Names.begin(); it != InputCenter::KeyInfo::Names.end();
+			for(Input::InfoNameMap::iterator it = Input::KeyInfo::Names.begin(); it != Input::KeyInfo::Names.end();
 				it++, Counter++)
 			{
 				if(it->second == Target)
@@ -270,28 +270,26 @@ namespace FlamingTorch
 			LogConsole("> Invalid key identifier '" + Target + "'");
 		}
 
-		RendererManager::Instance.Input.RegisterAction(TheAction);
+		g_Input.RegisterAction(TheAction);
 
 		LogConsole("[" + Action + "] => [" + Target + "]");
 	}
 
 	void Console::ScreenshotCommand(const std::vector<std::string> &Parameters)
 	{
-		bool WasShowing = RendererManager::Instance.ShowConsole;
+		bool WasShowing = g_Renderer.ShowConsole;
 		//Hide console
-		RendererManager::Instance.ShowConsole = false;
+		g_Renderer.ShowConsole = false;
 
 		//Get a full frame twice due to double buffering
-		RendererManager::Instance.RequestFrame();
-		RendererManager::Instance.RequestFrame();
-
-		Renderer *TargetRenderer = RendererManager::Instance.ActiveRenderer();
+		g_Renderer.RequestFrame();
+		g_Renderer.RequestFrame();
 
 		TextureBuffer t;
 
-		t.CreateEmpty((uint32)TargetRenderer->Size().x, (uint32)TargetRenderer->Size().y);
+		t.CreateEmpty((uint32)g_Renderer.Size().x, (uint32)g_Renderer.Size().y);
 
-		if(!TargetRenderer->CaptureScreen(&t.Data[0], t.Data.size()))
+		if (!g_Renderer.CaptureScreen(&t.Data[0], t.Data.size()))
 		{
 			LogConsole("Failed to take screenshot: Unable to capture screen");
 
@@ -301,12 +299,12 @@ namespace FlamingTorch
 		t.FlipY();
 
 		//Restore console
-		RendererManager::Instance.ShowConsole = WasShowing;
+		g_Renderer.ShowConsole = WasShowing;
 
 		FileStream Out;
 
-		std::string ScreenFileName = StringUtils::Replace(GameInterface::Instance->GameName(),
-			" ", "_") + "_" + StringUtils::Replace(StringUtils::Replace(StringUtils::Replace(GameClock::Instance.CurrentDateTimeAsString(), ":", "_"), "/", "_"), " ", "_") + ".png";
+		std::string ScreenFileName = StringUtils::Replace(g_Game->GameName(),
+			" ", "_") + "_" + StringUtils::Replace(StringUtils::Replace(StringUtils::Replace(g_Clock.CurrentDateTimeAsString(), ":", "_"), "/", "_"), " ", "_") + ".png";
 
 		if(!Out.Open(FileSystemUtils::PreferredStorageDirectory() + "/" + ScreenFileName, StreamFlags::Write))
 		{
@@ -392,7 +390,7 @@ namespace FlamingTorch
 		{
 			if(ConsoleVariables[i].Name == Variable.Name)
 			{
-				Log::Instance.LogWarn(TAG, "Unable to register ConVar '%s': Already exists", Variable.Name.c_str());
+				g_Log.LogWarn(TAG, "Unable to register ConVar '%s': Already exists", Variable.Name.c_str());
 
 				return;
 			}
@@ -418,7 +416,7 @@ namespace FlamingTorch
 		{
 			if(ConsoleCommands[i]->Name == Command->Name)
 			{
-				Log::Instance.LogWarn(TAG, "Unable to register ConCmd '%s': Already exists", Command->Name.c_str());
+				g_Log.LogWarn(TAG, "Unable to register ConCmd '%s': Already exists", Command->Name.c_str());
 
 				return;
 			}
@@ -429,7 +427,7 @@ namespace FlamingTorch
 
 	void Console::LogConsole(const std::string &Message)
 	{
-		Log::Instance.LogInfo(TAG, "%s", Message.c_str());
+		g_Log.LogInfo(TAG, "%s", Message.c_str());
 
 		if(Message.find('\n') != std::string::npos)
 		{

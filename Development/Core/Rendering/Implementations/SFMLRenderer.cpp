@@ -24,20 +24,6 @@ namespace FlamingTorch
 	bool SFMLRendererImplementation::SupportsFBOs = false;
 	GLint SFMLRendererImplementation::MaximumTextureSize = 0;
 
-	uint8 VertexBufferDataElementSizes[VertexElementDataType::Count] = {
-		sizeof(f32),
-		sizeof(Vector2),
-		sizeof(Vector3),
-		sizeof(Vector4)
-	};
-
-	uint32 VertexBufferDataElementCount[VertexElementDataType::Count] = {
-		1,
-		2,
-		3,
-		4
-	};
-
 	uint32 VertexBufferVertexMode[VertexModes::Count] = {
 		GL_TRIANGLES,
 		GL_LINES,
@@ -46,17 +32,17 @@ namespace FlamingTorch
 
 	void DumpRendererStats()
 	{
-		Log::Instance.LogInfo(TAG, "GL Info");
-		Log::Instance.LogInfo(TAG, "   Renderer: %s", glGetString(GL_RENDERER));
-		Log::Instance.LogInfo(TAG, "   Vendor: %s", glGetString(GL_VENDOR));
-		Log::Instance.LogInfo(TAG, "   Version: %s", glGetString(GL_VERSION));
+		g_Log.LogInfo(TAG, "GL Info");
+		g_Log.LogInfo(TAG, "   Renderer: %s", glGetString(GL_RENDERER));
+		g_Log.LogInfo(TAG, "   Vendor: %s", glGetString(GL_VENDOR));
+		g_Log.LogInfo(TAG, "   Version: %s", glGetString(GL_VERSION));
 
 		int32 t, t2, t3;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &SFMLRendererImplementation::MaximumTextureSize);
 
 		GLCHECK();
 
-		Log::Instance.LogInfo(TAG, "   Max Texture Size: %d", SFMLRendererImplementation::MaximumTextureSize);
+		g_Log.LogInfo(TAG, "   Max Texture Size: %d", SFMLRendererImplementation::MaximumTextureSize);
 
 		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &t);
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &t2);
@@ -64,13 +50,13 @@ namespace FlamingTorch
 
 		GLCHECK();
 
-		Log::Instance.LogInfo(TAG, "   Max Texture Units: %d (%d vs, %d ps)", t, t3, t2);
+		g_Log.LogInfo(TAG, "   Max Texture Units: %d (%d vs, %d ps)", t, t3, t2);
 
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &t);
 
 		GLCHECK();
 
-		Log::Instance.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
+		g_Log.LogInfo(TAG, "   Max Vertex Attribs: %d", t);
 	}
 
 	SFMLRendererImplementation::SFMLRendererImplementation() : LastBoundTexture(0), LastBoundVBO(0), 
@@ -92,11 +78,6 @@ namespace FlamingTorch
 		{
 			DestroyVertexBuffer(VertexBuffers.begin()->first);
 		}
-
-		while (FrameBuffers.size())
-		{
-			DestroyFrameBuffer(FrameBuffers.begin()->first);
-		}
 	}
 
 	bool SFMLRendererImplementation::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
@@ -111,7 +92,7 @@ namespace FlamingTorch
 		//If failed to open, return an error
 		if(!Window.isOpen())
 		{
-			Log::Instance.LogInfo(TAG, "Unable to create the rendering window.");
+			g_Log.LogInfo(TAG, "Unable to create the rendering window.");
 
 			return 0;
 		}
@@ -141,7 +122,7 @@ namespace FlamingTorch
 
 				if (GLEW_OK != err)
 				{
-					Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
+					g_Log.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
 						glewGetErrorString(err));
 
 					ExtensionsAvailable = false;
@@ -224,7 +205,7 @@ namespace FlamingTorch
 		//If it failed to open, return an error
 		if(!Window.isOpen())
 		{
-			Log::Instance.LogInfo(TAG, "Unable to create the rendering window.");
+			g_Log.LogInfo(TAG, "Unable to create the rendering window.");
 
 			return false;
 		}
@@ -258,7 +239,7 @@ namespace FlamingTorch
 
 				if (GLEW_OK != err)
 				{
-					Log::Instance.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
+					g_Log.LogInfo(TAG, "GLEW failed to start, so no fancy OpenGL extensions will be available. Error Message: %s",
 						glewGetErrorString(err));
 
 					ExtensionsAvailable = false;
@@ -282,122 +263,6 @@ namespace FlamingTorch
 		glClearColor(Renderer::DefaultClearColor.x, Renderer::DefaultClearColor.y, Renderer::DefaultClearColor.z, Renderer::DefaultClearColor.w);
 
 		return true;
-	}
-
-	FrameBufferHandle SFMLRendererImplementation::CreateFrameBuffer(const FrameBufferCreationInfo &Info)
-	{
-		if (!ExtensionsAvailable || !SupportsFBOs || Info.Size.x <= 0 || Info.Size.y <= 0)
-			return INVALID_FTGHANDLE;
-
-		for (uint32 i = 0; i < Info.ColorBuffers.size(); i++)
-		{
-			if (Info.ColorBuffers[i].Get() == NULL || Info.ColorBuffers[i]->Size() != Info.Size || !IsTextureHandleValid(Info.ColorBuffers[i]->Handle()))
-				return INVALID_FTGHANDLE;
-		}
-
-		DisposablePointer<FrameBufferInfo> FBInfo(new FrameBufferInfo());
-
-		GLCHECK();
-
-		glGenFramebuffers(1, &FBInfo->GLID);
-
-		GLCHECK();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, FBInfo->GLID);
-
-		GLCHECK();
-
-		std::vector<GLuint> DrawBuffers;
-		TextureHandle PreviousHandle = LastBoundTexture;
-
-		BindTexture((TextureHandle)0);
-
-		for (uint32 i = 0; i < Info.ColorBuffers.size(); i++)
-		{
-			BindTexture(Info.ColorBuffers[i]->Handle());
-
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, Textures[Info.ColorBuffers[i]->Handle()].GLID, 0);
-
-			GLCHECK();
-
-			DrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
-		}
-
-		BindTexture(PreviousHandle);
-
-		glGenRenderbuffers(1, &FBInfo->RenderBufferID);
-
-		GLCHECK();
-
-		glBindRenderbuffer(GL_RENDERBUFFER, FBInfo->RenderBufferID);
-
-		GLCHECK();
-
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, (GLsizei)Info.Size.x, (GLsizei)Info.Size.y);
-
-		GLCHECK();
-
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, FBInfo->RenderBufferID);
-
-		GLCHECK();
-
-		glDrawBuffers(DrawBuffers.size(), &DrawBuffers[0]);
-
-		GLCHECK();
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		{
-			glBindRenderbuffer(GL_RENDERBUFFER, 0);
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			glDeleteRenderbuffers(1, &FBInfo->RenderBufferID);
-			glDeleteFramebuffers(1, &FBInfo->GLID);
-
-			return INVALID_FTGHANDLE;
-		}
-
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		FrameBuffers[++FrameBufferCounter] = FBInfo;
-
-		return FrameBufferCounter;
-	}
-
-	bool SFMLRendererImplementation::IsFrameBufferValid(FrameBufferHandle Handle)
-	{
-		FrameBufferMap::iterator it = FrameBuffers.find(Handle);
-
-		return it != FrameBuffers.end();
-	}
-
-	void SFMLRendererImplementation::BindFrameBuffer(FrameBufferHandle Handle)
-	{
-		if (!IsFrameBufferValid(Handle))
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			return;
-		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, FrameBuffers[Handle]->GLID);
-	}
-
-	void SFMLRendererImplementation::DestroyFrameBuffer(FrameBufferHandle Handle)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		if (!IsFrameBufferValid(Handle))
-			return;
-
-		FrameBufferMap::iterator it = FrameBuffers.find(Handle);
-
-		glDeleteRenderbuffers(1, &it->second->RenderBufferID);
-		glDeleteFramebuffers(1, &it->second->GLID);
-
-		FrameBuffers.erase(it);
 	}
 
 	const RendererCapabilities &SFMLRendererImplementation::Capabilities() const
@@ -480,14 +345,14 @@ namespace FlamingTorch
 		{
 			if(Elements[i].Offset != LastOffset + LastElementSize)
 			{
-				Log::Instance.LogErr(TAG, "Expected a list of connected Offsets; Offset '%d' is not valid: Should be '%d'", Elements[i].Offset, LastOffset + LastElementSize);
+				g_Log.LogErr(TAG, "Expected a list of connected Offsets; Offset '%d' is not valid: Should be '%d'", Elements[i].Offset, LastOffset + LastElementSize);
 
 				return;
 			}
 
 			if(Elements[i].DataType >= VertexElementDataType::Count)
 			{
-				Log::Instance.LogErr(TAG, "Unknown data type '%d'", Elements[i].DataType);
+				g_Log.LogErr(TAG, "Unknown data type '%d'", Elements[i].DataType);
 
 				return;
 			}
@@ -497,7 +362,7 @@ namespace FlamingTorch
 			case VertexElementType::Position:
 				if(PositionOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for POSITION");
+					g_Log.LogErr(TAG, "Found duplicate element for POSITION");
 
 					return;
 				}
@@ -510,7 +375,7 @@ namespace FlamingTorch
 			case VertexElementType::TexCoord:
 				if(TexCoordOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for TEXCOORD");
+					g_Log.LogErr(TAG, "Found duplicate element for TEXCOORD");
 
 					return;
 				}
@@ -524,7 +389,7 @@ namespace FlamingTorch
 			case VertexElementType::Normal:
 				if(NormalOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for NORMAL");
+					g_Log.LogErr(TAG, "Found duplicate element for NORMAL");
 
 					return;
 				}
@@ -538,7 +403,7 @@ namespace FlamingTorch
 			case VertexElementType::Color:
 				if(ColorOffset != -1)
 				{
-					Log::Instance.LogErr(TAG, "Found duplicate element for COLOR");
+					g_Log.LogErr(TAG, "Found duplicate element for COLOR");
 
 					return;
 				}
@@ -550,7 +415,7 @@ namespace FlamingTorch
 				break;
 
 			default:
-				Log::Instance.LogErr(TAG, "Unknown element type '%d'", Elements[i].Type);
+				g_Log.LogErr(TAG, "Unknown element type '%d'", Elements[i].Type);
 
 				return;
 			}
@@ -561,7 +426,7 @@ namespace FlamingTorch
 
 		if(PositionOffset == -1)
 		{
-			Log::Instance.LogErr(TAG, "Expected a Position in this buffer");
+			g_Log.LogErr(TAG, "Expected a Position in this buffer");
 
 			return;
 		}
@@ -573,14 +438,14 @@ namespace FlamingTorch
 
 		if(VertexSize == 0)
 		{
-			Log::Instance.LogErr(TAG, "Vertex Size is 0");
+			g_Log.LogErr(TAG, "Vertex Size is 0");
 
 			return;
 		}
 
 		if(DataByteSize % VertexSize != 0)
 		{
-			Log::Instance.LogErr(TAG, "Data Byte Size is incompatible with estimated Vertex Size '%d': Not a multiple of Vertex Size.", VertexSize);
+			g_Log.LogErr(TAG, "Data Byte Size is incompatible with estimated Vertex Size '%d': Not a multiple of Vertex Size.", VertexSize);
 
 			return;
 		}
@@ -820,21 +685,21 @@ namespace FlamingTorch
 
 		if(it == VertexBuffers.end())
 		{
-			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Buffer", Buffer);
+			g_Log.LogErr(TAG, "Unable to render a buffer '%d': Invalid Buffer", Buffer);
 
 			return;
 		}
 
 		if(VertexMode >= VertexModes::Count)
 		{
-			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Vertex Mode '%d'", Buffer, VertexMode);
+			g_Log.LogErr(TAG, "Unable to render a buffer '%d': Invalid Vertex Mode '%d'", Buffer, VertexMode);
 
 			return;
 		}
 
 		if(End <= Start)
 		{
-			Log::Instance.LogErr(TAG, "Unable to render a buffer '%d': Invalid Start/End Pair '%d, %d'", Buffer, Start, End);
+			g_Log.LogErr(TAG, "Unable to render a buffer '%d': Invalid Start/End Pair '%d, %d'", Buffer, Start, End);
 
 			return;
 		}
@@ -1032,8 +897,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
-		SpriteCache::Instance.Flush(Target);
-
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
 
@@ -1047,8 +910,6 @@ namespace FlamingTorch
 
 	void SFMLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
-		SpriteCache::Instance.Flush(Target);
-
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
 
@@ -1271,7 +1132,7 @@ namespace FlamingTorch
 	bool SFMLRendererImplementation::GetTextureData(TextureHandle Handle, uint8 *Pixels, uint32 BufferByteCount)
 	{
 #if FLPLATFORM_ANDROID
-		Log::Instance.LogErr(TAG, "Unable to GetTextureData on GLES");
+		g_Log.LogErr(TAG, "Unable to GetTextureData on GLES");
 
 		return false;
 #endif
@@ -1331,24 +1192,6 @@ namespace FlamingTorch
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			break;
-
-		case BlendingMode::Additive:
-			EnableState(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);
-
-			break;
-
-		case BlendingMode::Subtractive:
-			EnableState(GL_BLEND);
-
-#if FLPLATFORM_ANDROID //GL_FUNC_SUBTRACT gives error, gotta figure out how to fix this.
-					   //If glBlendEquation is available, then GL_FUNC_SUBTRACT should as well.
-			FLASSERT(0, "Unable to use subtractive blending on Android!");
-#else
-			glBlendEquation(GL_FUNC_SUBTRACT);
-#endif
-
-			break;
 		}
 
 		GLCHECK();
@@ -1398,7 +1241,7 @@ namespace FlamingTorch
 				sf::View TheView(sf::FloatRect(0, 0, ExpectedSize.x, ExpectedSize.y));
 				Window.setView(TheView);
 
-				Target->OnResized(Target, (uint32)ExpectedSize.x, (uint32)ExpectedSize.y);
+				g_Renderer.OnResized(Target, (uint32)ExpectedSize.x, (uint32)ExpectedSize.y);
 
 				LastWindowSize = ExpectedSize;
 			}
@@ -1487,7 +1330,7 @@ namespace FlamingTorch
 				{
 					for (uint32 i = 0; i < InputMouseButton::Count; i++)
 					{
-						if (RendererManager::Instance.Input.MouseButtons[i].Pressed)
+						if (g_Input.MouseButtons[i].Pressed)
 						{
 							Out.Type = RendererEventType::TouchDrag;
 							Out.TouchIndex = i;
@@ -1564,7 +1407,7 @@ namespace FlamingTorch
 					Window.setView(TheView);
 				}
 
-				Target->OnResized(Target, (uint32)Out.WindowSize.x, (uint32)Out.WindowSize.y);
+				g_Renderer.OnResized((uint32)Out.WindowSize.x, (uint32)Out.WindowSize.y);
 
 				return true;
 

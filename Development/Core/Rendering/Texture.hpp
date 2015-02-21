@@ -248,10 +248,6 @@ private:
 
 	TexturePackerIndex Index;
 
-#if USE_GRAPHICS
-	DisposablePointer<Renderer> Owner;
-#endif
-
 public:
 	/*!
 	*	Whether Textures keep their data when loading

@@ -1,6 +1,8 @@
 #pragma once
 #if USE_GRAPHICS
 
+#define JOYSTICKDEADZONE 30
+
 /*!
 *	Input Action Type Enumeration
 */
@@ -15,8 +17,7 @@ namespace InputActionType
 		JoystickAxis, //!<Joystick Axis Action
 		TouchDown, //!<Touch Down Action
 		TouchUp, //!<Touch Up Action
-		TouchDrag, //!<Touch Drag Action
-		Sequence //!<Sequence Action
+		TouchDrag //!<Touch Drag Action
 	};
 }
 
@@ -173,11 +174,11 @@ namespace InputJoystickAxis
 class Renderer;
 
 /*!
-*	Input Center
+*	Input
 */
-class InputCenter
+class Input : public SubSystem
 {
-	friend class RendererManager;
+	friend class Renderer;
 public:
 	static const uint32 JoystickCount = 8;
 	static const uint32 JoystickButtonCount = 32;
@@ -288,13 +289,7 @@ public:
 		//Used for JoyAxis and MouseScroll
 		bool PositiveValues;
 
-		//Fill in Index/SecondaryIndex/Type/PositiveValues for these actions only
-		std::vector<Action> Sequence;
-		uint64 MaxTimeBetweenSequenceKeyPresses, LastSequenceTime;
-		uint8 CurrentSequenceIndex;
-
-		Action() : Type(InputActionType::Keyboard), Index(0), SecondaryIndex(0), MaxTimeBetweenSequenceKeyPresses(0),
-			LastSequenceTime(0), CurrentSequenceIndex(0), PositiveValues(false) {}
+		Action() : Type(InputActionType::Keyboard), Index(0), SecondaryIndex(0), PositiveValues(false) {}
 		KeyInfo *Key() const;
 		MouseButtonInfo *MouseButton() const;
 		JoystickButtonInfo *JoystickButton() const;
@@ -325,216 +320,13 @@ public:
 		virtual void OnJoystickConnected(uint8 Index) = 0;
 		virtual void OnJoystickDisconnected(uint8 Index) = 0;
 		virtual void OnMouseMove(const Vector2 &Position) = 0;
-		virtual void OnCharacterEntered(wchar_t Character) = 0;
+		virtual void OnCharacterEntered(uint32 Character) = 0;
 		virtual void OnAction(const Action &TheAction) = 0;
 		virtual void OnGainFocus() = 0;
 		virtual void OnLoseFocus() = 0;
 	};
 
-	class ScriptedContext : public Context
-	{
-	public:
-		luabind::object OnKeyFunction, OnMouseButtonFunction, OnJoystickButtonFunction, OnJoystickAxisFunction,
-			OnJoystickConnectedFunction, OnJoystickDisconnectedFunction, OnMouseMoveFunction, OnCharacterEnteredFunction,
-			OnActionFunction, OnGainFocusFunction, OnLoseFocusFunction, OnTouchFunction;
-
-		ScriptedContext() {}
-
-		ScriptedContext(const std::string &_Name)
-		{
-			Name = _Name;
-		}
-
-		bool OnKey(const KeyInfo &Key) override
-		{
-			if(OnKeyFunction)
-			{
-				try
-				{
-					return ProtectedLuaCast<bool>(OnKeyFunction(Key));
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnKey: Scripting Error: " + e.what());
-				}
-			}
-
-			return false;
-		}
-
-		bool OnMouseButton(const MouseButtonInfo &Button) override
-		{
-			if(OnMouseButtonFunction)
-			{
-				try
-				{
-					return ProtectedLuaCast<bool>(OnMouseButtonFunction(Button));
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnMouseButton: Scripting Error: " + e.what());
-				}
-			}
-
-			return false;
-		}
-
-		bool OnTouch(const TouchInfo &Touch) override
-		{
-			if(OnTouchFunction)
-			{
-				try
-				{
-					return ProtectedLuaCast<bool>(OnTouchFunction(Touch));
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnTouch: Scripting Error: " + e.what());
-				}
-			}
-
-			return false;
-		}
-
-		bool OnJoystickButton(const JoystickButtonInfo &Button) override
-		{
-			if(OnJoystickButtonFunction)
-			{
-				try
-				{
-					return ProtectedLuaCast<bool>(OnJoystickButtonFunction(Button));
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickButton: Scripting Error: " + e.what());
-				}
-			}
-
-			return false;
-		}
-
-		bool OnJoystickAxis(const JoystickAxisInfo &Axis) override
-		{
-			if(OnJoystickAxisFunction)
-			{
-				try
-				{
-					return ProtectedLuaCast<bool>(OnJoystickAxisFunction(Axis));
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickAxis: Scripting Error: " + e.what());
-				}
-			}
-
-			return false;
-		}
-
-		void OnJoystickConnected(uint8 Index) override
-		{
-			if(OnJoystickConnectedFunction)
-			{
-				try
-				{
-					OnJoystickConnectedFunction(Index);
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickConnected: Scripting Error: " + e.what());
-				}
-			}
-		}
-
-		void OnJoystickDisconnected(uint8 Index) override
-		{
-			if(OnJoystickDisconnectedFunction)
-			{
-				try
-				{
-					OnJoystickDisconnectedFunction(Index);
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnJoystickDisconnected: Scripting Error: " + e.what());
-				}
-			}
-		}
-
-		void OnMouseMove(const Vector2 &Position) override
-		{
-			if(OnMouseMoveFunction)
-			{
-				try
-				{
-					OnMouseMoveFunction(Position);
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnMouseMove: Scripting Error: " + e.what());
-				}
-			}
-		}
-
-		void OnCharacterEntered(wchar_t Character) override
-		{
-			if(OnCharacterEnteredFunction)
-			{
-				try
-				{
-					OnCharacterEnteredFunction((uint32)Character);
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnCharacterEntered: Scripting Error: " + e.what());
-				}
-			}
-		}
-
-		void OnAction(const Action &TheAction) override
-		{
-			if(OnActionFunction)
-			{
-				try
-				{
-					OnActionFunction(TheAction);
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnAction: Scripting Error: " + e.what());
-				}
-			}
-		}
-
-		void OnGainFocus() override
-		{
-			if(OnGainFocusFunction)
-			{
-				try
-				{
-					OnGainFocusFunction();
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnGainFocus: Scripting Error: " + e.what());
-				}
-			}
-		}
-
-		void OnLoseFocus() override
-		{
-			if(OnLoseFocusFunction)
-			{
-				try
-				{
-					OnLoseFocusFunction();
-				}
-				catch(std::exception &e)
-				{
-					LuaScriptManager::Instance.LogError("InputContext[" + Name + "] OnLoseFocus: Scripting Error: " + e.what());
-				}
-			}
-		}
-	};
+	Input();
 
 	/*!
 	*	Whether we have focus
@@ -547,7 +339,7 @@ public:
 	/*!
 	*	Last Typed character
 	*/
-	wchar_t Character;
+	uint32 Character;
 	/*!
 	*	Current Mouse Wheel Value
 	*/
@@ -559,9 +351,8 @@ public:
 
 	/*!
 	*	Center the mouse cursor
-	*	\param TheRenderer the Renderer that should be centered
 	*/
-	void CenterMouse(Renderer *TheRenderer);
+	void CenterMouse();
 
 	/*!
 	*	\return Whether the current input event was consumed by something else
@@ -637,9 +428,10 @@ private:
 
 	bool InputConsumedValue;
 
-	InputCenter();
-	void Initialize();
-	bool Update(Renderer *TheRenderer);
+	void StartUp(uint32 Priority);
+	void Shutdown(uint32 Priority);
+	void Update(uint32 Priority);
+
 	void FireAction(const JoystickAxisInfo &Axis);
 	void FireAction(const JoystickButtonInfo &Button);
 	void FireAction(const MouseButtonInfo &Button);
@@ -647,4 +439,7 @@ private:
 	void FireAction(const TouchInfo &Touch);
 	void FireAction(f32 MouseScrollDelta);
 };
+
+extern Input g_Input;
+
 #endif

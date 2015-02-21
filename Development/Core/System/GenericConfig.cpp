@@ -169,7 +169,7 @@ namespace FlamingTorch
 			{
 				if(Lines[i][Lines[i].length() - 1] != ']')
 				{
-					Log::Instance.LogWarn("GenericConfig", "Mismatch section header '%s'!", Lines[i].c_str());
+					g_Log.LogWarn("GenericConfig", "Mismatch section header '%s'!", Lines[i].c_str());
 
 					ActiveSection = std::string();
 
@@ -184,7 +184,7 @@ namespace FlamingTorch
 
 				if(Index == std::string::npos)
 				{
-					Log::Instance.LogWarn("GenericConfig", "Mismatch setting line '%s'!", Lines[i].c_str());
+					g_Log.LogWarn("GenericConfig", "Mismatch setting line '%s'!", Lines[i].c_str());
 
 					continue;
 				}

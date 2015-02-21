@@ -4,14 +4,14 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	DisposablePointer<Font> RenderTextUtils::DefaultFont;
 
-	bool RenderTextUtils::LoadDefaultFont(Renderer *TheRenderer, const std::string &FileName)
+	bool RenderTextUtils::LoadDefaultFont(const std::string &FileName)
 	{
 		PROFILE("RenderTextUtils LoadDefaultFont", StatTypes::Rendering);
 
 		if(DefaultFont)
 			return true;
 
-		DefaultFont = ResourceManager::Instance.GetFont(TheRenderer, "/" + FileName);
+		DefaultFont = g_ResourceManager.GetFont("/" + FileName);
 
 		if(!DefaultFont)
 		{
@@ -21,7 +21,7 @@ namespace FlamingTorch
 		return true;
 	}
 
-	Rect RenderTextUtils::MeasureTextSimple(Renderer *TheRenderer, const std::string &Str, TextParams Params)
+	Rect RenderTextUtils::MeasureTextSimple(const std::string &Str, TextParams Params)
 	{
 		PROFILE("RenderTextUtils MeasureTextSimple", StatTypes::Rendering);
 
@@ -33,7 +33,7 @@ namespace FlamingTorch
 		f32 LineSpacing = (f32)TheFont->LineSpacing(Params);
 		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', Params).Advance;
 
-		Vector2 Position(0, Params.FontSizeValue), Min, Max;
+		Vector2 Position(0, (f32)Params.FontSizeValue), Min, Max;
 
 		std::vector<std::string> Lines(StringUtils::Split(StringUtils::Strip(Str, '\r'), '\n'));
 
@@ -91,7 +91,7 @@ namespace FlamingTorch
 		return Rect(Min.x, Max.x, Min.y, Max.y);
 	}
 
-	void RenderTextUtils::FitTextAroundLength(Renderer *TheRenderer, const std::string &Str, TextParams Params, const f32 &LengthInPixels, int32 *OutFontSize)
+	void RenderTextUtils::FitTextAroundLength(const std::string &Str, TextParams Params, const f32 &LengthInPixels, int32 *OutFontSize)
 	{
 		PROFILE("RenderTextUtils FitTextAroundLength", StatTypes::Rendering);
 
@@ -102,20 +102,20 @@ namespace FlamingTorch
 
 		Vector2 MeasuredText;
 
-		while(MeasureTextSimple(TheRenderer, Str, Params.FontSize(*OutFontSize)).Right > LengthInPixels)
+		while(MeasureTextSimple(Str, Params.FontSize(*OutFontSize)).Right > LengthInPixels)
 		{
 			(*OutFontSize)--;
 		}
 	}
 
-	void RenderTextUtils::RenderText(Renderer *TheRenderer, const std::string &String, TextParams Params)
+	void RenderTextUtils::RenderText(const std::string &String, TextParams Params)
 	{
 		PROFILE("RenderTextUtils RenderText", StatTypes::Rendering);
 
-		TheRenderer->RenderText.DrawText(String, Params);
+		g_Renderer.RenderText.DrawText(String, Params);
 	}
 
-	Rect RenderTextUtils::MeasureTextLines(Renderer *TheRenderer, std::string *Lines, uint32 LineCount, TextParams Params)
+	Rect RenderTextUtils::MeasureTextLines(std::string *Lines, uint32 LineCount, TextParams Params)
 	{
 		Rect Out;
 		f32 AdditionalBottom = 0;
@@ -124,7 +124,7 @@ namespace FlamingTorch
 
 		for(uint32 i = 0, y = 0; i < LineCount; i++, y += Params.FontSizeValue)
 		{
-			Temp = MeasureTextSimple(TheRenderer, Lines[i], Params);
+			Temp = MeasureTextSimple(Lines[i], Params);
 
 			if(i == 0)
 			{
@@ -164,7 +164,7 @@ namespace FlamingTorch
 		return Out;
 	}
 
-	std::vector<std::string> RenderTextUtils::FitTextOnRect(Renderer *TheRenderer, const std::string &String, TextParams Params, const Vector2 &Size)
+	std::vector<std::string> RenderTextUtils::FitTextOnRect(const std::string &String, TextParams Params, const Vector2 &Size)
 	{
 		PROFILE("RenderTextUtils FitTextOnRect", StatTypes::Rendering);
 
@@ -189,7 +189,7 @@ namespace FlamingTorch
 			{
 				Stream << (Stream.str().length() ? " " : "") << Words[j];
 				
-				MeasuredRect = RenderTextUtils::MeasureTextSimple(TheRenderer, Stream.str(), Params);
+				MeasuredRect = RenderTextUtils::MeasureTextSimple(Stream.str(), Params);
 				MeasuredSize = Vector2(MeasuredRect.Right, MeasuredRect.Bottom);
 
 				if(MeasuredSize.x > Size.x)

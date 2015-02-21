@@ -90,8 +90,6 @@ public:
 		f32 GetPitch();
 	};
 
-	static SoundManager Instance;
-
 	SoundManager() : SubSystem(SOUNDMANAGER_PRIORITY) {}
 
 	DisposablePointer<Sound> GetSound(StringID ID);
@@ -113,6 +111,8 @@ public:
 	void Shutdown(uint32 Priority);
 	void Update(uint32 Priority);
 };
+
+extern SoundManager g_Sound;
 
 class ISoundManagerImplementation
 {

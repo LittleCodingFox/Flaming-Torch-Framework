@@ -15,23 +15,19 @@ namespace FlamingTorch
 #if USE_GRAPHICS
 	void Camera::BeginTransforms(Renderer *TheRenderer)
 	{
-		SpriteCache::Instance.Flush(TheRenderer);
-
 		Matrix4x4 CameraTransform = WorldTransform;
 		CameraTransform.Inverse();
 
 		CameraTransform = CameraTransform * Matrix4x4::Translate(Vector4(DrawOffset, 1));
 
-		TheRenderer->PushMatrices();
-		TheRenderer->SetProjectionMatrix(ProjectionTransform);
-		TheRenderer->SetWorldMatrix(CameraTransform);
+		g_Renderer.PushMatrices();
+		g_Renderer.SetProjectionMatrix(ProjectionTransform);
+		g_Renderer.SetWorldMatrix(CameraTransform);
 	}
 
 	void Camera::EndTransforms(Renderer *TheRenderer)
 	{
-		SpriteCache::Instance.Flush(TheRenderer);
-
-		TheRenderer->PopMatrices();
+		g_Renderer.PopMatrices();
 	}
 #endif
 }

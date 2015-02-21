@@ -3,7 +3,7 @@
 
 namespace FlamingTorch
 {
-	GameClock GameClock::Instance;
+	GameClock g_Clock;
 
 	void GameClock::StartUp(uint32 Priority)
 	{
@@ -13,7 +13,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo("GameClock", "Starting GameClock Subsystem");
+		g_Log.LogInfo("GameClock", "Starting GameClock Subsystem");
 
 		LastTimeFrame = CurrentTime();
 	}
@@ -22,7 +22,7 @@ namespace FlamingTorch
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo("GameClock", "Terminating GameClock Subsystem");
+		g_Log.LogInfo("GameClock", "Terminating GameClock Subsystem");
 
 		SubSystem::Shutdown(Priority);
 	}
@@ -138,12 +138,12 @@ namespace FlamingTorch
 
 	uint64 GameClockTime()
 	{
-		return GameClock::Instance.GetElapsedTime();
+		return g_Clock.GetElapsedTime();
 	}
 
 	uint64 GameClockTimeNoPause()
 	{
-		return GameClock::Instance.CurrentTime();
+		return g_Clock.CurrentTime();
 	}
 
 	uint64 GameClockDiff(uint64 offset)
@@ -160,22 +160,22 @@ namespace FlamingTorch
 
 	f32 GameClockDelta()
 	{
-		return GameClock::Instance.Delta();
+		return g_Clock.Delta();
 	}
 
 	void GameClockSetFixedFrameRate(uint32 FPS)
 	{
-		GameClock::Instance.SetFixedStepRate(FPS);
+		g_Clock.SetFixedStepRate(FPS);
 	}
 
 	bool GameClockMayPerformFixedTimeStep()
 	{
-		return GameClock::Instance.MayPerformFixedStepStep();
+		return g_Clock.MayPerformFixedStepStep();
 	}
 
 	f32 GameClockFixedDelta()
 	{
-		return GameClock::Instance.FixedStepDelta();
+		return g_Clock.FixedStepDelta();
 	}
 
 	f32 LinearTimer::Value()

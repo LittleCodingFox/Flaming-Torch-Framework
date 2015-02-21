@@ -11,25 +11,21 @@
 #include <SimpleDelegate/SimpleDelegate.hpp>
 
 #define FTSTD_VERSION_MAJOR 0
-#define FTSTD_VERSION_MINOR 11
-#define FLAMINGRENDER_VERSION_ID 'fr01'
+#define FTSTD_VERSION_MINOR 12
 
 //Subsystem Priorities
 #define LOG_PRIORITY 1
 #define GAMECLOCK_PRIORITY 2
 #define FPSCOUNTER_PRIORITY 3
-#define LUASCRIPTMANAGER_PRIORITY 4
-#define CONSOLE_PRIORITY 5
-#define RENDERERMANAGER_PRIORITY 6
-#define RESOURCEMANAGER_PRIORITY 7
-#define OBJECTMODEL_PRIORITY 8
-#define PHYSICS_PRIORITY 9
-#define NETWORK_PRIORITY 14
-#define SOUNDMANAGER_PRIORITY 15
-#define FILESYSTEM_WATCHER_PRIORITY 60
-#define PACKAGE_FILESYSTEM_PRIORITY 61
-#define PROFILER_PRIORITY 62
-#define FUTURE_PRIORITY 63
+#define CONSOLE_PRIORITY 4
+#define RENDERER_PRIORITY 5
+#define RESOURCEMANAGER_PRIORITY 6
+#define INPUT_PRIORITY 7
+#define SOUNDMANAGER_PRIORITY 8
+#define FILESYSTEM_WATCHER_PRIORITY 9
+#define PACKAGE_FILESYSTEM_PRIORITY 10
+#define PROFILER_PRIORITY 11
+#define FUTURE_PRIORITY 12
 
 namespace FlamingTorch
 {
@@ -181,8 +177,15 @@ namespace FlamingTorch
 		*	\return the current desktop work area (position and size)
 		*/
 		static Rect GetDesktopWorkArea();
-	};
 
-	void LibWarning(unsigned int Line, const char* FileName,
-		const char* Function, const char* Variable, const char *Message, ...);
+		/*!
+		*	Throw an Assert
+		*	\param Line the line where the assert occurred
+		*	\param FileName the name of the file where the assert occurred
+		*	\param Function the function where the assert occurred
+		*	\param Variable the failed variable
+		*	\param Message information about the failure
+		*/
+		static void Assert(unsigned int Line, const char* FileName, const char* Function, const char* Variable, const char *Message, ...);
+	};
 }

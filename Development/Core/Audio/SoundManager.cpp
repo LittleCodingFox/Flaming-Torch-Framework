@@ -4,7 +4,7 @@ namespace FlamingTorch
 #	if USE_SOUND
 #	define TAG "SoundManager"
 	uint64 SoundManager::SoundCounter = 0, SoundManager::MusicCounter = 0;
-	SoundManager SoundManager::Instance;
+	SoundManager g_Sound;
 
 	SoundManager::Music::~Music()
 	{
@@ -214,7 +214,7 @@ namespace FlamingTorch
 		if(!WasStarted)
 			return 0xFFFFFFFF;
 
-		DisposablePointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(Directory, FileName);
+		DisposablePointer<Stream> PackageStream = g_PackageManager.GetFile(Directory, FileName);
 
 		if(PackageStream.Get() == NULL)
 		{
@@ -283,7 +283,7 @@ namespace FlamingTorch
 		if(!WasStarted)
 			return 0xFFFFFFFF;
 
-		DisposablePointer<Stream> PackageStream = PackageFileSystemManager::Instance.GetFile(Directory, FileName);
+		DisposablePointer<Stream> PackageStream = g_PackageManager.GetFile(Directory, FileName);
 
 		if(PackageStream.Get() == NULL)
 		{
@@ -326,7 +326,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAG, "SoundManager Subsystem starting..");
+		g_Log.LogInfo(TAG, "SoundManager Subsystem starting..");
 
 		Impl.Reset(new DEFAULT_SOUNDMANAGER_IMPLEMENTATION());
 	}
@@ -335,7 +335,7 @@ namespace FlamingTorch
 	{
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAG, "SoundManager Subsystem terminating..");
+		g_Log.LogInfo(TAG, "SoundManager Subsystem terminating..");
 
 		while(Sounds.begin() != Sounds.end())
 		{
@@ -434,7 +434,7 @@ namespace FlamingTorch
 
 		if(CurrentObjects != TotalObjects)
 		{
-			Log::Instance.LogDebug(TAG, "Cleared %d objects (Prev: %d/Now: %d)", TotalObjects - CurrentObjects, TotalObjects, CurrentObjects);
+			g_Log.LogDebug(TAG, "Cleared %d objects (Prev: %d/Now: %d)", TotalObjects - CurrentObjects, TotalObjects, CurrentObjects);
 		}
 	}
 #endif

@@ -2,7 +2,7 @@
 
 namespace FlamingTorch
 {
-	FPSCounter FPSCounter::Instance;
+	FPSCounter g_FPSCounter;
 
 	uint32 FPSCounter::FPS()
 	{
@@ -17,7 +17,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo("FPSCounter", "Initializing FPS Counter...");
+		g_Log.LogInfo("FPSCounter", "Initializing FPS Counter...");
 	}
 
 	void FPSCounter::Shutdown(uint32 Priority)
@@ -26,7 +26,7 @@ namespace FlamingTorch
 
 		SubSystem::Shutdown(Priority);
 
-		Log::Instance.LogInfo("FPSCounter", "Terminating FPS Counter...");
+		g_Log.LogInfo("FPSCounter", "Terminating FPS Counter...");
 	}
 
 	void FPSCounter::Update(uint32 Priority)
@@ -35,7 +35,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Time += GameClock::Instance.Delta();
+		Time += g_Clock.Delta();
 		Counter++;
 
 		if(Time >= 1.f)

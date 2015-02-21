@@ -37,17 +37,17 @@ int main(int argc, char **argv)
 	EnableMinidumps(FLGameName().c_str(), CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
 #endif
 
-	Log::Instance.Register();
-	ResourceManager::Instance.Register();
+	g_Log.Register();
+	g_ResourceManager.Register();
 
-	Log::Instance.FolderName = FLGameName();
+	g_Log.FolderName = FLGameName();
 
 	InitSubsystems();
 
 	if(argc == 1)
 	{
-		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-maxwidth width] [-maxheight height] [-padding pixels] [-widthoverride width] [-heightoverride height] [-out outfilename] filename", argv[0]);
-		Log::Instance.LogInfo(TAG, "Default Max Width and Height: 4096x4096");
+		g_Log.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-maxwidth width] [-maxheight height] [-padding pixels] [-widthoverride width] [-heightoverride height] [-out outfilename] filename", argv[0]);
+		g_Log.LogInfo(TAG, "Default Max Width and Height: 4096x4096");
 
 		DeInitSubsystems();
 
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 			{
 				OutDirectory = argv[i + 1];
 
-				Log::Instance.LogInfo(TAG, "Set Out directory '%s'", argv[i + 1]);
+				g_Log.LogInfo(TAG, "Set Out directory '%s'", argv[i + 1]);
 
 				i++;
 			};
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 			{
 				ResourceDirectories.push_back(argv[i + 1]);
 
-				Log::Instance.LogInfo(TAG, "Added resource directory '%s'", argv[i + 1]);
+				g_Log.LogInfo(TAG, "Added resource directory '%s'", argv[i + 1]);
 
 				i++;
 			};
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 			{
 				OutFileName = argv[i + 1];
 
-				Log::Instance.LogInfo(TAG, "Set Out file '%s'", argv[i + 1]);
+				g_Log.LogInfo(TAG, "Set Out file '%s'", argv[i + 1]);
 
 				i++;
 			};
@@ -164,24 +164,24 @@ int main(int argc, char **argv)
 		WidthOverride = HeightOverride = -1;
 	};
 
-	Log::Instance.LogInfo(TAG, "Starting version %d.%d", VERSION_MAJOR, VERSION_MINOR);
-	Log::Instance.LogInfo(TAG, "Will store compiled data to directory '%s' as '%s'", OutDirectory.c_str(), OutFileName.c_str());
-	Log::Instance.LogInfo(TAG, "Maximum size: %dx%d", MaxWidth, MaxHeight);
+	g_Log.LogInfo(TAG, "Starting version %d.%d", VERSION_MAJOR, VERSION_MINOR);
+	g_Log.LogInfo(TAG, "Will store compiled data to directory '%s' as '%s'", OutDirectory.c_str(), OutFileName.c_str());
+	g_Log.LogInfo(TAG, "Maximum size: %dx%d", MaxWidth, MaxHeight);
 
 	if (WidthOverride > 0)
 	{
-		Log::Instance.LogInfo(TAG, "Size override: %dx%d", WidthOverride, HeightOverride);
+		g_Log.LogInfo(TAG, "Size override: %dx%d", WidthOverride, HeightOverride);
 	}
 
-	Log::Instance.LogInfo(TAG, "Padding: %d", Padding);
-	Log::Instance.LogInfo(TAG, "Processing '%s'", FileName.c_str());
+	g_Log.LogInfo(TAG, "Padding: %d", Padding);
+	g_Log.LogInfo(TAG, "Processing '%s'", FileName.c_str());
 
 	DisposablePointer<FileStream> Stream(new FileStream());
 	GenericConfig InConfig;
 
 	if(!Stream->Open(FileName, StreamFlags::Read | StreamFlags::Text) || !InConfig.DeSerialize(Stream))
 	{
-		Log::Instance.LogInfo(TAG, "Unable to open '%s' for reading!", FileName.c_str());
+		g_Log.LogInfo(TAG, "Unable to open '%s' for reading!", FileName.c_str());
 
 		DeInitSubsystems();
 
@@ -195,7 +195,7 @@ int main(int argc, char **argv)
 	std::vector<DisposablePointer<Texture> > Frames;
 	std::map<std::string, uint32> AnimationIndices;
 
-	Log::Instance.LogInfo(TAG, "Parsing Animations...");
+	g_Log.LogInfo(TAG, "Parsing Animations...");
 
 	//Read the animation frames
 	for(GenericConfig::Section::ValueMap::iterator it = AnimationsSection.Values.begin(); it != AnimationsSection.Values.end(); it++)
@@ -204,17 +204,17 @@ int main(int argc, char **argv)
 
 		std::vector<std::string> AnimationFrames = StringUtils::Split(it->second.Content, '|');
 
-		Log::Instance.LogInfo(TAG, "... %s (%d frames)", AnimationName.c_str(), AnimationFrames.size());
+		g_Log.LogInfo(TAG, "... %s (%d frames)", AnimationName.c_str(), AnimationFrames.size());
 
 		for(uint32 i = 0; i < AnimationFrames.size(); i++)
 		{
-			DisposablePointer<Texture> Frame = ResourceManager::Instance.GetTexture(AnimationFrames[i]);
+			DisposablePointer<Texture> Frame = g_ResourceManager.GetTexture(AnimationFrames[i]);
 			
 			if(!Frame)
 			{
 				for(uint32 j = 0; j < ResourceDirectories.size(); j++)
 				{
-					Frame = ResourceManager::Instance.GetTexture(Path(ResourceDirectories[j] + "/" + AnimationFrames[i]).FullPath());
+					Frame = g_ResourceManager.GetTexture(Path(ResourceDirectories[j] + "/" + AnimationFrames[i]).FullPath());
 
 					if(Frame)
 						break;
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 
 			if(!Frame.Get())
 			{
-				Log::Instance.LogWarn(TAG, "Unable to load frame '%s' for animation '%s'", AnimationFrames[i].c_str(), AnimationName.c_str());
+				g_Log.LogWarn(TAG, "Unable to load frame '%s' for animation '%s'", AnimationFrames[i].c_str(), AnimationName.c_str());
 
 				continue;
 			};
@@ -235,12 +235,12 @@ int main(int argc, char **argv)
 
 			if (WidthOverride > 0 && (Frame->Width() > (uint32)WidthOverride || Frame->Height() > (uint32)HeightOverride))
 			{
-				Log::Instance.LogWarn(TAG, "Unable to load frame '%s' for animation '%s' because it is bigger than the size override '%dx%d'", AnimationFrames[i].c_str(), AnimationName.c_str(), WidthOverride, HeightOverride);
+				g_Log.LogWarn(TAG, "Unable to load frame '%s' for animation '%s' because it is bigger than the size override '%dx%d'", AnimationFrames[i].c_str(), AnimationName.c_str(), WidthOverride, HeightOverride);
 
 				continue;
 			};
 			
-			Log::Instance.LogWarn(TAG, "Loaded frame '%s'", AnimationFrames[i].c_str());
+			g_Log.LogWarn(TAG, "Loaded frame '%s'", AnimationFrames[i].c_str());
 
 			if (WidthOverride > 0)
 			{
@@ -259,7 +259,7 @@ int main(int argc, char **argv)
 
 	if(Packed.Get() == NULL || Packed->Indices.size() != Frames.size())
 	{
-		Log::Instance.LogErr(TAG, "Unable to pack all textures together; Make sure you have a large enough size and don't have too many textures set up. "
+		g_Log.LogErr(TAG, "Unable to pack all textures together; Make sure you have a large enough size and don't have too many textures set up. "
 			"Current Max Size: %dx%d", MaxWidth, MaxHeight);
 
 		DeInitSubsystems();
@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 
 	if(!OutStream->Open(OutFileNamePNG, StreamFlags::Write) || !Packed->MainTexture->GetData()->Save(OutStream, TEInfo))
 	{
-		Log::Instance.LogErr(TAG, "Unable to open '%s' for writing", OutFileNamePNG.c_str());
+		g_Log.LogErr(TAG, "Unable to open '%s' for writing", OutFileNamePNG.c_str());
 
 		DeInitSubsystems();
 
@@ -327,7 +327,7 @@ int main(int argc, char **argv)
 
 	if(!OutStream->Open(OutFileNameCFG, StreamFlags::Write | StreamFlags::Text) || !OutConfig.Serialize(OutStream))
 	{
-		Log::Instance.LogErr(TAG, "Unable to open '%s' for writing", OutFileNameCFG.c_str());
+		g_Log.LogErr(TAG, "Unable to open '%s' for writing", OutFileNameCFG.c_str());
 
 		DeInitSubsystems();
 
@@ -336,15 +336,15 @@ int main(int argc, char **argv)
 
 	OutStream->Close();
 
-	Log::Instance.LogInfo(TAG, "Wrote '%d' Frames and '%d' Animations", Frames.size(), AnimationIndices.size());
+	g_Log.LogInfo(TAG, "Wrote '%d' Frames and '%d' Animations", Frames.size(), AnimationIndices.size());
 
-	Log::Instance.LogInfo(TAG, "Testing for correct deserialization");
+	g_Log.LogInfo(TAG, "Testing for correct deserialization");
 
 	DisposablePointer<Texture> MainTexture = Packed->MainTexture;
 
 	if(!OutStream->Open(OutFileNameCFG, StreamFlags::Read | StreamFlags::Text) || !OutConfig.DeSerialize(OutStream))
 	{
-		Log::Instance.LogErr(TAG, "Unable to open '%s' for reading", OutFileNameCFG.c_str());
+		g_Log.LogErr(TAG, "Unable to open '%s' for reading", OutFileNameCFG.c_str());
 
 		DeInitSubsystems();
 
@@ -353,7 +353,7 @@ int main(int argc, char **argv)
 
 	Packed = TexturePacker::FromConfig(MainTexture, OutConfig);
 
-	Log::Instance.LogInfo(TAG, "Status of reloading: %s", Packed.Get() && Packed->Indices.size() == Frames.size() ? "OK" : "FAIL");
+	g_Log.LogInfo(TAG, "Status of reloading: %s", Packed.Get() && Packed->Indices.size() == Frames.size() ? "OK" : "FAIL");
 
 	Packed.Dispose();
 

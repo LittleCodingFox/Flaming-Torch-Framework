@@ -125,13 +125,13 @@ public:
 
 	void Finalize(const char *OutFileName)
 	{
-		Log::Instance.LogInfo(TAG, "Finalizing!");
+		g_Log.LogInfo(TAG, "Finalizing!");
 
 		FileStream Stream;
 
 		if(!Stream.Open(OutFileName, StreamFlags::Write))
 		{
-			Log::Instance.LogErr(TAG, "Unable to open '%s' for writing!", OutFileName);
+			g_Log.LogErr(TAG, "Unable to open '%s' for writing!", OutFileName);
 
 			return;
 		};
@@ -235,7 +235,7 @@ public:
                 
                 if(ImageSize.x > MaxImageSize.x || ImageSize.y > MaxImageSize.y)
                 {
-                    Log::Instance.LogErr(TAG, "Unable to handle Unique Tiles Textures bigger than %dx%d, quitting...", MapSplitSize, MapSplitSize);
+                    g_Log.LogErr(TAG, "Unable to handle Unique Tiles Textures bigger than %dx%d, quitting...", MapSplitSize, MapSplitSize);
 
 					DeInitSubsystems();
                     
@@ -247,7 +247,7 @@ public:
 
 				if(!PackedUniqueTiles.Get() || PackedUniqueTiles->IndexCount() != UniqueTextures.size())
 				{
-					Log::Instance.LogErr(TAG, "Unable to pack unique tiles: %s (IC: %d/%d)", PackedUniqueTiles.Get() == NULL ? "Unable to generate the final atlas" : "Unable to pack all textures",
+					g_Log.LogErr(TAG, "Unable to pack unique tiles: %s (IC: %d/%d)", PackedUniqueTiles.Get() == NULL ? "Unable to generate the final atlas" : "Unable to pack all textures",
 						PackedUniqueTiles.Get() ? PackedUniqueTiles->IndexCount() : 0, UniqueTextures.size());
 
 					DeInitSubsystems();
@@ -267,7 +267,7 @@ public:
                 
 				if(!Out.Open(str.str(), StreamFlags::Write) || !PackedUniqueTiles->MainTexture->GetData()->Save(&Out, TInfo))
                 {
-                    Log::Instance.LogErr(TAG, "Unable to save Unique Tiles Texture");
+                    g_Log.LogErr(TAG, "Unable to save Unique Tiles Texture");
                     
                     return;
                 };
@@ -291,7 +291,7 @@ public:
 
 				if(!Out.Open(Path(str.str()).ChangeExtension("cfg").FullPath().c_str(), StreamFlags::Write|StreamFlags::Text) || !OutConfig.Serialize(&Out))
 				{
-                    Log::Instance.LogErr(TAG, "Unable to save Unique Tiles Texture config");
+                    g_Log.LogErr(TAG, "Unable to save Unique Tiles Texture config");
                     
                     return;
 				};
@@ -449,7 +449,7 @@ public:
 
 		Stream.Close();
 
-		Log::Instance.LogInfo(TAG, "All OK!");
+		g_Log.LogInfo(TAG, "All OK!");
 	};
 }MapData;
 
@@ -459,13 +459,13 @@ int main(int argc, char **argv)
 	EnableMinidumps(FLGameName().c_str(), CoreUtils::MakeVersionString(VERSION_MAJOR, VERSION_MINOR).c_str());
 #endif
 
-	Log::Instance.Register();
+	g_Log.Register();
 
-	Log::Instance.FolderName = FLGameName();
+	g_Log.FolderName = FLGameName();
 
 	if(argc == 1)
 	{
-		Log::Instance.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-imagemode] filename", argv[0]);
+		g_Log.LogInfo(TAG, "Usage: %s [-dir outdirectory] [-resdir resourcedirectory] [-imagemode] filename", argv[0]);
 
 		return 1;
 	};
@@ -504,7 +504,7 @@ int main(int argc, char **argv)
 		{
 			if(i + 1 < argc)
 			{
-				Log::Instance.LogInfo(TAG, "Added resources directory '%s'", argv[i + 1]);
+				g_Log.LogInfo(TAG, "Added resources directory '%s'", argv[i + 1]);
 
 				ResourceDirectories.push_back(argv[i + 1]);
 
@@ -539,21 +539,21 @@ int main(int argc, char **argv)
 		};
 	};
 
-	Log::Instance.LogInfo(TAG, "Starting version %d.%d", VERSION_MAJOR, VERSION_MINOR);
-	Log::Instance.LogInfo(TAG, "Will store compiled data to '%s'", OutFileName.c_str());
+	g_Log.LogInfo(TAG, "Starting version %d.%d", VERSION_MAJOR, VERSION_MINOR);
+	g_Log.LogInfo(TAG, "Will store compiled data to '%s'", OutFileName.c_str());
 
 	DisposablePointer<FileStream> Stream(new FileStream());
 
 	if(!Stream->Open(FileName, StreamFlags::Read | StreamFlags::Text))
 	{
-		Log::Instance.LogInfo(TAG, "Unable to open '%s' for reading!", FileName.c_str());
+		g_Log.LogInfo(TAG, "Unable to open '%s' for reading!", FileName.c_str());
 
 		DeInitSubsystems();
 
 		return 1;
 	};
 
-	Log::Instance.LogInfo(TAG, "Parsing '%s'", FileName.c_str());
+	g_Log.LogInfo(TAG, "Parsing '%s'", FileName.c_str());
 
 	DisposablePointer<Tmx::Map> Map(new Tmx::Map());
 
@@ -561,7 +561,7 @@ int main(int argc, char **argv)
 
 	if(Map->HasError())
 	{
-		Log::Instance.LogInfo(TAG, "Error parsing '%s': %s.", FileName.c_str(), Map->GetErrorText().c_str());
+		g_Log.LogInfo(TAG, "Error parsing '%s': %s.", FileName.c_str(), Map->GetErrorText().c_str());
 
 		DeInitSubsystems();
 
@@ -587,14 +587,14 @@ int main(int argc, char **argv)
 		break;
 
 	case Tmx::TMX_MO_STAGGERED:
-		Log::Instance.LogInfo(TAG, "Error parsing '%s': Staggered maps not supported.", FileName.c_str());
+		g_Log.LogInfo(TAG, "Error parsing '%s': Staggered maps not supported.", FileName.c_str());
 
 		DeInitSubsystems();
 
 		return 1;
 
     default:
-        Log::Instance.LogInfo(TAG, "Error parsing '%s': Map Orientation not supported.", FileName.c_str());
+        g_Log.LogInfo(TAG, "Error parsing '%s': Map Orientation not supported.", FileName.c_str());
             
         DeInitSubsystems();
             
@@ -604,7 +604,7 @@ int main(int argc, char **argv)
 
 	const std::vector<Tmx::Tileset *> &Sets = Map->GetTilesets();
 
-	Log::Instance.LogInfo(TAG, "Parsing %d Tilesets", Sets.size());
+	g_Log.LogInfo(TAG, "Parsing %d Tilesets", Sets.size());
 
 	for(uint32 i = 0; i < Sets.size(); i++)
 	{
@@ -639,7 +639,7 @@ int main(int argc, char **argv)
 
 		if(!Stream.Length())
 		{
-			Log::Instance.LogErr(TAG, "Unable to open a tileset '%s'!", TileSet->FileName.c_str());
+			g_Log.LogErr(TAG, "Unable to open a tileset '%s'!", TileSet->FileName.c_str());
 
 			DeInitSubsystems();
 
@@ -648,7 +648,7 @@ int main(int argc, char **argv)
 
 		if(!TileSet->Image->FromStream(&Stream))
 		{
-			Log::Instance.LogErr(TAG, "Unable to load a tileset with image '%s'!", TileSet->FileName.c_str());
+			g_Log.LogErr(TAG, "Unable to load a tileset with image '%s'!", TileSet->FileName.c_str());
 
 			DeInitSubsystems();
 
@@ -668,7 +668,7 @@ int main(int argc, char **argv)
 			TileSet->TransparentColor = Vector3((f32)StringUtils::HexToInt(Color.substr(0, 2)),
 				(f32)StringUtils::HexToInt(Color.substr(2, 2)), (f32)StringUtils::HexToInt(Color.substr(4, 2)));
 
-			Log::Instance.LogInfo(TAG, "Baking tileset '%s' with color '%s'", TileSet->FileName.c_str(), Color.c_str());
+			g_Log.LogInfo(TAG, "Baking tileset '%s' with color '%s'", TileSet->FileName.c_str(), Color.c_str());
 
 			uint8 *Pixels = &TileSet->Image->Data[0];
 
@@ -676,7 +676,7 @@ int main(int argc, char **argv)
 
 			if(!Pixels)
 			{
-				Log::Instance.LogErr(TAG, "Unable to get the texture pixels! Silently quitting...");
+				g_Log.LogErr(TAG, "Unable to get the texture pixels! Silently quitting...");
 
 				DeInitSubsystems();
 
@@ -704,7 +704,7 @@ int main(int argc, char **argv)
 
 			if(!Out->Open(OutFileName, StreamFlags::Write) || !TileSet->Image->Save(Out, TEInfo))
 			{
-				Log::Instance.LogErr("Unable to save baked texture to '%s'!", OutFileName.c_str());
+				g_Log.LogErr("Unable to save baked texture to '%s'!", OutFileName.c_str());
 
 				DeInitSubsystems();
 
@@ -716,7 +716,7 @@ int main(int argc, char **argv)
 
 		const std::vector<Tmx::Tile *> &Tiles = Sets[i]->GetTiles();
 
-		Log::Instance.LogInfo(TAG, "Parsing %d Tiles", Tiles.size());
+		g_Log.LogInfo(TAG, "Parsing %d Tiles", Tiles.size());
 
 		for(uint32 j = 0; j < Tiles.size(); j++)
 		{
@@ -730,7 +730,7 @@ int main(int argc, char **argv)
 
 	const std::vector<Tmx::Layer *> &Layers = Map->GetLayers();
 	
-	Log::Instance.LogInfo(TAG, "Parsing %d Layers", Layers.size());
+	g_Log.LogInfo(TAG, "Parsing %d Layers", Layers.size());
 
 	for(int32 i = MapData.TileSets.size() - 1; i >= 0; i--)
 	{
@@ -751,7 +751,7 @@ int main(int argc, char **argv)
 
 					if(TileSetIndex == 0xFFFFFFFF || MapData.TileSets.find(TileSetIndex) == MapData.TileSets.end())
 					{
-						Log::Instance.LogErr(TAG, "Unable to find a Tileset, silently exiting...");
+						g_Log.LogErr(TAG, "Unable to find a Tileset, silently exiting...");
 
 						DeInitSubsystems();
 
@@ -797,7 +797,7 @@ int main(int argc, char **argv)
 
 				if(TileSetIndex == 0xFFFFFFFF || MapData.TileSets.find(TileSetIndex) == MapData.TileSets.end())
 				{
-					Log::Instance.LogErr(TAG, "Unable to find a Tileset, silently exiting...");
+					g_Log.LogErr(TAG, "Unable to find a Tileset, silently exiting...");
 
 					DeInitSubsystems();
 
@@ -833,7 +833,7 @@ int main(int argc, char **argv)
 
 	const std::vector<Tmx::ObjectGroup *> &Objects = Map->GetObjectGroups();
 
-	Log::Instance.LogInfo(TAG, "Parsing %d Object Groups", Objects.size());
+	g_Log.LogInfo(TAG, "Parsing %d Object Groups", Objects.size());
 
 	for(uint32 i = 0; i < Objects.size(); i++)
 	{

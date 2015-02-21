@@ -19,7 +19,7 @@ namespace FlamingTorch
 	{
 		if (Max - Min < 0)
 		{
-			Log::Instance.LogWarn(TAG, "Invalid Min/Max: (%f, %f)", Min, Max);
+			g_Log.LogWarn(TAG, "Invalid Min/Max: (%f, %f)", Min, Max);
 
 			return 0;
 		}
@@ -31,7 +31,7 @@ namespace FlamingTorch
 	{
 		if (Max - Min < 0)
 		{
-			Log::Instance.LogWarn(TAG, "Invalid Min/Max: (%d, %d)", Min, Max);
+			g_Log.LogWarn(TAG, "Invalid Min/Max: (%d, %d)", Min, Max);
 
 			return 0;
 		}

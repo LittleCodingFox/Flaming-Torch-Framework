@@ -13,6 +13,10 @@ namespace StatTypes
 
 class Profiler : public SubSystem
 {
+private:
+	void StartUp(uint32 Priority);
+	void Shutdown(uint32 Priority);
+	void Update(uint32 Priority);
 public:
 	struct Packet
 	{
@@ -29,22 +33,16 @@ public:
 
 	std::mutex Lock;
 
-private:
 	Profiler() : SubSystem(PROFILER_PRIORITY), UpdateTimer(0) {}
-public:
-	static Profiler Instance;
-
 	~Profiler() {}
-
-	void StartUp(uint32 Priority);
-	void Shutdown(uint32 Priority);
-	void Update(uint32 Priority);
 
 	void ReportStat(const std::string &Name, uint32 Type, uint64 ms);
 	static std::string StatTypeString(uint32 Type);
 
 	SimpleDelegate::SimpleDelegate<const PacketMap &> OnFinishFrame;
 };
+
+extern Profiler g_Profiler;
 
 class ProfilerFragment
 {

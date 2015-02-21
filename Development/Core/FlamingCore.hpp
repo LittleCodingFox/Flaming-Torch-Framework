@@ -11,6 +11,7 @@
 #include <sstream>
 #include <thread>
 #include <mutex>
+#include <algorithm>
 #include "MaxRectsBinPack.h"
 #
 extern "C"
@@ -19,12 +20,6 @@ extern "C"
 #	include <lua/lauxlib.h>
 #	include <lua/lualib.h>
 }
-#	include <luabind/luabind.hpp>
-#	include <luabind/class.hpp>
-#	include <luabind/function.hpp>
-#	include <luabind/operator.hpp>
-#	include <luabind/out_value_policy.hpp>
-#	include <luabind/return_reference_to_policy.hpp>
 #	include <json/json.h>
 #	include <ft2build.h>
 #	include FT_FREETYPE_H
@@ -52,7 +47,7 @@ namespace FlamingTorch
 #	undef CreateDirectory
 #	define INVALID_FTGHANDLE 0
 
-	typedef uint64 TextureHandle, VertexBufferHandle, RendererHandle, SoundHandle, MusicHandle, FrameBufferHandle;
+	typedef uint64 TextureHandle, VertexBufferHandle, SoundHandle, MusicHandle;
 
 #	include "System/DisposablePointer.hpp"
 #	include "System/MiniDump.hpp"
@@ -70,13 +65,8 @@ namespace FlamingTorch
 #	include "System/Randomizer.hpp"
 #	include "System/DynamicLink.hpp"
 #
-#	include "Scripting/LuaScript.hpp"
-#
 #	include "Rendering/Texture.hpp"
 #
-#	include "System/PerlinNoise.hpp"
-#
-#	include "Rendering/FrustumCuller.hpp"
 #	include "Rendering/FPSCounter.hpp"
 #	include "Rendering/Camera.hpp"
 #
@@ -86,7 +76,7 @@ namespace FlamingTorch
 #	include "Rendering/Text.hpp"
 #	include "Rendering/RenderTextUtils.hpp"
 #	include "System/ResourceManager.hpp"
-#	include "Rendering/RenderBase.hpp"
+#	include "Rendering/Rendering.hpp"
 #
 #	include "Game/GameInterface.hpp"
 #
@@ -94,6 +84,5 @@ namespace FlamingTorch
 #	include "Rendering/TiledMap.hpp"
 #
 #	include "Game/Console.hpp"
-#	include "Game/ObjectModel.hpp"
 #
 }

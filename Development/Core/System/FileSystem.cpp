@@ -42,7 +42,7 @@ namespace FlamingTorch
 
 #if !FLPLATFORM_ANDROID
 	FW::FileWatcher GlobalFileWatcher;
-	FileSystemWatcher FileSystemWatcher::Instance;
+	FileSystemWatcher g_FileWatcher;
 
 	class FileSystemWatcherCallback : public FW::FileWatchListener
 	{
@@ -69,7 +69,7 @@ namespace FlamingTorch
 				break;
 			}
 
-			FileSystemWatcher::Instance.OnAction(dir, filename, ActionID);
+			g_FileWatcher.OnAction(dir, filename, ActionID);
 		}
 	};
 #endif
@@ -178,12 +178,7 @@ namespace FlamingTorch
 		Config.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 #if USE_GRAPHICS
-		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
-
-		if(TheRenderer)
-		{
-			Config.hwndOwner = (HWND)TheRenderer->WindowHandle();
-		}
+		Config.hwndOwner = (HWND)g_Renderer.WindowHandle();
 #endif
 
 		if(Config.hwndOwner == NULL)
@@ -197,7 +192,7 @@ namespace FlamingTorch
 		}
 		else
 		{
-			Log::Instance.LogDebug(TAGUTILS, "Failed to OpenFileDialog: 0x%04x", CommDlgExtendedError());
+			g_Log.LogDebug(TAGUTILS, "Failed to OpenFileDialog: 0x%04x", CommDlgExtendedError());
 		}
 #endif
 
@@ -224,12 +219,7 @@ namespace FlamingTorch
 		Config.Flags = OFN_OVERWRITEPROMPT;
 
 #if USE_GRAPHICS
-		Renderer *TheRenderer = RendererManager::Instance.ActiveRenderer();
-
-		if(TheRenderer)
-		{
-			Config.hwndOwner = (HWND)TheRenderer->WindowHandle();
-		}
+		Config.hwndOwner = (HWND)g_Renderer.WindowHandle();
 #endif
 
 		if(Config.hwndOwner == NULL)
@@ -243,7 +233,7 @@ namespace FlamingTorch
 		}
 		else
 		{
-			Log::Instance.LogDebug("FileSystemUtils", "Failed to SaveFileDialog: 0x%04x", CommDlgExtendedError());
+			g_Log.LogDebug("FileSystemUtils", "Failed to SaveFileDialog: 0x%04x", CommDlgExtendedError());
 		}
 #endif
 
@@ -255,13 +245,13 @@ namespace FlamingTorch
 	{
 		std::vector<std::string> Files;
 
-		Log::Instance.LogDebug(TAGUTILS, "Scanning directory '%s' (Recursive: %s)", Directory.c_str(), Recursive ? "YES" : "NO");
+		g_Log.LogDebug(TAGUTILS, "Scanning directory '%s' (Recursive: %s)", Directory.c_str(), Recursive ? "YES" : "NO");
 
 		DIR *Root = opendir (Directory.c_str());
 
 		if(Root == NULL)
 		{
-			Log::Instance.LogDebug(TAGUTILS, "Unable to opendir directory '%s'", Directory.c_str());
+			g_Log.LogDebug(TAGUTILS, "Unable to opendir directory '%s'", Directory.c_str());
 
 			return Files;
 		}
@@ -270,7 +260,7 @@ namespace FlamingTorch
 
 		if(Entry == NULL)
 		{
-			Log::Instance.LogErr(TAGUTILS, "Error while reading directory: %d", errno);
+			g_Log.LogErr(TAGUTILS, "Error while reading directory: %d", errno);
 
 			closedir(Root);
 
@@ -348,7 +338,7 @@ namespace FlamingTorch
         {
             if(!In.Open(Files[i], StreamFlags::Read))
             {
-                Log::Instance.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
+                g_Log.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory", Files[i].c_str());
                 
                 continue;
             }
@@ -373,7 +363,7 @@ namespace FlamingTorch
                 
                 if(!Out.Open(OutFileName, StreamFlags::Write))
                 {
-                    Log::Instance.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot open '%s' for writing",
+                    g_Log.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot open '%s' for writing",
                                          Files[i].c_str(), OutFileName.c_str());
                     
                     continue;
@@ -384,7 +374,7 @@ namespace FlamingTorch
             {
                 FileSystemUtils::RemoveFile(OutFileName);
                 
-                Log::Instance.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot copy to '%s'",
+                g_Log.LogErr(TAGUTILS, "Unable to copy a file '%s' while copying a directory: Cannot copy to '%s'",
                                      Files[i].c_str(), OutFileName.c_str());
                 
                 continue;
@@ -406,7 +396,7 @@ namespace FlamingTorch
 
 			if(Errno != EEXIST)
 			{
-				Log::Instance.LogWarn(TAGUTILS, "Failed to create directory '%s': %d", Directory.c_str(), Errno);
+				g_Log.LogWarn(TAGUTILS, "Failed to create directory '%s': %d", Directory.c_str(), Errno);
 			}
 		}
         
@@ -436,7 +426,7 @@ namespace FlamingTorch
         
         if(Root == NULL)
         {
-            Log::Instance.LogDebug(TAGUTILS, "Failed to remove directory %s", Directory.c_str());
+            g_Log.LogDebug(TAGUTILS, "Failed to remove directory %s", Directory.c_str());
             
             return false;
         }
@@ -453,7 +443,7 @@ namespace FlamingTorch
                 {
 					if(!DeleteDirectory(Path(Directory + "/" + FileName).FullPath()))
                     {
-                        Log::Instance.LogDebug(TAGUTILS, "Failed to remove subdirectory %s/%s", Directory.c_str(), FileName.c_str());
+                        g_Log.LogDebug(TAGUTILS, "Failed to remove subdirectory %s/%s", Directory.c_str(), FileName.c_str());
 
 						closedir(Root);
 
@@ -464,7 +454,7 @@ namespace FlamingTorch
                 {
 					if(!FileSystemUtils::RemoveFile(Path(Directory + "/" + FileName).FullPath()))
                     {
-                        Log::Instance.LogDebug(TAGUTILS, "Failed to remove file %s/%s", Directory.c_str(), FileName.c_str());
+                        g_Log.LogDebug(TAGUTILS, "Failed to remove file %s/%s", Directory.c_str(), FileName.c_str());
 
 						closedir(Root);
                         
@@ -489,7 +479,7 @@ namespace FlamingTorch
         
         if(Root == NULL)
         {
-            Log::Instance.LogErr(TAGUTILS, "Failed to open Directory '%s' for reading!", Directory.c_str());
+            g_Log.LogErr(TAGUTILS, "Failed to open Directory '%s' for reading!", Directory.c_str());
             
             return Out;
         }
@@ -612,16 +602,16 @@ namespace FlamingTorch
 			FileSystemUtils::CreateDirectoryRecursive(ActualStorageDirectory.c_str());
 #endif
 
-			if(Log::Instance.FolderName.length())
+			if(g_Log.FolderName.length())
 			{
-				ActualStorageDirectory += "/" + Log::Instance.FolderName;
+				ActualStorageDirectory += "/" + g_Log.FolderName;
 				ActualStorageDirectory = Path(ActualStorageDirectory.c_str()).FullPath();
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
 			}
-			else if(GameInterface::Instance.Get())
+			else if(g_Game.Get())
 			{
-				ActualStorageDirectory += "/" + GameInterface::Instance->GameName() + "_files";
+				ActualStorageDirectory += "/" + g_Game->GameName() + "_files";
 				ActualStorageDirectory = Path(ActualStorageDirectory.c_str()).FullPath();
 
 				FileSystemUtils::CreateDirectory(ActualStorageDirectory.c_str());
@@ -1286,7 +1276,7 @@ namespace FlamingTorch
 
 		if(!EntryList.size())
 		{
-			Log::Instance.LogWarn(TAGMANAGER, "Serializing a package with no Entries!");
+			g_Log.LogWarn(TAGMANAGER, "Serializing a package with no Entries!");
 
 			return true;
 		}
@@ -1295,7 +1285,7 @@ namespace FlamingTorch
 		{
 			if(!EntryList[i]->Input->CopyTo(Out))
 			{
-				Log::Instance.LogErr(TAGMANAGER, "While serializing: Unable to serialize Entry '%d/%s'!", EntryList[i]->DirectoryID,
+				g_Log.LogErr(TAGMANAGER, "While serializing: Unable to serialize Entry '%d/%s'!", EntryList[i]->DirectoryID,
 					EntryList[i]->Name.c_str());
 
 				return false;
@@ -1324,7 +1314,7 @@ namespace FlamingTorch
 
 		if(Version != TargetVersion)
 		{
-			Log::Instance.LogErr(TAGMANAGER, "While deserializing: Invalid Version ID '%lld' (should be '%lld')",
+			g_Log.LogErr(TAGMANAGER, "While deserializing: Invalid Version ID '%lld' (should be '%lld')",
 				Version, TargetVersion);
 
 			return false;
@@ -1343,7 +1333,7 @@ namespace FlamingTorch
 
 		if(ActualCRC != CRC)
 		{
-			Log::Instance.LogErr(TAGMANAGER, "While deserializing: Invalid CRC '%08x' (should be '%08x')",
+			g_Log.LogErr(TAGMANAGER, "While deserializing: Invalid CRC '%08x' (should be '%08x')",
 				ActualCRC, CRC);
 
 			return false;
@@ -1449,7 +1439,7 @@ namespace FlamingTorch
 
 	PackageFileSystemManager::Package::~Package()
 	{
-		PackageFileSystemManager::Instance.ClearPackageData(this);
+		g_PackageManager.ClearPackageData(this);
 
 		PackageStream.Dispose();
 		Entries.clear();
@@ -1538,11 +1528,11 @@ namespace FlamingTorch
 
 		if(!Result)
 		{
-			Log::Instance.LogErr(TAGMANAGER, "Unable to read '%d' bytes!", Length);
+			g_Log.LogErr(TAGMANAGER, "Unable to read '%d' bytes!", Length);
 		}
 	}
 
-	PackageFileSystemManager PackageFileSystemManager::Instance;
+	PackageFileSystemManager g_PackageManager;
 
 	void PackageFileSystemManager::StartUp(uint32 Priority)
 	{
@@ -1552,7 +1542,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAGMANAGER, "Initializing Package Filesystem...");
+		g_Log.LogInfo(TAGMANAGER, "Initializing Package Filesystem...");
 	}
 
 	void PackageFileSystemManager::Shutdown(uint32 Priority)
@@ -1561,7 +1551,7 @@ namespace FlamingTorch
 
 		SubSystem::Shutdown(Priority);
 
-		Log::Instance.LogInfo(TAGMANAGER, "Terminating Package Filesystem...");
+		g_Log.LogInfo(TAGMANAGER, "Terminating Package Filesystem...");
 
 		for(PackageMap::iterator it = Packages.begin(); it != Packages.end(); it++)
 		{
@@ -1584,7 +1574,7 @@ namespace FlamingTorch
 
 		if(!WasStarted)
 		{
-			Log::Instance.LogErr(TAGMANAGER, "While calling NewPackage: Subsystem was not inited!");
+			g_Log.LogErr(TAGMANAGER, "While calling NewPackage: Subsystem was not inited!");
 
 			return DisposablePointer<Package>();
 		}
@@ -1598,7 +1588,7 @@ namespace FlamingTorch
 
 		if(Packages.find(ID) != Packages.end())
 		{
-			Log::Instance.LogWarn(TAGMANAGER, "Attempted to add a package '%08x' that already exists!", ID);
+			g_Log.LogWarn(TAGMANAGER, "Attempted to add a package '%08x' that already exists!", ID);
 
 			return false;
 		}
@@ -1607,7 +1597,7 @@ namespace FlamingTorch
 
 		if(!ThePackage->FromStream(PackageStream))
 		{
-			Log::Instance.LogErr(TAGMANAGER, "Package '%08x' failed to be deserialized!", ID);
+			g_Log.LogErr(TAGMANAGER, "Package '%08x' failed to be deserialized!", ID);
 
 			return false;
 		}
@@ -1624,7 +1614,7 @@ namespace FlamingTorch
 
 				if(mit != Files.end() && mit->second.find(NameID) != mit->second.end())
 				{
-					Log::Instance.LogWarn(TAGMANAGER, "While adding Package '%08x': Overriding file %08x/%08x",
+					g_Log.LogWarn(TAGMANAGER, "While adding Package '%08x': Overriding file %08x/%08x",
 						ID, it->first, NameID);
 				}
 
@@ -1792,7 +1782,7 @@ namespace FlamingTorch
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAGWATCHER, "Initializing FileSystem Watcher...");
+		g_Log.LogInfo(TAGWATCHER, "Initializing FileSystem Watcher...");
 	}
 
 	void FileSystemWatcher::Shutdown(uint32 Priority)
@@ -1801,7 +1791,7 @@ namespace FlamingTorch
 
 		SubSystem::Shutdown(Priority);
 
-		Log::Instance.LogInfo(TAGWATCHER, "Terminating FileSystem Watcher...");
+		g_Log.LogInfo(TAGWATCHER, "Terminating FileSystem Watcher...");
 	}
 
 	void FileSystemWatcher::Update(uint32 Priority)

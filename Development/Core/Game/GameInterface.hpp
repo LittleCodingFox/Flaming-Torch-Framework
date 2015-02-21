@@ -14,16 +14,13 @@ struct RenderCreateOptions
 };
 #endif
 
-class GameInterface : public LuaLib
+class GameInterface
 {
 	friend class NativeGameInterface;
-	friend class ScriptedGameInterface;
 private:
 #if USE_GRAPHICS
 	void OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action);
 #endif
-protected:
-	bool ErroredOnFrameUpdate, ErroredOnFixedUpdate, ErroredOnFrameBegin, ErroredOnFrameEnd, ErroredOnFrameDraw, ErroredOnResize, ErroredOnResourcesReloaded;
 public:
 	bool QuitFlag;
 	bool GraphicsEnabled;
@@ -32,15 +29,9 @@ public:
 	uint32 UpdateRateValue, FrameRateValue;
 	Vector2 BaseResolution;
 
-	static DisposablePointer<GameInterface> Instance;
-
-	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0),
-			ErroredOnFrameUpdate(false), ErroredOnFixedUpdate(false), ErroredOnFrameBegin(false), ErroredOnFrameEnd(false),
-			ErroredOnFrameDraw(false), ErroredOnResize(false), ErroredOnResourcesReloaded(false), GraphicsEnabled(USE_GRAPHICS), QuitFlag(false){}
+	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), GraphicsEnabled(USE_GRAPHICS), QuitFlag(false) {}
 
 	virtual ~GameInterface() {}
-
-	static void SetInstance(DisposablePointer<GameInterface> TheInstance);
 
 	/*!
 	*	Load a package from a filename
@@ -80,12 +71,6 @@ public:
 	*/
 	virtual bool ShouldQuit() { return QuitFlag; }
 
-	/*!
-	*	Gets any script instances available for this game
-	*	Used to interact with the game's scripting or methods if you have any
-	*/
-	virtual DisposablePointer<LuaScript> GetScriptInstance() { return DisposablePointer<LuaScript>(); }
-
 #if USE_GRAPHICS
 	/*!
 	*	Used by the UI Sandbox
@@ -96,44 +81,35 @@ public:
 	/*!
 	*	Creates a renderer from options
 	*	\param Options the options to create the renderer
-	*	\return The Renderer that was created, or NULL
 	*/
-	Renderer *CreateRenderer(const RenderCreateOptions &Options);
+	bool CreateRenderer(const RenderCreateOptions &Options);
 
 	/*!
 	*	Called when a frame begins
-	*	\param TheRenderer the renderer to use for rendering
-	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass) {}
+	virtual void OnFrameBegin() {}
 
 	/*!
 	*	Called when a frame is drawn
-	*	\param TheRenderer the renderer to use for rendering
-	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass);
+	virtual void OnFrameDraw() {}
 
 	/*!
 	*	Called when a frame ends
-	*	\param TheRenderer the renderer to use for rendering
-	*	\param Pass the scene pass we're processing
 	*/
-	virtual void OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass);
+	virtual void OnFrameEnd() {}
 
 	/*!
 	*	Called when a renderer resizes
-	*	\param TheRenderer the renderer to use for rendering
 	*	\param Width the new width
 	*	\param Height the new height
 	*/
-	virtual void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height) {}
+	virtual void OnResize(uint32 Width, uint32 Height) {}
 
 	/*!
 	*	Called when resources have been reloaded
-	*	\param TheRenderer the renderer to use for rendering
 	*/
-	virtual void OnResourcesReloaded(Renderer *TheRenderer) {}
+	virtual void OnResourcesReloaded() {}
 #endif
 
 	/*!
@@ -150,50 +126,6 @@ public:
 	int32 Run(int32 argc, char **argv) override;
 };
 
-class ScriptedGameInterface : public GameInterface
-{
-public:
-	DisposablePointer<LuaScript> ScriptInstance;
-	std::string GameNameValue;
-
-	luabind::object PreInitFunction, InitFunction, DeInitFunction, OnFixedUpdateFunction, OnFrameUpdateFunction,
-		OnFrameBeginFunction, OnFrameEndFunction, OnFrameDrawFunction, OnResizeFunction, OnResourcesReloadedFunction,
-		ShouldQuitFunction;
-
-	ScriptedGameInterface() : GameNameValue("Game")
-	{
-	}
-
-	~ScriptedGameInterface();
-
-	const std::string &GameName() override
-	{
-		return GameNameValue;
-	}
-
-	int32 FixedUpdateRate() override
-	{
-		return UpdateRateValue;
-	}
-
-	DisposablePointer<LuaScript> GetScriptInstance() override
-	{
-		return ScriptInstance;
-	}
-
-#if USE_GRAPHICS
-	void OnFrameBegin(Renderer *TheRenderer, const std::string &ScenePass) override;
-	void OnFrameDraw(Renderer *TheRenderer, const std::string &ScenePass) override;
-	void OnFrameEnd(Renderer *TheRenderer, const std::string &ScenePass) override;
-	void OnResize(Renderer *TheRenderer, uint32 Width, uint32 Height) override;
-	void OnResourcesReloaded(Renderer *TheRenderer) override;
-#endif
-
-	void OnFixedUpdate() override;
-	void OnFrameUpdate() override;
-	bool ShouldQuit() override;
-
-	int32 Run(int32 argc, char **argv) override;
-};
-
 void GameInterfaceSingleFrame();
+
+extern DisposablePointer<GameInterface> g_Game;

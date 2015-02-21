@@ -47,18 +47,15 @@ private:
 
 	void UpdateDelta();
 
+	void StartUp(uint32 Priority);
+	void Shutdown(uint32 Priority);
+	void Update(uint32 Priority);
+public:
 	GameClock() : Paused(false), ActualDeltaTime(0), AccountedTime(0), AccumulatedTime(0), LastTimeFrame(0),
 		LastAccumulationTimeFrame(0), SubSystem(GAMECLOCK_PRIORITY)
 	{
 		SetFixedStepRate(30);
 	}
-public:
-	static GameClock Instance;
-
-	~GameClock() {}
-	void StartUp(uint32 Priority);
-	void Shutdown(uint32 Priority);
-	void Update(uint32 Priority);
 
 	/*!
 	*	Pauses the game clock
@@ -121,6 +118,8 @@ public:
 	*/
 	f32 FixedStepDelta();
 };
+
+extern GameClock g_Clock;
 
 /*!
 *	Current Time

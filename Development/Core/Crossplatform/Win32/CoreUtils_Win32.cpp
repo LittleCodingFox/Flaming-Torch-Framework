@@ -28,7 +28,7 @@ namespace FlamingTorch
 
 		ExePath = Path(ExePath).FullPath();
 
-		Log::Instance.LogDebug("Core", "Running Program '%s' with arguments '%s' (WD: '%s')", ExePath.c_str(), Parameters.c_str(),
+		g_Log.LogDebug("Core", "Running Program '%s' with arguments '%s' (WD: '%s')", ExePath.c_str(), Parameters.c_str(),
 			WorkingDirectory.c_str());
 
 		SHELLEXECUTEINFOA sei;

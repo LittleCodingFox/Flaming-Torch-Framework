@@ -3,17 +3,17 @@ namespace FlamingTorch
 {
 #	define TAG "Future"
 
-	Future Future::Instance;
+	Future g_Future;
 
 	void Future::StartUp(uint32 Priority)
 	{
-		SUBSYSTEM_STARTUP_CHECK()
+		SUBSYSTEM_STARTUP_CHECK();
 
 		SubSystem::StartUp(Priority);
 
 		SUBSYSTEM_PRIORITY_CHECK();
 
-		Log::Instance.LogInfo(TAG, "Starting Future Subsystem");
+		g_Log.LogInfo(TAG, "Starting Future Subsystem");
 	}
 
 	void Future::Shutdown(uint32 Priority)
@@ -21,7 +21,7 @@ namespace FlamingTorch
 		SUBSYSTEM_PRIORITY_CHECK();
 		WasStarted = false;
 
-		Log::Instance.LogInfo(TAG, "Shutting down Future Subsystem");
+		g_Log.LogInfo(TAG, "Shutting down Future Subsystem");
 	}
 
 	void Future::Update(uint32 Priority)
@@ -56,7 +56,7 @@ namespace FlamingTorch
 	{
 		if(!WasStarted)
 		{
-			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
+			g_Log.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
 		}
@@ -77,7 +77,7 @@ namespace FlamingTorch
 	{
 		if(!WasStarted)
 		{
-			Log::Instance.LogErr("Future", "Future Subsystem not started yet!");
+			g_Log.LogErr("Future", "Future Subsystem not started yet!");
 
 			return;
 		}

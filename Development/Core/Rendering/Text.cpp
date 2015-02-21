@@ -1,4 +1,5 @@
 #include "FlamingCore.hpp"
+#if USE_GRAPHICS
 #include FT_GLYPH_H
 #include FT_OUTLINE_H
 #include FT_BITMAP_H
@@ -490,7 +491,7 @@ namespace FlamingTorch
 						TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, -it->second.Info.Bounds.Top));
 						TheSprite.SpriteTexture = it->second.InstanceTexture;
 
-						TheSprite.Draw(Owner);
+						TheSprite.Draw();
 
 #if DEBUG_DRAWTEXT
 						if (TheSprite.SpriteTexture.Get())
@@ -521,3 +522,4 @@ namespace FlamingTorch
 		}
 	}
 }
+#endif
