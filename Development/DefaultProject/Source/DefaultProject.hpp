@@ -14,7 +14,6 @@ namespace FlamingTorch
 		std::string GameNameValue;
 
 		DefaultProject();
-		bool Register(lua_State *State);
 		const std::string &GameName() override;
 		int32 FixedUpdateRate() override;
 		void OnFixedUpdate() override;

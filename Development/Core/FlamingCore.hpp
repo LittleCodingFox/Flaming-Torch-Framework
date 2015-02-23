@@ -13,33 +13,26 @@
 #include <mutex>
 #include <algorithm>
 #include "MaxRectsBinPack.h"
-#
-extern "C"
-{
-#	include <lua/lua.h>
-#	include <lua/lauxlib.h>
-#	include <lua/lualib.h>
-}
-#	include <json/json.h>
-#	include <ft2build.h>
-#	include FT_FREETYPE_H
-#	if USE_GRAPHICS
-#		include <tb/tb_renderer.h>
-#		include <tb/tb_system.h>
-#		include <tb/tb_bitmap_fragment.h>
-#		include <tb/tb_skin.h>
-#		include <tb/tb_widgets.h>
-#		include <tb/tb_msg.h>
-#		include <tb/tb_font_renderer.h>
-#		include <tb/tb_widgets_reader.h>
-#		include <tb/tb_widgets.h>
-#		include <tb/tb_window.h>
-#		include <tb/animation/tb_widget_animation.h>
-#		include <tb/renderers/tb_renderer_batcher.h>
+#include <json/json.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#if USE_GRAPHICS
+#	include <tb/tb_renderer.h>
+#	include <tb/tb_system.h>
+#	include <tb/tb_bitmap_fragment.h>
+#	include <tb/tb_skin.h>
+#	include <tb/tb_widgets.h>
+#	include <tb/tb_msg.h>
+#	include <tb/tb_font_renderer.h>
+#	include <tb/tb_widgets_reader.h>
+#	include <tb/tb_widgets.h>
+#	include <tb/tb_window.h>
+#	include <tb/animation/tb_widget_animation.h>
+#	include <tb/renderers/tb_renderer_batcher.h>
 #
 using namespace tb;
 #
-#	endif
+#endif
 namespace FlamingTorch
 {
 #	undef DrawText

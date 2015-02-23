@@ -7,8 +7,6 @@ class UIRootWidget : public TBWidget
 {
 public:
 	virtual void OnInvalid();
-private:
-	UIRenderer *Owner;
 };
 
 class UIBitmap : public TBBitmap

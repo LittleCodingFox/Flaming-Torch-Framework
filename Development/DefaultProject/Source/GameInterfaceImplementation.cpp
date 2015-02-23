@@ -9,11 +9,6 @@ namespace FlamingTorch
 		QuitFlag = false;
 	}
 
-	bool DefaultProject::Register(lua_State *State)
-	{
-		return true;
-	}
-
 	bool DefaultProject::Initialize(int32 argc, char **argv)
 	{
 		if (!LoadPackage(FileSystemUtils::ResourcesDirectory() + "/Content/Game.package"))
@@ -39,8 +34,8 @@ namespace FlamingTorch
 
 		RenderCreateOptions Options;
 		Options.Title = GameName();
-		Options.Width = 960;
-		Options.Height = 720;
+		Options.Width = 800;
+		Options.Height = 600;
 		Options.FrameRate = FrameRateValue;
 
 		if (!CreateRenderer(Options))

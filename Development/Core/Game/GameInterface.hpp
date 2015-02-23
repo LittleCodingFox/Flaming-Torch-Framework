@@ -42,10 +42,6 @@ public:
 	*	The game's name
 	*/
 	virtual const std::string &GameName() = 0;
-	/*!
-	*	Register any scripting bindings here
-	*/
-	virtual bool Register(lua_State *State) { return true; }
 
 	virtual int32 FixedUpdateRate() = 0;
 	/*!
