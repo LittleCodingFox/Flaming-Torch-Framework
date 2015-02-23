@@ -254,6 +254,8 @@ public:
                     
                     return;
 				};
+
+				PackedUniqueTiles->Bind();
                 
                 TextureEncoderInfo TInfo;
                 TInfo.Encoder = TextureEncoderType::PNG;
