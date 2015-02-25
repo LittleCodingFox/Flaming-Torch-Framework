@@ -13,7 +13,7 @@ namespace FlamingTorch
 	}
 
 #if USE_GRAPHICS
-	void Camera::BeginTransforms(Renderer *TheRenderer)
+	void Camera::BeginTransforms()
 	{
 		Matrix4x4 CameraTransform = WorldTransform;
 		CameraTransform.Inverse();
@@ -25,7 +25,7 @@ namespace FlamingTorch
 		g_Renderer.SetWorldMatrix(CameraTransform);
 	}
 
-	void Camera::EndTransforms(Renderer *TheRenderer)
+	void Camera::EndTransforms()
 	{
 		g_Renderer.PopMatrices();
 	}

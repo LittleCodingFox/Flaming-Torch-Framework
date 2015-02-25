@@ -77,7 +77,7 @@ public:
 
 #if USE_GRAPHICS
 		std::vector<Vector2> Vertices, TexCoords;
-		SimpleDelegate::SimpleDelegate<TiledMap *, uint32, Renderer *> OnLayerDraw;
+		SimpleDelegate::SimpleDelegate<TiledMap *, uint32> OnLayerDraw;
 #endif
 	};
 
@@ -139,7 +139,7 @@ public:
 #if USE_GRAPHICS
 	bool InitResources(const TiledMapInitOptions &Options = TiledMapInitOptions());
 	bool ResourcesInited();
-	void Draw(uint32 Layer, Renderer *Renderer);
+	void Draw(uint32 Layer);
 	void UpdateGeometry();
 #endif
 

@@ -47,12 +47,12 @@ public:
 	*	Begin using the Camera's Transform
 	*	\param TheRenderer the renderer upon which to apply this transform
 	*/
-	void BeginTransforms(Renderer *TheRenderer);
+	void BeginTransforms();
 
 	/*!
 	*	End using the Camera's Transform
 	*	\param TheRenderer the renderer upon which to apply this transform
 	*/
-	void EndTransforms(Renderer *TheRenderer);
+	void EndTransforms();
 #endif
 };

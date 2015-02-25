@@ -494,7 +494,7 @@ namespace FlamingTorch
 		return true;
 	}
 
-	void TiledMap::Draw(uint32 Layer, Renderer *Renderer)
+	void TiledMap::Draw(uint32 Layer)
 	{
 		PROFILE("TiledMap::Draw", StatTypes::Rendering);
 
@@ -533,7 +533,7 @@ namespace FlamingTorch
 
 		g_Renderer.RenderVertices(VertexModes::Triangles, TiledMapVertexBuffer, 0, Vertices.size());
 
-		Layers[Layer]->OnLayerDraw(this, Layer, Renderer);
+		Layers[Layer]->OnLayerDraw(this, Layer);
 
 		if(DoTranslation)
 		{

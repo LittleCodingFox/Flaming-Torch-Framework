@@ -184,8 +184,6 @@ private:
 
 	DisposablePointer<TextureGroup> ResourcesGroup;
 
-	Renderer *Owner;
-
 	void ClearUnusedResources();
 	void GetText(const std::string &Text, const TextParams &Parameters);
 public:

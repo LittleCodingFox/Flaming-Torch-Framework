@@ -307,8 +307,6 @@ namespace FlamingTorch
 		if(Result)
 		{
 			BaseResolutionValue = Size();
-
-			RenderText.Owner = this;
 			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
 
 			UIRoot->SetRect(TBRect(0, 0, Size().x, Size().y));
@@ -342,7 +340,6 @@ namespace FlamingTorch
 		{
 			BaseResolutionValue = Size();
 
-			RenderText.Owner = this;
 			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
 
 			UIRoot->SetRect(TBRect(0, 0, Size().x, Size().y));
