@@ -31,7 +31,6 @@ namespace FlamingTorch
 			}
 		}
 
-
 		RenderCreateOptions Options;
 		Options.Title = GameName();
 		Options.Width = 800;
@@ -42,6 +41,15 @@ namespace FlamingTorch
 			return false;
 
 		OnResize((uint32)g_Renderer.Size().x, (uint32)g_Renderer.Size().y);
+
+		DisposablePointer<Stream> UISkinStream = g_PackageManager.GetFile(Path("/UIThemes/PolyCode/skin.cfg"));
+
+		DisposablePointer<GenericConfig> UISkinConfig(new GenericConfig());
+
+		if (!UISkinStream.Get() || !UISkinConfig->DeSerialize(UISkinStream))
+			return false;
+
+		g_Renderer.UI->SetSkin(UISkinConfig);
 
 		return true;
 	}

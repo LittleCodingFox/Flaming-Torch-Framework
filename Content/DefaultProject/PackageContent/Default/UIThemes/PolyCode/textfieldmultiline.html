@@ -1,0 +1,35 @@
+<html>
+<head>
+</head>
+<style type="text/css">
+body
+{
+	background-color: #000000;
+}
+
+.textfield
+{
+	-webkit-border-image: url(/html/UIThemes/PolyCode/textfieldmulti.png) 9 9 9 9 stretch stretch;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	outline: none;
+	border: none;
+	resize: none;
+	line-height: 20px;
+	font-size: 12px;
+}
+
+</style>
+<script type="text/javascript">
+function SetSize(w, h)
+{
+	var textfield = document.getElementById('text');
+	textfield.style.width = w + "px";
+	textfield.style.height = h + "px";
+}
+</script>
+<body>
+	<textarea id="text" class="textfield"></textarea>
+</body>
+</html>

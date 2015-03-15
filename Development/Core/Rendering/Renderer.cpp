@@ -837,13 +837,34 @@ namespace FlamingTorch
 			OnFrameDraw();
 		}
 
+		//TODO: Optimize this to prevent doing it twice per frame on dev mode?
+		bool PushOrtho = MatrixStackSize() == 0;
+
+		if (PushOrtho)
+		{
+			Rect ScreenRect(PlatformInfo::RotateScreen(Rect(0, Size().x, Size().y, 0)));
+
+			PushMatrices();
+			SetProjectionMatrix(Matrix4x4::OrthoMatrixRH(ScreenRect.Left, ScreenRect.Right, ScreenRect.Bottom, ScreenRect.Top, -1, 1));
+			SetWorldMatrix(Matrix4x4());
+			SetViewport(0, 0, Size().x, Size().y);
+		}
+
+		UI->Draw();
+		UI->Update();
+
+		if (PushOrtho)
+		{
+			PopMatrices();
+		}
+
 		{
 			PROFILE("Render FrameEnd", StatTypes::Rendering);
 			OnFrameEnded();
 		}
 
 		//TODO: Optimize this to prevent doing it twice per frame on dev mode?
-		bool PushOrtho = MatrixStackSize() == 0;
+		PushOrtho = MatrixStackSize() == 0;
 
 		if (PushOrtho)
 		{
