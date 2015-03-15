@@ -5,6 +5,20 @@
 #endif
 #
 #include "System/CoreVersion.hpp"
+#
+extern "C"
+{
+#	include <lua/lua.h>
+#	include <lua/lauxlib.h>
+#	include <lua/lualib.h>
+}
+#	include <luabind/luabind.hpp>
+#	include <luabind/class.hpp>
+#	include <luabind/function.hpp>
+#	include <luabind/operator.hpp>
+#	include <luabind/out_value_policy.hpp>
+#	include <luabind/return_reference_to_policy.hpp>
+#
 #include <vector>
 #include <map>
 #include <list>
@@ -16,23 +30,6 @@
 #include <json/json.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#if USE_GRAPHICS
-#	include <tb/tb_renderer.h>
-#	include <tb/tb_system.h>
-#	include <tb/tb_bitmap_fragment.h>
-#	include <tb/tb_skin.h>
-#	include <tb/tb_widgets.h>
-#	include <tb/tb_msg.h>
-#	include <tb/tb_font_renderer.h>
-#	include <tb/tb_widgets_reader.h>
-#	include <tb/tb_widgets.h>
-#	include <tb/tb_window.h>
-#	include <tb/animation/tb_widget_animation.h>
-#	include <tb/renderers/tb_renderer_batcher.h>
-#
-using namespace tb;
-#
-#endif
 namespace FlamingTorch
 {
 #	undef DrawText
@@ -68,12 +65,27 @@ namespace FlamingTorch
 #	include "Rendering/Input.hpp"
 #	include "Rendering/Text.hpp"
 #	include "Rendering/RenderTextUtils.hpp"
-#	include "System/ResourceManager.hpp"
+#
+#	include "Scripting/LuaScript.hpp"
+#
+#	include "Rendering/UI/UIUtils.hpp"
+#	include "Rendering/UI/UIElement.hpp"
+#	include "Rendering/UI/UIManager.hpp"
 #	include "Rendering/Rendering.hpp"
+#	include "Rendering/Sprite.hpp"
+#
+#	include "System/ResourceManager.hpp"
+#
+#	include "Rendering/UI/UIText.hpp"
+#	include "Rendering/UI/UIGroup.hpp"
+#	include "Rendering/UI/UIHorizontalGroup.hpp"
+#	include "Rendering/UI/UIVerticalGroup.hpp"
+#	include "Rendering/UI/UISprite.hpp"
+#	include "Rendering/UI/UIButton.hpp"
+#	include "Rendering/UI/UILayout.hpp"
 #
 #	include "Game/GameInterface.hpp"
 #
-#	include "Rendering/Sprite.hpp"
 #	include "Rendering/TiledMap.hpp"
 #
 #	include "Game/Console.hpp"

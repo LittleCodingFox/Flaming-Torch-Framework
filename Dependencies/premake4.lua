@@ -23,6 +23,8 @@ solution "Dependencies"
 			"Source/libpng/**.cpp",
 			"Source/lua/**.c",
 			"Source/lua/**.cpp",
+			"Source/luabind/**.c",
+			"Source/luabind/**.cpp",
 			"Source/SimpleFileWatcher/**.c",
 			"Source/SimpleFileWatcher/**.cpp",
 			"Source/tb/**.cpp",

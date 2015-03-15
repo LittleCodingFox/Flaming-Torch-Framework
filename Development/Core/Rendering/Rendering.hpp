@@ -158,7 +158,6 @@ class IRendererImplementation;
 #include "RendererFrameStats.hpp"
 #include "RendererDisplayMode.hpp"
 #include "RendererCapabilities.hpp"
-#include "UI.hpp"
 #include "Renderer.hpp"
 #include "IRendererImplementation.hpp"
 

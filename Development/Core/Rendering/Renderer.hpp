@@ -20,8 +20,6 @@ private:
 	std::string ConsoleText;
 	uint32 ConsoleCursorPosition, ConsoleLogOffset;
 
-	DisposablePointer<UIInputProcessor> UIInput;
-
 	IRendererImplementation *Impl;
 	Vector2 BaseResolutionValue;
 
@@ -37,8 +35,6 @@ private:
 	Rect LastViewport;
 
 	VertexBufferHandle LineBuffer;
-
-	DisposablePointer<UIRenderer> UI;
 
 	Renderer(const Renderer &o);
 	Renderer &operator=(const Renderer &o);
@@ -62,9 +58,12 @@ public:
 
 	Camera RenderCamera;
 
-	DisposablePointer<UIRootWidget> UIRoot;
-
 	TextRenderer RenderText;
+
+	/*!
+	*	UI Manager
+	*/
+	DisposablePointer<UIManager> UI;
 
 	/*!
 	*	OnFrameStarted should be used to do stuff before we render the main frame such as clearing the screen
@@ -391,12 +390,6 @@ public:
 	*	Requests a frame to be rendered
 	*/
 	void RequestFrame();
-
-	/*!
-	*	Loads the UI Skin from a Filename
-	*	\param FileName the filename to load from
-	*/
-	void LoadUISkin(const Path &FileName);
 };
 
 extern Renderer g_Renderer;

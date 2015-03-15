@@ -13,15 +13,20 @@ public:
 	bool FlipX, FlipY;
 	bool WireframeValue;
 	f32 WireframePixelSizeValue;
+	bool NinePatchValue;
+	f32 NinePatchScaleValue;
+	Rect NinePatchRectValue;
 	bool IsDirty;
 
 	SpriteDrawOptions() : ColorValue(1, 1, 1, 1), ScaleValue(1, 1), RotationValue(0), BlendingModeValue(BlendingMode::Alpha),
-		FlipX(false), FlipY(false), WireframeValue(false), WireframePixelSizeValue(1), IsDirty(true), CropValue(false) {
+		FlipX(false), FlipY(false), WireframeValue(false), WireframePixelSizeValue(1), NinePatchValue(false), NinePatchScaleValue(1),
+		IsDirty(true), CropValue(false) {
 	}
 
 	SpriteDrawOptions(const SpriteDrawOptions &o) : ColorValue(o.ColorValue), BlendingModeValue(o.BlendingModeValue), PositionValue(o.PositionValue),
 		ScaleValue(o.ScaleValue), RotationValue(o.RotationValue), CropRectValue(o.CropRectValue), FlipX(o.FlipX), FlipY(o.FlipY), OffsetValue(o.OffsetValue),
-		WireframeValue(o.WireframeValue), WireframePixelSizeValue(o.WireframePixelSizeValue), CropValue(o.CropValue), IsDirty(true) {
+		WireframeValue(o.WireframeValue), WireframePixelSizeValue(o.WireframePixelSizeValue), CropValue(o.CropValue), NinePatchValue(o.NinePatchValue),
+		NinePatchScaleValue(o.NinePatchScaleValue), NinePatchRectValue(o.NinePatchRectValue), IsDirty(true) {
 	}
 
 	/*!
@@ -150,12 +155,38 @@ public:
 	
 		return *this;
 	}
+
+	/*!
+	*	Sets up as a Nine Patch
+	*	\param NinePatch whether to use a Nine patch
+	*	\param NinePatchRect the distance between each side of the square for the nine patch
+	*/
+	SpriteDrawOptions &NinePatch(bool NinePatch, const Rect &NinePatchRect)
+	{
+		IsDirty = true;
+		NinePatchValue = NinePatch;
+		NinePatchRectValue = NinePatchRect;
+
+		return *this;
+	}
+
+	/*!
+	*	Sets the Nine Patch Scale
+	*	\param Scale the Nine Patch Scale
+	*/
+	SpriteDrawOptions &NinePatchScale(f32 Scale)
+	{
+		NinePatchScaleValue = Scale;
+
+		return *this;
+	}
 };
 
 class Sprite
 {
 private:
-	PosTexCol GeneratedGeometry[6];
+	PosTexCol GeneratedGeometry[54];
+	uint32 VertexCount;
 public:
 	DisposablePointer<Texture> SpriteTexture;
 	SpriteDrawOptions Options;

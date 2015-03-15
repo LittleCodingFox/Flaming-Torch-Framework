@@ -14,7 +14,7 @@ struct RenderCreateOptions
 };
 #endif
 
-class GameInterface
+class GameInterface : public LuaLib
 {
 	friend class NativeGameInterface;
 private:
@@ -39,10 +39,24 @@ public:
 	bool LoadPackage(const std::string &PackageName);
 
 	/*!
+	*	Register into a Lua VM
+	*	\param State the lua state to register to
+	*/
+	virtual bool Register(lua_State *State) { return true; }
+
+	/*!
 	*	The game's name
 	*/
 	virtual const std::string &GameName() = 0;
 
+	/*!
+	*	The game's Script Instance
+	*/
+	virtual DisposablePointer<LuaScript> ScriptInstance() { return DisposablePointer<LuaScript>(); }
+
+	/*!
+	*	The Fixed Update Rate
+	*/
 	virtual int32 FixedUpdateRate() = 0;
 	/*!
 	*	Run your initialization code here

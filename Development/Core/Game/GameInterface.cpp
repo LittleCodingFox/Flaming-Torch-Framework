@@ -116,6 +116,7 @@ namespace FlamingTorch
 		g_Console.Register();
 		g_Future.Register();
 		g_Profiler.Register();
+		g_LuaScript.Register();
 
 #if USE_SOUND
 		g_Sound.Register();
@@ -147,18 +148,23 @@ namespace FlamingTorch
 #	if !FLPLATFORM_ANDROID
 	void GameInterface::OnGUISandboxTrigger(const std::string &Directory, const std::string &FileName, uint32 Action)
 	{
-		if(FileName == "GUILayout.resource" || FileName == "DefaultLayout.resource")
+		if(FileName == "GUILayout.resource")
 			ReloadGUI();
 	}
 #	endif
 
 	void GameInterface::ReloadGUI()
 	{
-		g_Renderer.UIRoot->DeleteAllChildren();
+		g_Renderer.UI->ClearLayouts();
 
-		if (!g_widgets_reader->LoadFile(g_Renderer.UIRoot, (FileSystemUtils::ResourcesDirectory() + "/GUILayout.resource").c_str()))
+		DisposablePointer<FileStream> InputStream(new FileStream());
+
+		if (!InputStream->Open(FileSystemUtils::ResourcesDirectory() + "GUILayout.resource", StreamFlags::Read | StreamFlags::Text) ||
+			!g_Renderer.UI->LoadLayouts(InputStream))
 		{
-			g_Log.LogErr(TAG, "Failed to reload the GUI Layout file!");
+			g_Log.LogErr(TAG, "Failed to reload our GUI Layouts!");
+
+			return;
 		}
 	}
 

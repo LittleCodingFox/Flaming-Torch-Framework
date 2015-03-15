@@ -1,7 +1,5 @@
 #include "FlamingCore.hpp"
 
-void register_freetype_font_renderer();
-
 namespace FlamingTorch
 {
 #	if USE_GRAPHICS
@@ -308,8 +306,8 @@ namespace FlamingTorch
 		{
 			BaseResolutionValue = Size();
 			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
-
-			UIRoot->SetRect(TBRect(0, 0, Size().x, Size().y));
+			UI.Dispose();
+			UI.Reset(new UIManager());
 		}
 
 		return Result;
@@ -341,8 +339,8 @@ namespace FlamingTorch
 			BaseResolutionValue = Size();
 
 			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
-
-			UIRoot->SetRect(TBRect(0, 0, Size().x, Size().y));
+			UI.Dispose();
+			UI.Reset(new UIManager());
 		}
 
 		return Result;
@@ -397,6 +395,9 @@ namespace FlamingTorch
 
 	void Renderer::RenderCachedVertices(uint32 VertexMode, const void *Data, uint32 DataSize, VertexElementDescriptor *Format, uint32 FormatSize, Texture *TheTexture, uint32 BlendingMode)
 	{
+		if (!WasStarted)
+			return;
+
 		uint32 VertexSize = 0;
 
 		for (uint32 i = 0; i < FormatSize; i++)
@@ -702,14 +703,7 @@ namespace FlamingTorch
 		if (!WasStarted)
 			return false;
 
-		bool Result = Impl->PollEvent(Out);
-
-		if (Result && Out.Type == RendererEventType::WindowResized) //Make sure we support resizing of the UI
-		{
-			UIRoot->SetRect(TBRect(0, 0, (int)Size().x, (int)Size().y));
-		}
-
-		return Result;
+		return Impl->PollEvent(Out);
 	}
 
 	void *Renderer::WindowHandle() const
@@ -827,38 +821,6 @@ namespace FlamingTorch
 #if PROFILER_ENABLED
 		g_Profiler.OnFinishFrame.Connect<Renderer, &Renderer::OnGetProfilerPackets>(this);
 #endif
-
-		UI.Reset(new UIRenderer());
-
-		if (!tb_core_init(UI.Get(), "/UIResources/language/lng_en.tb.txt"))
-		{
-			g_Log.LogErr(TAG, "Failed to initialize TurboBadger, UI is not available!");
-		}
-
-		TBWidgetsAnimationManager::Init();
-
-		LoadUISkin(Path("/UIResources/default_skin/skin.tb.txt"));
-
-		register_freetype_font_renderer();
-
-		g_font_manager->AddFontInfo("/DefaultFont.ttf", "DefaultFont");
-
-		// Set the default font description for widgets to one of the fonts we just added
-		TBFontDescription fd;
-		fd.SetID(TBIDC("DefaultFont"));
-		fd.SetSize(g_tb_skin->GetDimensionConverter()->DpToPx(14));
-		g_font_manager->SetDefaultFontDescription(fd);
-
-		// Create the font now.
-		TBFontFace *font = g_font_manager->CreateFontFace(g_font_manager->GetDefaultFontDescription());
-
-		UIRoot.Reset(new UIRootWidget());
-
-		UIInput.Reset(new UIInputProcessor());
-		UIInput->Name = "GUIPROCESSOR";
-
-		g_Input.AddContext(UIInput);
-		g_Input.EnableContext(MakeStringID(UIInput->Name));
 	}
 
 	void Renderer::Update(uint32 Priority)
@@ -879,21 +841,6 @@ namespace FlamingTorch
 			PROFILE("Render FrameEnd", StatTypes::Rendering);
 			OnFrameEnded();
 		}
-
-		UI->FirstBatch = true;
-
-		TBAnimationManager::Update();
-		UIRoot->InvokeProcessStates();
-		UIRoot->InvokeProcess();
-
-		UI->BeginPaint((int)Size().x, (int)Size().y);
-		UIRoot->InvokePaint(TBWidget::PaintProps());
-		UI->EndPaint();
-
-		if (TBAnimationManager::HasAnimationsRunning())
-			UIRoot->Invalidate();
-
-		TBMessageHandler::ProcessMessages();
 
 		//TODO: Optimize this to prevent doing it twice per frame on dev mode?
 		bool PushOrtho = MatrixStackSize() == 0;
@@ -1042,27 +989,13 @@ namespace FlamingTorch
 
 		g_Log.LogInfo(TAG, "Terminating Renderer...");
 
+		UI.Dispose();
 		DefaultImpl.Dispose();
 		delete Impl;
 
 #if PROFILER_ENABLED
 		g_Profiler.OnFinishFrame.Disconnect<Renderer, &Renderer::OnGetProfilerPackets>(this);
 #endif
-
-		g_Input.DisableContext(MakeStringID("GUIPROCESSOR"));
-
-		TBWidgetsAnimationManager::Shutdown();
-
-		tb_core_shutdown();
-	}
-
-	void Renderer::LoadUISkin(const Path &FileName)
-	{
-		if (!WasStarted)
-			return;
-
-		if (!g_tb_skin->Load(FileName.FullPath().c_str()))
-			g_Log.LogErr(TAG, "Failed to load skin '%s'", FileName.FullPath().c_str());
 	}
 #	endif
 }

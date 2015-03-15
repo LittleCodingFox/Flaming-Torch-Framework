@@ -488,7 +488,8 @@ namespace FlamingTorch
 
 					if (it != TextResources.end())
 					{
-						TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, -it->second.Info.Bounds.Top));
+						TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, -it->second.Info.Bounds.Top))
+							.Color(Vector4(1, 1, 1, ActualParams.TextColorValue.w));
 						TheSprite.SpriteTexture = it->second.InstanceTexture;
 
 						TheSprite.Draw();
