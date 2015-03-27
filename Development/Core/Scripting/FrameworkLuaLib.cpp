@@ -1765,6 +1765,15 @@ namespace FlamingTorch
 					luabind::def("MeasureTextLines", &RenderTextMeasureTextLines)
 				],
 
+			//Font
+			luabind::class_<Font, DisposablePointer<Font> >("Font")
+				.def("FromStream", &Font::FromStream)
+				.def("Clear", &Font::Clear)
+				.def("SetSize", &Font::SetSize)
+				.def("LineSpacing", &Font::LineSpacing)
+				.def("Kerning", &Font::Kerning)
+				.def("LoadGlyph", &Font::LoadGlyph),
+
 			//Input
 			luabind::class_<Input>("Input")
 				.enum_("constants")

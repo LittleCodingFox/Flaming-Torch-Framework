@@ -345,7 +345,7 @@ namespace FlamingTorch
 			return it->second.InstanceTexture;
 		}
 
-		DisposablePointer<Texture> SourceTexture = Texture::CreateFromBuffer(TextureBuffer::CreateFromColor(32, 32, Color));
+		DisposablePointer<Texture> SourceTexture = Texture::CreateFromBuffer(TextureBuffer::CreateFromColor(256, 256, Color));
 
 		if (!SourceTexture.Get())
 			return SourceTexture;
