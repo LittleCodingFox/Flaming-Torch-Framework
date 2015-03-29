@@ -1294,6 +1294,21 @@ namespace FlamingTorch
 
 		for (uint32 i = 0; i < Indices.size(); i++)
 		{
+			bool Found = false;
+
+			for (uint32 j = 0; j < i; j++)
+			{
+				if (Indices[j].Index == Indices[i].Index)
+				{
+					Found = true;
+
+					break;
+				}
+			}
+
+			if (Found)
+				continue;
+
 			uint32 MyRowSize = (Indices[i].Width - DoublePadding) * 4;
 			uint32 TargetRowSize = MyRowSize;
 			uint32 xpos = (Indices[i].x + Padding) * 4;
@@ -1350,29 +1365,47 @@ namespace FlamingTorch
 				return DisposablePointer<TexturePacker>();
 
 			SortedTexture TextureInstance;
-			TextureInstance.Index = i;
 
-			::Rect RectInstance = Out->Rects.Insert(Textures[i]->Width() + DoublePadding, Textures[i]->Height() + DoublePadding, MaxRectsBinPack::RectBestShortSideFit);
+			bool Found = false;
 
-			TextureInstance.x = RectInstance.x + Padding;
-			TextureInstance.y = RectInstance.y + Padding;
-			TextureInstance.Width = RectInstance.width;
-			TextureInstance.Height = RectInstance.height;
+			for (uint32 j = 0; j < Out->Indices.size(); j++)
+			{
+				if (Out->Indices[j].SourceInstance.Get() == Textures[i].Get())
+				{
+					Found = true;
 
-			if (TextureInstance.x + TextureInstance.Width + Padding > MaxWidth)
-				MaxWidth = TextureInstance.x + TextureInstance.Width + Padding;
+					TextureInstance = Out->Indices[j];
 
-			if (TextureInstance.y + TextureInstance.Height + Padding > MaxHeight)
-				MaxHeight = TextureInstance.y + TextureInstance.Height + Padding;
+					break;
+				}
+			}
 
-			TextureInstance.SourceInstance = Textures[i];
-			TextureInstance.TextureInstance.Reset(new Texture());
+			if (!Found)
+			{
+				TextureInstance.Index = i;
 
-			TexturePackerIndex Index;
-			Index.Index = TextureInstance.Index;
-			Index.Owner = Out;
+				::Rect RectInstance = Out->Rects.Insert(Textures[i]->Width() + DoublePadding, Textures[i]->Height() + DoublePadding, MaxRectsBinPack::RectBestShortSideFit);
 
-			TextureInstance.TextureInstance->SetIndex(Index);
+				TextureInstance.x = RectInstance.x + Padding;
+				TextureInstance.y = RectInstance.y + Padding;
+				TextureInstance.Width = RectInstance.width;
+				TextureInstance.Height = RectInstance.height;
+
+				if (TextureInstance.x + TextureInstance.Width + Padding > MaxWidth)
+					MaxWidth = TextureInstance.x + TextureInstance.Width + Padding;
+
+				if (TextureInstance.y + TextureInstance.Height + Padding > MaxHeight)
+					MaxHeight = TextureInstance.y + TextureInstance.Height + Padding;
+
+				TextureInstance.SourceInstance = Textures[i];
+				TextureInstance.TextureInstance.Reset(new Texture());
+
+				TexturePackerIndex Index;
+				Index.Index = TextureInstance.Index;
+				Index.Owner = Out;
+
+				TextureInstance.TextureInstance->SetIndex(Index);
+			}
 
 			Out->Indices.push_back(TextureInstance);
 		}

@@ -228,7 +228,7 @@ namespace FlamingTorch
 
 	void ResourceManager::Cleanup()
 	{
-		uint32 TotalObjects = Textures.size() +
+		uint32 TotalObjects = Textures.size() + TexturePackers.size() + 
 #if USE_GRAPHICS
 			Fonts.size();
 #else
