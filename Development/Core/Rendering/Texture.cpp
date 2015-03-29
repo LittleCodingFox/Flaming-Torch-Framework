@@ -398,6 +398,13 @@ namespace FlamingTorch
 
 	bool TextureBuffer::FromStream(Stream *Stream)
 	{
+		if (!Stream)
+		{
+			g_Log.LogErr("TextureBuffer", "Unable to load a stream: NULL");
+
+			return false;
+		}
+
 		uint64 Position = Stream->Position();
 
 		png_structp png_ptr = png_create_read_struct (PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
