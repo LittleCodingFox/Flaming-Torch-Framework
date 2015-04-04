@@ -50,6 +50,7 @@ var class_flaming_torch_1_1_vector4 =
     [ "operator>", "class_flaming_torch_1_1_vector4.html#ae5e6592ac1f98024a1aa274875bf98f1", null ],
     [ "operator>=", "class_flaming_torch_1_1_vector4.html#af13d71b946560b22a7b45c27a4fa8608", null ],
     [ "Round", "class_flaming_torch_1_1_vector4.html#ac06e9a39f51f5af8ec59198318dc8ace", null ],
+    [ "ToString", "class_flaming_torch_1_1_vector4.html#a2d6b58ac245afedaaa9e273be6669d84", null ],
     [ "ToVector2", "class_flaming_torch_1_1_vector4.html#abacbb469a3f7874f4526301e15754512", null ],
     [ "ToVector3", "class_flaming_torch_1_1_vector4.html#af90bde086426d2481df21b3ca84d03b7", null ],
     [ "w", "class_flaming_torch_1_1_vector4.html#a1df064768853247906d77b530fdcacd2", null ],

@@ -1,5 +1,15 @@
 var searchData=
 [
-  ['keepdata',['KeepData',['../class_flaming_torch_1_1_texture.html#ab4e1171d98b6d2ea72ed27f0224a2d7b',1,'FlamingTorch::Texture']]],
-  ['key',['Key',['../class_flaming_torch_1_1_x_o_r_stream_processor.html#a389c906a062e3ed323e1d1c371c502c5',1,'FlamingTorch::XORStreamProcessor']]]
+  ['joystickaxis',['JoystickAxis',['../class_flaming_torch_1_1_input.html#ad9f3ee90885da96962953e55a4edd903',1,'FlamingTorch::Input']]],
+  ['joystickaxisindex',['JoystickAxisIndex',['../class_flaming_torch_1_1_renderer_event.html#a75356ca9d5dc54892c2aabf97988c331',1,'FlamingTorch::RendererEvent']]],
+  ['joystickaxisposition',['JoystickAxisPosition',['../class_flaming_torch_1_1_renderer_event.html#ac0d6e934e674577d125642ae77f0a05a',1,'FlamingTorch::RendererEvent']]],
+  ['joystickbuttoncount',['JoystickButtonCount',['../class_flaming_torch_1_1_input.html#acce6e23faa4949f5a70d05d482851f8f',1,'FlamingTorch::Input']]],
+  ['joystickbuttonindex',['JoystickButtonIndex',['../class_flaming_torch_1_1_renderer_event.html#af52f6090afd2fd2f311f10ad13afa250',1,'FlamingTorch::RendererEvent']]],
+  ['joystickbuttonpressed',['JoystickButtonPressed',['../class_flaming_torch_1_1_u_i_element.html#ac6b60ef0880ab493fded00eab8733389',1,'FlamingTorch::UIElement']]],
+  ['joystickbuttons',['JoystickButtons',['../class_flaming_torch_1_1_input.html#ab5560e5ac468d944abdf942029223227',1,'FlamingTorch::Input']]],
+  ['joystickbuttontimer',['JoystickButtonTimer',['../class_flaming_torch_1_1_u_i_element.html#a707e3c039979ca9b0c5a8050f9f72ac6',1,'FlamingTorch::UIElement']]],
+  ['joystickcount',['JoystickCount',['../class_flaming_torch_1_1_input.html#ac9a96d5fd65a73dc9546c22ce8e165ae',1,'FlamingTorch::Input']]],
+  ['joystickindex',['JoystickIndex',['../class_flaming_torch_1_1_input_1_1_joystick_button_info.html#a27eb75562a6f2c964577a10a22848fd9',1,'FlamingTorch::Input::JoystickButtonInfo::JoystickIndex()'],['../class_flaming_torch_1_1_input_1_1_joystick_axis_info.html#aa6f830371694eb2911c15075fbe80006',1,'FlamingTorch::Input::JoystickAxisInfo::JoystickIndex()'],['../class_flaming_torch_1_1_renderer_event.html#a897423b1f6100b33ee1d1f69dadb9652',1,'FlamingTorch::RendererEvent::JoystickIndex()']]],
+  ['justpressed',['JustPressed',['../class_flaming_torch_1_1_input_1_1_key_info.html#a8431f37916d535b34e1964cef85b2bf2',1,'FlamingTorch::Input::KeyInfo::JustPressed()'],['../class_flaming_torch_1_1_input_1_1_mouse_button_info.html#a366d610df3fdc9e15df263619f23b3ce',1,'FlamingTorch::Input::MouseButtonInfo::JustPressed()'],['../class_flaming_torch_1_1_input_1_1_joystick_button_info.html#afca06fb5f187f2de8336626fd5277042',1,'FlamingTorch::Input::JoystickButtonInfo::JustPressed()'],['../class_flaming_torch_1_1_input_1_1_touch_info.html#a5192c3ec561466043c83ac8cabcd991b',1,'FlamingTorch::Input::TouchInfo::JustPressed()']]],
+  ['justreleased',['JustReleased',['../class_flaming_torch_1_1_input_1_1_key_info.html#a79d9cf5730d42abc0ba91d67908c6d0d',1,'FlamingTorch::Input::KeyInfo::JustReleased()'],['../class_flaming_torch_1_1_input_1_1_mouse_button_info.html#a46c59d8900e1e8868586a5a078e11517',1,'FlamingTorch::Input::MouseButtonInfo::JustReleased()'],['../class_flaming_torch_1_1_input_1_1_joystick_button_info.html#a7b352cc66ab847b281fbc7aef85043cf',1,'FlamingTorch::Input::JoystickButtonInfo::JustReleased()'],['../class_flaming_torch_1_1_input_1_1_touch_info.html#aa89c0559958c1b3e6f6d31d7c7f746ed',1,'FlamingTorch::Input::TouchInfo::JustReleased()']]]
 ];

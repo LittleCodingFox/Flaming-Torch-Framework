@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dijkstranode',['DijkstraNode',['../class_flaming_torch_1_1_dijkstra_field.html#a1d4c8285d752cbc358f42240cb1da331',1,'FlamingTorch::DijkstraField']]]
+  ['disposablepointer',['DisposablePointer',['../class_flaming_torch_1_1_disposable_resource.html#ae07f4a3157879658538e906dd20b00ca',1,'FlamingTorch::DisposableResource']]]
 ];

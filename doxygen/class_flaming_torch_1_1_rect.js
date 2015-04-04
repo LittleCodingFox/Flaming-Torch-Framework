@@ -10,7 +10,6 @@ var class_flaming_torch_1_1_rect =
     [ "operator-", "class_flaming_torch_1_1_rect.html#a6f0c1a2615a83b2612451d42cd2583f0", null ],
     [ "Position", "class_flaming_torch_1_1_rect.html#a217d4d9ac74381a9e0089c5704822287", null ],
     [ "Size", "class_flaming_torch_1_1_rect.html#a89c514dc34384920a4b87525f17a240d", null ],
-    [ "ToFullSize", "class_flaming_torch_1_1_rect.html#a9e309956253dcd098312feaace1489e8", null ],
     [ "Bottom", "class_flaming_torch_1_1_rect.html#ab45cc45cfb762a28222993cadf4ca84f", null ],
     [ "Left", "class_flaming_torch_1_1_rect.html#a692add6c75d7fc5e34595c91a73dbcc2", null ],
     [ "Right", "class_flaming_torch_1_1_rect.html#a43bde01295921925bbba3fc96d9af20a", null ],

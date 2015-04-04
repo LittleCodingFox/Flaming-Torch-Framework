@@ -1,0 +1,28 @@
+var class_flaming_torch_1_1_i_sound_manager_implementation =
+[
+    [ "~ISoundManagerImplementation", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a25f9963fd352c529c7e2c26b52de7a67", null ],
+    [ "CreateMusic", "class_flaming_torch_1_1_i_sound_manager_implementation.html#aa1f8e685e5277b450ab734e614c1ec9c", null ],
+    [ "CreateSound", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a0e8f4e36f7f014213727b39eefbceed9", null ],
+    [ "DestroyMusic", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a72b3eb7299d7f2340fbd9e902d267f2f", null ],
+    [ "DestroySound", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a8464bda732bb4da91e6b206f00ba21f0", null ],
+    [ "GetMusicStatus", "class_flaming_torch_1_1_i_sound_manager_implementation.html#af1596747ae0cfdb68b8179658cee2e5f", null ],
+    [ "GetMusicVolume", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a71189e9e7f79ed843c23dd0dbef59204", null ],
+    [ "GetSoundStatus", "class_flaming_torch_1_1_i_sound_manager_implementation.html#ae29d472eb0b3ec651d7f0abefffe6b96", null ],
+    [ "GetSoundVolume", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a9538e80367012a44948e34311164ac31", null ],
+    [ "MusicLooping", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a25525e147b30331f4a9a849c32a316ea", null ],
+    [ "MusicPitch", "class_flaming_torch_1_1_i_sound_manager_implementation.html#af93b9871f2b863a7a4a98cd4f4f62f5d", null ],
+    [ "PauseMusic", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a2ee1af2903afe0d25e0aea224d2d945b", null ],
+    [ "PauseSound", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a3aa14de0692773b1be8b0fadc54d8bfc", null ],
+    [ "PlayMusic", "class_flaming_torch_1_1_i_sound_manager_implementation.html#af7df27df74856779b9fdd67dee9f4a17", null ],
+    [ "PlaySound", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a6fdeb77e7160e26c29a53a5318a9e1b1", null ],
+    [ "SetMusicLooping", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a12871310f719e3d204206d45574ec7e8", null ],
+    [ "SetMusicPitch", "class_flaming_torch_1_1_i_sound_manager_implementation.html#ae30171cafa5b86203f1a54649098093f", null ],
+    [ "SetMusicVolume", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a69d3abced0ddead31a587561cead10e1", null ],
+    [ "SetSoundLooping", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a40c1f4ed70e6090aa22948d20266d186", null ],
+    [ "SetSoundPitch", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a1f0867b754a6e59ebf135e88b8560863", null ],
+    [ "SetSoundVolume", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a62656d4a5040883d2a5abfb955987a06", null ],
+    [ "SoundLooping", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a5e11f2b123a07aed3b0d1ed68a4882f7", null ],
+    [ "SoundPitch", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a62fb5c76505f804a596a0f676ba1641d", null ],
+    [ "StopMusic", "class_flaming_torch_1_1_i_sound_manager_implementation.html#a2674eb439b185288a18d7cec1f6bbbcf", null ],
+    [ "StopSound", "class_flaming_torch_1_1_i_sound_manager_implementation.html#adbaee11954ca493cebebcdcd0ddf458e", null ]
+];

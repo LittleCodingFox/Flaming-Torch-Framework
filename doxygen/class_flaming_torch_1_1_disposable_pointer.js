@@ -1,0 +1,27 @@
+var class_flaming_torch_1_1_disposable_pointer =
+[
+    [ "DisposablePointer", "class_flaming_torch_1_1_disposable_pointer.html#af006e946f945dc71293905e8fc5d2b0e", null ],
+    [ "DisposablePointer", "class_flaming_torch_1_1_disposable_pointer.html#aae4d5c6814c3d178d5faea8224360a11", null ],
+    [ "DisposablePointer", "class_flaming_torch_1_1_disposable_pointer.html#a267409bf67ababb27e7ebd89d65541ce", null ],
+    [ "AsDerived", "class_flaming_torch_1_1_disposable_pointer.html#a4121d3aeab6533d6c527847692ce437f", null ],
+    [ "Dispose", "class_flaming_torch_1_1_disposable_pointer.html#a0aaa39e232253be6194b3efd47ef3b5e", null ],
+    [ "Get", "class_flaming_torch_1_1_disposable_pointer.html#a50c776187fa336658360bcd0f255e9fd", null ],
+    [ "Get", "class_flaming_torch_1_1_disposable_pointer.html#a8aa3253f686b24da91ead2fda3ca71ed", null ],
+    [ "IsReadOnly", "class_flaming_torch_1_1_disposable_pointer.html#acfe634057b564288effe49a36a1b081a", null ],
+    [ "MakeReadOnly", "class_flaming_torch_1_1_disposable_pointer.html#ab295229b9e59c6cb03427b9b2da07fcd", null ],
+    [ "MakeWeak", "class_flaming_torch_1_1_disposable_pointer.html#accf97fd6ad4173f17d111fc0f5fe9baf", null ],
+    [ "operator bool", "class_flaming_torch_1_1_disposable_pointer.html#a2516f422616442acfbe5c0b8440f7712", null ],
+    [ "operator bool", "class_flaming_torch_1_1_disposable_pointer.html#a0f1ebc2e5e28dfedc4d4b24e259c3e49", null ],
+    [ "operator const type *", "class_flaming_torch_1_1_disposable_pointer.html#a7e5fb1d3ddec13110f7ac25416c49b95", null ],
+    [ "operator DisposablePointer< OutType >", "class_flaming_torch_1_1_disposable_pointer.html#aac48f6e17ee4d188343c3bb77f6ce292", null ],
+    [ "operator type *", "class_flaming_torch_1_1_disposable_pointer.html#a66646515f6e59a626021ac12238cd975", null ],
+    [ "operator!=", "class_flaming_torch_1_1_disposable_pointer.html#a68d1a57fa6170e3939e0fc2e8033cdb0", null ],
+    [ "operator*", "class_flaming_torch_1_1_disposable_pointer.html#af36fc4ab754466c5b8c7b23217d377b7", null ],
+    [ "operator*", "class_flaming_torch_1_1_disposable_pointer.html#a70b66d17d40e2a22156ce101401d596b", null ],
+    [ "operator->", "class_flaming_torch_1_1_disposable_pointer.html#a6f0ea3776e9728170607552b8ca02d5b", null ],
+    [ "operator->", "class_flaming_torch_1_1_disposable_pointer.html#adf743dcd34395f6e2c722191ba08309b", null ],
+    [ "operator=", "class_flaming_torch_1_1_disposable_pointer.html#a8ea3bcf272198091c355904046abc149", null ],
+    [ "operator==", "class_flaming_torch_1_1_disposable_pointer.html#acfb27db70b4b235e4ed44d1e91d7b1bd", null ],
+    [ "Reset", "class_flaming_torch_1_1_disposable_pointer.html#ad00fee503bdfcff92c0ae7511a63bb03", null ],
+    [ "UseCount", "class_flaming_torch_1_1_disposable_pointer.html#a83148995e4098a462192009efebe23f0", null ]
+];

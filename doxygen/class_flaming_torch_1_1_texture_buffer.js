@@ -2,9 +2,12 @@ var class_flaming_torch_1_1_texture_buffer =
 [
     [ "TextureBuffer", "class_flaming_torch_1_1_texture_buffer.html#a46c44e04fa7f519099cf19cafa40604f", null ],
     [ "Blend", "class_flaming_torch_1_1_texture_buffer.html#aa3a78d4640e7cb20ed0b1cc3bacdeceb", null ],
-    [ "Clone", "class_flaming_torch_1_1_texture_buffer.html#a65836adf28b5b16bd75c32801e08f893", null ],
+    [ "Clone", "class_flaming_torch_1_1_texture_buffer.html#ac5533f430e71513a49def82b8b00777d", null ],
     [ "ColorType", "class_flaming_torch_1_1_texture_buffer.html#a20882c1395604196da62973a7e601dc4", null ],
     [ "CreateEmpty", "class_flaming_torch_1_1_texture_buffer.html#a459c1576960f4097a443dd68f54c58bc", null ],
+    [ "CreateFromColor", "class_flaming_torch_1_1_texture_buffer.html#aa54b69d1adea101907ad90d82f3122a5", null ],
+    [ "CreateFromData", "class_flaming_torch_1_1_texture_buffer.html#aa400c82048d379e9a52988541474b342", null ],
+    [ "CreateFromStream", "class_flaming_torch_1_1_texture_buffer.html#ab27598a84488c78a174c6a6a0f6d2df4", null ],
     [ "FlipX", "class_flaming_torch_1_1_texture_buffer.html#a1857bda2de992303fa0f4401258ff395", null ],
     [ "FlipY", "class_flaming_torch_1_1_texture_buffer.html#a11cc29ef91944b80bb3f6adcea0af6b3", null ],
     [ "FromData", "class_flaming_torch_1_1_texture_buffer.html#a0f716d55e48166cb58aa14bd487f0f54", null ],

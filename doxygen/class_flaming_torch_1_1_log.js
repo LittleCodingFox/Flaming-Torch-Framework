@@ -9,6 +9,5 @@ var class_flaming_torch_1_1_log =
     [ "Shutdown", "class_flaming_torch_1_1_log.html#a99ce60343a7a27f8eb731c0c2432ac21", null ],
     [ "StartUp", "class_flaming_torch_1_1_log.html#a616278550142cdfa3a14c2abab5366dd", null ],
     [ "FolderName", "class_flaming_torch_1_1_log.html#a7b639b9260965c04b74d13eb9e8e40c9", null ],
-    [ "Instance", "class_flaming_torch_1_1_log.html#aebe5a5cc5a7af8ca5b180cdcccf3a530", null ],
     [ "PrintTime", "class_flaming_torch_1_1_log.html#a456bd002e96ae467a6b5aa0e57c7cbe9", null ]
 ];

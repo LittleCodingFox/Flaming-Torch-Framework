@@ -14,5 +14,6 @@ var class_flaming_torch_1_1_string_utils =
     [ "Split", "class_flaming_torch_1_1_string_utils.html#aefb9ebf7bb83d08756d0ca551ebc22f6", null ],
     [ "Strip", "class_flaming_torch_1_1_string_utils.html#aacccd814693ffad6dc809be2f040aa97", null ],
     [ "ToLowerCase", "class_flaming_torch_1_1_string_utils.html#abf278b2570bc2725a10f25904d833517", null ],
-    [ "ToUpperCase", "class_flaming_torch_1_1_string_utils.html#a8a360887c0bacd9b7c682633d96048f4", null ]
+    [ "ToUpperCase", "class_flaming_torch_1_1_string_utils.html#a8a360887c0bacd9b7c682633d96048f4", null ],
+    [ "Trim", "class_flaming_torch_1_1_string_utils.html#a8a8bc03d2b1eb4f7a4c7729436f109d0", null ]
 ];

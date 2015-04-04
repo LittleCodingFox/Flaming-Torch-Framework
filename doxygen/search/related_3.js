@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['package',['Package',['../class_flaming_torch_1_1_package_file_system_manager.html#a1f6d1842edeebd449a74173c8c83f8ca',1,'FlamingTorch::PackageFileSystemManager']]]
+  ['luascript',['LuaScript',['../class_flaming_torch_1_1_lua_script_manager.html#a012f20a7e4555fc0c440aa0c6a250363',1,'FlamingTorch::LuaScriptManager']]],
+  ['luascriptmanager',['LuaScriptManager',['../class_flaming_torch_1_1_lua_script.html#a8a7cc16290dcdcc3988e08b1df1189a1',1,'FlamingTorch::LuaScript']]]
 ];

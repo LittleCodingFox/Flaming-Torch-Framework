@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['introduction',['Introduction',['../index.html',1,'']]]
+  ['how_20to_20compile',['How to Compile',['../howtocompile.html',1,'']]]
 ];

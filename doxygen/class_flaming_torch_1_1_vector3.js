@@ -45,6 +45,7 @@ var class_flaming_torch_1_1_vector3 =
     [ "operator>", "class_flaming_torch_1_1_vector3.html#a08340482822152696a3fc435f0eb1822", null ],
     [ "operator>=", "class_flaming_torch_1_1_vector3.html#aa469ac8b041d11c5256767626d539fa0", null ],
     [ "Round", "class_flaming_torch_1_1_vector3.html#a55148fa50d402b0b7cf5fd7a24bf5a42", null ],
+    [ "ToString", "class_flaming_torch_1_1_vector3.html#a777c8b599fe5bb06d7ec43dc34c5fe38", null ],
     [ "ToVector2", "class_flaming_torch_1_1_vector3.html#a15348586c13033fa657e0d36ba2321df", null ],
     [ "VectorAngles", "class_flaming_torch_1_1_vector3.html#ae5e3b72bb5b4cd6d52ae749095d81386", null ],
     [ "x", "class_flaming_torch_1_1_vector3.html#a6184641033fa2987dffea06fd5af675b", null ],

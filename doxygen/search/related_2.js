@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nativegameinterface',['NativeGameInterface',['../class_flaming_torch_1_1_game_interface.html#a6ecb8b34f53d4a144b51d895b7b67d31',1,'FlamingTorch::GameInterface']]]
+  ['input',['Input',['../class_flaming_torch_1_1_renderer.html#a9732a2f3b51c8d069f54b1a13fb64c68',1,'FlamingTorch::Renderer']]]
 ];
