@@ -1,0 +1,107 @@
+/*!
+*	\mainpage Introduction
+*
+*	\tableofcontents
+*
+*	Flaming Torch Games Framework (FTGF) is an open-source game engine/framework that allows you to develop games in either C++ or [Lua](http://www.lua.org/)
+*   
+*   \section gettingstarted Getting Started
+*   Developing a game in FTGF takes two processes: Modifying files, and Repackaging them.
+*
+*	\subsection modifyingfiles Modifying Files
+*
+*   In order to modify files, you first need a Project Folder. A sample project is included in the `Content/DefaultProject` folder, with its C++ project source code located in `Development/DefaultProject`. After you compile DefaultProject following the \ref howtocompile "How to Compile" guide, you will be ready to start using FTGF.
+*
+*   The Project is organized in a structure similar to this:
+*
+*	    <project root>\
+*	        Content\
+*	            <Compiled Packages>
+*	        PackageContent\
+*	            <Package Name>\
+*	                <Package Content>\
+*	        Baker.cfg
+*	        MakePackages.cmd/MakePackages.sh
+*	        <DLLs and .exes>
+*   
+*   The Content folder is automatically created and used to store compiled .package files which are in turn used by FTGF.
+*   A tool, Baker, will process the Baker.cfg file and use any necessary tools to prepare your game assets to be used at runtime by FTGF. The Baker.cfg file has a structure similar to this:
+*   
+*   ###Baker.cfg
+*   
+*   Baker.cfg is a configuration file similar to the INI format. You can use #'s at the beginning of any line as a comment. You can find a sample configuration file further below.
+*   
+*   ####Tools
+*   The first section (Tools) is optional. You only need it if you need to override the tool locations. You don't need to add an extension, Baker will automatically add it if necessary, depending on the platform
+*   
+*   Several tools exist that Baker will use to process your assets:
+*   
+*   Packer is the tool that creates the Packages FTGF uses
+*   
+*   TiledConverter is the tool that compiles [Tiled](http://www.mapeditor.org) (.tmx) maps for better usage by FTGF
+*   
+*   TexturePacker is the tool that compiles multiple textures into a single packed (Atlas) texture alongside a .cfg file
+*   
+*   ####ResourceDirectories
+*   The second section (ResourceDirectories) contains information on all resource directories that a Package may use.
+*   
+*   Resource Directories are necessary not only for removing unused directories from Packages, but also for figuring out where files needed by tools like TiledConverter are located. The value name is irrelevant, however. Baker will find all Resource Folders this way.
+*   
+*   ####MapDirectories
+*   The third section (MapDirectories) contains information on all map directories that a Package may contain.
+*	
+*   Map Directories tell TiledConverter where to find maps to convert and where to put them.
+*	
+*   You separate the folder to search from the folder to place with a "|"
+*   
+*   ####TexturePackingDirectories
+*   The fourth section (TexturePackingDirectories) contains information on all the texture packing configuration files. It uses the same logic as Map Directories.
+*   
+*   ###Sample Baker.cfg
+*   
+*   \code
+*   [Tools]
+*   Packer=../Binaries/Packer/Release/Packer
+*   TiledConverter=../Binaries/TiledConverter/Release/TiledConverter
+*   TexturePacker=../Binaries/TexturePacker/Release/TexturePacker
+*   
+*   [ResourceDirectories]
+*   Map=Preprocess
+*   
+*   [MapDirectories]
+*   Map=Maps|WorldChunks
+*   
+*   [TexturePackingDirectories]
+*   Player=Entities/Player|Entities/Player/PlayerAnimation
+*	\endcode
+*   
+*	\subsection repackagingfiles Repackaging Files
+*
+*   You use MakePackages to compile those packages. You might have some problems creating them, so the log files for each used program will be created in the main folder
+*   under a folder with that program's name. You can remove those folders later on if you wish to repackage the game for release.
+*
+*   After you are sure the packages have been generated, you can run your .exe to run the game you created. The DLL files in Dependencies/Binaries
+*   should be in the main folder as well
+*
+*	\section tutorials Tutorials
+*
+*   \page howtocompile How to Compile
+*   In order to compile you need a recent build of [Premake](http://premake.github.io/). You must premake the `Dependencies`, `Development/Tools`, and `Development/DefaultProject` folders.
+*   After building, all projects should have their Binaries in the `Binaries/<projectname>/<configuration>/` folder and the Temp files into `Temp/<projectname>/<configuration>/` folder.
+*   
+*   \section sdlrenderer SDL Renderer
+*   SDL isn't included with the dependencies of FTGF, so if you wish to use the SDL Renderer you should install SDL or copy it to the `Dependencies/Headers` and `Dependencies/Libs` folders.
+*   
+*   \section windows Windows
+*   You should be able to build everything with no changes. Simply generating Visual Studio project files should be enough to build everything.
+*   
+*   \section linux Linux
+*	A few additional dependencies are required to properly build for Linux if you're using the [SFML](http://www.sfml-dev.org) Renderer by following their [Compiling with CMake Guide's Additional Dependencies list](http://www.sfml-dev.org/tutorials/2.2/compile-with-cmake.php#installing-dependencies). Since SFML's source is included with the dependencies, you should install these either way.
+*   
+*   \section macosx Mac OS X
+*   
+*   \section android Android
+*	The only requirement for building for Android is the Android NDK and a non-Windows machine due to an [issue with the NDK](http://stackoverflow.com/questions/12598933/ndk-build-createprocess-make-e-87-the-parameter-is-incorrect) whose workaround unfortunately doesn't work. 
+*	You should build the `Dependencies` and the `DefaultProject` project, then copy the .so files from both folders to `Content/DefaultProject/Android/libs/` before building the project.
+*   
+*/
