@@ -61,6 +61,7 @@ namespace UIInputType
 *	\param Group the Event Group
 *	\param ID the ID of the Element
 *	\param ErroredBefore whether we had a previous error. Used for easier coding.
+*	\param Parameters the parameters to pass to the event
 *	\return Whether an error occurred to prevent log spamming
 */
 template<typename... Args>

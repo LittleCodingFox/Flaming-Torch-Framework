@@ -973,7 +973,7 @@ public:
 	/*!
 	*	Converts a HTML color code to a Vector4
 	*	\return a Vector4 with the color
-	*	\param Value the HTML color code in the form of #AABBCCDD
+	*	\param Value the HTML color code in the form of "#AABBCCDD"
 	*/
 	static inline Vector4 ColorFromHTML(const std::string &Value)
 	{

@@ -147,7 +147,6 @@ public:
 
 	/*!
 	*	Draws all visible Elements
-	*	\param Renderer the Renderer to draw to
 	*/
 	void Draw();
 

@@ -63,7 +63,6 @@ public:
 	/*!
 	*	Draws this element based on the parent position
 	*	\param ParentPosition the parent's position
-	*	\param Renderer the Renderer to draw to
 	*	\note Should iterate on all children
 	*/
 	virtual void Draw(const Vector2 &ParentPosition);

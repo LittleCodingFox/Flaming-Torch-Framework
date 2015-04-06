@@ -45,13 +45,11 @@ public:
 #if USE_GRAPHICS
 	/*!
 	*	Begin using the Camera's Transform
-	*	\param TheRenderer the renderer upon which to apply this transform
 	*/
 	void BeginTransforms();
 
 	/*!
 	*	End using the Camera's Transform
-	*	\param TheRenderer the renderer upon which to apply this transform
 	*/
 	void EndTransforms();
 #endif

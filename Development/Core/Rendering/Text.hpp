@@ -47,7 +47,7 @@ public:
 
 	/*!
 	*	Sets the text font
-	*	\param Font the text's font
+	*	\param TheFont the text's font
 	*/
 	TextParams &Font(DisposablePointer<Font> TheFont)
 	{

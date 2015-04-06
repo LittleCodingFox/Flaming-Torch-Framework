@@ -129,6 +129,8 @@ public:
 	*	\param p2 the second control point
 	*	\param p3 the third control point
 	*	\param p4 the fourth control point
+	*	\param Steps the steps between the line (more steps = more detail)
+	*	\param Color the color of the line
 	*/
 	void RenderLines(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, const Vector3 &p4, uint32 Steps, const Vector4 &Color = Vector4(1, 1, 1, 1));
 	
