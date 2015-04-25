@@ -486,6 +486,8 @@ namespace FlamingTorch
 		if(ScriptInstance.Get() == NULL)
 			ScriptInstance = g_LuaScript.CreateScript("", &Libs[0], Libs.size());
 
+		UIVariables = luabind::newtable(ScriptInstance->State);
+
 		RegisterInput();
 	}
 
@@ -1927,6 +1929,8 @@ namespace FlamingTorch
 
 		MouseOverElement = DisposablePointer<UIElement>();
 		FocusedElementValue = DisposablePointer<UIElement>();
+
+		UIVariables = luabind::newtable(ScriptInstance->State);
 	}
 
 	DisposablePointer<UIElement> UIManager::GetInputBlocker()
@@ -2346,6 +2350,7 @@ namespace FlamingTorch
 	{
 		UnRegisterInput();
 		Clear();
+		UIVariables = luabind::object();
 
 		ScriptInstance.Dispose();
 	}

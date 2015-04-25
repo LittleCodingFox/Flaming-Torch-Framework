@@ -115,6 +115,7 @@ public:
 	Vector4 DefaultTextColor, DefaultTextSecondaryColor;
 	uint32 DefaultTextFontSize;
 	DisposablePointer<Font> DefaultFont;
+	luabind::object UIVariables;
 
 	UIManager();
 	~UIManager();

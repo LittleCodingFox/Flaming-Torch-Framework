@@ -2055,6 +2055,7 @@ namespace FlamingTorch
 				.def("DrawText", &UIManager::DrawText)
 				.def("GetUITexture", (DisposablePointer<Texture> (UIManager::*)(const Path &))&UIManager::GetUITexture)
 				.def("GetUITexture", (DisposablePointer<Texture> (UIManager::*)(const Vector4 &))&UIManager::GetUITexture)
+				.def_readwrite("UIVariables", &UIManager::UIVariables)
 				.property("FocusedElement", &UIManager::GetFocusedElement)
 				.property("MouseOverElement", &UIManager::GetMouseOverElement)
 				.property("Skin", &UIManager::GetSkin, &UIManager::SetSkin),

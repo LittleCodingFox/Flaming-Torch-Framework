@@ -3,3 +3,6 @@
 *.vcxproj
 *.user
 *.bat
+Binaries/
+Temp/
+*.sdf

@@ -322,8 +322,12 @@ namespace FlamingTorch
 			case RendererEventType::MouseLeft:
 				for(uint32 i = 0; i < InputMouseButton::Count; i++)
 				{
+					if (MouseButtons[i].Pressed || MouseButtons[i].JustPressed)
+					{
+						MouseButtons[i].JustReleased = true;
+					}
+
 					MouseButtons[i].Pressed = MouseButtons[i].JustPressed = false;
-					MouseButtons[i].JustReleased = true;
 				}
 
 				if(PlatformInfo::PlatformType == PlatformType::Mobile)
@@ -410,8 +414,13 @@ namespace FlamingTorch
 			case RendererEventType::MouseButtonReleased:
 				{
 					MouseButtonInfo &Button = MouseButtons[Event.MouseButtonIndex];
-					Button.Pressed = Button.JustPressed = false;
-					Button.JustReleased = true;
+
+					//Avoid false positives
+					if (Button.Pressed || Button.JustPressed)
+					{
+						Button.Pressed = Button.JustPressed = false;
+						Button.JustReleased = true;
+					}
 				}
 
 				break;
