@@ -166,6 +166,8 @@ namespace FlamingTorch
 
 			return;
 		}
+
+		OnUIReloaded(true);
 	}
 
 	bool GameInterface::CreateRenderer(const RenderCreateOptions &Options)

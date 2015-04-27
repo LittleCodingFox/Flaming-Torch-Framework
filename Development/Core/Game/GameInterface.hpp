@@ -29,6 +29,11 @@ public:
 	uint32 UpdateRateValue, FrameRateValue;
 	Vector2 BaseResolution;
 
+	/*!
+	*	\note Requires argument, should be ignored
+	*/
+	SimpleDelegate::SimpleDelegate<bool> OnUIReloaded;
+
 	GameInterface() : DevelopmentBuild(false), IsGUISandbox(false), UpdateRateValue(30), FrameRateValue(0), GraphicsEnabled(USE_GRAPHICS), QuitFlag(false) {}
 
 	virtual ~GameInterface() {}
