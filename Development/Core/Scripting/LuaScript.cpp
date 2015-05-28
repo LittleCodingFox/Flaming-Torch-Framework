@@ -207,6 +207,8 @@ namespace FlamingTorch
 
 		if (0 != luaL_dostring(State, str.str().c_str()))
 		{
+			LuaErrorFunction(State);
+
 			return luabind::object();
 		}
 
@@ -215,14 +217,19 @@ namespace FlamingTorch
 		luabind::object FunctionInstance = Globals[FunctionName];
 
 		if (!FunctionInstance)
+		{
+			g_Log.LogErr(TAG, "Unable to load stream: Unable to find function '%s'", FunctionName.c_str());
+
 			return luabind::object();
+		}
 
 		try
 		{
 			return FunctionInstance();
 		}
-		catch (std::exception &)
+		catch (std::exception &e)
 		{
+			g_Log.LogErr(TAG, "Unable to load stream: %s", e.what());
 		}
 
 		return luabind::object();
