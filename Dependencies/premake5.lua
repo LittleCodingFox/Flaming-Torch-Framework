@@ -1,7 +1,7 @@
 -- A solution contains projects, and defines the available configurations
 solution "Dependencies"
 	configurations { "Debug", "Release" }
-	platforms { "x32", "x64" }
+	platforms { "x64" }
 	
 	-- A project defines one build target
 	project "FlamingDependencies"
@@ -117,7 +117,7 @@ solution "Dependencies"
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
 		})
 
-		if os.get() == "linux" then
+		if os.target() == "linux" then
 			files {
 				"Source/SFML/SFML/Network/Unix/*.cpp",
 				"Source/SFML/SFML/System/Unix/*.cpp",
@@ -126,11 +126,9 @@ solution "Dependencies"
 			}
 		end
 
-		if os.get() == "linux" or os.get() == "macosx" then
-			buildoptions { "-std=c++11" }
-		end
+		buildoptions { "-std=c++20" }
 		
-		if os.get() == "windows" then
+		if os.target() == "windows" then
 			excludes { "Source/SimpleFileWatcher/FileWatcherLinux.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
 			defines({ "_WIN32", "WIN32" })
 
@@ -145,7 +143,7 @@ solution "Dependencies"
 			}
 		end
 		
-		if os.get() == "linux" then
+		if os.target() == "linux" then
 			excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherOSX.cpp" }
 			defines({ "__LINUX__" })
 
@@ -154,7 +152,7 @@ solution "Dependencies"
 			}
 		end
 		
-		configuration "Debug"
+		filter "configurations:Debug"
 			targetsuffix "d"
 			
 			defines({ "DEBUG" })
@@ -162,17 +160,17 @@ solution "Dependencies"
 			targetdir("../Binaries/FlamingDependencies/Debug/")
 			objdir("../Temp/FlamingDependencies/Debug/")
 
-			flags { "Symbols" }
+			symbols "On"
  
-		configuration "Release"
+		filter "configurations:Release"
 			defines({ "NDEBUG" })
 			
 			targetdir("../Binaries/FlamingDependencies/Release/")
 			objdir("../Temp/FlamingDependencies/Release/")
 
-			flags { "Optimize" }
+			optimize "On"
 		
-		configuration "macosx"
+		filter "configurations:macosx"
 			files { "Source/freetype/base/ftmac.c" }
 
 			files {
@@ -189,4 +187,4 @@ solution "Dependencies"
 			
 			excludes { "Source/SimpleFileWatcher/FileWatcherWin32.cpp", "Source/SimpleFileWatcher/FileWatcherLinux.cpp" }
 			defines({ "NDEBUG", "__APPLE__", "__MACOSX__" })
-			flags { "Optimize" }
+			optimize "On"

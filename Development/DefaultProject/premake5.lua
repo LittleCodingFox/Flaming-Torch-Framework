@@ -2,7 +2,7 @@
 -- A solution contains projects, and defines the available configurations
 solution "DefaultProject"
 	configurations { "Debug", "Release" }
-	platforms { "x32", "x64" }
+	platforms { "x64" }
 	
 	-- A project defines one build target
 	project "DefaultProject"
@@ -25,25 +25,21 @@ solution "DefaultProject"
 			"../Core/"
 		}
 		
-		if os.get() == "linux" then
+		if os.target() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
-		elseif os.get() == "windows" then
+		elseif os.target() == "windows" then
 			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
 		
-		if os.get() == "windows" then
-			buildoptions { "/Zm200", "/bigobj" }
-		
+		if os.target() == "windows" then
 			libdirs {
-				"../../Dependencies/Libs/Win32/"
+				"../../Dependencies/Libs/Win64/"
 			}
-		else
-			buildoptions { "-w" }
 		end
 		
-		if os.get() == "macosx" then
+		if os.target() == "macosx" then
 			libdirs {
 				"../../Dependencies/Libs/OSX/"
 			}
@@ -51,14 +47,16 @@ solution "DefaultProject"
 			linkoptions {
 				"-F ../../Dependencies/Libs/OSX/"
 			}
-				
+			
 			files { "../Core/FileSystem_OSX.mm" }
 		end
 		
 		defines({ "SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE" })
  
-		configuration "Debug"
+		buildoptions { "-std=c++20" }
+
+		filter "configurations:Debug"
 			libdirs {
 				"../../Binaries/FlamingDependencies/Debug/"
 			}
@@ -68,33 +66,31 @@ solution "DefaultProject"
 			
 			defines({ "DEBUG" })
 		
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "_WIN32", "WIN32" })
+				
+				buildoptions { "/bigobj" }
 
-				links { "winmm", "ws2_32", "opengl32", "glu32", "glew", "FlamingDependenciesd", "jpeg", "openal32", "sndfile" }
+				links { "FlamingDependenciesd", "winmm", "ws2_32", "opengl32", "glu32", "glew32s", "openal32", "sndfile" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "__LINUX__" })
-				links { "GL", "GLU", "GLEW", "FlamingDependenciesd", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile", "udev" }
-
-				buildoptions { "-std=c++11" }
+				links { "GL", "GLU", "GLEW", "FlamingDependenciesd", "Xrandr", "X11", "pthread", "dl", "openal", "sndfile", "udev" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "__APPLE__" })
 
 				links { "OpenGL.framework", "glew", "FlamingDependenciesd",
 					"Foundation.framework", "AppKit.framework", "IOKit.framework", "Carbon.framework",
-					"GLEW", "OpenAL.framework", "jpeg", "../../Dependencies/Libs/OSX/sndfile.framework"
+					"GLEW", "OpenAL.framework", "../../Dependencies/Libs/OSX/sndfile.framework"
 				}
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Symbols" }
+			symbols "On"
  
-		configuration "Release"
+		filter "configurations:Release"
 			libdirs {
 				"../../Binaries/FlamingDependencies/Release/"
 			}
@@ -104,32 +100,26 @@ solution "DefaultProject"
 			
 			defines({ "NDEBUG" })
 			
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "_WIN32", "WIN32" })
-		
-				libdirs {
-					"../../Dependencies/Libs/Win32/"
-				}
+				
+				buildoptions { "/bigobj" }
 
-				links { "winmm", "ws2_32", "opengl32", "glu32", "glew", "FlamingDependencies", "jpeg", "openal32", "sndfile" }
+				links { "FlamingDependencies", "winmm", "ws2_32", "opengl32", "glu32", "glew", "openal32", "sndfile" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "__LINUX__" })
-				links { "GL", "GLU", "GLEW", "FlamingDependencies", "Xrandr", "X11", "pthread", "dl", "openal", "jpeg", "sndfile", "udev" }
-
-				buildoptions { "-std=c++11" }
+				links { "GL", "GLU", "GLEW", "FlamingDependencies", "Xrandr", "X11", "pthread", "dl", "openal", "sndfile", "udev" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "__APPLE__" })
 				
 				links { "OpenGL.framework", "glew", "FlamingDependencies",
 					"Foundation.framework", "AppKit.framework", "IOKit.framework", "Carbon.framework",
-					"GLEW", "OpenAL.framework", "jpeg", "sndfile.framework"
+					"GLEW", "OpenAL.framework", "sndfile.framework"
 				}
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Optimize" }
+			optimize "On"

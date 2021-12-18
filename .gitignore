@@ -3,6 +3,9 @@
 *.vcxproj
 *.user
 *.bat
-Binaries/
 Temp/
 *.sdf
+.vs
+Logs
+*.package
+/Binaries

@@ -38,7 +38,8 @@
 #	define FLPLATFORM_PATHSPLITSTRING "\\"
 #
 #	if _DEBUG
-#		define DEBUG_BREAK __asm{int 3}
+#		include <intrin.h>
+#		define DEBUG_BREAK __debugbreak();
 #	else
 #		define DEBUG_BREAK
 #	endif

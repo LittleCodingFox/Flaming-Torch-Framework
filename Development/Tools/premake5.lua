@@ -2,7 +2,7 @@
 -- A solution contains projects, and defines the available configurations
 solution "Tools"
 	configurations { "Debug", "Release" }
-	platforms { "x32", "x64" }
+	platforms { "x64" }
 	
 	-- A project defines one build target
 	project "Packer"
@@ -26,10 +26,10 @@ solution "Tools"
 			"../Core/"
 		}
 		
-		if os.get() == "linux" then
+		if os.target() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
-		elseif os.get() == "windows" then
+		elseif os.target() == "windows" then
 			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
@@ -48,13 +48,7 @@ solution "Tools"
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
 		})
 		
-		if os.get() == "windows" then
-			buildoptions { "/Zm139", "/bigobj" }
-		else
-			buildoptions { "-w" }
-		end
-		
-		if os.get() == "macosx" then
+		if os.target() == "macosx" then
 			libdirs {
 				"../../Dependencies/Libs/OSX/"
 			}
@@ -62,58 +56,58 @@ solution "Tools"
 			files { "../Core/FileSystem_OSX.mm" }
 			links { "Foundation.framework" }
 		end
+
+		buildoptions { "-std=c++20" }
 		 
-		configuration "Debug"
+		filter "configurations:Debug"
+			targetdir "../../Binaries/Packer/Debug"
+			objdir "../../Temp/Packer/Debug"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Debug/"
 			}
 		
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependenciesd" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
-				
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Symbols" }
+			symbols "On"
  
-		configuration "Release"
+		filter "configurations:Release"
+			targetdir "../../Binaries/Packer/Release"
+			objdir "../../Temp/Packer/Release"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Release/"
 			}
 
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependencies" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
-
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Optimize" }
+			optimize "On"
 	
 	-- A project defines one build target
 	project "TiledConverter"
@@ -145,11 +139,13 @@ solution "Tools"
 		libdirs {
 			"../../Dependencies/Libs/"
 		}
+
+		buildoptions { "-std=c++20" }
 		
-		if os.get() == "linux" then
+		if os.target() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
-		elseif os.get() == "windows" then
+		elseif os.target() == "windows" then
 			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
@@ -159,13 +155,7 @@ solution "Tools"
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
 		})
 		
-		if os.get() == "windows" then
-			buildoptions { "/Zm139", "/bigobj" }
-		else
-			buildoptions { "-w" }
-		end
-		
-		if os.get() == "macosx" then
+		if os.target() == "macosx" then
 			libdirs {
 				"../../Dependencies/Libs/OSX/"
 			}
@@ -174,57 +164,55 @@ solution "Tools"
 			links { "Foundation.framework" }
 		end
  
-		configuration "Debug"
+		filter "configurations:Debug"
+			targetdir "../../Binaries/TiledConverter/Debug"
+			objdir "../../Temp/TiledConverter/Debug"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Debug/"
 			}
 		
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependenciesd" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
-
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Symbols" }
+			symbols "On"
  
-		configuration "Release"
+		filter "configurations:Release"
+			targetdir "../../Binaries/TiledConverter/Release"
+			objdir "../../Temp/TiledConverter/Release"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Release/"
 			}
 
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependencies" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
-
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Optimize" }
+			optimize "On"
 	
 	-- A project defines one build target
 	project "Baker"
@@ -257,10 +245,10 @@ solution "Tools"
 			"../../Dependencies/Libs/"
 		}
 		
-		if os.get() == "linux" then
+		if os.target() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
-		elseif os.get() == "windows" then
+		elseif os.target() == "windows" then
 			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
@@ -270,13 +258,7 @@ solution "Tools"
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
 		})
 		
-		if os.get() == "windows" then
-			buildoptions { "/Zm139", "/bigobj" }
-		else
-			buildoptions { "-w" }
-		end
-		
-		if os.get() == "macosx" then
+		if os.target() == "macosx" then
 			libdirs {
 				"../../Dependencies/Libs/OSX/"
 			}
@@ -284,56 +266,58 @@ solution "Tools"
 			files { "../Core/FileSystem_OSX.mm" }
 			links { "Foundation.framework" }
 		end
+
+		buildoptions { "-std=c++20" }
  
-		configuration "Debug"
+		filter "configurations:Debug"
+			targetdir "../../Binaries/Baker/Debug"
+			objdir "../../Temp/Baker/Debug"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Debug/"
 			}
 		
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependenciesd" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
-
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Symbols" }
+			symbols "On"
  
-		configuration "Release"
+		filter "configurations:Release"
+			targetdir "../../Binaries/Baker/Release"
+			objdir "../../Temp/Baker/Release"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Release/"
 			}
 
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependencies" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
-
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Optimize" }
+			optimize "On"
 	
 	-- A project defines one build target
 	project "TexturePacker"
@@ -366,10 +350,10 @@ solution "Tools"
 			"../../Dependencies/Libs/"
 		}
 		
-		if os.get() == "linux" then
+		if os.target() == "linux" then
 			pchheader "../Core/FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
-		elseif os.get() == "windows" then
+		elseif os.target() == "windows" then
 			pchheader "FlamingCore.hpp"
 			pchsource "../Core/FlamingCore.cpp"
 		end
@@ -379,13 +363,7 @@ solution "Tools"
 			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
 		})
 		
-		if os.get() == "windows" then
-			buildoptions { "/Zm139", "/bigobj" }
-		else
-			buildoptions { "-w" }
-		end
-		
-		if os.get() == "macosx" then
+		if os.target() == "macosx" then
 			libdirs {
 				"../../Dependencies/Libs/OSX/"
 			}
@@ -393,77 +371,55 @@ solution "Tools"
 			files { "../Core/FileSystem_OSX.mm" }
 			links { "Foundation.framework" }
 		end
+
+		buildoptions { "-std=c++20" }
  
-		configuration "Debug"
+		filter "configurations:Debug"
+			targetdir "../../Binaries/TexturePacker/Debug"
+			objdir "../../Temp/TexturePacker/Debug"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Debug/"
 			}
 		
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependenciesd" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "DEBUG", "__LINUX__" })
 				links { "FlamingDependenciesd", "dl", "pthread" }
-
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "DEBUG", "__APPLE__" })
 				links { "FlamingDependenciesd" }
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Symbols" }
+			symbols "On"
  
-		configuration "Release"
+		filter "configurations:Release"
+			targetdir "../../Binaries/TexturePacker/Release"
+			objdir "../../Temp/TexturePacker/Release"
+
 			libdirs {
 				"../../Binaries/FlamingDependencies/Release/"
 			}
 
-			if os.get() == "windows" then
+			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependencies" }
 			end
 		
-			if os.get() == "linux" then
+			if os.target() == "linux" then
 				defines({ "NDEBUG", "__LINUX__" })
 				links { "FlamingDependencies", "dl", "pthread" }
-
-				buildoptions { "-std=c++11" }
 			end
 		
-			if os.get() == "macosx" then
+			if os.target() == "macosx" then
 				defines({ "NDEBUG", "__APPLE__" })
 				links { "FlamingDependencies" }
-
-				buildoptions { "-std=c++11" }
 			end
 
-			flags { "Optimize" }
-
--- From http://industriousone.com/topic/how-get-current-configuration
--- iterate over all solutions
-for sln in premake.solution.each() do
-   -- iterate over all projects in the solution
-	for pi = 1, #sln.projects do
-		-- make this the active project
-		prj = sln.projects[pi]
-		project(prj.name)
- 
-		-- iterate over all configurations
-		for ci = 1, #sln.configurations do
-			-- make this the active configuration
-			cfgname = sln.configurations[ci]
-			configuration(cfgname)
- 
-			-- do my custom stuff
-			targetdir(path.join(prj.basedir, "../../Binaries/" .. prj.name .. "/" .. cfgname))
-			objdir(path.join(prj.basedir, "../../Temp/" .. prj.name .. "/" .. cfgname))
-		end
-	end
-end
+			optimize "On"
