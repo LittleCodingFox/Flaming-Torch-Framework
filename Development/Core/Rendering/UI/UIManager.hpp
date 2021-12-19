@@ -114,7 +114,7 @@ public:
 	LayoutMap Layouts, DefaultLayouts;
 	Vector4 DefaultTextColor, DefaultTextSecondaryColor;
 	uint32 DefaultTextFontSize;
-	DisposablePointer<Font> DefaultFont;
+	DisposablePointer<TextFont> DefaultFont;
 	luabind::object UIVariables;
 
 	UIManager();

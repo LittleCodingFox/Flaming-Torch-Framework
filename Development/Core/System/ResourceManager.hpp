@@ -3,7 +3,7 @@
 class ResourceManager : public SubSystem
 {
 private:
-	typedef std::map<StringID, DisposablePointer<Font>> FontMap;
+	typedef std::map<StringID, DisposablePointer<TextFont>> FontMap;
 
 	typedef std::map<StringID, DisposablePointer<Texture> > TextureMap;
 	
@@ -26,7 +26,7 @@ public:
 	DisposablePointer<TexturePacker> GetTexturePack(const Path &ThePath, GenericConfig *Config);
 
 #if USE_GRAPHICS
-	DisposablePointer<Font> GetFont(const Path &ThePath);
+	DisposablePointer<TextFont> GetFont(const Path &ThePath);
 #endif
 
 	void PrepareResourceReload();

@@ -1509,7 +1509,7 @@ namespace FlamingTorch
 			//ResourceManager
 			luabind::class_<ResourceManager, SubSystem>("ResourceManager")
 #if USE_GRAPHICS
-				.def("GetFont", (DisposablePointer<Font>(ResourceManager::*)(const Path &))&ResourceManager::GetFont)
+				.def("GetFont", (DisposablePointer<TextFont>(ResourceManager::*)(const Path &))&ResourceManager::GetFont)
 #endif
 				.def("GetTexture", (DisposablePointer<Texture> (ResourceManager::*)(const Path &))&ResourceManager::GetTexture)
 				.def("GetTexturePack", (DisposablePointer<TexturePacker>(ResourceManager::*)(const Path &, GenericConfig *))&ResourceManager::GetTexturePack)
@@ -1747,14 +1747,14 @@ namespace FlamingTorch
 						.def_readwrite("RotationValue", &TextParams::rotationValue)
 						.def(luabind::constructor<>())
 						.def(luabind::constructor<const TextParams &>())
-						.def("Font", &TextParams::font, luabind::return_reference_to(_1))
-						.def("FontSize", &TextParams::fontSize, luabind::return_reference_to(_1))
-						.def("Color", &TextParams::color, luabind::return_reference_to(_1))
-						.def("SecondaryColor", &TextParams::secondaryColor, luabind::return_reference_to(_1))
-						.def("BorderColor", &TextParams::borderColor, luabind::return_reference_to(_1))
-						.def("BorderSize", &TextParams::borderSize, luabind::return_reference_to(_1))
-						.def("Rotate", &TextParams::rotate, luabind::return_reference_to(_1))
-						.def("Position", &TextParams::position, luabind::return_reference_to(_1)),
+						.def("Font", &TextParams::Font, luabind::return_reference_to(_1))
+						.def("FontSize", &TextParams::FontSize, luabind::return_reference_to(_1))
+						.def("Color", &TextParams::Color, luabind::return_reference_to(_1))
+						.def("SecondaryColor", &TextParams::SecondaryColor, luabind::return_reference_to(_1))
+						.def("BorderColor", &TextParams::BorderColor, luabind::return_reference_to(_1))
+						.def("BorderSize", &TextParams::BorderSize, luabind::return_reference_to(_1))
+						.def("Rotate", &TextParams::Rotate, luabind::return_reference_to(_1))
+						.def("Position", &TextParams::Position, luabind::return_reference_to(_1)),
 
 					luabind::def("LoadDefaultFont", &RenderTextUtils::LoadDefaultFont),
 					luabind::def("MeasureTextSimple", &RenderTextMeasureTextSimple),
@@ -1765,13 +1765,13 @@ namespace FlamingTorch
 				],
 
 			//Font
-			luabind::class_<Font, DisposablePointer<Font> >("Font")
-				.def("FromStream", &Font::FromStream)
-				.def("Clear", &Font::Clear)
-				.def("SetSize", &Font::SetSize)
-				.def("LineSpacing", &Font::LineSpacing)
-				.def("Kerning", &Font::Kerning)
-				.def("LoadGlyph", &Font::LoadGlyph),
+			luabind::class_<TextFont, DisposablePointer<TextFont> >("Font")
+				.def("FromStream", &TextFont::FromStream)
+				.def("Clear", &TextFont::Clear)
+				.def("SetSize", &TextFont::SetSize)
+				.def("LineSpacing", &TextFont::LineSpacing)
+				.def("Kerning", &TextFont::Kerning)
+				.def("LoadGlyph", &TextFont::LoadGlyph),
 
 			//Input
 			luabind::class_<Input>("Input")

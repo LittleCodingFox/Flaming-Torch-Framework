@@ -4,21 +4,6 @@ namespace FlamingTorch
 #	if USE_GRAPHICS
 #	define TAG "UIManager"
 
-	void RemoveElementFuture(MemoryStream &Stream)
-	{
-		StringID ID = 0;
-		UIManager *Manager = NULL;
-		uint32 ManagerAddr = 0;
-
-		Stream.Seek(0);
-		Stream.Read2<StringID>(&ID);
-		Stream.Read2<uint32>(&ManagerAddr);
-
-		Manager = (UIManager *)ManagerAddr;
-
-		Manager->RemoveElement(ID);
-	}
-
 	class UIInputProcessor : public Input::Context
 	{
 		bool OnKey(const Input::KeyInfo &Key) override
@@ -388,7 +373,7 @@ namespace FlamingTorch
 				TheResource.TextParameters = Parameters;
 				TheResource.References = 1;
 
-				TheResource.Info = const_cast<Font *>(Parameters.fontValue.Get())->LoadGlyph(Text[i], Parameters);
+				TheResource.Info = const_cast<TextFont *>(Parameters.fontValue.Get())->LoadGlyph(Text[i], Parameters);
 
 				if (TheResource.Info.pixels.Get())
 				{
@@ -405,9 +390,9 @@ namespace FlamingTorch
 	{
 		static Sprite TheSprite;
 
-		TextParams ActualParams = Params.fontValue ? Params : TextParams(Params).font(RenderTextUtils::DefaultFont);
+		TextParams ActualParams = Params.fontValue ? Params : TextParams(Params).Font(RenderTextUtils::DefaultFont);
 
-		DisposablePointer<Font> TheFont = ActualParams.fontValue;
+		DisposablePointer<TextFont> TheFont = ActualParams.fontValue;
 
 		f32 LineSpace = (f32)TheFont->LineSpacing(ActualParams);
 		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', ActualParams).advance;
@@ -523,7 +508,7 @@ namespace FlamingTorch
 
 		if(Property == "Font")
 		{
-			DisposablePointer<Font> TheFont = g_ResourceManager.GetFont(Path(Value));
+			DisposablePointer<TextFont> TheFont = g_ResourceManager.GetFont(Path(Value));
 			
 			if (TheFont.Get() == NULL)
 			{
@@ -532,7 +517,7 @@ namespace FlamingTorch
 				return;
 			}
 
-			TheText->TextParameters.font(TheFont);
+			TheText->TextParameters.Font(TheFont);
 		}
 		else if(Property == "FontSize")
 		{
@@ -540,7 +525,7 @@ namespace FlamingTorch
 
 			if(1 == sscanf(Value.c_str(), "%u", &FontSize))
 			{
-				TheText->TextParameters.fontSize(FontSize);
+				TheText->TextParameters.FontSize(FontSize);
 			}
 		}
 		else if(Property == "Text")

@@ -2,12 +2,12 @@
 #if USE_GRAPHICS
 
 class Renderer;
-class Font;
+class TextFont;
 
 class RenderTextUtils
 {
 public:
-	static DisposablePointer<Font> DefaultFont;
+	static DisposablePointer<TextFont> DefaultFont;
 
 	//Loads the default font
 	//Can be called several times, it'll only load it once

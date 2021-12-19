@@ -85,11 +85,13 @@ namespace FlamingTorch
 		UISprite::Draw(ParentPosition);
 
 		TextParams Parameters;
-		Parameters.font(ManagerValue->DefaultFont).color(FontColor).fontSize(FontSize);
+		Parameters.Font(ManagerValue->DefaultFont)
+			.Color(FontColor)
+			.FontSize(FontSize);
 
 		f32 Size = RenderTextUtils::MeasureTextSimple(Caption, Parameters).Right;
 
-		RenderTextUtils::RenderText(Caption, TextParams(Parameters).position(ActualPosition + LabelOffset + TheSprite.Options.NinePatchRectValue.Position() + Vector2((SizeValue.x - Size) / 2, 0)));
+		RenderTextUtils::RenderText(Caption, TextParams(Parameters).Position(ActualPosition + LabelOffset + TheSprite.Options.NinePatchRectValue.Position() + Vector2((SizeValue.x - Size) / 2, 0)));
 	}
 
 	void UIButton::SetCaption(const std::string &Caption)

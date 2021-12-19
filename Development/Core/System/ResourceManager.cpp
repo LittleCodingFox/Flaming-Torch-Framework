@@ -126,13 +126,13 @@ namespace FlamingTorch
 	}
 
 #if USE_GRAPHICS
-	DisposablePointer<Font> ResourceManager::GetFont(const Path &ThePath)
+	DisposablePointer<TextFont> ResourceManager::GetFont(const Path &ThePath)
 	{
 		if(!WasStarted)
 		{
 			g_Log.LogErr(TAG, "This Subsystem has not yet been initialized!");
 
-			return DisposablePointer<Font>();
+			return DisposablePointer<TextFont>();
 		}
 
 		StringID RealName = MakeStringID(ThePath.FullPath());
@@ -152,17 +152,17 @@ namespace FlamingTorch
 				{
 					g_Log.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
-					return DisposablePointer<Font>();
+					return DisposablePointer<TextFont>();
 				}
 			}
 
-			DisposablePointer<Font> Out(new Font());
+			DisposablePointer<TextFont> Out(new TextFont());
 
 			if(!Out->FromStream(TheStream))
 			{
 				g_Log.LogErr(TAG, "Failed to load a font '%s' (H: 0x%08x)", ThePath.FullPath().c_str(), RealName);
 
-				return DisposablePointer<Font>();
+				return DisposablePointer<TextFont>();
 			}
 
 			Fonts[RealName] = Out;

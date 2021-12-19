@@ -1,6 +1,6 @@
 #pragma once
 
-class Font;
+class TextFont;
 
 /*!
 *	Text rendering parameters
@@ -11,7 +11,7 @@ public:
 	Vector4 textColorValue, secondaryTextColorValue, borderColorValue;
 	Vector2 positionValue;
 	f32 borderSizeValue, rotationValue;
-	DisposablePointer<Font> fontValue;
+	DisposablePointer<TextFont> fontValue;
 	uint32 fontSizeValue;
 
 	TextParams() : borderSizeValue(0), textColorValue(1, 1, 1, 1), secondaryTextColorValue(1, 1, 1, 1), borderColorValue(0, 0, 0, 1),
@@ -38,7 +38,7 @@ public:
 	*	Sets the text's rotation
 	*	\param Rotation the rotation in Radians
 	*/
-	TextParams &rotate(f32 rotation)
+	TextParams &Rotate(f32 rotation)
 	{
 		rotationValue = rotation;
 
@@ -49,7 +49,7 @@ public:
 	*	Sets the text font
 	*	\param TheFont the text's font
 	*/
-	TextParams &font(DisposablePointer<Font> font)
+	TextParams &Font(DisposablePointer<TextFont> font)
 	{
 		fontValue = font;
 
@@ -60,7 +60,7 @@ public:
 	*	Sets the text font size
 	*	\param FontSize the text's font size in pixels
 	*/
-	TextParams &fontSize(uint32 fontSize)
+	TextParams &FontSize(uint32 fontSize)
 	{
 		fontSizeValue = fontSize;
 
@@ -73,7 +73,7 @@ public:
 	*	\note Changes the secondary color too to prevent issues with using this
 	*	\sa SecondaryColor
 	*/
-	TextParams &color(const Vector4 &color)
+	TextParams &Color(const Vector4 &color)
 	{
 		textColorValue = secondaryTextColorValue = color;
 
@@ -85,7 +85,7 @@ public:
 	*	\param SecondaryColor the secondary color to use
 	*	\sa Color
 	*/
-	TextParams &secondaryColor(const Vector4 &secondaryColor)
+	TextParams &SecondaryColor(const Vector4 &secondaryColor)
 	{
 		secondaryTextColorValue = secondaryColor;
 
@@ -97,7 +97,7 @@ public:
 	*	\param BorderColor the border color to use (default value is 0, 0, 0, 1)
 	*	\sa BorderSize
 	*/
-	TextParams &borderColor(const Vector4 &borderColor)
+	TextParams &BorderColor(const Vector4 &borderColor)
 	{
 		borderColorValue = borderColor;
 
@@ -109,7 +109,7 @@ public:
 	*	\param BorderSize the size of the border, in pixels (default value is 0)
 	*	\sa BorderColor
 	*/
-	TextParams &borderSize(f32 borderSize)
+	TextParams &BorderSize(f32 borderSize)
 	{
 		borderSizeValue = borderSize;
 
@@ -120,7 +120,7 @@ public:
 	*	Sets the text position
 	*	\param Position the text's position
 	*/
-	TextParams &position(const Vector2 &position)
+	TextParams &Position(const Vector2 &position)
 	{
 		positionValue = position;
 
@@ -139,7 +139,7 @@ public:
 	Glyph();
 };
 
-class Font
+class TextFont
 {
 private:
 	typedef std::map<StringID, Glyph> GlyphMap;
@@ -151,8 +151,8 @@ private:
 	uint32 currentSize, lineSpacingValue;
 public:
 
-	Font();
-	~Font();
+	TextFont();
+	~TextFont();
 	bool FromStream(Stream *stream);
 	void Clear();
 	void SetSize(uint32 size);

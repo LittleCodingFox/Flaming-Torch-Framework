@@ -41,16 +41,16 @@ namespace FlamingTorch
 		return CRC32::Instance.CRC((const uint8 *)stream.Get(), (uint32)stream.Length());
 	}
 
-	Font::Font() : currentSize(0), library(NULL), face(NULL)
+	TextFont::TextFont() : currentSize(0), library(NULL), face(NULL)
 	{
 	}
 
-	Font::~Font()
+	TextFont::~TextFont()
 	{
 		Clear();
 	}
 
-	bool Font::FromStream(Stream *stream)
+	bool TextFont::FromStream(Stream *stream)
 	{
 		Clear();
 
@@ -81,7 +81,7 @@ namespace FlamingTorch
 		return true;
 	}
 
-	uint32 Font::LineSpacing(const TextParams &params)
+	uint32 TextFont::LineSpacing(const TextParams &params)
 	{
 		if (!face)
 			return 0;
@@ -91,7 +91,7 @@ namespace FlamingTorch
 		return face->size->metrics.height >> 6;
 	}
 
-	int32 Font::Kerning(uint32 from, uint32 to, const TextParams &params)
+	int32 TextFont::Kerning(uint32 from, uint32 to, const TextParams &params)
 	{
 		if (face == NULL || !FT_HAS_KERNING(face))
 			return 0;
@@ -108,7 +108,7 @@ namespace FlamingTorch
 		return kerning.x >> 6;
 	}
 
-	Glyph Font::LoadGlyph(uint32 character, const TextParams &params)
+	Glyph TextFont::LoadGlyph(uint32 character, const TextParams &params)
 	{
 		StringID ID = MakeGlyphString(character, params.textColorValue, params.secondaryTextColorValue, params.borderSizeValue,
 			params.borderColorValue, params.fontSizeValue);
@@ -331,7 +331,7 @@ namespace FlamingTorch
 		return out;
 	}
 
-	void Font::Clear()
+	void TextFont::Clear()
 	{
 		if (face)
 		{
@@ -350,7 +350,7 @@ namespace FlamingTorch
 		containedData.resize(0);
 	}
 
-	void Font::SetSize(uint32 size)
+	void TextFont::SetSize(uint32 size)
 	{
 		if (!library || !face)
 			return;
@@ -433,7 +433,7 @@ namespace FlamingTorch
 				resource.textParameters = parameters;
 				resource.references = 1;
 
-				resource.info = const_cast<Font *>(parameters.fontValue.Get())->LoadGlyph(text[i], parameters);
+				resource.info = const_cast<TextFont *>(parameters.fontValue.Get())->LoadGlyph(text[i], parameters);
 
 				if (resource.info.pixels.Get())
 				{
@@ -450,9 +450,9 @@ namespace FlamingTorch
 	{
 		static Sprite sprite;
 
-		TextParams actualParams = params.fontValue ? params : TextParams(params).font(RenderTextUtils::DefaultFont);
+		TextParams actualParams = params.fontValue ? params : TextParams(params).Font(RenderTextUtils::DefaultFont);
 
-		DisposablePointer<Font> font = actualParams.fontValue;
+		DisposablePointer<TextFont> font = actualParams.fontValue;
 
 		if (font.Get() == nullptr)
 			return;

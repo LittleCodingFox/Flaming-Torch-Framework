@@ -2,7 +2,7 @@
 namespace FlamingTorch
 {
 #if USE_GRAPHICS
-	DisposablePointer<Font> RenderTextUtils::DefaultFont;
+	DisposablePointer<TextFont> RenderTextUtils::DefaultFont;
 
 	bool RenderTextUtils::LoadDefaultFont(const std::string &FileName)
 	{
@@ -25,7 +25,7 @@ namespace FlamingTorch
 	{
 		PROFILE("RenderTextUtils MeasureTextSimple", StatTypes::Rendering);
 
-		DisposablePointer<Font> TheFont = Params.fontValue.Get() ? Params.fontValue : DefaultFont;
+		DisposablePointer<TextFont> TheFont = Params.fontValue.Get() ? Params.fontValue : DefaultFont;
 
 		if (!TheFont.Get())
 			return Rect();
@@ -102,7 +102,7 @@ namespace FlamingTorch
 
 		Vector2 MeasuredText;
 
-		while(MeasureTextSimple(Str, Params.fontSize(*OutFontSize)).Right > LengthInPixels)
+		while(MeasureTextSimple(Str, Params.FontSize(*OutFontSize)).Right > LengthInPixels)
 		{
 			(*OutFontSize)--;
 		}

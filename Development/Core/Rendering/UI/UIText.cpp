@@ -8,7 +8,7 @@ namespace FlamingTorch
 	{
 		OnConstructed();
 
-		TextParameters = TextParameters.fontSize(UIELEMENT_DEFAULT_FONT_SIZE);
+		TextParameters = TextParameters.FontSize(UIELEMENT_DEFAULT_FONT_SIZE);
 	}
 
 	void UIText::SetSkin(DisposablePointer<GenericConfig> Skin)
@@ -18,7 +18,11 @@ namespace FlamingTorch
 
 		SkinValue = Skin;
 
-		TextParameters.font(ManagerValue->DefaultFont).fontSize(ManagerValue->DefaultTextFontSize).color(ManagerValue->DefaultTextColor).secondaryColor(ManagerValue->DefaultTextSecondaryColor);
+		TextParameters
+			.Font(ManagerValue->DefaultFont)
+			.FontSize(ManagerValue->DefaultTextFontSize)
+			.Color(ManagerValue->DefaultTextColor)
+			.SecondaryColor(ManagerValue->DefaultTextSecondaryColor);
 	}
 
 	void UIText::SetText(const std::string &String)
@@ -119,8 +123,10 @@ namespace FlamingTorch
 
 			Vector2 FinalPosition = ActualPosition + ChildrenPosition;
 
-			RenderTextUtils::RenderText(Strings[i].TheString, TextParams(TextParameters).position(FinalPosition)
-				.color(TextParameters.textColorValue).secondaryColor(TextParameters.secondaryTextColorValue));
+			RenderTextUtils::RenderText(Strings[i].TheString, TextParams(TextParameters)
+				.Position(FinalPosition)
+				.Color(TextParameters.textColorValue)
+				.SecondaryColor(TextParameters.secondaryTextColorValue));
 		}
 
 		DrawUIFocusZone(ParentPosition);
