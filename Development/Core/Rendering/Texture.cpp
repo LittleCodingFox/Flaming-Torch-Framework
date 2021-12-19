@@ -1,7 +1,5 @@
 #include "FlamingCore.hpp"
 #include <png.h>
-#include "webp/encode.h"
-#include "webp/decode.h"
 namespace FlamingTorch
 {
 #	define TAG "Texture"
@@ -59,145 +57,6 @@ namespace FlamingTorch
 		SFLASSERT(Out->Write2<FTIHeader>(&HDR));
 
 		return Data.size() && Out->Write2<uint8>(&Data[0], Data.size());
-	}
-
-	bool LoadWebP(Stream *In, uint32 &Width, uint32 &Height, std::vector<uint8> &Data)
-	{
-		PROFILE("TextureBuffer::LoadWebP", StatTypes::Rendering);
-
-		WebPDecoderConfig config;
-		WebPDecBuffer* const output_buffer = &config.output;
-		WebPBitstreamFeatures* const bitstream = &config.input;
-
-		if(!WebPInitDecoderConfig(&config))
-		{
-			g_Log.LogErr(TAGBUFFER, "@LoadWebP: Failed to load a webP stream due to invalid decoder");
-
-			return false;
-		}
-
-		VP8StatusCode status = VP8_STATUS_OK;
-		size_t data_size = 0;
-
-		size_t Length = (size_t)(In->Length() - In->Position());
-		std::vector<uint8> FeatureData(Length);
-
-		SFLASSERT(In->Read2<uint8>(&FeatureData[0], Length));
-
-		status = WebPGetFeatures(&FeatureData[0], Length, bitstream);
-
-		SFLASSERT(status == VP8_STATUS_OK);
-
-		if(bitstream->has_animation)
-		{
-			WebPFreeDecBuffer(output_buffer);
-
-			g_Log.LogErr(TAGBUFFER, "@LoadWebP: Unable to decode animated webP");
-
-			return false;
-		}
-
-		status = WebPDecode(&FeatureData[0], Length, &config);
-
-		Width = output_buffer->width;
-		Height = output_buffer->height;
-
-		uint8 *RGB = output_buffer->u.RGBA.rgba;
-		Data.resize(Width * Height * 4);
-
-		uint8 ColorSpace = output_buffer->colorspace;
-
-		//Not getting any RGBAs for some reason
-		if(ColorSpace == MODE_RGB)
-		{
-			for(uint32 i = 0, index = 0; i < Width * Height * 4; i += 4, index += 3)
-			{
-				Data[i] = RGB[index];
-				Data[i + 1] = RGB[index + 1];
-				Data[i + 2] = RGB[index + 2];
-				Data[i + 3] = 255;
-			}
-		}
-		else
-		{
-			memcpy(&Data[0], RGB, sizeof(uint8) * Data.size());
-		}
-
-		WebPFreeDecBuffer(output_buffer);
-
-		return true;
-	}
-
-	static int WebPStreamWriter(const uint8_t* data, size_t data_size, const WebPPicture* const pic)
-	{
-		Stream *Out = (Stream*)pic->custom_ptr;
-
-		return data_size ? (Out->Write2<uint8_t>(data, data_size)) : 1;
-	}
-
-	bool WriteWebP(Stream *Out, uint32 Width, uint32 Height, const std::vector<uint8> &Data, bool Lossless, uint32 Quality = 100, uint32 TargetWidth = 0, uint32 TargetHeight = 0)
-	{
-		PROFILE("TextureBuffer::WriteWebP", StatTypes::Rendering);
-
-		WebPConfig config;
-		WebPMemoryWriter memory_writer;
-		WebPPicture picture;
-		WebPMemoryWriterInit(&memory_writer);
-
-		if(!WebPPictureInit(&picture) || !WebPConfigInit(&config))
-		{
-			g_Log.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to init picture/config");
-			
-			return false;
-		}
-
-		config.quality = (f32)Quality;
-		config.lossless = Lossless ? 1 : 0;
-		config.method = 0;
-		picture.width = Width;
-		picture.height = Height;
-		picture.use_argb = 1;
-		picture.writer = WebPStreamWriter;
-		picture.custom_ptr = Out;
-
-		if(!WebPValidateConfig(&config) || !WebPPictureAlloc(&picture))
-		{
-			g_Log.LogErr(TAGBUFFER,
-				"@WriteWebP: Failed to write a webP stream: Failed to init validate config or alloc picture");
-			
-			return false;
-		}
-
-		if(!WebPPictureImportRGBA(&picture, &Data[0], Data.size() / Height))
-		{
-			WebPPictureFree(&picture);
-			g_Log.LogErr(TAGBUFFER, "@WriteWebP: Failed to write a webP stream: Failed to import RGBA");
-
-			return false;
-		}
-
-		if(TargetWidth != 0 && TargetHeight != 0)
-		{
-			if(!WebPPictureRescale(&picture, TargetWidth, TargetHeight))
-			{
-				WebPPictureFree(&picture);
-
-				g_Log.LogErr(TAGBUFFER,
-					"@WriteWebP: Failed to write a webP stream: Failed to rescale picture from %dx%d to %dx%d",
-					Width, Height, TargetWidth, TargetHeight);
-
-				return false;
-			}
-		}
-
-		if(!WebPEncode(&config, &picture))
-		{
-			g_Log.LogErr(TAGBUFFER, "@WriteWebP: Failed to encode the final picture");
-			
-			return false;
-		}
-
-		return true;
 	}
 
 	void PNGReadFromStream(png_structp ptr, png_bytep dest, png_size_t len)
@@ -458,22 +317,6 @@ namespace FlamingTorch
 				return false;
 			}
 		}
-		else
-		{
-			Stream->Seek(Position);
-
-			if(!LoadWebP(Stream, WidthValue, HeightValue, Data))
-			{
-				Stream->Seek(Position);
-
-				if(!LoadFTI(Stream, WidthValue, HeightValue, ColorTypeValue, Data))
-				{
-					g_Log.LogWarn("TextureBuffer", "Unable to read Stream '0x%08x' as a webP or FTI.", Stream);
-
-					return false;
-				}
-			}
-		}
 
 		return true;
 	}
@@ -695,9 +538,6 @@ namespace FlamingTorch
 		{
 		case TextureEncoderType::PNG:
 			return WritePNG(Out, WidthValue, HeightValue, Data);
-
-		case TextureEncoderType::WebP:
-			return WriteWebP(Out, WidthValue, HeightValue, Data, Info.Lossless, Info.Quality, Info.TargetWidth, Info.TargetHeight);
 
 		case TextureEncoderType::FTI:
 			return WriteFTI(Out, WidthValue, HeightValue, ColorTypeValue, Data);

@@ -9,3 +9,7 @@ Temp/
 Logs
 *.package
 /Binaries
+conanbuildinfo.premake.lua
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json

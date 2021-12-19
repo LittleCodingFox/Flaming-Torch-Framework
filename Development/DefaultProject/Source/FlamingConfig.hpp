@@ -1,7 +1,8 @@
 #define USE_GRAPHICS 1
 #define USE_SOUND 1
-#define USE_SFML_RENDERER 1
-#define USE_SFML_SOUNDMANAGER 1
+#define USE_SFML_RENDERER 0
+#define USE_SFML_SOUNDMANAGER 0
+#define USE_SDL_RENDERER 1
 
 //Set this to 1 when preparing a release build
 #define FLGAME_RELEASE 0

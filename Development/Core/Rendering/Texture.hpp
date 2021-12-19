@@ -27,7 +27,6 @@ namespace TextureEncoderType
 	enum TextureEncoderType
 	{
 		PNG,
-		WebP,
 		FTI //Flaming Torch Image
 	};
 }

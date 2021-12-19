@@ -956,7 +956,6 @@ namespace FlamingTorch
 			luabind::class_<TextureEncoderInfo>("TextureEncoderInfo")
 				.enum_("constants") [
 					luabind::value("Encoder_PNG", TextureEncoderType::PNG),
-					luabind::value("Encoder_WEBP", TextureEncoderType::WebP),
 					luabind::value("Encoder_FTI", TextureEncoderType::FTI)
 				]
 				.def(luabind::constructor<>())

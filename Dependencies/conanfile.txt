@@ -1,0 +1,10 @@
+[requires]
+freetype/2.11.1
+glew/2.2.0
+libpng/1.6.37
+sdl/2.0.18
+tinyxml/2.6.2
+zlib/1.2.11
+
+[generators]
+premake

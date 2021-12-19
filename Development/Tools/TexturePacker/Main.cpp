@@ -4,7 +4,6 @@
 #include <map>
 #include <sstream>
 #include <stdio.h>
-#include <SFML/System.hpp>
 
 using namespace FlamingTorch;
 

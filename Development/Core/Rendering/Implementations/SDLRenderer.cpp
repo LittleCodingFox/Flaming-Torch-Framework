@@ -24,20 +24,6 @@ namespace FlamingTorch
 	bool SDLRendererImplementation::SupportsFBOs = false;
 	GLint SDLRendererImplementation::MaximumTextureSize = 0;
 
-	uint8 VertexBufferDataElementSizes[VertexElementDataType::Count] = {
-		sizeof(f32),
-		sizeof(Vector2),
-		sizeof(Vector3),
-		sizeof(Vector4)
-	};
-
-	uint32 VertexBufferDataElementCount[VertexElementDataType::Count] = {
-		1,
-		2,
-		3,
-		4
-	};
-
 	uint32 VertexBufferVertexMode[VertexModes::Count] = {
 		GL_TRIANGLES,
 		GL_LINES,
@@ -362,11 +348,6 @@ namespace FlamingTorch
 		{
 			DestroyVertexBuffer(VertexBuffers.begin()->first);
 		}
-
-		while (FrameBuffers.size())
-		{
-			DestroyFrameBuffer(FrameBuffers.begin()->first);
-		}
 	}
 
 	bool SDLRendererImplementation::Create(void *WindowHandle, RendererCapabilities ExpectedCaps)
@@ -577,122 +558,6 @@ namespace FlamingTorch
 		glClearColor(Renderer::DefaultClearColor.x, Renderer::DefaultClearColor.y, Renderer::DefaultClearColor.z, Renderer::DefaultClearColor.w);
 
 		return true;
-	}
-
-	FrameBufferHandle SDLRendererImplementation::CreateFrameBuffer(const FrameBufferCreationInfo &Info)
-	{
-		if (!ExtensionsAvailable || !SupportsFBOs || Info.Size.x <= 0 || Info.Size.y <= 0)
-			return INVALID_FTGHANDLE;
-
-		for (uint32 i = 0; i < Info.ColorBuffers.size(); i++)
-		{
-			if (Info.ColorBuffers[i].Get() == NULL || Info.ColorBuffers[i]->Size() != Info.Size || !IsTextureHandleValid(Info.ColorBuffers[i]->Handle()))
-				return INVALID_FTGHANDLE;
-		}
-
-		DisposablePointer<FrameBufferInfo> FBInfo(new FrameBufferInfo());
-
-		GLCHECK();
-
-		glGenFramebuffers(1, &FBInfo->GLID);
-
-		GLCHECK();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, FBInfo->GLID);
-
-		GLCHECK();
-
-		std::vector<GLuint> DrawBuffers;
-		TextureHandle PreviousHandle = LastBoundTexture;
-
-		BindTexture((TextureHandle)0);
-
-		for (uint32 i = 0; i < Info.ColorBuffers.size(); i++)
-		{
-			BindTexture(Info.ColorBuffers[i]->Handle());
-
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, Textures[Info.ColorBuffers[i]->Handle()].GLID, 0);
-
-			GLCHECK();
-
-			DrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
-		}
-
-		BindTexture(PreviousHandle);
-
-		glGenRenderbuffers(1, &FBInfo->RenderBufferID);
-
-		GLCHECK();
-
-		glBindRenderbuffer(GL_RENDERBUFFER, FBInfo->RenderBufferID);
-
-		GLCHECK();
-
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, (GLsizei)Info.Size.x, (GLsizei)Info.Size.y);
-
-		GLCHECK();
-
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, FBInfo->RenderBufferID);
-
-		GLCHECK();
-
-		glDrawBuffers(DrawBuffers.size(), &DrawBuffers[0]);
-
-		GLCHECK();
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		{
-			glBindRenderbuffer(GL_RENDERBUFFER, 0);
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			glDeleteRenderbuffers(1, &FBInfo->RenderBufferID);
-			glDeleteFramebuffers(1, &FBInfo->GLID);
-
-			return INVALID_FTGHANDLE;
-		}
-
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		FrameBuffers[++FrameBufferCounter] = FBInfo;
-
-		return FrameBufferCounter;
-	}
-
-	bool SDLRendererImplementation::IsFrameBufferValid(FrameBufferHandle Handle)
-	{
-		FrameBufferMap::iterator it = FrameBuffers.find(Handle);
-
-		return it != FrameBuffers.end();
-	}
-
-	void SDLRendererImplementation::BindFrameBuffer(FrameBufferHandle Handle)
-	{
-		if (!IsFrameBufferValid(Handle))
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			return;
-		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, FrameBuffers[Handle]->GLID);
-	}
-
-	void SDLRendererImplementation::DestroyFrameBuffer(FrameBufferHandle Handle)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		if (!IsFrameBufferValid(Handle))
-			return;
-
-		FrameBufferMap::iterator it = FrameBuffers.find(Handle);
-
-		glDeleteRenderbuffers(1, &it->second->RenderBufferID);
-		glDeleteFramebuffers(1, &it->second->GLID);
-
-		FrameBuffers.erase(it);
 	}
 
 	const RendererCapabilities &SDLRendererImplementation::Capabilities() const
@@ -1329,8 +1194,6 @@ namespace FlamingTorch
 
 	void SDLRendererImplementation::SetWorldMatrix(const Matrix4x4 &WorldMatrix)
 	{
-		SpriteCache::Instance.Flush(Target);
-
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
 
@@ -1344,8 +1207,6 @@ namespace FlamingTorch
 
 	void SDLRendererImplementation::SetProjectionMatrix(const Matrix4x4 &ProjectionMatrix)
 	{
-		SpriteCache::Instance.Flush(Target);
-
 		FrameStatsValue.StateChanges++;
 		FrameStatsValue.MatrixChanges++;
 
@@ -1628,24 +1489,6 @@ namespace FlamingTorch
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			break;
-
-		case BlendingMode::Additive:
-			EnableState(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);
-
-			break;
-
-		case BlendingMode::Subtractive:
-			EnableState(GL_BLEND);
-
-#if FLPLATFORM_ANDROID //GL_FUNC_SUBTRACT gives error, gotta figure out how to fix this.
-					   //If glBlendEquation is available, then GL_FUNC_SUBTRACT should as well.
-			FLASSERT(0, "Unable to use subtractive blending on Android!");
-#else
-			glBlendEquation(GL_FUNC_SUBTRACT);
-#endif
-
-			break;
 		}
 
 		GLCHECK();
@@ -1854,8 +1697,6 @@ namespace FlamingTorch
 			case SDL_WINDOWEVENT_RESIZED:
 				Out.Type = RendererEventType::WindowResized;
 				Out.WindowSize = Vector2((f32)Event.window.data1, (f32)Event.window.data1);
-
-				Target->OnResized(Target, (uint32)Out.WindowSize.x, (uint32)Out.WindowSize.y);
 
 				return true;
 

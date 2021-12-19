@@ -1,13 +1,28 @@
+include("conanbuildinfo.premake.lua")
 
--- A solution contains projects, and defines the available configurations
-solution "Tools"
+workspace "Tools"
+	conan_basic_setup()
+
 	configurations { "Debug", "Release" }
-	platforms { "x64" }
+		
+	if os.target() == "linux" then
+		pchheader "../Core/FlamingCore.hpp"
+		pchsource "../Core/FlamingCore.cpp"
+	elseif os.target() == "windows" then
+		pchheader "FlamingCore.hpp"
+		pchsource "../Core/FlamingCore.cpp"
+	end
 	
-	-- A project defines one build target
+	if os.target() == "windows" then
+		buildoptions { "/bigobj" }
+	end
+	
 	project "Packer"
 		kind "ConsoleApp"
 		language "C++"
+		targetdir "../../Binaries/Packer/%{cfg.buildcfg}"
+		objdir "../../Temp/Packer/%{cfg.buildcfg}"
+
 		files {
 			"../Core/**.hpp",
 			"../Core/**.cpp",
@@ -19,34 +34,15 @@ solution "Tools"
 		includedirs {
 			"Packer/",
 			"../../Dependencies/Headers/",
-			"../../Dependencies/Headers/lua/",
-			"../../Dependencies/Headers/zlib/",
-			"../../Dependencies/Source/angelscript/",
-			"../../Dependencies/Source/webp/",
 			"../Core/"
 		}
 		
-		if os.target() == "linux" then
-			pchheader "../Core/FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		elseif os.target() == "windows" then
-			pchheader "FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		end
-		
-		excludes {
-			"../../Dependencies/Source/lua/luac.c", 
-			"../../Dependencies/Source/lua/lua.c"
-		}
+		linkoptions { conan_exelinkflags }
 		
 		libdirs {
-			"../../Dependencies/Libs/"
+			"../../Dependencies/Libs/",
+			"../../Binaries/FlamingDependencies/%{cfg.buildcfg}"
 		}
-		
-		defines({
-			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
-			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
-		})
 		
 		if os.target() == "macosx" then
 			libdirs {
@@ -56,16 +52,8 @@ solution "Tools"
 			files { "../Core/FileSystem_OSX.mm" }
 			links { "Foundation.framework" }
 		end
-
-		buildoptions { "-std=c++20" }
 		 
 		filter "configurations:Debug"
-			targetdir "../../Binaries/Packer/Debug"
-			objdir "../../Temp/Packer/Debug"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Debug/"
-			}
 		
 			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
@@ -85,12 +73,6 @@ solution "Tools"
 			symbols "On"
  
 		filter "configurations:Release"
-			targetdir "../../Binaries/Packer/Release"
-			objdir "../../Temp/Packer/Release"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Release/"
-			}
 
 			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
@@ -113,6 +95,9 @@ solution "Tools"
 	project "TiledConverter"
 		kind "ConsoleApp"
 		language "C++"
+		targetdir "../../Binaries/TiledConverter/%{cfg.buildcfg}"
+		objdir "../../Temp/TiledConverter/%{cfg.buildcfg}"
+
 		files {
 			"../Core/**.hpp",
 			"../Core/**.cpp",
@@ -124,36 +109,15 @@ solution "Tools"
 		includedirs {
 			"TiledConverter/",
 			"../../Dependencies/Headers/",
-			"../../Dependencies/Headers/lua/",
-			"../../Dependencies/Headers/zlib/",
-			"../../Dependencies/Source/angelscript/",
-			"../../Dependencies/Source/webp/",
 			"../Core/"
-		}
-
-		excludes {
-			"../../Dependencies/Source/lua/luac.c", 
-			"../../Dependencies/Source/lua/lua.c"
 		}
 		
 		libdirs {
-			"../../Dependencies/Libs/"
+			"../../Dependencies/Libs/",
+			"../../Binaries/FlamingDependencies/%{cfg.buildcfg}"
 		}
-
-		buildoptions { "-std=c++20" }
 		
-		if os.target() == "linux" then
-			pchheader "../Core/FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		elseif os.target() == "windows" then
-			pchheader "FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		end
-		
-		defines({
-			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
-			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
-		})
+		linkoptions { conan_exelinkflags }
 		
 		if os.target() == "macosx" then
 			libdirs {
@@ -165,13 +129,6 @@ solution "Tools"
 		end
  
 		filter "configurations:Debug"
-			targetdir "../../Binaries/TiledConverter/Debug"
-			objdir "../../Temp/TiledConverter/Debug"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Debug/"
-			}
-		
 			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependenciesd" }
@@ -190,13 +147,6 @@ solution "Tools"
 			symbols "On"
  
 		filter "configurations:Release"
-			targetdir "../../Binaries/TiledConverter/Release"
-			objdir "../../Temp/TiledConverter/Release"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Release/"
-			}
-
 			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependencies" }
@@ -214,10 +164,12 @@ solution "Tools"
 
 			optimize "On"
 	
-	-- A project defines one build target
 	project "Baker"
 		kind "ConsoleApp"
 		language "C++"
+		targetdir "../../Binaries/Baker/%{cfg.buildcfg}"
+		objdir "../../Temp/Baker/%{cfg.buildcfg}"
+
 		files {
 			"../Core/**.hpp",
 			"../Core/**.cpp",
@@ -229,34 +181,15 @@ solution "Tools"
 		includedirs {
 			"Baker/",
 			"../../Dependencies/Headers/",
-			"../../Dependencies/Headers/lua/",
-			"../../Dependencies/Headers/zlib/",
-			"../../Dependencies/Source/angelscript/",
-			"../../Dependencies/Source/webp/",
 			"../Core/"
-		}
-
-		excludes {
-			"../../Dependencies/Source/lua/luac.c", 
-			"../../Dependencies/Source/lua/lua.c"
 		}
 		
 		libdirs {
-			"../../Dependencies/Libs/"
+			"../../Dependencies/Libs/",
+			"../../Binaries/FlamingDependencies/%{cfg.buildcfg}"
 		}
 		
-		if os.target() == "linux" then
-			pchheader "../Core/FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		elseif os.target() == "windows" then
-			pchheader "FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		end
-		
-		defines({
-			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
-			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
-		})
+		linkoptions { conan_exelinkflags }
 		
 		if os.target() == "macosx" then
 			libdirs {
@@ -266,17 +199,8 @@ solution "Tools"
 			files { "../Core/FileSystem_OSX.mm" }
 			links { "Foundation.framework" }
 		end
-
-		buildoptions { "-std=c++20" }
  
 		filter "configurations:Debug"
-			targetdir "../../Binaries/Baker/Debug"
-			objdir "../../Temp/Baker/Debug"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Debug/"
-			}
-		
 			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependenciesd" }
@@ -295,13 +219,6 @@ solution "Tools"
 			symbols "On"
  
 		filter "configurations:Release"
-			targetdir "../../Binaries/Baker/Release"
-			objdir "../../Temp/Baker/Release"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Release/"
-			}
-
 			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependencies" }
@@ -319,10 +236,12 @@ solution "Tools"
 
 			optimize "On"
 	
-	-- A project defines one build target
 	project "TexturePacker"
 		kind "ConsoleApp"
 		language "C++"
+		targetdir "../../Binaries/TexturePacker/%{cfg.buildcfg}"
+		objdir "../../Temp/TexturePacker/%{cfg.buildcfg}"
+
 		files {
 			"../Core/**.hpp",
 			"../Core/**.cpp",
@@ -334,34 +253,15 @@ solution "Tools"
 		includedirs {
 			"TexturePacker/",
 			"../../Dependencies/Headers/",
-			"../../Dependencies/Headers/lua/",
-			"../../Dependencies/Headers/zlib/",
-			"../../Dependencies/Source/angelscript/",
-			"../../Dependencies/Source/webp/",
 			"../Core/"
-		}
-
-		excludes {
-			"../../Dependencies/Source/lua/luac.c", 
-			"../../Dependencies/Source/lua/lua.c"
 		}
 		
 		libdirs {
-			"../../Dependencies/Libs/"
+			"../../Dependencies/Libs/",
+			"../../Binaries/FlamingDependencies/%{cfg.buildcfg}"
 		}
 		
-		if os.target() == "linux" then
-			pchheader "../Core/FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		elseif os.target() == "windows" then
-			pchheader "FlamingCore.hpp"
-			pchsource "../Core/FlamingCore.cpp"
-		end
-		
-		defines({
-			"SFML_WINDOW_EXPORTS", "SFML_SYSTEM_EXPORTS", "SFML_NETWORK_EXPORTS",
-			"SFML_GRAPHICS_EXPORTS", "SFML_AUDIO_EXPORTS", "GLEW_STATIC", "UNICODE"
-		})
+		linkoptions { conan_exelinkflags }
 		
 		if os.target() == "macosx" then
 			libdirs {
@@ -371,17 +271,8 @@ solution "Tools"
 			files { "../Core/FileSystem_OSX.mm" }
 			links { "Foundation.framework" }
 		end
-
-		buildoptions { "-std=c++20" }
  
 		filter "configurations:Debug"
-			targetdir "../../Binaries/TexturePacker/Debug"
-			objdir "../../Temp/TexturePacker/Debug"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Debug/"
-			}
-		
 			if os.target() == "windows" then
 				defines({ "DEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependenciesd" }
@@ -400,13 +291,6 @@ solution "Tools"
 			symbols "On"
  
 		filter "configurations:Release"
-			targetdir "../../Binaries/TexturePacker/Release"
-			objdir "../../Temp/TexturePacker/Release"
-
-			libdirs {
-				"../../Binaries/FlamingDependencies/Release/"
-			}
-
 			if os.target() == "windows" then
 				defines({ "NDEBUG", "_WIN32", "WIN32" })
 				links { "winmm", "ws2_32", "FlamingDependencies" }

@@ -25,7 +25,7 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml/tinyxml.h>
+#include <tinyxml.h>
 
 #include "TmxPropertySet.h"
 
