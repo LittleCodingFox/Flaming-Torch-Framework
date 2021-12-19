@@ -25,15 +25,15 @@ namespace FlamingTorch
 	{
 		PROFILE("RenderTextUtils MeasureTextSimple", StatTypes::Rendering);
 
-		DisposablePointer<Font> TheFont = Params.FontValue.Get() ? Params.FontValue : DefaultFont;
+		DisposablePointer<Font> TheFont = Params.fontValue.Get() ? Params.fontValue : DefaultFont;
 
 		if (!TheFont.Get())
 			return Rect();
 
 		f32 LineSpacing = (f32)TheFont->LineSpacing(Params);
-		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', Params).Advance;
+		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', Params).advance;
 
-		Vector2 Position(0, (f32)Params.FontSizeValue), Min, Max;
+		Vector2 Position(0, (f32)Params.fontSizeValue), Min, Max;
 
 		std::vector<std::string> Lines(StringUtils::Split(StringUtils::Strip(Str, '\r'), '\n'));
 
@@ -47,10 +47,10 @@ namespace FlamingTorch
 
 				if (i == 0 && j == 0)
 				{
-					Min.x = TheGlyph.Bounds.Left;
-					Min.y = TheGlyph.Bounds.Top;
-					Max.x = TheGlyph.Bounds.Right;
-					Max.y = Position.y - TheGlyph.Bounds.Bottom;
+					Min.x = TheGlyph.bounds.Left;
+					Min.y = TheGlyph.bounds.Top;
+					Max.x = TheGlyph.bounds.Right;
+					Max.y = Position.y - TheGlyph.bounds.Bottom;
 				}
 
 				switch (Lines[i][j])
@@ -65,7 +65,7 @@ namespace FlamingTorch
 						if (j > 0)
 							Position.x += TheFont->Kerning(Lines[i][j - 1], Lines[i][j], Params);
 
-						Position.x = Position.x + TheGlyph.Advance;
+						Position.x = Position.x + TheGlyph.advance;
 					}
 
 					break;
@@ -98,11 +98,11 @@ namespace FlamingTorch
 		FLASSERT(OutFontSize, "Invalid Font Size Pointer");
 		FLASSERT(LengthInPixels > 0, "Invalid Length");
 
-		*OutFontSize = Params.FontSizeValue;
+		*OutFontSize = Params.fontSizeValue;
 
 		Vector2 MeasuredText;
 
-		while(MeasureTextSimple(Str, Params.FontSize(*OutFontSize)).Right > LengthInPixels)
+		while(MeasureTextSimple(Str, Params.fontSize(*OutFontSize)).Right > LengthInPixels)
 		{
 			(*OutFontSize)--;
 		}
@@ -122,7 +122,7 @@ namespace FlamingTorch
 
 		static Rect Temp;
 
-		for(uint32 i = 0, y = 0; i < LineCount; i++, y += Params.FontSizeValue)
+		for(uint32 i = 0, y = 0; i < LineCount; i++, y += Params.fontSizeValue)
 		{
 			Temp = MeasureTextSimple(Lines[i], Params);
 
@@ -132,8 +132,8 @@ namespace FlamingTorch
 			}
 
 			//Compensate for extra space due to lower letters like y and p
-			if(Temp.Bottom > Params.FontSizeValue)
-				AdditionalBottom += Temp.Bottom - Params.FontSizeValue;
+			if(Temp.Bottom > Params.fontSizeValue)
+				AdditionalBottom += Temp.Bottom - Params.fontSizeValue;
 
 			Temp.Top += y;
 			Temp.Bottom += y;
@@ -219,13 +219,13 @@ namespace FlamingTorch
 				Stream.str("");
 				PreviousStream.str("");
 
-				CurrentY += MathUtils::Max(MeasuredSize.y, (f32)Params.FontSizeValue);
+				CurrentY += MathUtils::Max(MeasuredSize.y, (f32)Params.fontSizeValue);
 			}
-			else if(CurrentY + Params.FontSizeValue <= Size.y)
+			else if(CurrentY + Params.fontSizeValue <= Size.y)
 			{
 				OutLines.push_back("");
 
-				CurrentY += Params.FontSizeValue;
+				CurrentY += Params.fontSizeValue;
 			}
 		}
 

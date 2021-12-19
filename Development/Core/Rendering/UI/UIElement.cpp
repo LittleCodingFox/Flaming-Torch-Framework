@@ -460,7 +460,7 @@ namespace FlamingTorch
 				ParentPanel = ParentPanel->ParentValue;
 			}
 
-			RenderTextUtils::RenderText(StringUtils::MakeIntString(ParentCounter), TextParams().Position(AABB.min.ToVector2() + Vector2(IndicatorPosition, 0)));
+			RenderTextUtils::RenderText(StringUtils::MakeIntString(ParentCounter), TextParams().position(AABB.min.ToVector2() + Vector2(IndicatorPosition, 0)));
 		}
 	}
 

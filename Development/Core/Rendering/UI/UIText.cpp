@@ -8,7 +8,7 @@ namespace FlamingTorch
 	{
 		OnConstructed();
 
-		TextParameters = TextParameters.FontSize(UIELEMENT_DEFAULT_FONT_SIZE);
+		TextParameters = TextParameters.fontSize(UIELEMENT_DEFAULT_FONT_SIZE);
 	}
 
 	void UIText::SetSkin(DisposablePointer<GenericConfig> Skin)
@@ -18,7 +18,7 @@ namespace FlamingTorch
 
 		SkinValue = Skin;
 
-		TextParameters.Font(ManagerValue->DefaultFont).FontSize(ManagerValue->DefaultTextFontSize).Color(ManagerValue->DefaultTextColor).SecondaryColor(ManagerValue->DefaultTextSecondaryColor);
+		TextParameters.font(ManagerValue->DefaultFont).fontSize(ManagerValue->DefaultTextFontSize).color(ManagerValue->DefaultTextColor).secondaryColor(ManagerValue->DefaultTextSecondaryColor);
 	}
 
 	void UIText::SetText(const std::string &String)
@@ -49,7 +49,7 @@ namespace FlamingTorch
 
 		for(uint32 i = 0; i < Strings.size(); i++)
 		{
-			Size.y += (Strings[i].Size.Bottom < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Bottom);
+			Size.y += (Strings[i].Size.Bottom < TextParameters.fontSizeValue ? TextParameters.fontSizeValue : Strings[i].Size.Bottom);
 
 			if (Size.x < Strings[i].Size.Right)
 				Size.x = Strings[i].Size.Right;
@@ -80,7 +80,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.FontSizeValue);
+				YOffset += MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.fontSizeValue);
 			}
 
 			YOffset = MathUtils::Clamp((SizeValue.y - YOffset) / 2, 0, SizeValue.y);
@@ -89,7 +89,7 @@ namespace FlamingTorch
 		{
 			for(uint32 i = 0; i < Strings.size(); i++)
 			{
-				YOffset += MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.FontSizeValue);
+				YOffset += MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.fontSizeValue);
 			}
 
 			YOffset = SizeValue.y - YOffset;
@@ -97,9 +97,9 @@ namespace FlamingTorch
 
 		f32 TextYOffset = YOffset;
 
-		for (uint32 i = 0; i < Strings.size(); TextYOffset += (Strings[i].Size.Size().y < TextParameters.FontSizeValue ? TextParameters.FontSizeValue : Strings[i].Size.Size().y), i++)
+		for (uint32 i = 0; i < Strings.size(); TextYOffset += (Strings[i].Size.Size().y < TextParameters.fontSizeValue ? TextParameters.fontSizeValue : Strings[i].Size.Size().y), i++)
 		{
-			if(TextYOffset + MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.FontSizeValue) > SizeValue.y)
+			if(TextYOffset + MathUtils::Max(Strings[i].Size.Bottom, (f32)TextParameters.fontSizeValue) > SizeValue.y)
 				break;
 
 			Vector2 ChildrenPosition;
@@ -119,8 +119,8 @@ namespace FlamingTorch
 
 			Vector2 FinalPosition = ActualPosition + ChildrenPosition;
 
-			RenderTextUtils::RenderText(Strings[i].TheString, TextParams(TextParameters).Position(FinalPosition)
-				.Color(TextParameters.TextColorValue).SecondaryColor(TextParameters.SecondaryTextColorValue));
+			RenderTextUtils::RenderText(Strings[i].TheString, TextParams(TextParameters).position(FinalPosition)
+				.color(TextParameters.textColorValue).secondaryColor(TextParameters.secondaryTextColorValue));
 		}
 
 		DrawUIFocusZone(ParentPosition);

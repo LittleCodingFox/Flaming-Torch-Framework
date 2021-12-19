@@ -86,7 +86,7 @@ namespace FlamingTorch
 		if (!face)
 			return 0;
 
-		SetSize(params.FontSizeValue);
+		SetSize(params.fontSizeValue);
 
 		return face->size->metrics.height >> 6;
 	}
@@ -96,16 +96,16 @@ namespace FlamingTorch
 		if (face == NULL || !FT_HAS_KERNING(face))
 			return 0;
 
-		SetSize(params.FontSizeValue);
+		SetSize(params.fontSizeValue);
 
 		FT_Vector kerning;
-		FT_UInt fromindex = FT_Get_Char_index(face, from);
-		FT_UInt toindex = FT_Get_Char_index(face, to);
+		FT_UInt fromindex = FT_Get_Char_Index(face, from);
+		FT_UInt toindex = FT_Get_Char_Index(face, to);
 
 		if(FT_Get_Kerning(face, fromindex, toindex, FT_KERNING_DEFAULT, &kerning) != FT_Err_Ok)
 			return 0;
 
-		return Kerning.x >> 6;
+		return kerning.x >> 6;
 	}
 
 	Glyph Font::LoadGlyph(uint32 character, const TextParams &params)
@@ -113,15 +113,15 @@ namespace FlamingTorch
 		StringID ID = MakeGlyphString(character, params.textColorValue, params.secondaryTextColorValue, params.borderSizeValue,
 			params.borderColorValue, params.fontSizeValue);
 
-		GlyphMap::iterator it = Glyphs.find(ID);
+		GlyphMap::iterator it = glyphs.find(ID);
 
-		if (it != Glyphs.end())
+		if (it != glyphs.end())
 			return it->second;
 
 		Glyph out;
 		FT_Glyph glyphDesc;
 
-		SetSize(params.FontSizeValue);
+		SetSize(params.fontSizeValue);
 
 		if (FT_Load_Char(face, character, FT_LOAD_TARGET_LIGHT | FT_LOAD_FORCE_AUTOHINT) != FT_Err_Ok)
 			return Glyph();
@@ -161,17 +161,17 @@ namespace FlamingTorch
 		FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph)glyphDesc;
 		FT_Bitmap& bitmap = bitmapGlyph->bitmap;
 
-		out.Advance = glyphDesc->advance.x >> 16;
+		out.advance = glyphDesc->advance.x >> 16;
 
 		uint32 width = (uint32)bitmap.width;
 		uint32 height = (uint32)bitmap.rows;
 
 		if (width > 0 && height > 0)
 		{
-			Out.Bounds.Left = (f32)bitmapGlyph->left;
-			Out.Bounds.Top = (f32)bitmapGlyph->top;
-			Out.Bounds.Right = (f32)width + Out.Bounds.Left;
-			Out.Bounds.Bottom = (f32)height + Out.Bounds.Top;
+			out.bounds.Left = (f32)bitmapGlyph->left;
+			out.bounds.Top = (f32)bitmapGlyph->top;
+			out.bounds.Right = (f32)width + out.bounds.Left;
+			out.bounds.Bottom = (f32)height + out.bounds.Top;
 
 			std::vector<uint8> pixelBuffer;
 
@@ -231,9 +231,9 @@ namespace FlamingTorch
 					}
 					else
 					{
-						pixelBuffer[index] = (uint8)(byteColor.x + diff.x * Percent);
-						pixelBuffer[index + 1] = (uint8)(byteColor.y + diff.y * Percent);
-						pixelBuffer[index + 2] = (uint8)(byteColor.z + diff.z * Percent);
+						pixelBuffer[index] = (uint8)(byteColor.x + diff.x * percent);
+						pixelBuffer[index + 1] = (uint8)(byteColor.y + diff.y * percent);
+						pixelBuffer[index + 2] = (uint8)(byteColor.z + diff.z * percent);
 					}
 				}
 			}
@@ -283,25 +283,25 @@ namespace FlamingTorch
 				if (outlineSpans[i].y > max.y)
 					max.y = (f32)outlineSpans[i].y;
 
-				if (outlineSpans[i].x + outlineSpans[i].Width - 1 < min.x)
-					min.x = (f32)(outlineSpans[i].x + outlineSpans[i].Width - 1);
+				if (outlineSpans[i].x + outlineSpans[i].width - 1 < min.x)
+					min.x = (f32)(outlineSpans[i].x + outlineSpans[i].width - 1);
 
-				if (outlineSpans[i].x + outlineSpans[i].Width - 1 > max.x)
-					max.x = (f32)(outlineSpans[i].x + outlineSpans[i].Width - 1);
+				if (outlineSpans[i].x + outlineSpans[i].width - 1 > max.x)
+					max.x = (f32)(outlineSpans[i].x + outlineSpans[i].width - 1);
 			}
 
 			Vector3 byteBorderColor = params.borderColorValue.ToVector3() * 255;
 
 			for (uint32 i = 0; i < outlineSpans.size(); i++)
 			{
-				for (int32 w = 0; w < outlineSpans[i].Width; w++)
+				for (int32 w = 0; w < outlineSpans[i].width; w++)
 				{
-					uint32 index = (uint32)((Height - 1 - (outlineSpans[i].y - min.y)) * Width + (outlineSpans[i].x - min.x) + w) * 4;
+					uint32 index = (uint32)((height - 1 - (outlineSpans[i].y - min.y)) * width + (outlineSpans[i].x - min.x) + w) * 4;
 
 					pixelBuffer[index] = (uint8)byteBorderColor.x;
 					pixelBuffer[index + 1] = (uint8)byteBorderColor.y;
 					pixelBuffer[index + 2] = (uint8)byteBorderColor.z;
-					pixelBuffer[index + 3] = (uint8)std::min(255, outlineSpans[i].Coverage);
+					pixelBuffer[index + 3] = (uint8)std::min(255, outlineSpans[i].coverage);
 				}
 			}
 
@@ -309,15 +309,15 @@ namespace FlamingTorch
 			{
 				for (uint32 w = 0; w < (uint32)spans[i].width; w++)
 				{
-					uint32 y = (uint32)(Height - 1 - (spans[i].y - min.y));
-					f32 percent = y / (f32)(Height - 1);
+					uint32 y = (uint32)(height - 1 - (spans[i].y - min.y));
+					f32 percent = y / (f32)(height - 1);
 
-					uint32 index = (uint32)((Height - 1 - (spans[i].y - min.y)) * width + (spans[i].x - min.x) + w) * 4;
+					uint32 index = (uint32)((height - 1 - (spans[i].y - min.y)) * width + (spans[i].x - min.x) + w) * 4;
 
 					pixelBuffer[index] = (uint8)(pixelBuffer[index] + (((byteColor.x + (int32)(diff.x * percent)) - pixelBuffer[index]) * spans[i].coverage / 255.f));
 					pixelBuffer[index + 1] = (uint8)(pixelBuffer[index + 1] + (((byteColor.y + (int32)(diff.y * percent)) - pixelBuffer[index + 1]) * spans[i].coverage / 255.f));
 					pixelBuffer[index + 2] = (uint8)(pixelBuffer[index + 2] + (((byteColor.z + (int32)(diff.z * percent)) - pixelBuffer[index + 2]) * spans[i].coverage / 255.f));
-					pixelBuffer[index + 3] = (uint8)std::min(255, (int32)(pixelBuffer[index + 3]) + spans[i].Coverage);
+					pixelBuffer[index + 3] = (uint8)std::min(255, (int32)(pixelBuffer[index + 3]) + spans[i].coverage);
 				}
 			}
 
@@ -326,9 +326,9 @@ namespace FlamingTorch
 
 		FT_Done_Glyph(glyphDesc);
 
-		glyphs[ID] = Out;
+		glyphs[ID] = out;
 
-		return Out;
+		return out;
 	}
 
 	void Font::Clear()
@@ -347,7 +347,7 @@ namespace FlamingTorch
 			library = NULL;
 		}
 
-		ContainedData.resize(0);
+		containedData.resize(0);
 	}
 
 	void Font::SetSize(uint32 size)
@@ -361,7 +361,7 @@ namespace FlamingTorch
 			currentSize = size;
 	}
 
-	Glyph::Glyph() : Advance(0)
+	Glyph::Glyph() : advance(0)
 	{
 	}
 
@@ -385,7 +385,7 @@ namespace FlamingTorch
 		COPYOFFSET(parameters.secondaryTextColorValue, Vector4);
 		COPYOFFSET(parameters.textColorValue, Vector4);
 
-		return CRC32::Instance.CRC(Buffer, Size);
+		return CRC32::Instance.CRC(Buffer, size);
 	}
 
 	void TextRenderer::ClearUnusedResources()
@@ -407,18 +407,18 @@ namespace FlamingTorch
 
 		for (TextResourceMap::iterator it = textResources.begin(); it != textResources.end(); it++)
 		{
-			it->second.References = 0;
+			it->second.references = 0;
 		}
 	}
 
 	void TextRenderer::GetText(const std::string &text, const TextParams &parameters)
 	{
-		for (uint32 i = 0; i < Text.size(); i++)
+		for (uint32 i = 0; i < text.size(); i++)
 		{
 			if (text[i] == ' ' || text[i] == '\n' || text[i] == '\r')
 				continue;
 
-			StringID ID = MakeTextResourceString(text[i], Parameters);
+			StringID ID = MakeTextResourceString(text[i], parameters);
 			TextResourceMap::iterator it = textResources.find(ID);
 
 			if (it != textResources.end())
@@ -431,7 +431,7 @@ namespace FlamingTorch
 
 				resource.character = text[i];
 				resource.textParameters = parameters;
-				resource.References = 1;
+				resource.references = 1;
 
 				resource.info = const_cast<Font *>(parameters.fontValue.Get())->LoadGlyph(text[i], parameters);
 
@@ -441,7 +441,7 @@ namespace FlamingTorch
 					resource.instanceTexture = resourcesGroup->Get(resourcesGroup->Add(resource.sourceTexture));
 				}
 
-				textResources[ID] = TheResource;
+				textResources[ID] = resource;
 			}
 		}
 	}
@@ -450,7 +450,7 @@ namespace FlamingTorch
 	{
 		static Sprite sprite;
 
-		TextParams actualParams = params.FontValue ? params : TextParams(params).font(RenderTextUtils::DefaultFont);
+		TextParams actualParams = params.fontValue ? params : TextParams(params).font(RenderTextUtils::DefaultFont);
 
 		DisposablePointer<Font> font = actualParams.fontValue;
 
@@ -487,7 +487,7 @@ namespace FlamingTorch
 
 					if (it != textResources.end())
 					{
-						sprite.Options.Position(Position + Vector2(it->second.info.bounds.Left, -it->second.info.bounds.Top))
+						sprite.Options.Position(position + Vector2(it->second.info.bounds.Left, -it->second.info.bounds.Top))
 							.Color(Vector4(1, 1, 1, actualParams.textColorValue.w));
 						sprite.SpriteTexture = it->second.instanceTexture;
 

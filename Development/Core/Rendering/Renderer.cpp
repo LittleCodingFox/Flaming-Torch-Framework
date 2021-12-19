@@ -305,7 +305,7 @@ namespace FlamingTorch
 		if(Result)
 		{
 			BaseResolutionValue = Size();
-			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
+			RenderText.resourcesGroup.Reset(new TextureGroup(4096, 4096));
 			UI.Dispose();
 			UI.Reset(new UIManager());
 		}
@@ -338,7 +338,7 @@ namespace FlamingTorch
 		{
 			BaseResolutionValue = Size();
 
-			RenderText.ResourcesGroup.Reset(new TextureGroup(4096, 4096));
+			RenderText.resourcesGroup.Reset(new TextureGroup(4096, 4096));
 			UI.Dispose();
 			UI.Reset(new UIManager());
 		}
@@ -888,8 +888,8 @@ namespace FlamingTorch
 			str << "Frame Stats:\nDraw calls: " << Stats.DrawCalls << "/" << Stats.DrawCalls + Stats.SkippedDrawCalls << "\nVertex Count: " << Stats.VertexCount << "\nTexture Changes: " << Stats.TextureChanges << "\nMatrix Changes: " << Stats.MatrixChanges <<
 				"\nClipping Changes: " << Stats.ClippingChanges << "\nState Changes: " << Stats.StateChanges << "\nActive Resources: " << Stats.TotalResources << " (" << Stats.TotalResourceUsage << " MB)\n";
 
-			RenderTextUtils::RenderText(str.str(), TextParams().FontSize(20).Color(Vector4(1, 1, 1, 1))
-				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, 0)));
+			RenderTextUtils::RenderText(str.str(), TextParams().fontSize(20).color(Vector4(1, 1, 1, 1))
+				.borderColor(Vector4(0, 0, 0, 1)).borderSize(1).position(Vector2(0, 0)));
 		}
 
 		if (g_Game.Get() && g_Game->DevelopmentBuild)
@@ -898,8 +898,8 @@ namespace FlamingTorch
 
 			str << g_FPSCounter.FPS() << " / " << 1000.f / g_FPSCounter.FPS() << "";
 
-			RenderTextUtils::RenderText(str.str(), TextParams().FontSize(10).Color(Vector4(1, 1, 1, 1))
-				.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, Size().y - 10.0f)));
+			RenderTextUtils::RenderText(str.str(), TextParams().fontSize(10).color(Vector4(1, 1, 1, 1))
+				.borderColor(Vector4(0, 0, 0, 1)).borderSize(1).position(Vector2(0, Size().y - 10.0f)));
 		}
 
 #if PROFILER_ENABLED
@@ -944,8 +944,8 @@ namespace FlamingTorch
 					TextColor = Vector4(1, 0, 0, 1);
 				}
 
-				RenderTextUtils::RenderText(str.str(), TextParams().FontSize(PROFILER_FONT_SIZE)
-					.Color(TextColor).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
+				RenderTextUtils::RenderText(str.str(), TextParams().fontSize(PROFILER_FONT_SIZE)
+					.color(TextColor).borderColor(Vector4(0, 0, 0, 1)).borderSize(1).position(Vector2(0, (f32)YPos)));
 
 				str << std::dec;
 			}
@@ -965,8 +965,8 @@ namespace FlamingTorch
 				str.str("");
 				str << "UFT: " << std::fixed << PercentLeft << "% (" << std::fixed << TimeThisFrame * PercentLeft / 100.f << " ms)";
 
-				RenderTextUtils::RenderText(str.str(), TextParams().FontSize(PROFILER_FONT_SIZE)
-					.Color(TextColor).BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, (f32)YPos)));
+				RenderTextUtils::RenderText(str.str(), TextParams().fontSize(PROFILER_FONT_SIZE)
+					.color(TextColor).borderColor(Vector4(0, 0, 0, 1)).borderSize(1).position(Vector2(0, (f32)YPos)));
 
 				str << std::dec;
 			}
@@ -982,13 +982,13 @@ namespace FlamingTorch
 			std::string ActualConsoleText = ConsoleText;
 			ActualConsoleText = ActualConsoleText.substr(0, ConsoleCursorPosition) + "|" + ActualConsoleText.substr(ConsoleCursorPosition);
 			TextParams Params;
-			Params.BorderColor(Vector4(0, 0, 0, 1)).BorderSize(1).Position(Vector2(0, Size().y - PROFILER_FONT_SIZE * 1.3f)).FontSize(PROFILER_FONT_SIZE);
+			Params.borderColor(Vector4(0, 0, 0, 1)).borderSize(1).position(Vector2(0, Size().y - PROFILER_FONT_SIZE * 1.3f)).fontSize(PROFILER_FONT_SIZE);
 
 			RenderTextUtils::RenderText(ActualConsoleText, Params);
 
-			Params.PositionValue.y -= PROFILER_FONT_SIZE;
+			Params.positionValue.y -= PROFILER_FONT_SIZE;
 
-			for (int32 i = g_Console.ConsoleLog.size() - 1; i >= 0; i--, Params.PositionValue.y -= PROFILER_FONT_SIZE)
+			for (int32 i = g_Console.ConsoleLog.size() - 1; i >= 0; i--, Params.positionValue.y -= PROFILER_FONT_SIZE)
 			{
 				RenderTextUtils::RenderText(g_Console.ConsoleLog[i], Params);
 			}

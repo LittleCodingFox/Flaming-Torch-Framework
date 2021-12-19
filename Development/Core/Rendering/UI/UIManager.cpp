@@ -270,8 +270,12 @@ namespace FlamingTorch
 
 	bool TextParamsAreSimilar(const TextParams &A, const TextParams &B)
 	{
-		return A.BorderColorValue == B.BorderColorValue && A.BorderSizeValue == B.BorderSizeValue && A.FontSizeValue == B.FontSizeValue &&
-			A.FontValue.Get() == B.FontValue.Get() && A.SecondaryTextColorValue == B.SecondaryTextColorValue && A.TextColorValue == B.TextColorValue;
+		return A.borderColorValue == B.borderColorValue &&
+			A.borderSizeValue == B.borderSizeValue &&
+			A.fontSizeValue == B.fontSizeValue &&
+			A.fontValue.Get() == B.fontValue.Get() &&
+			A.secondaryTextColorValue == B.secondaryTextColorValue &&
+			A.textColorValue == B.textColorValue;
 	}
 
 #define COPYOFFSET(var, type)\
@@ -287,12 +291,12 @@ namespace FlamingTorch
 		uint32 Offset = 0;
 
 		COPYOFFSET(Character, uint32);
-		COPYOFFSET(Parameters.BorderColorValue, Vector4);
-		COPYOFFSET(Parameters.BorderSizeValue, f32);
-		COPYOFFSET(Parameters.FontSizeValue, uint32);
-		COPYOFFSET(*Parameters.FontValue.Get(), intptr_t);
-		COPYOFFSET(Parameters.SecondaryTextColorValue, Vector4);
-		COPYOFFSET(Parameters.TextColorValue, Vector4);
+		COPYOFFSET(Parameters.borderColorValue, Vector4);
+		COPYOFFSET(Parameters.borderSizeValue, f32);
+		COPYOFFSET(Parameters.fontSizeValue, uint32);
+		COPYOFFSET(*Parameters.fontValue.Get(), intptr_t);
+		COPYOFFSET(Parameters.secondaryTextColorValue, Vector4);
+		COPYOFFSET(Parameters.textColorValue, Vector4);
 
 		return CRC32::Instance.CRC(Buffer, Size);
 	}
@@ -384,11 +388,11 @@ namespace FlamingTorch
 				TheResource.TextParameters = Parameters;
 				TheResource.References = 1;
 
-				TheResource.Info = const_cast<Font *>(Parameters.FontValue.Get())->LoadGlyph(Text[i], Parameters);
+				TheResource.Info = const_cast<Font *>(Parameters.fontValue.Get())->LoadGlyph(Text[i], Parameters);
 
-				if (TheResource.Info.Pixels.Get())
+				if (TheResource.Info.pixels.Get())
 				{
-					TheResource.SourceTexture = Texture::CreateFromBuffer(TheResource.Info.Pixels);
+					TheResource.SourceTexture = Texture::CreateFromBuffer(TheResource.Info.pixels);
 					TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(TheResource.SourceTexture));
 				}
 
@@ -401,14 +405,14 @@ namespace FlamingTorch
 	{
 		static Sprite TheSprite;
 
-		TextParams ActualParams = Params.FontValue ? Params : TextParams(Params).Font(RenderTextUtils::DefaultFont);
+		TextParams ActualParams = Params.fontValue ? Params : TextParams(Params).font(RenderTextUtils::DefaultFont);
 
-		DisposablePointer<Font> TheFont = ActualParams.FontValue;
+		DisposablePointer<Font> TheFont = ActualParams.fontValue;
 
 		f32 LineSpace = (f32)TheFont->LineSpacing(ActualParams);
-		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', ActualParams).Advance;
+		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', ActualParams).advance;
 
-		Vector2 Position = Vector2(Params.PositionValue.x, Params.PositionValue.y + Params.FontSizeValue), InitialPosition = Position;
+		Vector2 Position = Vector2(Params.positionValue.x, Params.positionValue.y + Params.fontSizeValue), InitialPosition = Position;
 
 		GetUIText(Text, ActualParams);
 
@@ -435,7 +439,7 @@ namespace FlamingTorch
 
 						if (it != TextResources.end())
 						{
-							TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, -it->second.Info.Bounds.Top));
+							TheSprite.Options.Position(Position + Vector2(it->second.Info.bounds.Left, -it->second.Info.bounds.Top));
 							TheSprite.SpriteTexture = it->second.InstanceTexture;
 
 							TheSprite.Draw();
@@ -452,7 +456,7 @@ namespace FlamingTorch
 							}
 #endif
 
-							Position.x = Position.x + it->second.Info.Advance;
+							Position.x = Position.x + it->second.Info.advance;
 						}
 						else
 						{
@@ -528,7 +532,7 @@ namespace FlamingTorch
 				return;
 			}
 
-			TheText->TextParameters.Font(TheFont);
+			TheText->TextParameters.font(TheFont);
 		}
 		else if(Property == "FontSize")
 		{
@@ -536,7 +540,7 @@ namespace FlamingTorch
 
 			if(1 == sscanf(Value.c_str(), "%u", &FontSize))
 			{
-				TheText->TextParameters.FontSize(FontSize);
+				TheText->TextParameters.fontSize(FontSize);
 			}
 		}
 		else if(Property == "Text")
@@ -587,8 +591,8 @@ namespace FlamingTorch
 			if(4 != sscanf(Value.c_str(), "%f,%f,%f,%f", &Color.x, &Color.y, &Color.z, &Color.w))
 				return;
 
-			TheText->TextParameters.TextColorValue = Color;
-			TheText->TextParameters.SecondaryTextColorValue = TheText->TextParameters.TextColorValue;
+			TheText->TextParameters.textColorValue = Color;
+			TheText->TextParameters.secondaryTextColorValue = TheText->TextParameters.textColorValue;
 		}
 		else if(Property == "SecondaryTextColor")
 		{
@@ -597,7 +601,7 @@ namespace FlamingTorch
 			if(4 != sscanf(Value.c_str(), "%f,%f,%f,%f", &Color.x, &Color.y, &Color.z, &Color.w))
 				return;
 
-			TheText->TextParameters.SecondaryTextColorValue = Color;
+			TheText->TextParameters.secondaryTextColorValue = Color;
 		}
 		else if(Property == "Border")
 		{
@@ -606,7 +610,7 @@ namespace FlamingTorch
 			if(1 != sscanf(Value.c_str(), "%f", &Size))
 				return;
 
-			TheText->TextParameters.BorderSizeValue = Size;
+			TheText->TextParameters.borderSizeValue = Size;
 		}
 		else if(Property == "BorderColor")
 		{
@@ -615,7 +619,7 @@ namespace FlamingTorch
 			if(4 != sscanf(Value.c_str(), "%f,%f,%f,%f", &Color.x, &Color.y, &Color.z, &Color.w))
 				return;
 
-			TheText->TextParameters.BorderColorValue = Color;
+			TheText->TextParameters.borderColorValue = Color;
 		}
 	}
 
@@ -704,8 +708,8 @@ namespace FlamingTorch
 
 		static std::stringstream str;
 		str.str("");
-		str << TheText->TextParameters.TextColorValue.x << "," << TheText->TextParameters.TextColorValue.y << "," << TheText->TextParameters.TextColorValue.z << "," <<
-			TheText->TextParameters.TextColorValue.w;
+		str << TheText->TextParameters.textColorValue.x << "," << TheText->TextParameters.textColorValue.y << "," << TheText->TextParameters.textColorValue.z << "," <<
+			TheText->TextParameters.textColorValue.w;
 
 		Value = Data.get("TextColor", Json::Value());
 
@@ -722,8 +726,8 @@ namespace FlamingTorch
 		}
 
 		str.str("");
-		str << TheText->TextParameters.SecondaryTextColorValue.x << "," << TheText->TextParameters.SecondaryTextColorValue.y << "," <<
-			TheText->TextParameters.SecondaryTextColorValue.z << "," << TheText->TextParameters.SecondaryTextColorValue.w;
+		str << TheText->TextParameters.secondaryTextColorValue.x << "," << TheText->TextParameters.secondaryTextColorValue.y << "," <<
+			TheText->TextParameters.secondaryTextColorValue.z << "," << TheText->TextParameters.secondaryTextColorValue.w;
 
 		Value = Data.get("SecondaryTextColor", Json::Value(str.str()));
 
@@ -751,8 +755,8 @@ namespace FlamingTorch
 		}
 
 		str.str("");
-		str << TheText->TextParameters.BorderColorValue.x << "," << TheText->TextParameters.BorderColorValue.y << "," << TheText->TextParameters.BorderColorValue.z << "," <<
-			TheText->TextParameters.BorderColorValue.w;
+		str << TheText->TextParameters.borderColorValue.x << "," << TheText->TextParameters.borderColorValue.y << "," << TheText->TextParameters.borderColorValue.z << "," <<
+			TheText->TextParameters.borderColorValue.w;
 
 		Value = Data.get("BorderColor", Json::Value(str.str()));
 
