@@ -11,4 +11,7 @@ Logs
 conanbuildinfo.premake.lua
 conanbuildinfo.txt
 conaninfo.txt
+conan.lock
 graph_info.json
+Makefile
+*.make

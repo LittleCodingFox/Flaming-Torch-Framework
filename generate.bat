@@ -30,6 +30,7 @@ goto :eof
 
 :conan_failed
 @echo Conan failed to run. Please check for any errors and that you have it properly installed and try again.
+cd %CURRENT%
 
 goto :eof
 

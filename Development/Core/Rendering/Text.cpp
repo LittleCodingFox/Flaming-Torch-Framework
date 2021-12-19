@@ -10,9 +10,9 @@ namespace FlamingTorch
 	{
 		Span() { }
 		Span(int32 _x, int32 _y, int32 _width, int32 _coverage)
-			: x(_x), y(_y), Width(_width), Coverage(_coverage) { }
+			: x(_x), y(_y), width(_width), coverage(_coverage) { }
 
-		int32 x, y, Width, Coverage;
+		int32 x, y, width, coverage;
 	};
 
 	typedef std::vector<Span> Spans;
@@ -27,21 +27,21 @@ namespace FlamingTorch
 		}
 	}
 
-	StringID MakeGlyphString(uint32 Character, const Vector4 &TextColor, const Vector4 &TextColor2, f32 BorderSize, const Vector4 &BorderColor, uint32 TextSize)
+	StringID MakeGlyphString(uint32 character, const Vector4 &textColor, const Vector4 &textColor2, f32 borderSize, const Vector4 &borderColor, uint32 textSize)
 	{
-		MemoryStream Stream;
+		MemoryStream stream;
 
-		Stream.Write2(&Character, 1);
-		Stream.Write2(&TextColor, 1);
-		Stream.Write2(&TextColor2, 1);
-		Stream.Write2(&BorderSize, 1);
-		Stream.Write2(&BorderColor, 1);
-		Stream.Write2(&TextSize, 1);
+		stream.Write2(&character, 1);
+		stream.Write2(&textColor, 1);
+		stream.Write2(&textColor2, 1);
+		stream.Write2(&borderSize, 1);
+		stream.Write2(&borderColor, 1);
+		stream.Write2(&textSize, 1);
 
-		return CRC32::Instance.CRC((const uint8 *)Stream.Get(), (uint32)Stream.Length());
+		return CRC32::Instance.CRC((const uint8 *)stream.Get(), (uint32)stream.Length());
 	}
 
-	Font::Font() : CurrentSize(0), Library(NULL), Face(NULL)
+	Font::Font() : currentSize(0), library(NULL), face(NULL)
 	{
 	}
 
@@ -50,30 +50,30 @@ namespace FlamingTorch
 		Clear();
 	}
 
-	bool Font::FromStream(Stream *TheStream)
+	bool Font::FromStream(Stream *stream)
 	{
 		Clear();
 
-		ContainedData.resize((uint32)TheStream->Length());
+		containedData.resize((uint32)stream->Length());
 
-		if (!TheStream->Seek(0) || !TheStream->Read2(&ContainedData[0], (uint32)TheStream->Length()))
+		if (!stream->Seek(0) || !stream->Read2(&containedData[0], (uint32)stream->Length()))
 		{
 			return false;
 		}
 
-		if (FT_Init_FreeType(&Library) != 0)
+		if (FT_Init_FreeType(&library) != 0)
 		{
 			return false;
 		}
 
-		if (FT_New_Memory_Face(Library, &ContainedData[0], ContainedData.size(), 0, &Face) != 0)
+		if (FT_New_Memory_Face(library, &containedData[0], containedData.size(), 0, &face) != 0)
 		{
 			return false;
 		}
 
-		if (FT_Select_Charmap(Face, FT_ENCODING_UNICODE) != 0)
+		if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
 		{
-			FT_Done_Face(Face);
+			FT_Done_Face(face);
 
 			return false;
 		}
@@ -81,285 +81,284 @@ namespace FlamingTorch
 		return true;
 	}
 
-	uint32 Font::LineSpacing(const TextParams &Params)
+	uint32 Font::LineSpacing(const TextParams &params)
 	{
-		if (!Face)
+		if (!face)
 			return 0;
 
-		SetSize(Params.FontSizeValue);
+		SetSize(params.FontSizeValue);
 
-		return Face->size->metrics.height >> 6;
+		return face->size->metrics.height >> 6;
 	}
 
-	int32 Font::Kerning(uint32 From, uint32 To, const TextParams &Params)
+	int32 Font::Kerning(uint32 from, uint32 to, const TextParams &params)
 	{
-		if (Face == NULL || !FT_HAS_KERNING(Face))
+		if (face == NULL || !FT_HAS_KERNING(face))
 			return 0;
 
-		SetSize(Params.FontSizeValue);
+		SetSize(params.FontSizeValue);
 
-		FT_Vector Kerning;
-		FT_UInt FromIndex = FT_Get_Char_Index(Face, From);
-		FT_UInt ToIndex = FT_Get_Char_Index(Face, To);
+		FT_Vector kerning;
+		FT_UInt fromindex = FT_Get_Char_index(face, from);
+		FT_UInt toindex = FT_Get_Char_index(face, to);
 
-		if(FT_Get_Kerning(Face, FromIndex, ToIndex, FT_KERNING_DEFAULT, &Kerning) != FT_Err_Ok)
+		if(FT_Get_Kerning(face, fromindex, toindex, FT_KERNING_DEFAULT, &kerning) != FT_Err_Ok)
 			return 0;
 
-		int32 Out = Kerning.x >> 6;
-
-		return Out;
+		return Kerning.x >> 6;
 	}
 
-	Glyph Font::LoadGlyph(uint32 Character, const TextParams &Params)
+	Glyph Font::LoadGlyph(uint32 character, const TextParams &params)
 	{
-		StringID ID = MakeGlyphString(Character, Params.TextColorValue, Params.SecondaryTextColorValue, Params.BorderSizeValue, Params.BorderColorValue, Params.FontSizeValue);
+		StringID ID = MakeGlyphString(character, params.textColorValue, params.secondaryTextColorValue, params.borderSizeValue,
+			params.borderColorValue, params.fontSizeValue);
 
 		GlyphMap::iterator it = Glyphs.find(ID);
 
 		if (it != Glyphs.end())
 			return it->second;
 
-		Glyph Out;
-		FT_Glyph GlyphDesc;
+		Glyph out;
+		FT_Glyph glyphDesc;
 
-		SetSize(Params.FontSizeValue);
+		SetSize(params.FontSizeValue);
 
-		if (FT_Load_Char(Face, Character, FT_LOAD_TARGET_LIGHT | FT_LOAD_FORCE_AUTOHINT) != FT_Err_Ok)
+		if (FT_Load_Char(face, character, FT_LOAD_TARGET_LIGHT | FT_LOAD_FORCE_AUTOHINT) != FT_Err_Ok)
 			return Glyph();
 
-		if (FT_Get_Glyph(Face->glyph, &GlyphDesc))
+		if (FT_Get_Glyph(face->glyph, &glyphDesc))
 			return Glyph();
 
-		Spans spans, OutlineSpans;
+		Spans spans, outlineSpans;
 
-		if (Params.BorderSizeValue > 0 && GlyphDesc->format == FT_GLYPH_FORMAT_OUTLINE)
+		if (params.borderSizeValue > 0 && glyphDesc->format == FT_GLYPH_FORMAT_OUTLINE)
 		{
-			FT_Raster_Params RasterParams;
+			FT_Raster_Params rasterParams;
 
-			memset(&RasterParams, 0, sizeof(RasterParams));
-			RasterParams.flags = FT_RASTER_FLAG_AA | FT_RASTER_FLAG_DIRECT;
-			RasterParams.gray_spans = RasterCallback;
-			RasterParams.user = &spans;
+			memset(&rasterParams, 0, sizeof(rasterParams));
+			rasterParams.flags = FT_RASTER_FLAG_AA | FT_RASTER_FLAG_DIRECT;
+			rasterParams.gray_spans = RasterCallback;
+			rasterParams.user = &spans;
 
-			FT_Outline_Render(Library, &Face->glyph->outline, &RasterParams);
+			FT_Outline_Render(library, &face->glyph->outline, &rasterParams);
 
-			FT_Stroker Stroker;
-			FT_Stroker_New(Library, &Stroker);
-			FT_Stroker_Set(Stroker, (int32)(Params.BorderSizeValue * 64), FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0);
+			FT_Stroker stroker;
+			FT_Stroker_New(library, &stroker);
+			FT_Stroker_Set(stroker, (int32)(params.borderSizeValue * 64), FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0);
 
-			FT_Glyph_StrokeBorder(&GlyphDesc, Stroker, 0, 1);
+			FT_Glyph_StrokeBorder(&glyphDesc, stroker, 0, 1);
 
-			FT_Outline *o = &reinterpret_cast<FT_OutlineGlyph>(GlyphDesc)->outline;
+			FT_Outline *o = &reinterpret_cast<FT_OutlineGlyph>(glyphDesc)->outline;
 
-			RasterParams.user = &OutlineSpans;
+			rasterParams.user = &outlineSpans;
 
-			FT_Outline_Render(Library, o, &RasterParams);
+			FT_Outline_Render(library, o, &rasterParams);
 
-			FT_Stroker_Done(Stroker);
+			FT_Stroker_Done(stroker);
 		}
 
-		FT_Glyph_To_Bitmap(&GlyphDesc, FT_RENDER_MODE_NORMAL, 0, 1);
-		FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph)GlyphDesc;
+		FT_Glyph_To_Bitmap(&glyphDesc, FT_RENDER_MODE_NORMAL, 0, 1);
+		FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph)glyphDesc;
 		FT_Bitmap& bitmap = bitmapGlyph->bitmap;
 
-		Out.Advance = GlyphDesc->advance.x >> 16;
+		out.Advance = glyphDesc->advance.x >> 16;
 
-		uint32 Width = (uint32)bitmap.width;
-		uint32 Height = (uint32)bitmap.rows;
+		uint32 width = (uint32)bitmap.width;
+		uint32 height = (uint32)bitmap.rows;
 
-		if (Width > 0 && Height > 0)
+		if (width > 0 && height > 0)
 		{
 			Out.Bounds.Left = (f32)bitmapGlyph->left;
 			Out.Bounds.Top = (f32)bitmapGlyph->top;
-			Out.Bounds.Right = (f32)Width + Out.Bounds.Left;
-			Out.Bounds.Bottom = (f32)Height + Out.Bounds.Top;
+			Out.Bounds.Right = (f32)width + Out.Bounds.Left;
+			Out.Bounds.Bottom = (f32)height + Out.Bounds.Top;
 
-			std::vector<uint8> PixelBuffer;
+			std::vector<uint8> pixelBuffer;
 
-			PixelBuffer.resize(Width * Height * 4, 0);
+			pixelBuffer.resize(width * height * 4, 0);
 
-			const uint8* Pixels = bitmap.buffer;
+			const uint8* pixels = bitmap.buffer;
 
 			if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
 			{
-				for (uint32 y = 0; y < Height; ++y)
+				for (uint32 y = 0; y < height; ++y)
 				{
-					for (uint32 x = 0; x < Width; ++x)
+					for (uint32 x = 0; x < width; ++x)
 					{
-						uint32 Index = (x + y * Width) * 4 + 3;
+						uint32 index = (x + y * width) * 4 + 3;
 
-						PixelBuffer[Index] = ((Pixels[x / 8]) & (1 << (7 - (x % 8)))) ? 255 : 0;
+						pixelBuffer[index] = ((pixels[x / 8]) & (1 << (7 - (x % 8)))) ? 255 : 0;
 					}
 
-					Pixels += bitmap.pitch;
+					pixels += bitmap.pitch;
 				}
 			}
 			else
 			{
-				for (uint32 y = 0; y < Height; ++y)
+				for (uint32 y = 0; y < height; ++y)
 				{
-					for (uint32 x = 0; x < Width; ++x)
+					for (uint32 x = 0; x < width; ++x)
 					{
-						uint32 Index = (x + y * Width) * 4 + 3;
+						uint32 index = (x + y * width) * 4 + 3;
 
-						PixelBuffer[Index] = Pixels[x];
+						pixelBuffer[index] = pixels[x];
 					}
 
-					Pixels += bitmap.pitch;
+					pixels += bitmap.pitch;
 				}
 			}
 
-			Vector4 ByteColor = Params.TextColorValue * 255;
-			Vector4 SecondaryByteColor = Params.SecondaryTextColorValue * 255;
+			Vector4 byteColor = params.textColorValue * 255;
+			Vector4 secondaryByteColor = params.secondaryTextColorValue * 255;
 
-			Vector3 Diff(MathUtils::Clamp(Params.SecondaryTextColorValue.x - Params.TextColorValue.x) * 255,
-				MathUtils::Clamp(Params.SecondaryTextColorValue.y - Params.TextColorValue.y) * 255, 
-				MathUtils::Clamp(Params.SecondaryTextColorValue.z - Params.TextColorValue.z) * 255);
+			Vector3 diff(MathUtils::Clamp(params.secondaryTextColorValue.x - params.textColorValue.x) * 255,
+				MathUtils::Clamp(params.secondaryTextColorValue.y - params.textColorValue.y) * 255, 
+				MathUtils::Clamp(params.secondaryTextColorValue.z - params.textColorValue.z) * 255);
 
-			for (uint32 y = 0; y < Height; ++y)
+			for (uint32 y = 0; y < height; ++y)
 			{
-				for (uint32 x = 0; x < Width; ++x)
+				for (uint32 x = 0; x < width; ++x)
 				{
-					f32 Percent = y / (f32)(Height - 1);
+					f32 percent = y / (f32)(height - 1);
 
-					uint32 Index = (x + y * Width) * 4;
+					uint32 index = (x + y * width) * 4;
 
-					if (Params.TextColorValue == Params.SecondaryTextColorValue)
+					if (params.textColorValue == params.secondaryTextColorValue)
 					{
-						PixelBuffer[Index] = (uint8)ByteColor.x;
-						PixelBuffer[Index + 1] = (uint8)ByteColor.y;
-						PixelBuffer[Index + 2] = (uint8)ByteColor.z;
+						pixelBuffer[index] = (uint8)byteColor.x;
+						pixelBuffer[index + 1] = (uint8)byteColor.y;
+						pixelBuffer[index + 2] = (uint8)byteColor.z;
 					}
 					else
 					{
-						PixelBuffer[Index] = (uint8)(ByteColor.x + Diff.x * Percent);
-						PixelBuffer[Index + 1] = (uint8)(ByteColor.y + Diff.y * Percent);
-						PixelBuffer[Index + 2] = (uint8)(ByteColor.z + Diff.z * Percent);
+						pixelBuffer[index] = (uint8)(byteColor.x + diff.x * Percent);
+						pixelBuffer[index + 1] = (uint8)(byteColor.y + diff.y * Percent);
+						pixelBuffer[index + 2] = (uint8)(byteColor.z + diff.z * Percent);
 					}
 				}
 			}
 
-			Vector2 Min, Max;
+			Vector2 min, max;
 
 			for (uint32 i = 0; i < spans.size(); i++)
 			{
 				if (i == 0)
 				{
-					Min.x = (f32)spans[i].x;
-					Min.y = (f32)spans[i].y;
-					Max.x = (f32)spans[i].x;
-					Max.y = (f32)spans[i].y;
+					min.x = (f32)spans[i].x;
+					min.y = (f32)spans[i].y;
+					max.x = (f32)spans[i].x;
+					max.y = (f32)spans[i].y;
 				}
 
-				if (spans[i].x < Min.x)
-					Min.x = (f32)spans[i].x;
+				if (spans[i].x < min.x)
+					min.x = (f32)spans[i].x;
 
-				if (spans[i].x > Max.x)
-					Max.x = (f32)spans[i].x;
+				if (spans[i].x > max.x)
+					max.x = (f32)spans[i].x;
 
-				if (spans[i].y < Min.y)
-					Min.y = (f32)spans[i].y;
+				if (spans[i].y < min.y)
+					min.y = (f32)spans[i].y;
 
-				if (spans[i].y > Max.y)
-					Max.y = (f32)spans[i].y;
+				if (spans[i].y > max.y)
+					max.y = (f32)spans[i].y;
 
-				if (spans[i].x + spans[i].Width - 1 < Min.x)
-					Min.x = (f32)(spans[i].x + spans[i].Width - 1);
+				if (spans[i].x + spans[i].width - 1 < min.x)
+					min.x = (f32)(spans[i].x + spans[i].width - 1);
 
-				if (spans[i].x + spans[i].Width - 1 > Max.x)
-					Max.x = (f32)(spans[i].x + spans[i].Width - 1);
+				if (spans[i].x + spans[i].width - 1 > max.x)
+					max.x = (f32)(spans[i].x + spans[i].width - 1);
 			}
 
-			for (size_t i = 0; i < OutlineSpans.size(); i++)
+			for (size_t i = 0; i < outlineSpans.size(); i++)
 			{
-				if (OutlineSpans[i].x < Min.x)
-					Min.x = (f32)OutlineSpans[i].x;
+				if (outlineSpans[i].x < min.x)
+					min.x = (f32)outlineSpans[i].x;
 
-				if (OutlineSpans[i].x > Max.x)
-					Max.x = (f32)OutlineSpans[i].x;
+				if (outlineSpans[i].x > max.x)
+					max.x = (f32)outlineSpans[i].x;
 
-				if (OutlineSpans[i].y < Min.y)
-					Min.y = (f32)OutlineSpans[i].y;
+				if (outlineSpans[i].y < min.y)
+					min.y = (f32)outlineSpans[i].y;
 
-				if (OutlineSpans[i].y > Max.y)
-					Max.y = (f32)OutlineSpans[i].y;
+				if (outlineSpans[i].y > max.y)
+					max.y = (f32)outlineSpans[i].y;
 
-				if (OutlineSpans[i].x + OutlineSpans[i].Width - 1 < Min.x)
-					Min.x = (f32)(OutlineSpans[i].x + OutlineSpans[i].Width - 1);
+				if (outlineSpans[i].x + outlineSpans[i].Width - 1 < min.x)
+					min.x = (f32)(outlineSpans[i].x + outlineSpans[i].Width - 1);
 
-				if (OutlineSpans[i].x + OutlineSpans[i].Width - 1 > Max.x)
-					Max.x = (f32)(OutlineSpans[i].x + OutlineSpans[i].Width - 1);
+				if (outlineSpans[i].x + outlineSpans[i].Width - 1 > max.x)
+					max.x = (f32)(outlineSpans[i].x + outlineSpans[i].Width - 1);
 			}
 
-			Vector3 ByteBorderColor = Params.BorderColorValue.ToVector3() * 255;
+			Vector3 byteBorderColor = params.borderColorValue.ToVector3() * 255;
 
-			for (uint32 i = 0; i < OutlineSpans.size(); i++)
+			for (uint32 i = 0; i < outlineSpans.size(); i++)
 			{
-				for (int32 w = 0; w < OutlineSpans[i].Width; w++)
+				for (int32 w = 0; w < outlineSpans[i].Width; w++)
 				{
-					uint32 Index = (uint32)((Height - 1 - (OutlineSpans[i].y - Min.y)) * Width + (OutlineSpans[i].x - Min.x) + w) * 4;
+					uint32 index = (uint32)((Height - 1 - (outlineSpans[i].y - min.y)) * Width + (outlineSpans[i].x - min.x) + w) * 4;
 
-					PixelBuffer[Index] = (uint8)ByteBorderColor.x;
-					PixelBuffer[Index + 1] = (uint8)ByteBorderColor.y;
-					PixelBuffer[Index + 2] = (uint8)ByteBorderColor.z;
-					PixelBuffer[Index + 3] = (uint8)std::min(255, OutlineSpans[i].Coverage);
+					pixelBuffer[index] = (uint8)byteBorderColor.x;
+					pixelBuffer[index + 1] = (uint8)byteBorderColor.y;
+					pixelBuffer[index + 2] = (uint8)byteBorderColor.z;
+					pixelBuffer[index + 3] = (uint8)std::min(255, outlineSpans[i].Coverage);
 				}
 			}
 
 			for (uint32 i = 0; i < spans.size(); i++)
 			{
-				for (uint32 w = 0; w < (uint32)spans[i].Width; w++)
+				for (uint32 w = 0; w < (uint32)spans[i].width; w++)
 				{
-					uint32 y = (uint32)(Height - 1 - (spans[i].y - Min.y));
-					f32 Percent = y / (f32)(Height - 1);
+					uint32 y = (uint32)(Height - 1 - (spans[i].y - min.y));
+					f32 percent = y / (f32)(Height - 1);
 
-					uint32 Index = (uint32)((Height - 1 - (spans[i].y - Min.y)) * Width + (spans[i].x - Min.x) + w) * 4;
+					uint32 index = (uint32)((Height - 1 - (spans[i].y - min.y)) * width + (spans[i].x - min.x) + w) * 4;
 
-					PixelBuffer[Index] = (uint8)(PixelBuffer[Index] + (((ByteColor.x + (int32)(Diff.x * Percent)) - PixelBuffer[Index]) * spans[i].Coverage / 255.f));
-					PixelBuffer[Index + 1] = (uint8)(PixelBuffer[Index + 1] + (((ByteColor.y + (int32)(Diff.y * Percent)) - PixelBuffer[Index + 1]) * spans[i].Coverage / 255.f));
-					PixelBuffer[Index + 2] = (uint8)(PixelBuffer[Index + 2] + (((ByteColor.z + (int32)(Diff.z * Percent)) - PixelBuffer[Index + 2]) * spans[i].Coverage / 255.f));
-					PixelBuffer[Index + 3] = (uint8)std::min(255, (int32)(PixelBuffer[Index + 3]) + spans[i].Coverage);
+					pixelBuffer[index] = (uint8)(pixelBuffer[index] + (((byteColor.x + (int32)(diff.x * percent)) - pixelBuffer[index]) * spans[i].coverage / 255.f));
+					pixelBuffer[index + 1] = (uint8)(pixelBuffer[index + 1] + (((byteColor.y + (int32)(diff.y * percent)) - pixelBuffer[index + 1]) * spans[i].coverage / 255.f));
+					pixelBuffer[index + 2] = (uint8)(pixelBuffer[index + 2] + (((byteColor.z + (int32)(diff.z * percent)) - pixelBuffer[index + 2]) * spans[i].coverage / 255.f));
+					pixelBuffer[index + 3] = (uint8)std::min(255, (int32)(pixelBuffer[index + 3]) + spans[i].Coverage);
 				}
 			}
 
-			Out.Pixels = TextureBuffer::CreateFromData(&PixelBuffer[0], Width, Height);
+			out.pixels = TextureBuffer::CreateFromData(&pixelBuffer[0], width, height);
 		}
 
-		FT_Done_Glyph(GlyphDesc);
+		FT_Done_Glyph(glyphDesc);
 
-		Glyphs[ID] = Out;
+		glyphs[ID] = Out;
 
 		return Out;
 	}
 
 	void Font::Clear()
 	{
-		if (Face)
+		if (face)
 		{
-			FT_Done_Face(Face);
+			FT_Done_Face(face);
 
-			Face = NULL;
+			face = NULL;
 		}
 
-		if (Library)
+		if (library)
 		{
-			FT_Done_FreeType(Library);
+			FT_Done_FreeType(library);
 
-			Library = NULL;
+			library = NULL;
 		}
 
 		ContainedData.resize(0);
 	}
 
-	void Font::SetSize(uint32 Size)
+	void Font::SetSize(uint32 size)
 	{
-		if (!Library || !Face)
+		if (!library || !face)
 			return;
 
-		FT_Error Result = FT_Set_Pixel_Sizes(Face, 0, Size);
+		FT_Error result = FT_Set_Pixel_Sizes(face, 0, size);
 
-		if (Result == FT_Err_Ok)
-			CurrentSize = Size;
+		if (result == FT_Err_Ok)
+			currentSize = size;
 	}
 
 	Glyph::Glyph() : Advance(0)
@@ -371,146 +370,146 @@ namespace FlamingTorch
 	\
 	Offset += sizeof(type);
 
-	StringID MakeTextResourceString(uint32 Character, const TextParams &Parameters)
+	StringID MakeTextResourceString(uint32 character, const TextParams &parameters)
 	{
-		const uint32 Size = sizeof(uint32) + sizeof(TextParams) - sizeof(f32) - sizeof(Vector2);
-		static uint8 Buffer[Size];
+		const uint32 size = sizeof(uint32) + sizeof(TextParams) - sizeof(f32) - sizeof(Vector2);
+		static uint8 Buffer[size];
 
 		uint32 Offset = 0;
 
-		COPYOFFSET(Character, uint32);
-		COPYOFFSET(Parameters.BorderColorValue, Vector4);
-		COPYOFFSET(Parameters.BorderSizeValue, f32);
-		COPYOFFSET(Parameters.FontSizeValue, uint32);
-		COPYOFFSET(*Parameters.FontValue.Get(), intptr_t);
-		COPYOFFSET(Parameters.SecondaryTextColorValue, Vector4);
-		COPYOFFSET(Parameters.TextColorValue, Vector4);
+		COPYOFFSET(character, uint32);
+		COPYOFFSET(parameters.borderColorValue, Vector4);
+		COPYOFFSET(parameters.borderSizeValue, f32);
+		COPYOFFSET(parameters.fontSizeValue, uint32);
+		COPYOFFSET(*parameters.fontValue.Get(), intptr_t);
+		COPYOFFSET(parameters.secondaryTextColorValue, Vector4);
+		COPYOFFSET(parameters.textColorValue, Vector4);
 
 		return CRC32::Instance.CRC(Buffer, Size);
 	}
 
 	void TextRenderer::ClearUnusedResources()
 	{
-		for (TextResourceMap::iterator it = TextResources.begin(); it != TextResources.end(); it++)
+		for (TextResourceMap::iterator it = textResources.begin(); it != textResources.end(); it++)
 		{
-			if (it->second.References == 0)
+			if (it->second.references == 0)
 			{
-				it->second.SourceTexture.Dispose();
+				it->second.sourceTexture.Dispose();
 
-				TextResources.erase(it);
+				textResources.erase(it);
 
-				it = TextResources.begin();
+				it = textResources.begin();
 
-				if (it == TextResources.end())
+				if (it == textResources.end())
 					break;
 			}
 		}
 
-		for (TextResourceMap::iterator it = TextResources.begin(); it != TextResources.end(); it++)
+		for (TextResourceMap::iterator it = textResources.begin(); it != textResources.end(); it++)
 		{
 			it->second.References = 0;
 		}
 	}
 
-	void TextRenderer::GetText(const std::string &Text, const TextParams &Parameters)
+	void TextRenderer::GetText(const std::string &text, const TextParams &parameters)
 	{
 		for (uint32 i = 0; i < Text.size(); i++)
 		{
-			if (Text[i] == ' ' || Text[i] == '\n' || Text[i] == '\r')
+			if (text[i] == ' ' || text[i] == '\n' || text[i] == '\r')
 				continue;
 
-			StringID ID = MakeTextResourceString(Text[i], Parameters);
-			TextResourceMap::iterator it = TextResources.find(ID);
+			StringID ID = MakeTextResourceString(text[i], Parameters);
+			TextResourceMap::iterator it = textResources.find(ID);
 
-			if (it != TextResources.end())
+			if (it != textResources.end())
 			{
-				it->second.References++;
+				it->second.references++;
 			}
 			else
 			{
-				TextResourceInfo TheResource;
+				TextResourceInfo resource;
 
-				TheResource.Character = Text[i];
-				TheResource.TextParameters = Parameters;
-				TheResource.References = 1;
+				resource.character = text[i];
+				resource.textParameters = parameters;
+				resource.References = 1;
 
-				TheResource.Info = const_cast<Font *>(Parameters.FontValue.Get())->LoadGlyph(Text[i], Parameters);
+				resource.info = const_cast<Font *>(parameters.fontValue.Get())->LoadGlyph(text[i], parameters);
 
-				if (TheResource.Info.Pixels.Get())
+				if (resource.info.pixels.Get())
 				{
-					TheResource.SourceTexture = Texture::CreateFromBuffer(TheResource.Info.Pixels);
-					TheResource.InstanceTexture = ResourcesGroup->Get(ResourcesGroup->Add(TheResource.SourceTexture));
+					resource.sourceTexture = Texture::CreateFromBuffer(resource.info.pixels);
+					resource.instanceTexture = resourcesGroup->Get(resourcesGroup->Add(resource.sourceTexture));
 				}
 
-				TextResources[ID] = TheResource;
+				textResources[ID] = TheResource;
 			}
 		}
 	}
 
-	void TextRenderer::DrawText(const std::string &Text, const TextParams &Params)
+	void TextRenderer::DrawText(const std::string &text, const TextParams &params)
 	{
-		static Sprite TheSprite;
+		static Sprite sprite;
 
-		TextParams ActualParams = Params.FontValue ? Params : TextParams(Params).Font(RenderTextUtils::DefaultFont);
+		TextParams actualParams = params.FontValue ? params : TextParams(params).font(RenderTextUtils::DefaultFont);
 
-		DisposablePointer<Font> TheFont = ActualParams.FontValue;
+		DisposablePointer<Font> font = actualParams.fontValue;
 
-		if (TheFont.Get() == nullptr)
+		if (font.Get() == nullptr)
 			return;
 
-		f32 LineSpace = (f32)TheFont->LineSpacing(ActualParams);
-		f32 SpaceSize = (f32)TheFont->LoadGlyph(' ', ActualParams).Advance;
+		f32 lineSpace = (f32)font->LineSpacing(actualParams);
+		f32 spaceSize = (f32)font->LoadGlyph(' ', actualParams).advance;
 
-		Vector2 Position = Vector2(Params.PositionValue.x, Params.PositionValue.y + Params.FontSizeValue), InitialPosition = Position;
+		Vector2 position = Vector2(params.positionValue.x, params.positionValue.y + params.fontSizeValue), initialPosition = position;
 
-		GetText(Text, ActualParams);
+		GetText(text, actualParams);
 
-		std::vector<std::string> Lines(StringUtils::Split(StringUtils::Strip(Text, '\r'), '\n'));
+		std::vector<std::string> lines(StringUtils::Split(StringUtils::Strip(text, '\r'), '\n'));
 
-		for (uint32 i = 0; i < Lines.size(); i++)
+		for (uint32 i = 0; i < lines.size(); i++)
 		{
-			for (uint32 j = 0; j < Lines[i].length(); j++)
+			for (uint32 j = 0; j < lines[i].length(); j++)
 			{
-				switch (Lines[i][j])
+				switch (lines[i][j])
 				{
 				case ' ':
-					Position.x = Position.x + SpaceSize;
+					position.x = position.x + spaceSize;
 
 					break;
 
 				default:
 				{
-					StringID ID = MakeTextResourceString(Lines[i][j], ActualParams);
-					TextResourceMap::iterator it = TextResources.find(ID);
+					StringID ID = MakeTextResourceString(lines[i][j], actualParams);
+					TextResourceMap::iterator it = textResources.find(ID);
 
 					if (j > 0)
-						Position.x += TheFont->Kerning(Lines[i][j - 1], Lines[i][j], ActualParams);
+						position.x += font->Kerning(lines[i][j - 1], lines[i][j], actualParams);
 
-					if (it != TextResources.end())
+					if (it != textResources.end())
 					{
-						TheSprite.Options.Position(Position + Vector2(it->second.Info.Bounds.Left, -it->second.Info.Bounds.Top))
-							.Color(Vector4(1, 1, 1, ActualParams.TextColorValue.w));
-						TheSprite.SpriteTexture = it->second.InstanceTexture;
+						sprite.Options.Position(Position + Vector2(it->second.info.bounds.Left, -it->second.info.bounds.Top))
+							.Color(Vector4(1, 1, 1, actualParams.textColorValue.w));
+						sprite.SpriteTexture = it->second.instanceTexture;
 
-						TheSprite.Draw();
+						sprite.Draw();
 
 #if DEBUG_DRAWTEXT
-						if (TheSprite.SpriteTexture.Get())
+						if (sprite.SpriteTexture.Get())
 						{
-							TheSprite.Options.Scale(Vector2(TheSprite.SpriteTexture->Size())).Color(Vector4(1, 1, 0, 1)).Wireframe(true);
-							TheSprite.SpriteTexture = DisposablePointer<Texture>();
+							sprite.Options.Scale(Vector2(sprite.SpriteTexture->Size())).Color(Vector4(1, 1, 0, 1)).Wireframe(true);
+							sprite.SpriteTexture = DisposablePointer<Texture>();
 
-							TheSprite.Draw(Owner);
+							sprite.Draw(Owner);
 
-							TheSprite.Options.Scale(Vector2(1, 1)).Color(Vector4(1, 1, 1, 1)).Wireframe(false);
+							sprite.Options.Scale(Vector2(1, 1)).Color(Vector4(1, 1, 1, 1)).Wireframe(false);
 						}
 #endif
 
-						Position.x = Position.x + it->second.Info.Advance;
+						position.x = position.x + it->second.info.advance;
 					}
 					else
 					{
-						Position.x = Position.x + SpaceSize;
+						position.x = position.x + spaceSize;
 					}
 				}
 
@@ -518,8 +517,8 @@ namespace FlamingTorch
 				}
 			}
 
-			Position.x = InitialPosition.x;
-			Position.y += LineSpace;
+			position.x = initialPosition.x;
+			position.y += lineSpace;
 		}
 	}
 }

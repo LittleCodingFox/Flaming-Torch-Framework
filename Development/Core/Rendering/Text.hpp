@@ -8,28 +8,28 @@ class Font;
 class TextParams
 {
 public:
-	Vector4 TextColorValue, SecondaryTextColorValue, BorderColorValue;
-	Vector2 PositionValue;
-	f32 BorderSizeValue, RotationValue;
-	DisposablePointer<Font> FontValue;
-	uint32 FontSizeValue;
+	Vector4 textColorValue, secondaryTextColorValue, borderColorValue;
+	Vector2 positionValue;
+	f32 borderSizeValue, rotationValue;
+	DisposablePointer<Font> fontValue;
+	uint32 fontSizeValue;
 
-	TextParams() : BorderSizeValue(0), TextColorValue(1, 1, 1, 1), SecondaryTextColorValue(1, 1, 1, 1), BorderColorValue(0, 0, 0, 1),
-		FontValue(0), FontSizeValue(12), RotationValue(0) {}
-	TextParams(const TextParams &o) : BorderSizeValue(o.BorderSizeValue), TextColorValue(o.TextColorValue),
-		SecondaryTextColorValue(o.SecondaryTextColorValue), BorderColorValue(o.BorderColorValue), PositionValue(o.PositionValue),
-		FontValue(o.FontValue), FontSizeValue(o.FontSizeValue), RotationValue(o.RotationValue) {}
+	TextParams() : borderSizeValue(0), textColorValue(1, 1, 1, 1), secondaryTextColorValue(1, 1, 1, 1), borderColorValue(0, 0, 0, 1),
+		fontValue(0), fontSizeValue(12), rotationValue(0) {}
+	TextParams(const TextParams &o) : borderSizeValue(o.borderSizeValue), textColorValue(o.textColorValue),
+		secondaryTextColorValue(o.secondaryTextColorValue), borderColorValue(o.borderColorValue), positionValue(o.positionValue),
+		fontValue(o.fontValue), fontSizeValue(o.fontSizeValue), rotationValue(o.rotationValue) {}
 
 	TextParams &operator=(const TextParams &o)
 	{
-		BorderSizeValue = o.BorderSizeValue;
-		TextColorValue = o.TextColorValue;
-		SecondaryTextColorValue = o.SecondaryTextColorValue;
-		BorderColorValue = o.BorderColorValue;
-		PositionValue = o.PositionValue;
-		FontValue = o.FontValue;
-		FontSizeValue = o.FontSizeValue;
-		RotationValue = o.RotationValue;
+		borderSizeValue = o.borderSizeValue;
+		textColorValue = o.textColorValue;
+		secondaryTextColorValue = o.secondaryTextColorValue;
+		borderColorValue = o.borderColorValue;
+		positionValue = o.positionValue;
+		fontValue = o.fontValue;
+		fontSizeValue = o.fontSizeValue;
+		rotationValue = o.rotationValue;
 
 		return *this;
 	}
@@ -38,9 +38,9 @@ public:
 	*	Sets the text's rotation
 	*	\param Rotation the rotation in Radians
 	*/
-	TextParams &Rotate(f32 Rotation)
+	TextParams &rotate(f32 rotation)
 	{
-		RotationValue = Rotation;
+		rotationValue = rotation;
 
 		return *this;
 	}
@@ -49,9 +49,9 @@ public:
 	*	Sets the text font
 	*	\param TheFont the text's font
 	*/
-	TextParams &Font(DisposablePointer<Font> TheFont)
+	TextParams &font(DisposablePointer<Font> font)
 	{
-		FontValue = TheFont;
+		fontValue = font;
 
 		return *this;
 	}
@@ -60,9 +60,9 @@ public:
 	*	Sets the text font size
 	*	\param FontSize the text's font size in pixels
 	*/
-	TextParams &FontSize(uint32 FontSize)
+	TextParams &fontSize(uint32 fontSize)
 	{
-		FontSizeValue = FontSize;
+		fontSizeValue = fontSize;
 
 		return *this;
 	}
@@ -73,9 +73,9 @@ public:
 	*	\note Changes the secondary color too to prevent issues with using this
 	*	\sa SecondaryColor
 	*/
-	TextParams &Color(const Vector4 &Color)
+	TextParams &color(const Vector4 &color)
 	{
-		TextColorValue = SecondaryTextColorValue = Color;
+		textColorValue = secondaryTextColorValue = color;
 
 		return *this;
 	}
@@ -85,9 +85,9 @@ public:
 	*	\param SecondaryColor the secondary color to use
 	*	\sa Color
 	*/
-	TextParams &SecondaryColor(const Vector4 &SecondaryColor)
+	TextParams &secondaryColor(const Vector4 &secondaryColor)
 	{
-		SecondaryTextColorValue = SecondaryColor;
+		secondaryTextColorValue = secondaryColor;
 
 		return *this;
 	}
@@ -97,9 +97,9 @@ public:
 	*	\param BorderColor the border color to use (default value is 0, 0, 0, 1)
 	*	\sa BorderSize
 	*/
-	TextParams &BorderColor(const Vector4 &BorderColor)
+	TextParams &borderColor(const Vector4 &borderColor)
 	{
-		BorderColorValue = BorderColor;
+		borderColorValue = borderColor;
 
 		return *this;
 	}
@@ -109,9 +109,9 @@ public:
 	*	\param BorderSize the size of the border, in pixels (default value is 0)
 	*	\sa BorderColor
 	*/
-	TextParams &BorderSize(f32 BorderSize)
+	TextParams &borderSize(f32 borderSize)
 	{
-		BorderSizeValue = BorderSize;
+		borderSizeValue = borderSize;
 
 		return *this;
 	}
@@ -120,9 +120,9 @@ public:
 	*	Sets the text position
 	*	\param Position the text's position
 	*/
-	TextParams &Position(const Vector2 &Position)
+	TextParams &position(const Vector2 &position)
 	{
-		PositionValue = Position;
+		positionValue = position;
 
 		return *this;
 	}
@@ -132,9 +132,9 @@ public:
 class Glyph
 {
 public:
-	uint32 Advance;
-	Rect Bounds;
-	DisposablePointer<TextureBuffer> Pixels;
+	uint32 advance;
+	Rect bounds;
+	DisposablePointer<TextureBuffer> pixels;
 
 	Glyph();
 };
@@ -143,22 +143,22 @@ class Font
 {
 private:
 	typedef std::map<StringID, Glyph> GlyphMap;
-	GlyphMap Glyphs;
-	std::vector<uint8> ContainedData;
+	GlyphMap glyphs;
+	std::vector<uint8> containedData;
 
-	FT_Library Library;
-	FT_Face Face;
-	uint32 CurrentSize, LineSpacingValue;
+	FT_Library library;
+	FT_Face face;
+	uint32 currentSize, lineSpacingValue;
 public:
 
 	Font();
 	~Font();
-	bool FromStream(Stream *TheStream);
+	bool FromStream(Stream *stream);
 	void Clear();
-	void SetSize(uint32 Size);
-	uint32 LineSpacing(const TextParams &Params);
-	int32 Kerning(uint32 From, uint32 To, const TextParams &Params);
-	Glyph LoadGlyph(uint32 Character, const TextParams &Params);
+	void SetSize(uint32 size);
+	uint32 LineSpacing(const TextParams &params);
+	int32 Kerning(uint32 from, uint32 to, const TextParams &params);
+	Glyph LoadGlyph(uint32 character, const TextParams &params);
 };
 
 class TextRenderer
@@ -167,30 +167,30 @@ class TextRenderer
 private:
 	struct TextResourceInfo
 	{
-		uint32 Character;
-		TextParams TextParameters;
-		Glyph Info;
+		uint32 character;
+		TextParams textParameters;
+		Glyph info;
 
-		uint32 References;
+		uint32 references;
 
-		DisposablePointer<Texture> SourceTexture, InstanceTexture;
+		DisposablePointer<Texture> sourceTexture, instanceTexture;
 
-		TextResourceInfo() : References(0), Character(0) {}
+		TextResourceInfo() : references(0), character(0) {}
 	};
 
 	typedef std::map<StringID, TextResourceInfo> TextResourceMap;
 
-	TextResourceMap TextResources;
+	TextResourceMap textResources;
 
-	DisposablePointer<TextureGroup> ResourcesGroup;
+	DisposablePointer<TextureGroup> resourcesGroup;
 
 	void ClearUnusedResources();
-	void GetText(const std::string &Text, const TextParams &Parameters);
+	void GetText(const std::string &text, const TextParams &parameters);
 public:
 
 	/*!
 	*	\param Text the text string to draw
 	*	\param Params the text parameters
 	*/
-	void DrawText(const std::string &Text, const TextParams &Params);
+	void DrawText(const std::string &text, const TextParams &params);
 };
