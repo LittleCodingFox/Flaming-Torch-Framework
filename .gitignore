@@ -2,7 +2,6 @@
 *.filters
 *.vcxproj
 *.user
-*.bat
 Temp/
 *.sdf
 .vs
